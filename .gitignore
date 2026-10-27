@@ -1,0 +1,21 @@
+# Godot local cache and editor state
+.godot/
+*.tmp
+*.wav.import
+*.png.import
+# Portable runtime, builds and local saves do not belong in source control
+runtime/
+userdata/
+export_templates/
+feature_profiles/
+script_templates/
+text_editor_themes/
+*.pck
+*.exe
+*.zip
+# Local credentials and OS files
+.env
+.env.*
+!.env.example
+Thumbs.db
+.DS_Store
