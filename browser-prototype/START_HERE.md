@@ -1,7 +1,7 @@
-# ブラウザー試作の入口
+# ブラウザー試作 v01.4
 
-[企画書](game_design.md) / [開発目標](development_goal.md) / [操作説明](README.md) / [検証記録](verification.md)
+[企画書](game_design.md) / [開発目標](development_goal.md) / [操作説明](README.md) / [検証](verification.md)
 
-ゲームは [index.html](index.html) をダウンロードしてブラウザーで開いてください。GitHub上のソース表示ではプレイできません。
+ソース取得後、browser-prototype フォルダーで `node music/render.cjs` を実行して4曲のWAVを生成し、index.htmlをブラウザーで開きます。チャット配布ZIPは生成済みです。
 
-v01.2の別系統試作です。ルートのGodot版とはまだ統合していません。Steam公開は後回し。次は音楽刷新・命中音・ボス軽減です。
+十字キー優先と設定保存・移行、場面別4曲を追加。実機再確認・音楽の品質評価は未完了。Godot版とは未統合。Steam公開は後回しです。

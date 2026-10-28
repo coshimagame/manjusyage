@@ -1,0 +1,50 @@
+[
+  {
+    "key": "opening",
+    "title": "01_星の向こうへ",
+    "bpm": 112,
+    "bars": 24,
+    "duration": 54.62857142857143,
+    "events": 904,
+    "peakBeforeNormalization": 0.3596544563770294,
+    "peakLimit": 0.88,
+    "rms": 0.18395864882852286,
+    "bytes": 6992504
+  },
+  {
+    "key": "stage",
+    "title": "02_軌道の残響",
+    "bpm": 138,
+    "bars": 32,
+    "duration": 58.85217391304348,
+    "events": 1304,
+    "peakBeforeNormalization": 0.4068218469619751,
+    "peakLimit": 0.88,
+    "rms": 0.18122046655067403,
+    "bytes": 7533124
+  },
+  {
+    "key": "boss",
+    "title": "03_記憶の番人",
+    "bpm": 150,
+    "bars": 32,
+    "duration": 54.400000000000006,
+    "events": 1284,
+    "peakBeforeNormalization": 0.4159623384475708,
+    "peakLimit": 0.88,
+    "rms": 0.17273214298087242,
+    "bytes": 6963248
+  },
+  {
+    "key": "ending",
+    "title": "04_帰還の光",
+    "bpm": 92,
+    "bars": 24,
+    "duration": 65.80869565217391,
+    "events": 813,
+    "peakBeforeNormalization": 0.3749713897705078,
+    "peakLimit": 0.88,
+    "rms": 0.17138690548139132,
+    "bytes": 8423560
+  }
+]
