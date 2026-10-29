@@ -607,7 +607,11 @@ func sprite(rows,pos,palette,size=1):
 	for y in range(rows.size()):
 		for x in range(rows[y].length()):
 			var ch=rows[y][x]
-			if ch!=".": draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,size),palette[int(ch)-1])
+			if ch!=".":
+				var base: Color = palette[int(ch)-1]
+				var shade = base.lightened(.12) if y < rows.size()/2 else base.darkened(.16)
+				draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,size),shade)
+				if size>1: draw_line(Vector2(floor(pos.x+x*size),floor(pos.y+y*size)),Vector2(floor(pos.x+x*size+size-1),floor(pos.y+y*size)),base.lightened(.22),1)
 
 func ship(pos,color,size=1):
 	var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
@@ -616,7 +620,12 @@ func ship(pos,color,size=1):
 	draw_rect(Rect2(pos.x-14*size,pos.y-size,5*size,2*size),Color("ffedb0"))
 
 func background():
-	draw_rect(Rect2(0,0,W,H),Color("060b20"))
+	for y in range(360):
+		draw_line(Vector2(0,y),Vector2(640,y),Color("080d25").lerp(Color("26374d"),float(y)/360))
+	for band in range(6):
+		for i in range(18):
+			var cloud_x = fposmod(i*43.0+band*17-travel*.09,720)-40
+			draw_rect(Rect2(cloud_x,90+band*13+sin(i*.7)*10,48,3),Color(.22,.30,.43,.22))
 	for s in stars:
 		var x=fposmod(s.x-travel*s.z*.25,W)
 		draw_rect(Rect2(floor(x),s.y,2 if s.z>1.3 else 1,1),Color("52658f") if s.z<1 else Color("9bb9ce"))

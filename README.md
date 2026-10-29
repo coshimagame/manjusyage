@@ -1,3 +1,7 @@
+# 最新：Windows物語導入版0.3
+
+起動すると約51秒のプロローグから始まります。Enter/Aで次へ、Esc/Startでスキップ。スーファミ寄りの陰影・多層背景へ調整中。[今回の仕様と検証](docs/PROLOGUE.md)。ブラウザー版は browser-prototype/ に保管。以下は基礎となる0.2の説明です。
+
 # STARLINK SQUAD — Ruins of Resonance
 
 Godot 4.6 / Windows向け、1〜3人ローカル協力の横スクロールSTG。

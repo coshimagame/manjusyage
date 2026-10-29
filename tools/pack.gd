@@ -4,7 +4,7 @@ func _initialize():
 	var packer=PCKPacker.new()
 	var result=packer.pck_start("res://STARLINK-SQUAD.pck")
 	assert(result==OK)
-	for path in ["project.godot","main.tscn","game.gd"]:
+	for path in ["project.godot","main.tscn","game.gd","prologue.gd","prologue.tscn"]:
 		assert(packer.add_file("res://"+path,"res://"+path)==OK)
 	for folder in ["audio", ".godot/imported"]:
 		for name in DirAccess.get_files_at("res://"+folder):
