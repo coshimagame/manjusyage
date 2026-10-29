@@ -1,3 +1,7 @@
+# 最新：Windows音楽統合版0.4
+
+**ソースから起動する前に `node tools/build_story_music.cjs` を実行し、Godotで再インポートしてください。** 4場面の音楽を更新しending.wavを生成します。配布ZIPは生成済み。[音楽・ボス調整と検証](docs/AUDIO_RELEASE.md)。
+
 # 最新：Windows物語導入版0.3
 
 起動すると約51秒のプロローグから始まります。Enter/Aで次へ、Esc/Startでスキップ。スーファミ寄りの陰影・多層背景へ調整中。[今回の仕様と検証](docs/PROLOGUE.md)。ブラウザー版は browser-prototype/ に保管。以下は基礎となる0.2の説明です。

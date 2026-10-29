@@ -82,7 +82,7 @@ func _ready():
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.volume_db = -3
-	music.finished.connect(func(): music.play())
+	music.finished.connect(_repeat_music)
 	for name in ["shot","switch","hit","burst","gate","pickup"]:
 		sounds[name] = load("res://audio/"+name+".wav")
 	for i in range(12):
@@ -109,6 +109,9 @@ func _ready():
 		if screenshot_mode == "gate": begin_gate(1)
 		if screenshot_mode == "boss": begin_boss()
 	queue_redraw()
+
+func _repeat_music():
+	music.play()
 
 func _pad_changed(device, connected):
 	if connected:
@@ -444,10 +447,10 @@ func update_game(dt):
 			if gate==1 and gate_step>=3: open_gate()
 		for e in enemies:
 			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
-				e.hp-=1; e.flash=.08; bullet.pos.x=800
+				e.hp-=1; e.flash=.08; bullet.pos.x=800; sfx("hit")
 		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
 			if bullet.color==boss.color:
-				boss.hp-=1; boss.flash=.07
+				boss.hp-=1; boss.flash=.07; sfx("hit")
 			bullet.pos.x=800
 	bullets=bullets.filter(func(b):return b.pos.x<700)
 	for e in enemies:
@@ -503,7 +506,7 @@ func open_gate():
 
 func begin_boss():
 	enemies.clear(); shots.clear(); bullets.clear()
-	boss={"pos":Vector2(525,180),"hp":180.0+count*80,"max":180.0+count*80,"age":0.0,"cool":1.8,"color":0,"flash":0.0}
+	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
 	track("sentinel")
 	tell("WARNING / PRISM SENTINEL",4)
 
@@ -512,13 +515,14 @@ func update_boss(dt):
 	boss.pos.y=180+sin(boss.age*.65)*74
 	boss.color=int(boss.age/7)%3
 	if boss.cool<=0:
-		boss.cool=1.05 if boss.hp<boss.max*.5 else 1.6
-		for j in range(7):
-			var angle=PI+(j-3)*.17+sin(boss.age)*.15
-			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*92,"r":4})
-		if boss.hp<boss.max*.5:
+		boss.volleys+=1
+		boss.cool=2.3 if boss.volleys%3==0 else 1.55
+		for j in range(5):
+			var angle=PI+(j-2)*.24+sin(boss.age)*.15
+			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*72,"r":4})
+		if boss.hp<boss.max*.5 and boss.volleys%3==0:
 			for p in players:
-				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*125,"r":3})
+				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})
 	for p in players:
 		if p.down==0 and p.pos.distance_to(boss.pos)<60: hurt(p)
 
@@ -540,6 +544,7 @@ func explode(pos,color,amount):
 func finish(won):
 	mode="clear" if won else "over"
 	music.stop(); sfx("gate" if won else "burst")
+	if won: track("ending")
 	if won:
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
