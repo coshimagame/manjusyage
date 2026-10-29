@@ -11,6 +11,7 @@ const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
 }
 
+var planet_texture: ImageTexture
 var mode = "menu"
 var count = 1
 var players: Array = []
@@ -67,6 +68,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 
 func _ready():
 	randomize()
+	build_planet_texture()
 	for i in range(130):
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
 	pads = Array(Input.get_connected_joypads())
@@ -108,6 +110,7 @@ func _ready():
 		start_game()
 		if screenshot_mode == "gate": begin_gate(1)
 		if screenshot_mode == "boss": begin_boss()
+		for pilot in players: pilot.inv=0
 	queue_redraw()
 
 func _repeat_music():
@@ -616,7 +619,10 @@ func sprite(rows,pos,palette,size=1):
 				var base: Color = palette[int(ch)-1]
 				var shade = base.lightened(.12) if y < rows.size()/2 else base.darkened(.16)
 				draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,size),shade)
-				if size>1: draw_line(Vector2(floor(pos.x+x*size),floor(pos.y+y*size)),Vector2(floor(pos.x+x*size+size-1),floor(pos.y+y*size)),base.lightened(.22),1)
+				if size>1:
+					var above = "." if y==0 or x>=rows[y-1].length() else rows[y-1][x]
+					if above!=ch: draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,1),base.lightened(.28))
+					if x==rows[y].length()-1 or rows[y][x+1]==".": draw_rect(Rect2(floor(pos.x+(x+1)*size-1),floor(pos.y+y*size),1,size),base.darkened(.32))
 
 func ship(pos,color,size=1):
 	var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
@@ -624,32 +630,52 @@ func ship(pos,color,size=1):
 	draw_rect(Rect2(pos.x-18*size,pos.y-2*size,(6+int(clock*20)%4)*size,4*size),Color("ff8b4e"))
 	draw_rect(Rect2(pos.x-14*size,pos.y-size,5*size,2*size),Color("ffedb0"))
 
+func build_planet_texture():
+	var img=Image.create(125,125,false,Image.FORMAT_RGBA8)
+	for py in range(-61,62):
+		var half=int(sqrt(maxf(0,62*62-py*py)))
+		for px in range(-half,half):
+			var light=clampf(.48-float(px)/150-float(py)/230,0,1)
+			var col=Color("34455f").lerp(Color("95b2b6"),floor(light*12)/12)
+			if sin(py*.23+sin(px*.045)*2)>.56: col=col.lightened(.12)
+			img.set_pixel(px+62,py+62,col)
+	planet_texture=ImageTexture.create_from_image(img)
+
 func background():
+	# Four independent scroll planes; fine highlights stay on the native pixel grid.
 	for y in range(360):
-		draw_line(Vector2(0,y),Vector2(640,y),Color("080d25").lerp(Color("26374d"),float(y)/360))
-	for band in range(6):
-		for i in range(18):
-			var cloud_x = fposmod(i*43.0+band*17-travel*.09,720)-40
-			draw_rect(Rect2(cloud_x,90+band*13+sin(i*.7)*10,48,3),Color(.22,.30,.43,.22))
-	for s in stars:
-		var x=fposmod(s.x-travel*s.z*.25,W)
-		draw_rect(Rect2(floor(x),s.y,2 if s.z>1.3 else 1,1),Color("52658f") if s.z<1 else Color("9bb9ce"))
-	# Distant fractured orbital structures, quantized to the pixel grid.
+		draw_line(Vector2(0,y),Vector2(640,y),Color("101630").lerp(Color("566978"),float(y)/430))
+	for star in stars:
+		var sx=floor(fposmod(star.x-travel*star.z*.08,W))
+		draw_rect(Rect2(sx,star.y,1,1),Color("7b91ac") if star.z<1 else Color("c5d3d5"))
+	# Scanline-built planet: shaded limb and cloud strata without blurred filtering.
+	var planet=Vector2(472-floor(fposmod(travel*.025,100)),118)
+	draw_texture(planet_texture,planet-Vector2(62,62))
+	for layer in range(3):
+		var base_y=230+layer*38
+		var tint=[Color("34475f"),Color("293c53"),Color("203248")][layer]
+		for i in range(13):
+			var x=floor(fposmod(i*61-travel*(.08+layer*.09),793))-70
+			var ht=25+(i*31+layer*17)%75
+			draw_rect(Rect2(x,base_y-ht,43,ht+110),tint)
+			draw_rect(Rect2(x+4,base_y-ht-4,35,4),tint.lightened(.08))
+			draw_rect(Rect2(x+5,base_y-ht+5,2,ht-5),tint.lightened(.11))
+			for row in range(3):
+				for col in range(3):
+					draw_rect(Rect2(x+12+col*8,base_y-ht+12+row*13,3,5),tint.darkened(.3))
 	for i in range(8):
-		var x=fposmod(i*100-travel*.18,800)-80
-		var y=65+(i*43)%170
-		draw_rect(Rect2(x,y,45,64),Color("111b37"))
-		draw_rect(Rect2(x+4,y+4,37,56),Color("0b142c"))
-		draw_rect(Rect2(x+14,y,5,64),Color("182441"))
-		draw_line(Vector2(x,y+30),Vector2(x+45,y+30),Color("223052"),1)
-	for i in range(22):
-		var x=fposmod(i*34-travel*.8,748)-40
-		var ht=12+(i*13)%20
-		for bottom in [false,true]:
-			var y=330 if bottom else 32-ht
-			draw_rect(Rect2(x,y,32,ht),Color("192d48"))
-			draw_rect(Rect2(x+2,y+2,28,ht-4),Color("0c1a31"))
-			draw_rect(Rect2(x+5,330 if bottom else 30,13,2),Color("2f6070"))
+		var x=floor(fposmod(i*106-travel*.48,848))-90
+		var top=275+(i*19)%35
+		# Carved foreground masonry, bevels, seams and illuminated insets.
+		draw_rect(Rect2(x,top,64,70),Color("182b3e"))
+		draw_rect(Rect2(x,top,64,3),Color("77959b"))
+		draw_rect(Rect2(x+2,top+3,5,67),Color("435e6b"))
+		draw_rect(Rect2(x+58,top+3,6,67),Color("101e32"))
+		for row in range(4):
+			draw_line(Vector2(x+8,top+12+row*14),Vector2(x+57,top+12+row*14),Color("30475a"))
+			draw_rect(Rect2(x+18+(row%2)*15,top+4+row*14,1,8),Color("425c69"))
+		draw_rect(Rect2(x+27,top+9,10,30),Color("0b1d30"))
+		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
 
 func _draw():
 	background()
@@ -795,7 +821,7 @@ func draw_menu():
 	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
 	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
 	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
-	text_at("PROTOTYPE 0.2",Vector2(22,345),Color("3e536f"))
+	text_at("PROTOTYPE 0.5",Vector2(22,345),Color("3e536f"))
 	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
 	text_at("F11 FULLSCREEN",Vector2(540,345),Color("3e536f"))
 	if show_help:
