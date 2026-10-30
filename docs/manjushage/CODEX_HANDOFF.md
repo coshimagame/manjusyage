@@ -1,6 +1,9 @@
 # Codex向け：今後の公式設定を守る指示書
 2026-10-30 v0.1
 
+## 最新の機体デザイン方針（2026-10-30・ユーザー発案／未確定）
+機体の見た目を完全別設計にしない。別々の世界線にいる**同じ設計者**が機体を作ったため、3機は共通する外形・構造を持つ。その一方で世界線ごとに**異なる物理現象**が起こるという最新案。初期の「シルエットも全く違う3機」という案より優先して扱う。ただし設計者の正体、機体の正式な形、色、発光の規則、物語上の真相は未決。まず [SHIP_LINEAGE.md](SHIP_LINEAGE.md) を読み、共通ベース＋現象差の差分案として具体化する。ゲームコードの変更と未承認の正史化は避ける。
+
 ## 最初に行うこと
 1. リポジトリの `AGENTS.md`, `HANDOFF.md`, `README.md`, `docs/DEVELOPMENT.md`, `docs/CHANGELOG.md` を読む。
 2. このフォルダの `INDEX.md`, `CANON.md`, `CHARACTERS.md`, `STORY.md`, `STAGES.md`, `GAMEPLAY.md`, `ART_ASSETS.md`, `CONTINUITY.md`, `BOOK_PLAN.md` を読む。
