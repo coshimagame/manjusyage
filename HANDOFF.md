@@ -146,3 +146,7 @@ GitHubのコミット履歴を保存状況の基準とする。ローカルの�
 
 ## MANJUSHAGE official canon — 2026-10-30
 Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / ジヨーザ / マフィオ**. Complete setting archive and Codex instructions: [docs/manjushage/INDEX.md](docs/manjushage/INDEX.md) and [docs/manjushage/CODEX_HANDOFF.md](docs/manjushage/CODEX_HANDOFF.md). This is a **design documentation update only**; the current Godot game's functionality, graphics and title have not yet been migrated. Online co-op and unique character abilities are planned, not implemented. Check the canon and continuity docs before future story/art/gameplay changes.
+
+
+## 2026-10-30 BOOK-001：設定資料＆パーフェクトガイド初稿
+26ページ、6×9インチ、横書きのレビュー用PDF v0.1を制作。原本は books/perfect-guide/v0.1/build_book.py と manuscript.json、試作画面title-v0.6.png。PDFはチャット配布。確定設定と開発案、試作0.6の攻略を分離。正式原画・最終攻略・著者名・入稿表紙は未確定。KDP公開は未実施。26頁レンダリング目視検査済み。ゲームコード変更なし。

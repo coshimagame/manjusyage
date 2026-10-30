@@ -32,3 +32,7 @@
 | 2026-10-30 | UI-001 | 正式タイトル・3名を実行UIに適用。保存先維持 | game.gd/prologue.gd。性能・配色・台詞の新規決定なし |
 
 実装差分と検証：[IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md)。旧稿：[archive/v0.5/game.gd](archive/v0.5/game.gd)。
+
+
+## 2026-10-30 BOOK-001：設定資料＆パーフェクトガイド初稿
+26ページ、6×9インチ、横書きのレビュー用PDF v0.1を制作。原本は books/perfect-guide/v0.1/build_book.py と manuscript.json、試作画面title-v0.6.png。PDFはチャット配布。確定設定と開発案、試作0.6の攻略を分離。正式原画・最終攻略・著者名・入稿表紙は未確定。KDP公開は未実施。26頁レンダリング目視検査済み。ゲームコード変更なし。
