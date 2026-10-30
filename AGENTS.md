@@ -17,3 +17,7 @@ verification results, unresolved issues and the recommended next step.
 Do not track engine executables, generated PCK/ZIP packages, .godot caches, userdata,
 credentials or connection tokens. The engine's license notices are not a blanket license
 for the game. Consult current user instructions for publishing/sharing decisions.
+
+
+## MANJUSHAGE official canon — 2026-10-30
+The game's official future title is **曼珠沙華 / MANJUSHAGE**. Before editing story, characters, artwork, stages, or multiplayer mechanics, read **docs/manjushage/INDEX.md** and **docs/manjushage/CODEX_HANDOFF.md**, then the related canon files. The three protagonists are **コルミィ, ジヨーザ, マフィオ**. Do not use the outdated names コルミー or ショルマ as current character names. Separate approved canon from proposals, and implementation from plans. Keep asset provenance and continuity records updated; protect existing gameplay and tests.
