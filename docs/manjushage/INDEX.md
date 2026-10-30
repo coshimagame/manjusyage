@@ -6,6 +6,7 @@
 | 文書 | 内容 |
 |---|---|
 | [CANON.md](CANON.md) | 公式設定台帳・採用と提案の区別 |
+| [SHIP_LINEAGE.md](SHIP_LINEAGE.md) | 同じ設計者の世界線別機体・物理現象の相違（ユーザー発案、未確定） |
 | [CHARACTERS.md](CHARACTERS.md) | コルミィ／ジヨーザ／マフィオ |
 | [STORY.md](STORY.md) | 花言葉・世界観・ストーリーと伏線 |
 | [STAGES.md](STAGES.md) | 全8ステージと周回変化 |
