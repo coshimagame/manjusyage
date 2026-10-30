@@ -138,3 +138,7 @@ GitHubのコミット履歴を保存状況の基準とする。ローカルの�
 4場面の自作曲をGodot版に統合。敵・ボスへのhit音、ボスHPと弾数・弾速軽減。再生成は node tools/build_story_music.cjs → Godot再インポート。既存WAVは生成手順で更新する。配布ZIPは音源を同梱。
 
 音楽切替・再生・長さ・HP・弾数の検査成功。3人自動攻略成功。配布PCKでも音楽検査成功（終了時リソース解放警告あり）。実聴・物理入力・手操作による品質評価は未完了。単体4曲WAV ZIPをチャット配布。詳しくは docs/AUDIO_RELEASE.md。次は企画書全体の8面・世界線・記憶・継承・保存など。Steam公開は後回し。
+
+
+## MANJUSHAGE official canon — 2026-10-30
+Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / ジヨーザ / マフィオ**. Complete setting archive and Codex instructions: [docs/manjushage/INDEX.md](docs/manjushage/INDEX.md) and [docs/manjushage/CODEX_HANDOFF.md](docs/manjushage/CODEX_HANDOFF.md). This is a **design documentation update only**; the current Godot game's functionality, graphics and title have not yet been migrated. Online co-op and unique character abilities are planned, not implemented. Check the canon and continuity docs before future story/art/gameplay changes.
