@@ -19,6 +19,7 @@ var test_shot := false
 var frames := 0
 
 func _ready():
+	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
 	music = AudioStreamPlayer.new()

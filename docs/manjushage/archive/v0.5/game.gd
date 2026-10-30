@@ -1,0 +1,856 @@
+extends Node2D
+
+const W = 640.0
+const H = 360.0
+const COLORS = [Color("67ecff"), Color("ff668e"), Color("ffce63")]
+const WHITE = Color("e5f5ff")
+const DIM = Color("617797")
+const SHIP = ["...........11.............", "......11111221............", "..11112222222211..........", "..1333332222222211........", "1112222222444422221111....", "1222222244444422222222111.", "1112222222222222221111....", "..1333332222222211........", "..11112222222211..........", "......11111221............", "...........11............."]
+const FOE = ["..11........11..", ".1221......1221.", "1222211111122221", ".12223333332221.", "..123344443321..", "1112334444332111", ".12223333332221.", "1222211111122221", ".1221......1221.", "..11........11.."]
+const FONT = {
+"A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
+}
+
+var planet_texture: ImageTexture
+var mode = "menu"
+var count = 1
+var players: Array = []
+var bullets: Array = []
+var enemies: Array = []
+var shots: Array = []
+var particles: Array = []
+var pickups: Array = []
+var stars: Array = []
+var pads: Array = []
+var pad_edges = {}
+var clock = 0.0
+var travel = 0.0
+var elapsed = 0.0
+var wave_timer = 1.0
+var wave_id = 0
+var score = 0
+var reserves = 3
+var combo = 1
+var combo_time = 0.0
+var high_scores = [0,0,0]
+var gate = 0
+var gates_done = 0
+var gate_order = [1,0,2]
+var gate_step = 0
+var gate_lights = [0.0,0.0,0.0]
+var gate_flash = 0.0
+var boss = {}
+var notice = ""
+var notice_time = 0.0
+var shake = 0.0
+var music: AudioStreamPlayer
+var sounds = {}
+var sfx_pool: Array = []
+var muted = false
+var show_help = false
+var auto_test = false
+var screenshot_mode = ""
+var frame_count = 0
+var tests_done = false
+var test_count = 3
+var pad_profiles = {}
+var calibration_step = -1
+var calibration_device = -1
+var calibration_bindings = {}
+var calibration_return = "menu"
+var calibration_ready = false
+var calibration_previous = {}
+var calibration_axis_baseline = {}
+var music_name = ""
+var jp_font: SystemFont
+const CONTROL_ACTIONS = ["up","down","left","right","fire","color","burst","start"]
+const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色切り替えのボタン","バーストのボタン","決定・ポーズのボタン"]
+
+func _ready():
+	randomize()
+	build_planet_texture()
+	for i in range(130):
+		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
+	pads = Array(Input.get_connected_joypads())
+	Input.joy_connection_changed.connect(_pad_changed)
+	jp_font=SystemFont.new()
+	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
+	var input_cfg=ConfigFile.new()
+	if input_cfg.load("user://controls.cfg")==OK: pad_profiles=input_cfg.get_value("input","profiles",{})
+	var audio_cfg=ConfigFile.new()
+	if audio_cfg.load("user://audio.cfg")==OK:
+		var output=str(audio_cfg.get_value("audio","output","Default"))
+		if AudioServer.get_output_device_list().has(output): AudioServer.output_device=output
+	music = AudioStreamPlayer.new()
+	add_child(music)
+	music.volume_db = -3
+	music.finished.connect(_repeat_music)
+	for name in ["shot","switch","hit","burst","gate","pickup"]:
+		sounds[name] = load("res://audio/"+name+".wav")
+	for i in range(12):
+		var player = AudioStreamPlayer.new()
+		player.volume_db = -8
+		add_child(player)
+		sfx_pool.append(player)
+	var cfg = ConfigFile.new()
+	if cfg.load("user://scores.cfg") == OK:
+		for i in range(3): high_scores[i] = int(cfg.get_value("scores",str(i),0))
+	for arg in OS.get_cmdline_user_args():
+		if arg == "--autotest": auto_test = true
+		if arg.begins_with("--players="): test_count = clampi(int(arg.substr(10)),1,3)
+		if arg.begins_with("--shot="): screenshot_mode = arg.substr(7)
+	if not auto_test: track("title")
+	if auto_test:
+		Engine.time_scale = 20.0
+		count = test_count
+		start_game()
+		run_mechanics_tests()
+	elif screenshot_mode != "" and screenshot_mode != "menu":
+		count = 3
+		start_game()
+		if screenshot_mode == "gate": begin_gate(1)
+		if screenshot_mode == "boss": begin_boss()
+		for pilot in players: pilot.inv=0
+	queue_redraw()
+
+func _repeat_music():
+	music.play()
+
+func _pad_changed(device, connected):
+	if connected:
+		if not pads.has(device):
+			var empty = -1
+			for i in range(pads.size()):
+				if not Input.get_connected_joypads().has(pads[i]): empty=i; break
+			if empty>=0: pads[empty]=device
+			else: pads.append(device)
+	else:
+		if mode == "play" and pads.has(device) and pads.find(device) < count:
+			mode = "pause"
+			notice = "CONTROLLER LOST - RECONNECT OR USE KEYBOARD"
+		# Preserve slots so one disconnect cannot silently swap players.
+		# Reconnected devices fill the same ID; menu re-enumerates on restart.
+	if mode == "menu": pads = Array(Input.get_connected_joypads())
+
+func sfx(name):
+	if muted or auto_test: return
+	for player in sfx_pool:
+		if not player.playing:
+			player.stream = sounds[name]
+			player.play()
+			return
+
+func track(name):
+	music_name=name
+	music.stream = load("res://audio/"+name+".wav")
+	if music.stream == null:
+		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
+		return
+	if music.stream is AudioStreamWAV:
+		music.stream.loop_mode=AudioStreamWAV.LOOP_FORWARD
+		music.stream.loop_begin=0
+		music.stream.loop_end=int(music.stream.get_length()*music.stream.mix_rate)
+	if not auto_test: music.play()
+
+func profile_key(device):
+	return Input.get_joy_guid(device)+":"+Input.get_joy_name(device)
+
+func binding_down(device,binding):
+	if binding.get("kind","")=="button": return Input.is_joy_button_pressed(device,int(binding.index))
+	if binding.get("kind","")=="axis": return Input.get_joy_axis(device,int(binding.index))*float(binding.sign)>.5
+	return false
+
+func pad_action(device,action,default_button):
+	var profile=pad_profiles.get(profile_key(device),{})
+	if profile.has(action): return binding_down(device,profile[action])
+	return Input.is_joy_button_pressed(device,default_button)
+
+func pad_direction(device):
+	var dpad=Vector2(float(pad_action(device,"right",JOY_BUTTON_DPAD_RIGHT))-float(pad_action(device,"left",JOY_BUTTON_DPAD_LEFT)),float(pad_action(device,"down",JOY_BUTTON_DPAD_DOWN))-float(pad_action(device,"up",JOY_BUTTON_DPAD_UP)))
+	# Digital directions take priority so a drifting stick cannot cancel a D-pad press.
+	if dpad.length_squared()>0: return dpad.normalized()
+	var stick=Vector2(Input.get_joy_axis(device,JOY_AXIS_LEFT_X),Input.get_joy_axis(device,JOY_AXIS_LEFT_Y))
+	return stick.limit_length() if stick.length()>.25 else Vector2.ZERO
+
+func pad_action_edge(device,action,button):
+	var key=str(device)+":"+action
+	var down=pad_action(device,action,button)
+	var previous=pad_edges.get(key,false)
+	pad_edges[key]=down
+	return down and not previous
+
+func open_calibration():
+	if Input.get_connected_joypads().is_empty():
+		tell("CONNECT A CONTROLLER FIRST",5)
+		return
+	calibration_return=mode
+	calibration_step=0; calibration_device=-1; calibration_bindings={}; calibration_previous={}
+	calibration_ready=true
+	calibration_axis_baseline={}
+	for id in Input.get_connected_joypads():
+		for axis in range(JOY_AXIS_MAX): calibration_axis_baseline[str(id)+":"+str(axis)]=Input.get_joy_axis(id,axis)
+	mode="controls"
+
+func capture_binding(event):
+	if event is InputEventKey and event.pressed and event.physical_keycode==KEY_ESCAPE:
+		mode=calibration_return; calibration_step=-1
+		return
+	if not calibration_ready or not (event is InputEventJoypadButton or event is InputEventJoypadMotion): return
+	if calibration_device>=0 and event.device!=calibration_device: return
+	var binding={}
+	if event is InputEventJoypadButton and event.pressed:
+		binding={"kind":"button","index":event.button_index}
+	elif event is InputEventJoypadMotion:
+		var baseline=calibration_axis_baseline.get(str(event.device)+":"+str(event.axis),0.0)
+		if absf(event.axis_value-baseline)>.65 and absf(event.axis_value)>.65 and absf(baseline)<.4:
+			binding={"kind":"axis","index":event.axis,"sign":signf(event.axis_value)}
+	if binding.is_empty(): return
+	# Each action must be distinct; otherwise a held direction could also fire/start.
+	if calibration_bindings.values().has(binding): return
+	calibration_device=event.device
+	calibration_bindings[CONTROL_ACTIONS[calibration_step]]=binding
+	calibration_previous=binding
+	calibration_ready=false
+	calibration_step+=1
+	if calibration_step==CONTROL_ACTIONS.size():
+		pad_profiles[profile_key(calibration_device)]=calibration_bindings.duplicate(true)
+		var cfg=ConfigFile.new()
+		cfg.set_value("input","profiles",pad_profiles)
+		var result=cfg.save("user://controls.cfg")
+		tell("CONTROLS SAVED" if result==OK else "CONTROLS ACTIVE / SAVE FAILED",4)
+		pad_edges[str(calibration_device)+":start"]=true
+		pad_edges[str(calibration_device)+":fire"]=true
+		mode=calibration_return; calibration_step=-1
+
+func japanese(message,pos,size=13,color=WHITE):
+	draw_string(jp_font,pos,message,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
+
+func tell(message, duration = 3.0):
+	notice = message
+	notice_time = duration
+
+func start_game():
+	pads = Array(Input.get_connected_joypads())
+	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
+	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 1.5; score = 0
+	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
+	for i in range(count):
+		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
+	mode = "play"
+	show_help = false
+	track("ruins")
+	tell("SECTOR 01 / THE SLEEPING RELAY",4)
+
+func button_edge(device, button):
+	var key = str(device)+":"+str(button)
+	var down = Input.is_joy_button_pressed(device,button)
+	var previous = pad_edges.get(key,false)
+	pad_edges[key] = down
+	return down and not previous
+
+func _input(event):
+	if mode=="controls":
+		capture_binding(event)
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key = event.physical_keycode
+		if key==KEY_F2 and mode in ["menu","pause"]:
+			open_calibration()
+			return
+		if key==KEY_F6:
+			muted=false
+			AudioServer.set_bus_mute(0,false)
+			music.stream_paused=false
+			music.play()
+			sfx("pickup")
+		if key==KEY_F7:
+			var outputs=AudioServer.get_output_device_list()
+			if not outputs.is_empty():
+				AudioServer.output_device=outputs[(outputs.find(AudioServer.output_device)+1)%outputs.size()]
+				var cfg=ConfigFile.new()
+				cfg.set_value("audio","output",AudioServer.output_device)
+				cfg.save("user://audio.cfg")
+		if key == KEY_F11:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if DisplayServer.window_get_mode()==DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
+		if key == KEY_M:
+			muted = not muted
+			AudioServer.set_bus_mute(0,muted)
+		if mode == "menu":
+			if key in [KEY_LEFT,KEY_A]: count = maxi(1,count-1)
+			if key in [KEY_RIGHT,KEY_D]: count = mini(3,count+1)
+			if key in [KEY_1,KEY_2,KEY_3]: count = key-KEY_1+1
+			if key == KEY_H: show_help = not show_help
+			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+		elif mode == "play":
+			if key in [KEY_ESCAPE,KEY_P]: mode = "pause"; notice = "FLIGHT PAUSED"
+			for i in range(count):
+				if key == [KEY_X,KEY_F,KEY_O][i]: change_color(i)
+				if key == [KEY_C,KEY_G,KEY_N][i]: burst(i)
+		elif mode == "pause":
+			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
+			if key == KEY_Q: mode = "menu"; track("title")
+		else:
+			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
+		var p = get_global_mouse_position()
+		if Rect2(220,236,200,32).has_point(p): start_game()
+		elif Rect2(185,307,270,20).has_point(p): open_calibration()
+		elif p.y > 200 and p.y < 232:
+			if p.x < 320: count=maxi(1,count-1)
+			else: count=mini(3,count+1)
+
+func change_color(i):
+	if players[i].down > 0: return
+	players[i].color = (players[i].color+1)%3
+	sfx("switch")
+
+func burst(i):
+	var p = players[i]
+	if p.down > 0 or p.charge < 100: return
+	p.charge = 0; p.burst = .55; p.inv = 1
+	shots.clear()
+	for e in enemies: e.hp -= 5
+	if not boss.is_empty(): boss.hp -= 12
+	shake = 4
+	sfx("burst")
+
+func _process(dt):
+	clock += dt
+	music.stream_paused = mode == "pause"
+	frame_count += 1
+	if mode=="controls":
+		if not calibration_ready and calibration_device>=0:
+			calibration_ready=not binding_down(calibration_device,calibration_previous)
+		queue_redraw()
+		return
+	for device in Input.get_connected_joypads():
+		var start = pad_action_edge(device,"start",JOY_BUTTON_START)
+		var a = pad_action_edge(device,"fire",JOY_BUTTON_A)
+		var x = pad_action_edge(device,"color",JOY_BUTTON_X)
+		var b = pad_action_edge(device,"burst",JOY_BUTTON_B)
+		var left = pad_action_edge(device,"left",JOY_BUTTON_DPAD_LEFT)
+		var right = pad_action_edge(device,"right",JOY_BUTTON_DPAD_RIGHT)
+		if mode == "menu":
+			if left: count=maxi(1,count-1)
+			if right: count=mini(3,count+1)
+			if start or a: start_game()
+		elif mode == "play":
+			if start: mode="pause"; notice="FLIGHT PAUSED"
+			var slot = pads.find(device)
+			if slot >= 0 and slot < count:
+				if x: change_color(slot)
+				if b: burst(slot)
+		elif mode == "pause":
+			if start or a: mode="play"
+		elif start or a: start_game()
+	if mode == "play":
+		update_game(minf(dt,.05))
+	elif mode == "menu":
+		travel += dt*14
+		notice_time=maxf(0,notice_time-dt)
+	for part in particles:
+		part.pos += part.vel*dt
+		part.life -= dt
+	particles = particles.filter(func(p): return p.life>0)
+	shake = maxf(0,shake-dt*20)
+	queue_redraw()
+	if screenshot_mode != "" and frame_count == 12:
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://"+screenshot_mode+".png")
+		get_tree().quit()
+	if auto_test and elapsed > 245 and not tests_done:
+		push_error("AUTOTEST TIMEOUT")
+		get_tree().quit(1)
+
+func movement(i):
+	var keysets = [[KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN,KEY_Z],[KEY_A,KEY_D,KEY_W,KEY_S,KEY_R],[KEY_J,KEY_L,KEY_I,KEY_K,KEY_U]]
+	var k=keysets[i]
+	var v=Vector2(float(Input.is_physical_key_pressed(k[1]))-float(Input.is_physical_key_pressed(k[0])),float(Input.is_physical_key_pressed(k[3]))-float(Input.is_physical_key_pressed(k[2])))
+	var fire=Input.is_physical_key_pressed(k[4]) or (i==0 and Input.is_physical_key_pressed(KEY_SPACE))
+	if i<pads.size() and Input.get_connected_joypads().has(pads[i]):
+		var id=pads[i]
+		v+=pad_direction(id)
+		fire=fire or pad_action(id,"fire",JOY_BUTTON_A) or Input.get_joy_axis(id,JOY_AXIS_TRIGGER_RIGHT)>.4
+	return [v.limit_length(),fire]
+
+func update_game(dt):
+	elapsed += dt
+	notice_time = maxf(0,notice_time-dt)
+	gate_flash = maxf(0,gate_flash-dt)
+	combo_time -= dt
+	if combo_time<0: combo=1
+	if gate==0 and boss.is_empty(): travel+=dt*35
+	for i in range(count):
+		var p=players[i]
+		p.cool-=dt; p.inv-=dt; p.burst=maxf(0,p.burst-dt)
+		p.charge=minf(100,p.charge+dt*2)
+		if p.down>0:
+			p.down=maxf(.01,p.down-dt)
+			var near=false
+			for other in players:
+				if other.down==0 and other.pos.distance_to(p.pos)<55: near=true
+			p.rescue=maxf(0,p.rescue+dt*(1 if near else -.5))
+			if p.rescue>=1.5 or (p.down<.1 and reserves>0):
+				if p.rescue<1.5: reserves-=1
+				p.down=0; p.hp=4; p.inv=3; p.rescue=0
+				p.pos.x=clampf(p.pos.x,40,320)
+				sfx("pickup")
+			continue
+		var input=movement(i)
+		if auto_test:
+			p.inv=100
+			input[1]=true
+			var target=Vector2(180+i*20,150)
+			if gate>0:
+				var index=gate_order[mini(gate_step,2)] if gate==1 else i
+				if gate==2 and count<3:
+					for j in range(3):
+						if gate_lights[j]<=0: index=j; break
+				p.color=index
+				target=Vector2(360,100+index*80)
+			elif not boss.is_empty():
+				p.color=boss.color
+				target=Vector2(350,boss.pos.y)
+			input[0]=(target-p.pos).limit_length()
+		p.pos+=input[0]*155*dt
+		p.pos.x=clampf(p.pos.x,18,440 if gate>0 else 605)
+		p.pos.y=clampf(p.pos.y,48,320)
+		if input[1] and p.cool<=0:
+			p.cool=.13
+			bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i})
+			if i==0: sfx("shot")
+	var alive=players.any(func(p): return p.down==0)
+	if not alive and reserves==0:
+		finish(false)
+		return
+	if gate==0 and boss.is_empty():
+		if travel>=1400 and gates_done==0: begin_gate(1)
+		elif travel>=3000 and gates_done==1: begin_gate(2)
+		elif travel>=4800: begin_boss()
+		else:
+			wave_timer-=dt
+			if wave_timer<=0:
+				spawn_wave(); wave_timer=2.5
+	if gate>0:
+		for i in range(3): gate_lights[i]=maxf(0,gate_lights[i]-dt) if gate==2 else gate_lights[i]
+		if gate==2 and gate_lights.all(func(t): return t>0): open_gate()
+	if not boss.is_empty(): update_boss(dt)
+	for bullet in bullets:
+		bullet.pos.x+=dt*390
+		if gate>0 and bullet.pos.x>472:
+			for i in range(3):
+				if absf(bullet.pos.y-(100+i*80))<17:
+					if bullet.color==i:
+						if gate==1 and gate_step<3 and i==gate_order[gate_step]:
+							gate_lights[i]=99; gate_step+=1; sfx("pickup")
+						elif gate==2: gate_lights[i]=7.5; sfx("pickup")
+					else: gate_flash=.12
+			bullet.pos.x=800
+			if gate==1 and gate_step>=3: open_gate()
+		for e in enemies:
+			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
+				e.hp-=1; e.flash=.08; bullet.pos.x=800; sfx("hit")
+		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
+			if bullet.color==boss.color:
+				boss.hp-=1; boss.flash=.07; sfx("hit")
+			bullet.pos.x=800
+	bullets=bullets.filter(func(b):return b.pos.x<700)
+	for e in enemies:
+		e.age+=dt; e.flash=maxf(0,e.flash-dt)
+		e.pos.x-=e.speed*dt
+		e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
+		e.cool-=dt
+		if e.cool<=0 and e.pos.x<610:
+			e.cool=2.5
+			var target=players[wave_id%count].pos
+			shots.append({"pos":e.pos,"vel":(target-e.pos).normalized()*85,"r":3})
+		for p in players:
+			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
+		if e.hp<=0:
+			explode(e.pos,COLORS[1],14)
+			score+=100*combo; combo=mini(8,combo+1); combo_time=3
+			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
+	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
+	for shot in shots:
+		shot.pos+=shot.vel*dt
+		for p in players:
+			if p.down==0 and p.pos.distance_to(shot.pos)<8+shot.r:
+				hurt(p); shot.pos.x=-100
+	shots=shots.filter(func(s):return s.pos.x>-30 and s.pos.x<680 and s.pos.y>30 and s.pos.y<340)
+	for item in pickups:
+		item.pos.x-=dt*40
+		for p in players:
+			if p.down==0 and p.pos.distance_to(item.pos)<20:
+				if item.kind==0: p.hp=mini(4,p.hp+1)
+				else: p.charge=minf(100,p.charge+25)
+				score+=50; sfx("pickup"); item.pos.x=-100
+	pickups=pickups.filter(func(p):return p.pos.x>-20)
+	if not boss.is_empty() and boss.hp<=0: finish(true)
+
+func spawn_wave():
+	wave_id+=1
+	var base=85+(wave_id*61)%190
+	for j in range(3+count):
+		enemies.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0})
+
+func begin_gate(number):
+	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
+	enemies.clear(); shots.clear(); bullets.clear()
+	tell("RELAY 01 / MATCH COLOR - SHOOT IN ORDER" if number==1 else "RELAY 02 / LIGHT ALL THREE WITHIN 7 SECONDS",5)
+
+func open_gate():
+	score+=2500*count
+	gates_done+=1; gate=0
+	explode(Vector2(490,180),COLORS[0],60)
+	for p in players: p.charge=minf(100,p.charge+40)
+	sfx("gate"); tell("RELAY LINKED / ROUTE UNLOCKED",3)
+	wave_timer=3
+
+func begin_boss():
+	enemies.clear(); shots.clear(); bullets.clear()
+	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
+	track("sentinel")
+	tell("WARNING / PRISM SENTINEL",4)
+
+func update_boss(dt):
+	boss.age+=dt; boss.cool-=dt; boss.flash=maxf(0,boss.flash-dt)
+	boss.pos.y=180+sin(boss.age*.65)*74
+	boss.color=int(boss.age/7)%3
+	if boss.cool<=0:
+		boss.volleys+=1
+		boss.cool=2.3 if boss.volleys%3==0 else 1.55
+		for j in range(5):
+			var angle=PI+(j-2)*.24+sin(boss.age)*.15
+			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*72,"r":4})
+		if boss.hp<boss.max*.5 and boss.volleys%3==0:
+			for p in players:
+				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})
+	for p in players:
+		if p.down==0 and p.pos.distance_to(boss.pos)<60: hurt(p)
+
+func hurt(p):
+	if p.inv>0: return
+	p.hp-=1; p.inv=1.7; shake=3; combo=1
+	sfx("hit"); explode(p.pos,COLORS[p.color],10)
+	if p.hp<=0:
+		p.down=6; p.rescue=0
+		tell("SHIP DOWN / APPROACH THE POD TO RESCUE",3)
+		if not auto_test:
+			for id in pads:
+				Input.start_joy_vibration(id,.2,.4,.2)
+
+func explode(pos,color,amount):
+	for i in range(amount):
+		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(20,115),"life":randf_range(.2,.8),"color":color})
+
+func finish(won):
+	mode="clear" if won else "over"
+	music.stop(); sfx("gate" if won else "burst")
+	if won: track("ending")
+	if won:
+		score+=reserves*1000
+		explode(Vector2(525,180),COLORS[2],90)
+	if not auto_test:
+		high_scores[count-1]=maxi(high_scores[count-1],score)
+		var cfg=ConfigFile.new()
+		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
+		cfg.save("user://scores.cfg")
+		var record={"version":"0.2.0","ruleset":"ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
+		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
+		if file: file.store_string(JSON.stringify(record,"  "))
+	else:
+		tests_done=true
+		if won and gates_done==2:
+			print("AUTOTEST PASS: ",count," pilots, both relay puzzles, boss defeat, stage clear. Score=",score," elapsed=",elapsed)
+			get_tree().quit(0)
+		else:
+			push_error("AUTOTEST FAIL")
+			get_tree().quit(1)
+
+func run_mechanics_tests():
+	# Exercise actual keyboard event handlers and the same collision/recovery update used in play.
+	var event=InputEventKey.new()
+	event.physical_keycode=KEY_X; event.pressed=true
+	_input(event)
+	assert(players[0].color==1,"Color switching must work through keyboard input")
+	event.physical_keycode=KEY_C
+	shots.append({"pos":Vector2(500,180),"vel":Vector2.ZERO,"r":3})
+	_input(event)
+	assert(shots.is_empty() and players[0].charge==0,"Burst must consume energy and clear bullets")
+	event.physical_keycode=KEY_ESCAPE
+	_input(event)
+	assert(mode=="pause","Escape must pause")
+	_input(event)
+	assert(mode=="play","Escape must resume")
+	players[0].inv=0; players[0].hp=1
+	hurt(players[0])
+	assert(players[0].down>0,"Fatal damage must create a rescue pod")
+	if count>1:
+		players[1].pos=players[0].pos
+		players[0].rescue=1.49
+		update_game(.02)
+		assert(players[0].down==0 and reserves==count*3,"Ally rescue must not cost a reserve")
+	else:
+		players[0].down=.05
+		update_game(.02)
+		assert(players[0].down==0 and reserves==2,"Solo recovery must consume one reserve")
+	print("MECHANICS PASS: color, burst, pause/resume, damage and recovery")
+	start_game()
+
+func text_at(message, pos, color=WHITE, scale_px=1):
+	var x=pos.x
+	for ch in str(message).to_upper():
+		if FONT.has(ch):
+			var rows=FONT[ch].split("/")
+			for y in range(7):
+				for col in range(5):
+					if rows[y][col]=="1": draw_rect(Rect2(x+col*scale_px,pos.y+y*scale_px,scale_px,scale_px),color)
+		x+=6*scale_px
+
+func centered(message,y,color=WHITE,size=1):
+	text_at(message,Vector2((W-message.length()*6*size)/2,y),color,size)
+
+func sprite(rows,pos,palette,size=1):
+	for y in range(rows.size()):
+		for x in range(rows[y].length()):
+			var ch=rows[y][x]
+			if ch!=".":
+				var base: Color = palette[int(ch)-1]
+				var shade = base.lightened(.12) if y < rows.size()/2 else base.darkened(.16)
+				draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,size),shade)
+				if size>1:
+					var above = "." if y==0 or x>=rows[y-1].length() else rows[y-1][x]
+					if above!=ch: draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,1),base.lightened(.28))
+					if x==rows[y].length()-1 or rows[y][x+1]==".": draw_rect(Rect2(floor(pos.x+(x+1)*size-1),floor(pos.y+y*size),1,size),base.darkened(.32))
+
+func ship(pos,color,size=1):
+	var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
+	sprite(SHIP,pos-Vector2(12,5)*size,pal,size)
+	draw_rect(Rect2(pos.x-18*size,pos.y-2*size,(6+int(clock*20)%4)*size,4*size),Color("ff8b4e"))
+	draw_rect(Rect2(pos.x-14*size,pos.y-size,5*size,2*size),Color("ffedb0"))
+
+func build_planet_texture():
+	var img=Image.create(125,125,false,Image.FORMAT_RGBA8)
+	for py in range(-61,62):
+		var half=int(sqrt(maxf(0,62*62-py*py)))
+		for px in range(-half,half):
+			var light=clampf(.48-float(px)/150-float(py)/230,0,1)
+			var col=Color("34455f").lerp(Color("95b2b6"),floor(light*12)/12)
+			if sin(py*.23+sin(px*.045)*2)>.56: col=col.lightened(.12)
+			img.set_pixel(px+62,py+62,col)
+	planet_texture=ImageTexture.create_from_image(img)
+
+func background():
+	# Four independent scroll planes; fine highlights stay on the native pixel grid.
+	for y in range(360):
+		draw_line(Vector2(0,y),Vector2(640,y),Color("101630").lerp(Color("566978"),float(y)/430))
+	for star in stars:
+		var sx=floor(fposmod(star.x-travel*star.z*.08,W))
+		draw_rect(Rect2(sx,star.y,1,1),Color("7b91ac") if star.z<1 else Color("c5d3d5"))
+	# Scanline-built planet: shaded limb and cloud strata without blurred filtering.
+	var planet=Vector2(472-floor(fposmod(travel*.025,100)),118)
+	draw_texture(planet_texture,planet-Vector2(62,62))
+	for layer in range(3):
+		var base_y=230+layer*38
+		var tint=[Color("34475f"),Color("293c53"),Color("203248")][layer]
+		for i in range(13):
+			var x=floor(fposmod(i*61-travel*(.08+layer*.09),793))-70
+			var ht=25+(i*31+layer*17)%75
+			draw_rect(Rect2(x,base_y-ht,43,ht+110),tint)
+			draw_rect(Rect2(x+4,base_y-ht-4,35,4),tint.lightened(.08))
+			draw_rect(Rect2(x+5,base_y-ht+5,2,ht-5),tint.lightened(.11))
+			for row in range(3):
+				for col in range(3):
+					draw_rect(Rect2(x+12+col*8,base_y-ht+12+row*13,3,5),tint.darkened(.3))
+	for i in range(8):
+		var x=floor(fposmod(i*106-travel*.48,848))-90
+		var top=275+(i*19)%35
+		# Carved foreground masonry, bevels, seams and illuminated insets.
+		draw_rect(Rect2(x,top,64,70),Color("182b3e"))
+		draw_rect(Rect2(x,top,64,3),Color("77959b"))
+		draw_rect(Rect2(x+2,top+3,5,67),Color("435e6b"))
+		draw_rect(Rect2(x+58,top+3,6,67),Color("101e32"))
+		for row in range(4):
+			draw_line(Vector2(x+8,top+12+row*14),Vector2(x+57,top+12+row*14),Color("30475a"))
+			draw_rect(Rect2(x+18+(row%2)*15,top+4+row*14,1,8),Color("425c69"))
+		draw_rect(Rect2(x+27,top+9,10,30),Color("0b1d30"))
+		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
+
+func _draw():
+	background()
+	if mode=="controls":
+		draw_controls()
+		return
+	if mode=="menu":
+		draw_menu()
+		return
+	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
+	if gate>0: draw_gate()
+	for e in enemies:
+		sprite(FOE,e.pos-Vector2(16,10),[Color("3c2c59"),Color("9379b8"),Color("d871a4"),WHITE if e.flash>0 else Color("ffce63")],2)
+	for b in bullets:
+		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
+		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
+	for s in shots:
+		draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
+		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
+		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
+	for item in pickups:
+		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
+		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
+	if not boss.is_empty(): draw_boss()
+	for i in range(players.size()):
+		var p=players[i]
+		if p.down>0:
+			draw_rect(Rect2(p.pos-Vector2(7,5),Vector2(14,10)),COLORS[i],false,2)
+			text_at("SOS",p.pos+Vector2(-8,-15),COLORS[i])
+			draw_rect(Rect2(p.pos+Vector2(-12,11),Vector2(24*p.rescue/1.5,2)),WHITE)
+		elif p.inv<=0 or int(clock*14)%2==0:
+			ship(p.pos,COLORS[p.color])
+			text_at(str(i+1),p.pos+Vector2(-5,-17),COLORS[i])
+			# A small diamond marks the precise player hitbox.
+			draw_rect(Rect2(p.pos-Vector2(1,1),Vector2(2,2)),COLORS[p.color])
+		if p.burst>0:
+			draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,COLORS[p.color],2)
+	for part in particles:
+		draw_rect(Rect2(part.pos,Vector2(3,2)),part.color)
+	draw_set_transform(Vector2.ZERO)
+	draw_hud()
+	if notice_time>0:
+		draw_rect(Rect2(0,43,640,20),Color(0.02,.04,.1,.85))
+		centered(notice,50,COLORS[2])
+	if mode=="pause":
+		draw_rect(Rect2(0,0,W,H),Color(0,0,.04,.8))
+		centered("PAUSED",125,WHITE,3)
+		centered(notice,164,COLORS[2])
+		centered("START / ENTER : RESUME",194)
+		centered("Q : RETURN TO TITLE",213,DIM)
+		centered("M : SOUND   F11 : FULLSCREEN",245,DIM)
+		japanese("F2：コントローラー設定 / F6：音声テスト",Vector2(179,272))
+	elif mode in ["clear","over"]: draw_result()
+
+func draw_hud():
+	draw_rect(Rect2(0,0,640,33),Color("080f22"))
+	draw_rect(Rect2(0,32,640,1),Color("2d4a62"))
+	for i in range(count):
+		var p=players[i]
+		var x=12+i*138
+		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
+		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
+		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
+		draw_rect(Rect2(x,22,110,3),Color("26314b"))
+		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[i])
+		if p.charge>=100: text_at("B",Vector2(x+115,19),WHITE)
+	text_at("SCORE",Vector2(460,7),DIM)
+	text_at("%07d"%score,Vector2(515,7),WHITE)
+	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
+	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
+	draw_rect(Rect2(0,337,640,23),Color("080f22"))
+	text_at("01 / RUINS OF RESONANCE",Vector2(12,345),DIM)
+	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
+	text_at("START PAUSE",Vector2(405,345),DIM)
+	draw_rect(Rect2(500,347,125,2),Color("28374e"))
+	draw_rect(Rect2(500,347,minf(125,travel/4800*125),2),COLORS[0])
+
+func draw_gate():
+	var col=COLORS[1] if gate_flash>0 else Color("365878")
+	draw_rect(Rect2(475,64,33,255),Color("172942"))
+	draw_rect(Rect2(480,64,3,255),col)
+	for y in range(65,320,9): draw_rect(Rect2(508,y,110,2),Color("29304f"))
+	for i in range(3):
+		var pos=Vector2(490,100+i*80)
+		var active=gate_lights[i]>0
+		draw_rect(Rect2(pos-Vector2(18,19),Vector2(36,38)),COLORS[i],false,2)
+		draw_rect(Rect2(pos-Vector2(11,12),Vector2(22,24)),COLORS[i] if active else Color("14243b"))
+		text_at(["C","R","G"][i],pos-Vector2(2,3),Color("14243b") if active else COLORS[i])
+		text_at(str(gate_order.find(i)+1) if gate==1 else "SYNC",pos+Vector2(30,-3),COLORS[i])
+		if gate==1 and gate_step<3 and gate_order[gate_step]==i: text_at(">",pos-Vector2(33,3),WHITE)
+		if gate==2 and active: draw_rect(Rect2(pos+Vector2(-18,23),Vector2(36*gate_lights[i]/7.5,3)),COLORS[i])
+	text_at("X : CHANGE COLOR",Vector2(330,303),WHITE)
+	if gate==1: text_at("ROSE > CYAN > GOLD",Vector2(330,316),COLORS[2])
+	else: text_at("KEEP ALL RELAYS LIT",Vector2(330,316),COLORS[2])
+
+func draw_boss():
+	var p=boss.pos
+	var col=COLORS[boss.color]
+	for side in [-1,1]:
+		draw_rect(Rect2(p+Vector2(-10,side*51-10),Vector2(75,20)),Color("4c426f"))
+		draw_rect(Rect2(p+Vector2(-26,side*46-8),Vector2(37,16)),Color("8895b9"))
+		draw_rect(Rect2(p+Vector2(-30,side*46-3),Vector2(10,6)),col)
+	draw_rect(Rect2(p+Vector2(-12,-36),Vector2(67,72)),Color("5a507d"))
+	draw_rect(Rect2(p+Vector2(-25,-27),Vector2(67,54)),Color("9395b9"))
+	draw_rect(Rect2(p+Vector2(-32,-20),Vector2(65,40)),Color("33355a"))
+	draw_rect(Rect2(p+Vector2(-36,-13),Vector2(22,26)),WHITE if boss.flash>0 else col)
+	draw_rect(Rect2(p+Vector2(-30,-7),Vector2(10,14)),WHITE)
+	for j in range(4): draw_rect(Rect2(p+Vector2(42,-24+j*16),Vector2(15,7)),Color("232c4d"))
+	# Stepped armor, illuminated conduits and exposed vents keep the silhouette pixel-native.
+	for side in [-1,1]:
+		for j in range(4):
+			draw_rect(Rect2(p+Vector2(j*13-8,side*61-3),Vector2(10,6)),Color("6d6f99"))
+		draw_rect(Rect2(p+Vector2(48,side*53-7),Vector2(18,14)),Color("b6bad2"))
+		draw_rect(Rect2(p+Vector2(50,side*53-3),Vector2(12,6)),Color("3c4168"))
+		draw_rect(Rect2(p+Vector2(-17,side*22-1),Vector2(45,2)),Color("c9d0e0"))
+	for j in range(4):
+		draw_rect(Rect2(p+Vector2(2+j*7,-12),Vector2(3,24)),Color("252a48"))
+		draw_rect(Rect2(p+Vector2(3+j*7,-6),Vector2(1,12)),col.darkened(.5))
+	draw_rect(Rect2(p+Vector2(28,-29),Vector2(8,5)),col)
+	draw_rect(Rect2(p+Vector2(28,24),Vector2(8,5)),col)
+	draw_arc(p,44,PI*.6,PI*1.4,16,col,2)
+	text_at("PRISM SENTINEL / MATCH ITS CORE COLOR",Vector2(193,70),col)
+	draw_rect(Rect2(193,82,360,4),Color("302b4c"))
+	draw_rect(Rect2(193,82,360*maxf(0,boss.hp)/boss.max,4),col)
+
+func draw_menu():
+	text_at("AN ORIGINAL CO-OP ARCADE SHOOTER",Vector2(22,20),DIM)
+	text_at("LOCAL 1-3P",Vector2(552,20),COLORS[0])
+	japanese("F7 音声出力："+AudioServer.output_device.left(52),Vector2(22,43),11,DIM)
+	centered("STARLINK",63,Color("203b59"),6)
+	centered("STARLINK",60,WHITE,6)
+	centered("S Q U A D",112,COLORS[0],3)
+	centered("RUINS OF RESONANCE",146,Color("ffce63"))
+	ship(Vector2(319,181),COLORS[0],2)
+	ship(Vector2(240,180),COLORS[1])
+	ship(Vector2(397,180),COLORS[2])
+	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
+	draw_rect(Rect2(220,239,200,28),COLORS[0])
+	centered("LAUNCH SQUAD",249,Color("0a1830"),1)
+	japanese("左右で人数選択 / A または Enter で出撃",Vector2(189,282),13,WHITE)
+	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+" / BGM "+("OFF" if muted else ("ON" if music.playing else "ERROR"))+" / F6 AUDIO TEST",294,COLORS[2])
+	japanese("F2：十字キー・ボタン設定（クリック可）",Vector2(193,321),12,COLORS[0])
+	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
+	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
+	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
+	text_at("PROTOTYPE 0.5",Vector2(22,345),Color("3e536f"))
+	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
+	text_at("F11 FULLSCREEN",Vector2(540,345),Color("3e536f"))
+	if show_help:
+		draw_rect(Rect2(45,42,550,270),Color("0c162c"))
+		draw_rect(Rect2(45,42,550,270),COLORS[0],false,1)
+		centered("FLIGHT MANUAL",60,COLORS[0],2)
+		var lines=["GAMEPAD : STICK / D-PAD MOVE", "A / RT : SHOT   X : COLOR   B : BURST", "START : PAUSE   LEFT / RIGHT : PLAYER COUNT", "", "P1 : ARROWS    Z SHOT / X COLOR / C BURST", "P2 : W A S D   R SHOT / F COLOR / G BURST", "P3 : I J K L   U SHOT / O COLOR / N BURST", "", "MATCH THE RELAY COLOR AND SHOOT ITS CORE.", "APPROACH A DOWNED ALLY FOR 1.5S TO RESCUE.", "BURST CLEARS BULLETS. ENERGY REFILLS OVER TIME.", "1 HIT = 1 HULL. SOLO RESPAWNS USE RESERVES."]
+		for i in range(lines.size()): text_at(lines[i],Vector2(69,92+i*15),WHITE if i<7 else DIM)
+		centered("H : CLOSE / ENTER : LAUNCH",290,COLORS[2])
+	if notice_time>0: japanese(notice,Vector2(16,60),12,COLORS[2])
+
+func draw_controls():
+	centered("CONTROLLER SETUP",47,COLORS[0],2)
+	japanese("十字キーとボタンを、このコントローラー用に登録します",Vector2(121,85),14)
+	japanese(str(calibration_step+1)+" / 8   "+CONTROL_LABELS[calibration_step]+" を押してください",Vector2(170,137),18,COLORS[2])
+	japanese("スティックではなく、使いたい十字キーを押してください",Vector2(129,169),13,DIM)
+	japanese("1回押したら離し、次の指示に進んでください",Vector2(160,193),13,DIM)
+	if calibration_device>=0:
+		japanese(Input.get_joy_name(calibration_device),Vector2(175,229),14,COLORS[0])
+		text_at("DEVICE "+str(calibration_device+1),Vector2(282,245),DIM)
+	japanese("Esc：キャンセル（元の設定を維持）",Vector2(203,292),13)
+	japanese("登録完了後は、決定ボタンを一度離してください",Vector2(167,318),12,DIM)
+
+func draw_result():
+	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
+	centered("SECTOR CLEAR" if mode=="clear" else "SIGNAL LOST",83,COLORS[0] if mode=="clear" else COLORS[1],3)
+	centered("THE RELAY SINGS AGAIN" if mode=="clear" else "REGROUP. RELOAD. RETURN.",119,DIM)
+	centered("%07d"%score,153,WHITE,4)
+	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
+	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
+	centered("ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ESC : TITLE",289,DIM)

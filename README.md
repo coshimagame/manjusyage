@@ -1,3 +1,7 @@
+# 曼珠沙華（MANJUSHAGE）— 表示移行版0.6
+
+正式名をタイトルとHUDへ反映。既存1面の技術試作で、固有能力と正式8面は未実装。[公式設定](docs/manjushage/INDEX.md)／[差分監査](docs/manjushage/IMPLEMENTATION_AUDIT.md)。保存互換のため内部識別名は旧名のままです。
+
 # 最新：Windows音楽統合版0.4
 
 **ソースから起動する前に `node tools/build_story_music.cjs` を実行し、Godotで再インポートしてください。** 4場面の音楽を更新しending.wavを生成します。配布ZIPは生成済み。[音楽・ボス調整と検証](docs/AUDIO_RELEASE.md)。
