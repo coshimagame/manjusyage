@@ -12,9 +12,15 @@ const FONT = {
 }
 
 var planet_texture: ImageTexture
+const Abilities=preload("res://pilot_abilities.gd")
+const VerticalPassage=preload("res://vertical_passage.gd")
+var vertical=VerticalPassage.new()
+var mixed_scroll=true
+var pilot_offset=0
+var new_music=false
 const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
-var bio_route = false
+var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
 var mode = "menu"
 var count = 1
@@ -101,7 +107,10 @@ func _ready():
 	if cfg.load("user://scores.cfg") == OK:
 		for i in range(3): high_scores[i] = int(cfg.get_value("scores",str(i),0))
 	for arg in OS.get_cmdline_user_args():
+		if arg == "--legacy": bio_route=false
 		if arg == "--bio": bio_route=true
+		if arg.begins_with("--pilot="): pilot_offset=clampi(int(arg.substr(8)),0,2)
+		if arg=="--new-music":new_music=true
 		if arg == "--autotest": auto_test = true
 		if arg.begins_with("--players="): test_count = clampi(int(arg.substr(10)),1,3)
 		if arg.begins_with("--shot="): screenshot_mode = arg.substr(7)
@@ -114,6 +123,8 @@ func _ready():
 	elif screenshot_mode != "" and screenshot_mode != "menu":
 		count = 3
 		start_game()
+		if screenshot_mode == "vertical":
+			bio_route=true;travel=3100;vertical.begin(self);vertical.age=3
 		if screenshot_mode == "gate": begin_gate(1)
 		if screenshot_mode == "boss":
 			travel=4800
@@ -149,6 +160,9 @@ func sfx(name):
 			return
 
 func track(name):
+	if name=="wistful_demo" and not ResourceLoader.exists("res://audio/wistful_demo.wav"):
+		name="ruins" if mode=="play" else "title"
+		tell("NEW MUSIC NOT BUILT / USING ORIGINAL",5)
 	music_name=name
 	music.stream = load("res://audio/"+name+".wav")
 	if music.stream == null:
@@ -239,15 +253,17 @@ func tell(message, duration = 3.0):
 
 func start_game():
 	bio.reset()
+	vertical.reset()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
 	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 1.5; score = 0
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
+	for i in range(count): Abilities.initialize(players[i],(i+pilot_offset)%3)
 	mode = "play"
 	show_help = false
-	track("ruins")
+	track("wistful_demo" if new_music else "ruins")
 	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
 
 func button_edge(device, button):
@@ -263,6 +279,12 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key = event.physical_keycode
+		if key==KEY_F4 and mode=="menu": pilot_offset=(pilot_offset+1)%3; return
+		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
+		if key==KEY_F8 and mode=="menu":
+			new_music=not new_music
+			track("wistful_demo" if new_music else "title")
+			return
 		if key==KEY_F3 and mode=="menu":
 			bio_route=not bio_route
 			return
@@ -319,7 +341,9 @@ func change_color(i):
 
 func burst(i):
 	var p = players[i]
-	if p.down > 0 or p.charge < 100: return
+	if p.down>0: return
+	if bio_route and p.character==2 and Abilities.eat(self,p): return
+	if p.charge<100: return
 	p.charge = 0; p.burst = .55; p.inv = 1
 	shots.clear()
 	for e in enemies: e.hp -= 5
@@ -349,6 +373,8 @@ func _process(dt):
 		if mode == "menu":
 			if left: count=maxi(1,count-1)
 			if right: count=mini(3,count+1)
+			if x: pilot_offset=(pilot_offset+1)%3
+			if b: bio_route=not bio_route
 			if start or a: start_game()
 		elif mode == "play":
 			if start: mode="pause"; notice="FLIGHT PAUSED"
@@ -391,6 +417,10 @@ func movement(i):
 
 func update_game(dt):
 	elapsed += dt
+	if bio_route and mixed_scroll and not vertical.done and travel>=3100 and gate==0 and boss.is_empty():
+		if not vertical.active: vertical.begin(self)
+		vertical.update(self,dt)
+		return
 	notice_time = maxf(0,notice_time-dt)
 	gate_flash = maxf(0,gate_flash-dt)
 	combo_time -= dt
@@ -399,6 +429,7 @@ func update_game(dt):
 	if bio_route: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
+		Abilities.digest(p,dt)
 		p.cool-=dt; p.inv-=dt; p.burst=maxf(0,p.burst-dt)
 		p.charge=minf(100,p.charge+dt*2)
 		if p.down>0:
@@ -439,7 +470,9 @@ func update_game(dt):
 		p.pos.y=clampf(p.pos.y,48,320)
 		if input[1] and p.cool<=0:
 			p.cool=.13
-			bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i})
+			var velocities=Abilities.velocities(p,Vector2.RIGHT,enemies) if bio_route else [Vector2(390,0)]
+			for velocity in velocities:
+				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":Abilities.damage(p,elapsed) if bio_route else 1.0})
 			if i==0: sfx("shot")
 	var alive=players.any(func(p): return p.down==0)
 	if not alive and reserves==0:
@@ -458,7 +491,7 @@ func update_game(dt):
 		if gate==2 and gate_lights.all(func(t): return t>0): open_gate()
 	if not boss.is_empty(): update_boss(dt)
 	for bullet in bullets:
-		bullet.pos.x+=dt*390
+		bullet.pos+=dt*bullet.get("vel",Vector2(390,0))
 		if gate>0 and bullet.pos.x>472:
 			for i in range(3):
 				if absf(bullet.pos.y-(100+i*80))<17:
@@ -471,13 +504,13 @@ func update_game(dt):
 			if gate==1 and gate_step>=3: open_gate()
 		for e in enemies:
 			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
-				e.hp-=1; e.flash=.08; bullet.pos.x=800; sfx("hit")
+				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
 		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
 		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
 			if bullet.color==boss.color and (not bio_route or bio.exposed()):
-				boss.hp-=1; boss.flash=.07; sfx("hit")
+				boss.hp-=bullet.get("damage",1.0); boss.flash=.07; sfx("hit")
 			bullet.pos.x=800
-	bullets=bullets.filter(func(b):return b.pos.x<700)
+	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
 		e.pos.x-=e.speed*dt
@@ -486,10 +519,13 @@ func update_game(dt):
 		if e.cool<=0 and e.pos.x<610:
 			e.cool=2.5
 			var target=players[wave_id%count].pos
-			shots.append({"pos":e.pos,"vel":(target-e.pos).normalized()*85,"r":3})
+			for angle in ([-.2,0,.2] if bio_route and e.get("technique","")=="fan" else [0]):
+				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3})
 		for p in players:
 			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
 		if e.hp<=0:
+			for p in players:
+				if p.down==0:p.experience+=1
 			explode(e.pos,COLORS[1],14)
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
 			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
@@ -514,7 +550,7 @@ func spawn_wave():
 	wave_id+=1
 	var base=85+(wave_id*61)%190
 	for j in range(3+count):
-		enemies.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0})
+		enemies.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":"fan" if wave_id%2==0 else "aimed"})
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
@@ -713,10 +749,17 @@ func _draw():
 	if mode=="menu":
 		draw_menu()
 		return
+	if vertical.active and mode in ["play","pause","over"]:
+		vertical.draw(self)
+		draw_hud()
+		if mode=="pause": centered("PAUSED / START TO RESUME",185,WHITE,2)
+		if mode=="over": draw_result()
+		return
 	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
 	if bio_route: bio.draw_organs(self)
 	if gate>0: draw_gate()
 	for e in enemies:
+		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)
 		sprite(FOE,e.pos-Vector2(16,10),[Color("3c2c59"),Color("9379b8"),Color("d871a4"),WHITE if e.flash>0 else Color("ffce63")],2)
 	for b in bullets:
 		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
@@ -766,7 +809,8 @@ func draw_hud():
 		var p=players[i]
 		var x=12+i*138
 		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
-		japanese(PILOT_NAMES[i],Vector2(x,43),10,WHITE)
+		japanese(PILOT_NAMES[p.character],Vector2(x,43),10,WHITE)
+		if bio_route: japanese(Abilities.label(p,elapsed),Vector2(x+48,43),9,COLORS[i])
 		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
 		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
 		draw_rect(Rect2(x,22,110,3),Color("26314b"))
@@ -841,7 +885,8 @@ func draw_menu():
 	japanese("曼珠沙華",Vector2(224,103),48,Color("203b59"))
 	japanese("曼珠沙華",Vector2(221,100),48,WHITE)
 	centered("MANJUSHAGE",116,COLORS[0],3)
-	japanese("コルミィ / ジヨーザ / マフィオ",Vector2(207,155),13,COLORS[2])
+	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
+	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
 	ship(Vector2(319,181),COLORS[0],2)
 	ship(Vector2(240,180),COLORS[1])
 	ship(Vector2(397,180),COLORS[2])
@@ -854,7 +899,7 @@ func draw_menu():
 	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
 	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
 	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
-	text_at("PROTOTYPE 0.7",Vector2(22,345),Color("3e536f"))
+	text_at("PROTOTYPE 0.8",Vector2(22,345),Color("3e536f"))
 	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
 	text_at("F11 FULLSCREEN",Vector2(540,345),Color("3e536f"))
 	if show_help:
@@ -864,6 +909,7 @@ func draw_menu():
 		var lines=["GAMEPAD : STICK / D-PAD MOVE", "A / RT : SHOT   X : COLOR   B : BURST", "START : PAUSE   LEFT / RIGHT : PLAYER COUNT", "", "P1 : ARROWS    Z SHOT / X COLOR / C BURST", "P2 : W A S D   R SHOT / F COLOR / G BURST", "P3 : I J K L   U SHOT / O COLOR / N BURST", "", "MATCH THE RELAY COLOR AND SHOOT ITS CORE.", "APPROACH A DOWNED ALLY FOR 1.5S TO RESCUE.", "BURST CLEARS BULLETS. ENERGY REFILLS OVER TIME.", "1 HIT = 1 HULL. SOLO RESPAWNS USE RESERVES."]
 		for i in range(lines.size()): text_at(lines[i],Vector2(69,92+i*15),WHITE if i<7 else DIM)
 		centered("H : CLOSE / ENTER : LAUNCH",290,COLORS[2])
+		if bio_route: japanese("マフィオ：弱った輪付きの敵へ近づき、C / Bで捕食（40ゲージ）",Vector2(67,307),11,COLORS[2])
 	if notice_time>0: japanese(notice,Vector2(16,60),12,COLORS[2])
 
 func draw_controls():

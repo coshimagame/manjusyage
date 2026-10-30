@@ -4,8 +4,8 @@ extends Node2D
 const PAGES = [
 	["PROLOGUE / 01", "星が消えた夜", "空が裂けた夜、宇宙はひとつではなくなった。\n昨日まで隣にあった星が、別の世界へ消えていった。"],
 	["PROLOGUE / 02", "八つの境界", "重力も、光の速さも、世界ごとに違っていた。\n帰る道を探すには、八つの境界を越えるしかない。"],
-	["PROLOGUE / 03", "覚えている敵", "境界の番人は、私たちを知っていた。\nまだ出会っていないはずなのに。"],
-	["PROLOGUE / 04", "消えなかった記憶", "『その武器で、また私を倒すつもりか。』\n繰り返す世界で、敵だけが前の戦いを覚えていた。"],
+	["PROLOGUE / 03", "後席から見た空", "それぞれの世界で、ムゥの後席に乗って操縦を学んだ。\nやるっきゃない。そう思いながら、少しずつ飛べるようになった。"],
+	["PROLOGUE / 04", "似た機体、違う力", "よく似た機体から、異なる現象が生まれていた。\n三つの世界の法則が、この空で重なり始める。"],
 	["PROLOGUE / 05", "最後の出撃", "世界を渡るたび、シールドは少しずつ弱くなる。\nそれでも、帰る場所をあきらめるわけにはいかない。"],
 	["PROLOGUE / 06", "三つの光", "三機の光が、暗闇へ走り出す。\n今度こそ、この戦いの向こうへ。"]
 ]
@@ -33,6 +33,7 @@ func _ready():
 			finish()
 			return
 		if arg == "--story-shot": test_shot = true; page = 1; age = 4.0
+		if arg == "--training-shot": test_shot=true;page=2;age=4.0
 	queue_redraw()
 
 func _loop_music():
@@ -116,6 +117,7 @@ func _draw():
 			points.append(Vector2(i*20,220+layer*13-sin(i*.8+layer)*15-sin(i*1.9)*8))
 		points.append(Vector2(640,360)); points.append(Vector2(0,360))
 		draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
+	if page in [2,3]: draw_training()
 	if page>=4:
 		for i in range(3):
 			var pos=Vector2(95+i*41+sin(clock)*4,130+i*21)
@@ -135,3 +137,23 @@ func _draw():
 		draw_string(font,Vector2(30,307+i*21),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("d8e5ee"))
 	draw_string(font,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
 	draw_string(font,Vector2(574,350),str(page+1)+" / 6",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
+
+
+func draw_training():
+	# MOV-002: common tandem hull, no unapproved human appearance or gender assignment.
+	for i in range(3):
+		var pos=Vector2(floor(85+age*13+i*142),103+i*37)
+		var col=[Color("f4ac91"),Color("94c9ed"),Color("efdc9d")][i]
+		for y in range(-8,9):
+			var width=40-abs(y)*3
+			draw_rect(Rect2(pos.x-width/2,pos.y+y,width,1),Color("a8bdca") if y<0 else Color("4e607e"))
+		draw_rect(Rect2(pos+Vector2(-12,-13),Vector2(7,8)),col)
+		draw_rect(Rect2(pos+Vector2(4,-13),Vector2(7,8)),Color("e8eddd"))
+		draw_rect(Rect2(pos+Vector2(-30,-2),Vector2(12+int(clock*10)%4,4)),col)
+		if page==2:
+			draw_string(font,pos+Vector2(-28,27),["コルミィ","ジヨーザ","マフィオ"][i],HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("e5e8eb"))
+		else:
+			for j in range(4):
+				var offset=Vector2(38+j*11,sin(clock*4+j)*(8 if i==0 else 2))
+				if i==2: offset.x=75-j*11-fposmod(clock*20,11)
+				draw_rect(Rect2(pos+offset,Vector2(3,2)),col)
