@@ -45,3 +45,7 @@
 
 
 - [MU_FIRST_ENDING.md](MU_FIRST_ENDING.md) — 1周目のムゥ死亡理由・エンディング会話・2周目救出の構造（**AI脚本提案、ユーザー承認待ち**）。
+
+## 2026-10-30 音楽担当・新規デモ
+- [SOUND_DESIGN.md](SOUND_DESIGN.md) — **ゲームサウンドクリエイター役、哀愁ある8bit/FM音源風のオリジナル曲、全4周回での主題変奏、作曲と効果音の制作・検収ルール**。
+- 新曲「戻れない空へ」（仮）の作曲・合成スクリプト原本：[`tools/render_wistful_stage.py`](../../tools/render_wistful_stage.py)（GitHub保存、WAV再生成可）。音声プレビューは今回のチャットで配布。既存音楽の差し替えやゲーム内音声実装は未実施。
