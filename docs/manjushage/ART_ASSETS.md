@@ -70,3 +70,7 @@ TXT-002：game.gdのクリア短文『赤い光の向こうに、道が続いて
 BOOK-002：books/perfect-guide/supplements/source-expansion-v0.2/build_book.pyとmanuscript.json、30頁、Codex編集増補、2026-10-30、レビュー候補。既刊初稿v0.1を保持。
 IMG-005：books/perfect-guide/supplements/source-expansion-v0.2/bio-boss-v0.7.png、640×360、Godot実行画像、2026-10-30、試作記録。正式原画ではない。
 SRC-001：docs/manjushage/sources/2026-10-30-conversation-original.txt、ユーザー提供会話原文。旧名・旧設定を含む参照資料。本文に旧名があっても現行名称には採用しない。
+
+
+## 2026-10-30 SHIP-001 参考方針（画像原本なし）
+ユーザー発案：**別世界線の同じ設計者によるよく似た機体／違う物理現象**。以前の「完全別設計」「3機のシルエットを全く違える」は採用確定ではなく、現行の比較図では避ける。正式な共通機体基礎図、各世界線の差分図、物理現象の連続コマは**未制作**。作成時に原本ID・制作日・版・採否・著作権を登録する。参照：[SHIP_LINEAGE.md](SHIP_LINEAGE.md)。
