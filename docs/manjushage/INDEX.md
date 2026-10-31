@@ -62,3 +62,9 @@
 ## 2026-10-31 HUD・アイテム・弾幕／ロゴ・カセットラベル風美術
 - [HUD_UI_DIRECTION.md](HUD_UI_DIRECTION.md) — ユーザー要望「美しく散る弾幕」「視認性」「アイテムとステータスUIの品質向上」の実装検討仕様。現行 `game.gd` の仮HUDと既存2種アイテムを基準に、1〜3人プレイを検証する。
 - [LOGO_LABEL_DIRECTION.md](LOGO_LABEL_DIRECTION.md) — ユーザー要望「スーパーファミコンのカセットラベルのように豪華なロゴ」。完全オリジナルの16-bit風ラベルアート／タイトル画面用ロゴの制作ブリーフ。実装・最終採用は未了。
+
+
+## 2026-10-31 全部仮組み→ブラッシュアップ＋名作STG研究
+- [PROVISIONAL_VISUAL_BIBLE_V01.md](PROVISIONAL_VISUAL_BIBLE_V01.md) — 正式な性別と性格を守りつつ、未決の髪型・衣装・機体外観・各世界線の花色・HUD・タイトルロゴまで、**AI仮案で統一した v0.1**。レビューごとに変更可能。
+- [CLASSIC_STG_INSPIRATIONS_V01.md](CLASSIC_STG_INSPIRATIONS_V01.md) — 沙羅曼蛇／ツインビー／R-TYPE／エリア88の設計の長所を研究し、世界線・花晶・護り花弁・ムゥ開発へ**独自の仮機能**として置き換える。原作素材や旋律のコピーはしない。
+- [NEXT_ACTION.md](NEXT_ACTION.md) — 上記をGodotの実ゲームへ段階実装し、画像比較・実動作テスト・コミットまで進める作業キュー。
