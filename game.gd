@@ -371,7 +371,7 @@ func _input(event):
 				status_slot=(status_slot+players.size()-1)%maxi(1,players.size()); archive_page=false
 			elif key in [KEY_RIGHT,KEY_D]:
 				status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
-			elif key==KEY_E and players[status_slot].character==2:
+			elif key==KEY_E and players[status_slot].character==2 and briefing_progress.feature_available("mafio"):
 				archive_page=not archive_page
 			elif key==KEY_UP:
 				archive_cursor=maxi(0,archive_cursor-1)
@@ -554,7 +554,7 @@ func _process(dt):
 				status_slot=(status_slot+players.size()-1)%maxi(1,players.size());archive_page=false
 			elif right:
 				status_slot=(status_slot+1)%maxi(1,players.size());archive_page=false
-			elif x and players[status_slot].character==2: archive_page=not archive_page
+			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
 			if start or a: open_briefing(briefing_progress.next_briefing_stage())
@@ -1388,7 +1388,7 @@ func draw_status_screen():
 			Vector2(386+h*18,14),Vector2(378+h*18,23)
 		]),c)
 	draw_line(Vector2(22,41),Vector2(617,41),accent,2)
-	if archive_page and char_id==2:
+	if archive_page and char_id==2 and briefing_progress.feature_available("mafio"):
 		draw_mafio_archive()
 	elif char_id==0:
 		draw_cormii_status(p)
@@ -1420,7 +1420,9 @@ func draw_cormii_status(p):
 		text_at(str(chance)+"%",Vector2(x+63,169),Color("fff2de"),2)
 	japanese("おみくじは再抽選！ 運気が下がることもある",Vector2(33,293),14,WHITE)
 	var log: Array=p.get("fortune_history",[])
-	if log.size()>0:
+	if not briefing_progress.feature_available("cormii"):
+		japanese("ツイてる日記：6面からムゥの発明で解放",Vector2(33,316),14,Color("ffe6aa"))
+	elif log.size()>0:
 		var last: Dictionary=log[log.size()-1]
 		japanese("最新："+str(last.event)+"  "+str(last.before)+"% → "+str(last.after)+"%",Vector2(33,316),14,Color("ffe6aa"))
 	else:
@@ -1443,7 +1445,10 @@ func draw_jiyoza_status(p):
 	draw_line(Vector2(449,227),Vector2(561,227),Color("7ddfeb"),1)
 	draw_line(Vector2(505,168),Vector2(505,286),Color("7ddfeb"),1)
 	japanese("取得経験 "+str(p.experience),Vector2(56,283),15,WHITE)
-	japanese("記録した敵種 "+str(enemy_analysis.count_observed()),Vector2(298,299),12,Color("b0e8f5"))
+	if briefing_progress.feature_available("jiyoza"):
+		japanese("記録した敵種 "+str(enemy_analysis.count_observed()),Vector2(298,299),12,Color("b0e8f5"))
+	else:
+		japanese("解析履歴：5面から解放",Vector2(298,299),12,Color("b0e8f5"))
 	japanese("解析ゲージ "+str(p.analysis_charge)+"%   使用 "+str(p.analysis_uses)+"/2",Vector2(57,326),13,Color("b9f4ff"))
 	japanese("解析精度と出力が着実に上がる",Vector2(58,306),14,Color("a9d8e7"))
 
@@ -1461,8 +1466,11 @@ func draw_mafio_status(p):
 	japanese("現在の技",Vector2(61,127),15,WHITE)
 	japanese("基本弾" if str(p.learned)=="none" else ("拡散弾" if str(p.learned)=="fan" else "狙い撃ち"),Vector2(61,170),20,Color("ffe5b4"))
 	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(382,150),17,WHITE)
-	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(365,213),15,WHITE)
-	text_at("E / X : ENEMY ARCHIVE",Vector2(344,262),Color("d5baf6"))
+	if briefing_progress.feature_available("mafio"):
+		japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(365,213),15,WHITE)
+		text_at("E / X : ENEMY ARCHIVE",Vector2(344,262),Color("d5baf6"))
+	else:
+		japanese("ごちそうさま図鑑：4面から解放",Vector2(365,213),12,WHITE)
 	japanese("敵の技を食べて、自分の力へ変える",Vector2(150,316),14,WHITE)
 
 func draw_mafio_archive():
