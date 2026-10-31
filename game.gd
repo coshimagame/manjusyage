@@ -480,8 +480,14 @@ func update_game(dt):
 		if input[1] and p.cool<=0:
 			p.cool=.13
 			var velocities=Abilities.velocities(p,Vector2.RIGHT,enemies) if bio_route else [Vector2(390,0)]
+			# One chance roll per volley, shared by all projectiles. Works in both routes.
+			var power=1.0
+			if p.character==0:
+				power=Abilities.damage(p,elapsed,randf())
+			elif bio_route:
+				power=Abilities.damage(p,elapsed)
 			for velocity in velocities:
-				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":Abilities.damage(p,elapsed) if bio_route else 1.0})
+				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":power,"grade":p.last_power_grade if p.character==0 else "normal"})
 			if i==0: sfx("shot")
 	var alive=players.any(func(p): return p.down==0)
 	if not alive and reserves==0:
@@ -537,7 +543,12 @@ func update_game(dt):
 				if p.down==0:p.experience+=1
 			explode(e.pos,COLORS[1],14)
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
-			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
+			if randi()%4==0:
+				var kind=0 if randi()%4==0 else 1
+				# Rare, Cormii-only pickup; stop dropping it once the core is maxed.
+				var needs_stability=players.any(func(p): return p.character==0 and p.stability<3)
+				if needs_stability and kind==1 and randi()%3==0: kind=2
+				pickups.append({"pos":e.pos,"kind":kind})
 	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
 	for shot in shots:
 		shot.pos+=shot.vel*dt
@@ -549,9 +560,16 @@ func update_game(dt):
 		item.pos.x-=dt*40
 		for p in players:
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
-				if item.kind==0: p.hp=mini(4,p.hp+1)
-				else: p.charge=minf(100,p.charge+25)
-				explode(item.pos,Color("ffb7a2") if item.kind==0 else Color("9ee8ff"),8)
+				# Stability core belongs to Cormii; other pilots must not consume it.
+				if item.kind==2 and p.character!=0: continue
+				if item.kind==0:
+					p.hp=mini(4,p.hp+1)
+				elif item.kind==1:
+					p.charge=minf(100,p.charge+25)
+				else:
+					p.stability=mini(3,p.stability+1)
+					tell("COR MII / STABILITY "+str(p.stability)+"/3",2.0)
+				explode(item.pos,Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff")),11 if item.kind==2 else 8)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0: finish(true)
@@ -769,9 +787,20 @@ func background():
 # HP and energy have distinct silhouettes, not tiny lettered boxes.
 func draw_collectible(item):
 	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
-	var image=artwork.texture("item_hp" if item.kind==0 else "item_energy")
+	var image=artwork.texture("item_stability" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy"))
 	if image!=null:
 		draw_texture_rect(image,Rect2(p-Vector2(10,10),Vector2(20,20)),false)
+		return
+	if item.kind==2:
+		# Gold hexagonal probability core: two counter-rotating probability rings.
+		var ring=.15*sin(clock*4.0)
+		draw_circle(p,12,Color(1,.78,.25,.12))
+		draw_arc(p,9,ring,PI+ring,14,Color("ffe2a1"),1.5)
+		draw_arc(p,9,PI+ring,TAU+ring,14,Color("a6eaff"),1.5)
+		draw_colored_polygon(PackedVector2Array([p+Vector2(-4,-7),p+Vector2(4,-7),p+Vector2(8,0),p+Vector2(4,7),p+Vector2(-4,7),p+Vector2(-8,0)]),Color("a97630"))
+		draw_colored_polygon(PackedVector2Array([p+Vector2(-3,-5),p+Vector2(3,-5),p+Vector2(6,0),p+Vector2(3,5),p+Vector2(-3,5),p+Vector2(-6,0)]),Color("fff0bc"))
+		draw_rect(Rect2(p+Vector2(-1,-4),Vector2(2,8)),Color("8ecfdf"))
+		draw_rect(Rect2(p+Vector2(-4,-1),Vector2(8,2)),Color("8ecfdf"))
 		return
 	var heart=item.kind==0
 	var outline=Color("3c152f") if heart else Color("112b4e")
@@ -847,8 +876,20 @@ func _draw():
 		else:
 			sprite(FOE_BLOOM if is_fan else FOE_LANCE,e.pos-Vector2(16,9),[Color("22213d"),Color("5e7390") if not is_fan else Color("8f456c"),Color("c9a5b3"),WHITE if e.flash>0 else Color("ffc37d")],2)
 	for b in bullets:
-		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
-		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
+		var tier=b.get("grade","normal")
+		if tier=="jackpot":
+			# The reward remains unmistakable, even at 640x360.
+			draw_rect(Rect2(b.pos.x-16,b.pos.y-4,25,8),Color("ea4778"))
+			draw_rect(Rect2(b.pos.x-12,b.pos.y-2,23,4),Color("ffe59b"))
+			draw_rect(Rect2(b.pos.x+3,b.pos.y-1,7,2),WHITE)
+			draw_rect(Rect2(b.pos.x-7,b.pos.y-7,3,2),Color("ffb6be"))
+			draw_rect(Rect2(b.pos.x-3,b.pos.y+5,3,2),Color("ffb6be"))
+		elif tier=="low":
+			draw_rect(Rect2(b.pos.x-4,b.pos.y-1,7,2),COLORS[b.color])
+			draw_rect(Rect2(b.pos.x+1,b.pos.y,3,1),WHITE)
+		else:
+			draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
+			draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
 	for s in shots:
 		# Dangerous projectile: angular silhouette and bright core;
 		# harmless petals are thinner, dimmer and fade.
@@ -918,6 +959,8 @@ func draw_hud():
 		draw_rect(Rect2(x,3,28,2),accent)
 		text_at("P"+str(i+1),Vector2(x+5,10),accent)
 		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
+		if p.character==0 and p.down<=0 and p.stability>0:
+			text_at("S"+str(p.stability),Vector2(x+93,10),Color("ffe8af"))
 		if p.character==2 and p.down<=0:
 			# Hair motif / tech digestion marker: left self, right other.
 			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
