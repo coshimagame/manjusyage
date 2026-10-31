@@ -18,10 +18,11 @@ jobs:
       - name: Install display and Godot 4.6 Standard
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libgl1 libasound2t64 unzip
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libgl1 libasound2t64 unzip fonts-noto-cjk
           curl -fLsS --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp
           sudo install -m755 /tmp/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
+          fc-cache -f
           godot --version
       - name: Import and test all scripts in the game
         run: |
@@ -34,7 +35,7 @@ jobs:
           for mode in menu boss vertical briefing status; do
             echo "CAPTURE $mode"
             timeout 70s xvfb-run -a -s "-screen 0 1280x720x24" \
-              godot --path . res://main.tscn --rendering-method gl_compatibility -- --bio --shot="$mode" \
+              godot --path . res://main.tscn --rendering-method gl_compatibility --audio-driver Dummy -- --bio --shot="$mode" \
               >"/tmp/screenshot-$mode.log" 2>&1 || true
             if [ -s "$mode.png" ]; then
               cp "$mode.png" "docs/screenshots/latest/$mode.png"
