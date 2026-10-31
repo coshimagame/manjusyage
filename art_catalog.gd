@@ -6,7 +6,7 @@ const SLOTS = [
 	"title_logo", "title_backdrop",
 	"ship_cormii", "ship_jiyoza", "ship_mafio",
 	"enemy_lance", "enemy_bloom",
-	"item_hp", "item_energy",
+	"item_hp", "item_energy", "item_stability",
 	"bio_backdrop", "boss_body"
 ]
 var images: Dictionary = {}
