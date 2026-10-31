@@ -30,8 +30,12 @@ func update(g,dt):
 	spawn-=dt
 	if spawn<=0:
 		spawn=1.4; wave+=1
+		var wave_group: Array=[]
+		var pattern="fan" if wave%2==0 else "aimed"
 		for j in range(3):
-			g.enemies.append({"pos":Vector2(110+fposmod(wave*71+j*143,430),40),"hp":3.0,"cool":1.2,"technique":"fan" if wave%2==0 else "aimed"})
+			wave_group.append({"pos":Vector2(110+fposmod(wave*71+j*143,430),40),"hp":3.0,"cool":1.2,"technique":pattern})
+		g.enemy_analysis.mark_new_group(wave_group,"prototype/"+pattern)
+		g.enemies.append_array(wave_group)
 	for i in range(g.count):
 		var p=g.players[i]
 		p.inv-=dt; p.cool-=dt; p.burst=maxf(0,p.burst-dt); p.charge=minf(100,p.charge+dt*2)
@@ -50,8 +54,9 @@ func update(g,dt):
 		p.pos=p.pos.clamp(Vector2(65,100),Vector2(575,315))
 		if input[1] and p.cool<=0:
 			p.cool=.13
+			var power=g.Abilities.damage(p,g.elapsed,randf()) if p.character==0 else g.Abilities.damage(p,g.elapsed)
 			for velocity in g.Abilities.velocities(p,Vector2.UP,g.enemies):
-				g.bullets.append({"pos":p.pos+Vector2(0,-18),"vel":velocity,"color":p.color,"owner":i,"damage":g.Abilities.damage(p,g.elapsed)})
+				g.bullets.append({"pos":p.pos+Vector2(0,-18),"vel":velocity,"color":p.color,"owner":i,"damage":power,"grade":p.last_power_grade if p.character==0 else "normal"})
 			if i==0:g.sfx("shot")
 	for b in g.bullets:
 		b.pos+=b.vel*dt
@@ -64,7 +69,7 @@ func update(g,dt):
 			e.cool=2.1
 			var direction=(g.players[wave%g.count].pos-e.pos).normalized()
 			for angle in ([-.2,0,.2] if e.technique=="fan" else [0]):
-				g.shots.append({"pos":e.pos,"vel":direction.rotated(angle)*80,"r":3})
+				g.shots.append({"pos":e.pos,"vel":direction.rotated(angle)*80,"r":3,"analysis_eligible":e.get("analysis_eligible",false),"source_id":e.get("analysis_id","")})
 		for p in g.players:
 			if p.down==0 and e.pos.distance_to(p.pos)<20:g.hurt(p)
 		if e.hp<=0:
