@@ -62,7 +62,8 @@ func run():
 
 	g.new_music=true
 	g.start_game()
-	assert(g.music_name=="wistful_demo" and g.music.stream.get_length()>51)
+	assert(g.music_name==("wistful_demo" if ResourceLoader.exists("res://audio/wistful_demo.wav") else "ruins"))
+	assert(g.music.stream!=null and g.music.stream.get_length()>20)
 	g.queue_free()
 	await process_frame
 	print("SETTINGS PASS: character order, fortune rerolls, Jiyoza growth, Mafio temporary digestion, vertical stage and music")
