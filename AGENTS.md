@@ -57,3 +57,11 @@ Read `docs/manjushage/HUD_UI_DIRECTION.md` and `docs/manjushage/LOGO_LABEL_DIREC
 
 ## 2026-10-31 User direction: build provisional versions, study classic shmups
 The user explicitly requests **coherent provisional implementations even for undecided art**, then repeated refinement. Read `docs/manjushage/PROVISIONAL_VISUAL_BIBLE_V01.md`, `CLASSIC_STG_INSPIRATIONS_V01.md`, and `NEXT_ACTION.md`. Inspirations from Salamander, TwinBee, R-TYPE and Area 88 should be converted into **distinctive original mechanics and aesthetics** rather than copying their protected assets, distinctive sprite/ship shapes, stage patterns, text or music. Characters: **コルミィ energetic girl / ジヨーザ boy / マフィオ tomboyish girl**. Four worldlines change the spider-lily color (crimson, silver-white, blue-violet and gold are **provisional choices**, not approved colors). Prototype/approve/implement/test are separate states. Develop actual Godot gameplay in small measured milestones instead of stopping at documents.
+
+
+## 2026-10-31 / ART SLOT v0.1: 好きなChatGPT絵をPNGで差し替える（ユーザー直接指示）
+ユーザー：「正式でなくても仮で全部入れて磨く」「グラフィックは差し替えすぐできるでしょ？」「あなたのグラフィック結構いいのあるからそれでいれれるように」。`art_catalog.gd`、`art/active/README.md`、`tests/test_art_slots.gd` を追加し、`game.gd`・`biological_stage.gd` へ**11個のPNGスロット**を実装：赤×白銀タイトルロゴ／タイトル背景／コルミィ・ジヨーザ・マフィオ各機体／狙撃・扇状敵／HP・エネルギーアイテム／生体ステージ遠景／ボス本体。各PNGが**存在すれば描画に利用し、なければ現行Godotでの手描きへフォールバック**。ステージ危険壁やボス弱点はPNGの上にゲーム処理で表示し、当たり判定や保存データ・既存機能は変更しない。Godot4.6のインポート／実画面・1〜3人テストは**未実施**。
+
+過去の生成コンセプトボードには実在メーカーの商標／旧名・性別の不整合があったため**丸ごと実装しない**。ユーザー選好の赤×白銀タイトル文字のみ抽出した試用ロゴと、前に好評だった緑の回復アイコン／青い結晶のエネルギーアイコンは**このChatGPT会話でPNGの差し替え体験用ZIP**として準備。**ZIPの画像バイナリはGitHubリポジトリには未登録**であり、Codexから自動的に参照できない。Godotで表示するときはユーザーがZIP内の `art/active/*.png` を最新版展開フォルダへコピーする必要あり。試作採用は「正式キャラ外観の採用」ではない。
+
+**Codexの次の一手**：GitHub最新版で `godot --headless --editor --path . --import --quit`、`tests/test_art_slots.gd`、旧1〜3P自動攻略を実行してエラーを直す。後日PNGが揃えば画像ごとに追加し、実スクリーンショットで視認性・比率・性能をレビュー。READMEに従って差し替えだけで済む構造を維持。既存ユーザーPCの古いZIP展開版に自動反映されないことも忘れず案内。
