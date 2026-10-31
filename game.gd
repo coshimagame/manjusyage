@@ -405,7 +405,8 @@ func burst(i):
 # SPECIAL ANALYSIS: only previously observed normal enemies, never bosses.
 # Enemy-bullet tags travel from the source and are checked independently.
 func special_analysis(p):
-	if p.charge<100: return
+	# Never spend ordinary, time-regenerated burst energy.
+	if p.analysis_charge<100 or p.analysis_uses>=2: return
 	var affected=0
 	for e in enemies:
 		if e.get("analysis_eligible",false) and float(e.get("hp",0.0))>0: affected+=1
@@ -414,7 +415,8 @@ func special_analysis(p):
 	if affected==0:
 		tell("UNKNOWN ENEMY / BOSS IMMUNE",2.2)
 		return
-	p.charge=0
+	p.analysis_charge=0
+	p.analysis_uses+=1
 	p.burst=.48
 	p.inv=maxf(float(p.inv),.65)
 	analysis_flash=.56
@@ -625,6 +627,9 @@ func update_game(dt):
 		for p in players:
 			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
 		if e.hp<=0:
+			# Jiyoza: only dedicated marked enemies drop analysis shards.
+			if e.get("scan_crystal",false) and players.any(func(p):return p.character==1 and p.analysis_uses<2):
+				pickups.append({"pos":e.pos,"kind":3})
 			for p in players:
 				if p.down==0:p.experience+=1
 			explode(e.pos,COLORS[1],14)
@@ -648,14 +653,18 @@ func update_game(dt):
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
 				# Stability core belongs to Cormii; other pilots must not consume it.
 				if item.kind==2 and p.character!=0: continue
+				if item.kind==3 and (p.character!=1 or p.analysis_uses>=2 or p.analysis_charge>=100): continue
 				if item.kind==0:
 					p.hp=mini(4,p.hp+1)
 				elif item.kind==1:
 					p.charge=minf(100,p.charge+25)
+				elif item.kind==3:
+					p.analysis_charge=mini(100,int(p.analysis_charge)+25)
+					if p.analysis_charge>=100: tell("SPECIAL ANALYSIS / READY",2.0)
 				else:
 					p.stability=mini(3,p.stability+1)
 					tell("COR MII / STABILITY "+str(p.stability)+"/3",2.0)
-				explode(item.pos,Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff")),11 if item.kind==2 else 8)
+				explode(item.pos,Color("96faff") if item.kind==3 else (Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff"))),11 if item.kind in [2,3] else 8)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0: finish(true)
@@ -666,7 +675,7 @@ func spawn_wave():
 	var pattern="fan" if wave_id%2==0 else "aimed"
 	var group: Array=[]
 	for j in range(3+count):
-		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern})
+		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern,"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
 	enemy_analysis.mark_new_group(group,"prototype/"+pattern)
 	enemies.append_array(group)
 
