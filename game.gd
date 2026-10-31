@@ -146,8 +146,11 @@ func _ready():
 			begin_boss()
 		if screenshot_mode=="status": mode="status"
 		if screenshot_mode=="archive":
-			mode="status"; status_slot=players.find_custom(func(p):return p.character==2)
-			if status_slot<0: status_slot=0
+			mode="status"; status_slot=0
+			for j in range(players.size()):
+				if players[j].character==2:
+					status_slot=j
+					break
 			archive_page=players[status_slot].character==2
 		for pilot in players: pilot.inv=0
 	queue_redraw()
@@ -1175,7 +1178,7 @@ func draw_status_screen():
 	draw_rect(Rect2(0,0,640,360),bg)
 	draw_rect(Rect2(0,0,640,4),accent)
 	for j in range(21):
-		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent,0.045),1.0)
+		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent.r,accent.g,accent.b,.045),1.0)
 	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
 	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
 	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
@@ -1229,7 +1232,7 @@ func draw_jiyoza_status(p):
 	for n in range(12):
 		draw_rect(Rect2(55+n*42,162,32,15),Color("50d8ed") if n<mini(12,int(p.experience)) else Color("183e60"))
 	for m in range(4):
-		draw_line(Vector2(80+m*55,234),Vector2(245+m*55,210),Color("67c9f4",.45),2)
+		draw_line(Vector2(80+m*55,234),Vector2(245+m*55,210),Color(.40,.79,.96,.45),2)
 	draw_arc(Vector2(505,227),57,0,TAU,40,Color("3f81ad"),1)
 	draw_arc(Vector2(505,227),45,0,TAU*float(level_now)/4.0,40,Color("c6f5ff"),3)
 	draw_line(Vector2(449,227),Vector2(561,227),Color("7ddfeb"),1)
