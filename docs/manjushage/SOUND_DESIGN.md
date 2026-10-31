@@ -76,3 +76,10 @@
 - 再生成できる作曲元ソース、BPM、編成、loop開始/終了、権利記録、試聴結果、Godot回帰テストを記録。古い曲・セーブ・ゲームパッド操作を維持する。仮案は承認待ちで止めずゲームへ試験的に入れて構わない（正式採用とは区別）。
 
 関連する実装優先命令：docs/manjushage/PROTOTYPE_FIRST_DIRECTIVE.md。
+
+
+### 2026-10-31：雅楽×未来STG 初回オリジナル音楽デモ（音源試作、ゲーム組込前）
+- 完全オリジナルの16小節・**156 BPM・約24.62秒**の短い音響試作をChatGPT制作チームで合成。笙の持続和音、篳篥風リード、龍笛風単音、撥弦音、FMベース／速いドラムを**オリジナル波形合成**で構成。録音素材や既存曲のメロディ流用なし。
+- **再生成PythonソースはGitHubに反映済み**：tools/render_manjushage_gagaku_future.py。numpyが必要。コマンド例：python tools/render_manjushage_gagaku_future.py manjushage_gagaku_future_demo.wav。原本とは別の新作曲。
+- 音声デモWAV/MP3は**ChatGPTのこの会話で生成済み**（MP3はffmpeg変換）、ただし**GitHubに音声ファイルそのものは未配置**。Godotにインポートして実ゲームBGMが新曲へ切り替わるのは**未実装・未検証**。音源の生成・長さ・ファイル形式は会話側の制作環境で確認、ユーザー試聴の採否は未確認。
+- 開発チケット：[Issue #2](https://github.com/coshimagame/starlink-squad/issues/2)。今後は作曲A/B比較、場面に合う長尺化、ギャップレスループ、SEとミックス、ムゥの記憶主題の変奏を優先。仮案をどんどん実装して磨く。
