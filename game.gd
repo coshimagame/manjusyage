@@ -437,6 +437,7 @@ func update_game(dt):
 	if bio_route: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
+		p.fusion_flash=maxf(0.0,float(p.get("fusion_flash",0.0))-dt)
 		Abilities.digest(p,dt)
 		p.cool-=dt; p.inv-=dt; p.burst=maxf(0,p.burst-dt)
 		p.charge=minf(100,p.charge+dt*2)
@@ -790,6 +791,29 @@ func draw_collectible(item):
 	draw_rect(Rect2(p+Vector2(-1,-13),Vector2(2,2)),Color("fff9e8"))
 	draw_rect(Rect2(p+Vector2(11,0),Vector2(2,1)),Color("fff1d0"))
 
+# A small two-tone halo follows Mafio's absorption/digestion state.
+# Inspired by the split-dye fringe in the character design: self vs other.
+# Visual only, behind no enemy bullets, with four small lights at most.
+func draw_mafio_fusion(p):
+	if p.character!=2 or p.down>0: return
+	var digesting=clampf(float(p.digest)/1.2,0.0,1.0)
+	var flash=clampf(float(p.get("fusion_flash",0.0)),0.0,1.0)
+	if digesting<=0.0 and flash<=0.0: return
+	var opacity=minf(.75,.20+digesting*.23+flash*.38)
+	var center: Vector2=p.pos
+	var left=Color(.99,.83,.66,opacity)
+	var right=Color(.65,.45,.95,opacity)
+	draw_arc(center,16.0,PI*.5,PI*1.5,15,left,1.5)
+	draw_arc(center,16.0,-PI*.5,PI*.5,15,right,1.5)
+	# The moving seam carries swallowed technique energy through the cockpit.
+	var progress=1.0-digesting if digesting>0 else 1.0-flash
+	var offset=lerpf(-12.0,12.0,progress)
+	draw_line(center+Vector2(offset,-9),center+Vector2(offset+3,8),Color(1.0,.96,.84,opacity),1.0)
+	for n in range(4):
+		var a=clock*3.0+float(n)*TAU/4.0
+		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
+		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
+
 func _draw():
 	background()
 	if mode=="controls":
@@ -847,6 +871,9 @@ func _draw():
 			text_at(str(i+1),p.pos+Vector2(-5,-17),COLORS[i])
 			# A small diamond marks the precise player hitbox.
 			draw_rect(Rect2(p.pos-Vector2(1,1),Vector2(2,2)),COLORS[p.color])
+		# During absorption and digestion, the two halves briefly converge.
+		# Even if the invulnerability sprite blinks, its harmless halo remains.
+		if bio_route: draw_mafio_fusion(p)
 		if p.burst>0:
 			draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,COLORS[p.color],2)
 	for part in particles:
@@ -891,6 +918,12 @@ func draw_hud():
 		draw_rect(Rect2(x,3,28,2),accent)
 		text_at("P"+str(i+1),Vector2(x+5,10),accent)
 		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
+		if p.character==2 and p.down<=0:
+			# Hair motif / tech digestion marker: left self, right other.
+			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
+			draw_rect(Rect2(x+105,7,5,3),Color("9a6ed8"))
+			if p.digest>0:
+				draw_rect(Rect2(x+100,12,10*(1.0-clampf(p.digest/1.2,0,1)),2),Color("d9faff"))
 		if p.down>0:
 			text_at("SOS",Vector2(x+103,10),Color("ffb77c"))
 		else:
