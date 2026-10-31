@@ -7,6 +7,7 @@ func run():
 	var scene=load("res://main.tscn").instantiate()
 	root.add_child(scene)
 	scene.count=2
+	scene.bio_route=true
 	scene.start_game()
 	scene.score=4321
 	scene.gates_done=2
@@ -15,7 +16,7 @@ func run():
 	assert(cfg.load("user://scores.cfg")==OK)
 	assert(int(cfg.get_value("scores","1",0))>=10321)
 	var record=JSON.parse_string(FileAccess.get_file_as_string("user://last_run.json"))
-	assert(record.players==2 and record.cleared and record.gates==2 and record.ruleset=="ruins-v1")
+	assert(record.players==2 and record.cleared and record.gates==2 and record.ruleset=="red-echo-bio-v1")
 	scene.start_game()
 	scene.reserves=0
 	for p in scene.players: p.down=1
