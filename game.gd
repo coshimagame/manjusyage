@@ -542,6 +542,7 @@ func update_game(dt):
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
 				if item.kind==0: p.hp=mini(4,p.hp+1)
 				else: p.charge=minf(100,p.charge+25)
+				explode(item.pos,Color("ffb7a2") if item.kind==0 else Color("9ee8ff"),8)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0: finish(true)
@@ -601,9 +602,11 @@ func hurt(p):
 			for id in pads:
 				Input.start_joy_vibration(id,.2,.4,.2)
 
+# Spark/petal bursts have a strict limit so heavy 3P bullet screens stay clear.
 func explode(pos,color,amount):
-	for i in range(amount):
-		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(20,115),"life":randf_range(.2,.8),"color":color})
+	for i in range(mini(amount,maxi(0,210-particles.size()))):
+		var lifetime=randf_range(.22,.62)
+		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(26,102),"life":lifetime,"max_life":lifetime,"color":color,"petal":i%3==0})
 
 func finish(won):
 	mode="clear" if won else "over"
@@ -741,6 +744,27 @@ func background():
 		draw_rect(Rect2(x+27,top+9,10,30),Color("0b1d30"))
 		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
 
+# HP and energy have distinct silhouettes, not tiny lettered boxes.
+func draw_collectible(item):
+	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
+	var heart=item.kind==0
+	var outline=Color("3c152f") if heart else Color("112b4e")
+	var glow=Color(.98,.32,.52,.13) if heart else Color(.25,.79,1.0,.15)
+	draw_circle(p,11,glow)
+	if heart:
+		var shape=PackedVector2Array([p+Vector2(0,7),p+Vector2(-7,-1),p+Vector2(-7,-5),p+Vector2(-4,-8),p+Vector2(-1,-7),p,p+Vector2(1,-7),p+Vector2(4,-8),p+Vector2(7,-5),p+Vector2(7,-1)])
+		draw_colored_polygon(shape,outline)
+		draw_colored_polygon(PackedVector2Array([p+Vector2(0,5),p+Vector2(-5,-2),p+Vector2(-4,-5),p+Vector2(-1,-4),p,p+Vector2(1,-4),p+Vector2(4,-5),p+Vector2(5,-2)]),Color("ff6788"))
+		draw_rect(Rect2(p+Vector2(-4,-5),Vector2(3,2)),Color("fff4d7"))
+		draw_rect(Rect2(p+Vector2(-1,-2),Vector2(2,5)),Color("fff2df"))
+		draw_rect(Rect2(p+Vector2(-3,0),Vector2(6,2)),Color("fff2df"))
+	else:
+		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-10),p+Vector2(8,0),p+Vector2(0,10),p+Vector2(-8,0)]),outline)
+		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-7),p+Vector2(6,0),p+Vector2(0,7),p+Vector2(-6,0)]),Color("5ce5ff"))
+		draw_colored_polygon(PackedVector2Array([p+Vector2(-1,-6),p+Vector2(4,-1),p+Vector2(0,1),p+Vector2(2,6),p+Vector2(-4,0),p+Vector2(0,-2)]),Color("fff1b9"))
+	draw_rect(Rect2(p+Vector2(-1,-13),Vector2(2,2)),Color("fff9e8"))
+	draw_rect(Rect2(p+Vector2(11,0),Vector2(2,1)),Color("fff1d0"))
+
 func _draw():
 	background()
 	if mode=="controls":
@@ -765,12 +789,15 @@ func _draw():
 		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
 		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
 	for s in shots:
-		draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
-		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
-		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
+		# Dangerous projectile: angular silhouette and bright core;
+		# harmless petals are thinner, dimmer and fade.
+		var q=s.pos
+		var size=s.r+2
+		draw_colored_polygon(PackedVector2Array([q+Vector2(-size,0),q+Vector2(0,-size),q+Vector2(size,0),q+Vector2(0,size)]),Color("542342"))
+		draw_colored_polygon(PackedVector2Array([q+Vector2(-size+2,0),q+Vector2(0,-size+2),q+Vector2(size-2,0),q+Vector2(0,size-2)]),Color("ff7194"))
+		draw_rect(Rect2(q-Vector2.ONE*1.5,Vector2(3,3)),Color("fff5d7"))
 	for item in pickups:
-		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
-		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
+		draw_collectible(item)
 	if not boss.is_empty(): draw_boss()
 	for i in range(players.size()):
 		var p=players[i]
@@ -786,12 +813,24 @@ func _draw():
 		if p.burst>0:
 			draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,COLORS[p.color],2)
 	for part in particles:
-		draw_rect(Rect2(part.pos,Vector2(3,2)),part.color)
+		var fade=clampf(float(part.life)/maxf(.05,float(part.get("max_life",.6))),0.0,1.0)
+		var tint: Color=part.color
+		tint.a=fade*.9
+		if part.get("petal",false):
+			draw_line(part.pos+Vector2(-3,2),part.pos+Vector2(2,-2),tint,2)
+			draw_rect(Rect2(part.pos+Vector2(-1,-2),Vector2(2,2)),Color(1.0,.85,.73,fade*.8))
+		else:
+			draw_rect(Rect2(part.pos,Vector2(2,2)),tint)
 	draw_set_transform(Vector2.ZERO)
 	draw_hud()
 	if notice_time>0:
-		draw_rect(Rect2(0,43,640,20),Color(0.02,.04,.1,.85))
-		centered(notice,50,COLORS[2])
+		if notice.begins_with("SHIP DOWN"):
+			draw_rect(Rect2(411,44,221,16),Color(.06,.08,.17,.88))
+			draw_rect(Rect2(411,44,2,16),Color("ffb573"))
+			text_at("ALLY DOWN / FIND SOS",Vector2(420,49),Color("ffe6bf"))
+		else:
+			draw_rect(Rect2(116,44,408,17),Color(.02,.04,.1,.88))
+			centered(notice,49,COLORS[2])
 	if mode=="pause":
 		draw_rect(Rect2(0,0,W,H),Color(0,0,.04,.8))
 		centered("PAUSED",125,WHITE,3)
@@ -802,30 +841,46 @@ func _draw():
 		japanese("F2：コントローラー設定 / F6：音声テスト",Vector2(179,272))
 	elif mode in ["clear","over"]: draw_result()
 
+# Compact multi-pilot avionics. No Japanese names intrude into the battle area.
 func draw_hud():
-	draw_rect(Rect2(0,0,640,33),Color("080f22"))
-	draw_rect(Rect2(0,32,640,1),Color("2d4a62"))
+	draw_rect(Rect2(0,0,640,40),Color("08101e"))
+	draw_rect(Rect2(0,39,640,1),Color("803951"))
 	for i in range(count):
 		var p=players[i]
-		var x=12+i*138
-		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
-		japanese(PILOT_NAMES[p.character],Vector2(x,43),10,WHITE)
-		if bio_route: japanese(Abilities.label(p,elapsed),Vector2(x+48,43),9,COLORS[i])
-		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
-		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
-		draw_rect(Rect2(x,22,110,3),Color("26314b"))
-		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[i])
-		if p.charge>=100: text_at("B",Vector2(x+115,19),WHITE)
-	text_at("SCORE",Vector2(460,7),DIM)
-	text_at("%07d"%score,Vector2(515,7),WHITE)
-	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
-	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
-	draw_rect(Rect2(0,337,640,23),Color("080f22"))
-	text_at("01 / RED ECHO - EXPERIMENT" if bio_route else "01 / RUINS OF RESONANCE",Vector2(12,345),DIM)
-	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
-	text_at("START PAUSE",Vector2(405,345),DIM)
-	draw_rect(Rect2(500,347,125,2),Color("28374e"))
-	draw_rect(Rect2(500,347,minf(125,travel/4800*125),2),COLORS[0])
+		var x=7+i*143
+		var accent=COLORS[i]
+		draw_rect(Rect2(x,3,136,33),Color("111c30"))
+		draw_rect(Rect2(x,3,136,33),Color("5a4054"),false,1)
+		draw_rect(Rect2(x,3,28,2),accent)
+		text_at("P"+str(i+1),Vector2(x+5,10),accent)
+		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
+		if p.down>0:
+			text_at("SOS",Vector2(x+103,10),Color("ffb77c"))
+		else:
+			draw_rect(Rect2(x+121,10,8,7),COLORS[p.color])
+			draw_rect(Rect2(x+123,12,4,3),WHITE)
+		for h in range(4):
+			draw_rect(Rect2(x+6+h*15,21,12,6),Color("ff9ab2") if h<p.hp else Color("28334b"))
+			if h<p.hp: draw_rect(Rect2(x+7+h*15,21,9,2),Color("ffe5dd"))
+		draw_rect(Rect2(x+6,31,87,3),Color("26364a"))
+		draw_rect(Rect2(x+6,31,87*clampf(p.charge/100.0,0,1),3),accent)
+		if p.charge>=100 and p.down<=0: text_at("READY",Vector2(x+98,27),Color("ffe3a4"))
+		elif p.down>0: text_at("RESCUE",Vector2(x+98,27),Color("ffaf82"))
+		else: text_at(str(int(p.charge))+"%",Vector2(x+103,27),DIM)
+	draw_rect(Rect2(444,3,190,33),Color("111a2c"))
+	draw_rect(Rect2(444,3,190,33),Color("5a4054"),false,1)
+	text_at("SCORE",Vector2(451,9),DIM)
+	text_at("%07d"%score,Vector2(496,9),WHITE)
+	text_at("STOCK "+str(reserves),Vector2(452,24),Color("ffce63"))
+	text_at("COMBO X"+str(combo),Vector2(547,24),COLORS[0])
+	draw_rect(Rect2(0,336,640,24),Color("08101e"))
+	draw_rect(Rect2(0,336,640,1),Color("803951"))
+	text_at("01 / RED ECHO" if bio_route else "01 / RUINS",Vector2(12,346),WHITE)
+	if bio_route and count==1: japanese(Abilities.label(players[0],elapsed),Vector2(156,355),10,COLORS[0])
+	text_at("M MUSIC "+("OFF" if muted else "ON"),Vector2(365,346),DIM)
+	draw_rect(Rect2(502,347,124,4),Color("28374e"))
+	draw_rect(Rect2(502,347,minf(124.0,travel/4800.0*124.0),4),Color("ef8c95"))
+	text_at("STAGE",Vector2(554,354),DIM)
 
 func draw_gate():
 	var col=COLORS[1] if gate_flash>0 else Color("365878")
@@ -882,9 +937,18 @@ func draw_menu():
 	text_at("AN ORIGINAL CO-OP ARCADE SHOOTER",Vector2(22,20),DIM)
 	text_at("LOCAL 1-3P",Vector2(552,20),COLORS[0])
 	japanese("F3：ルート切替 / "+("赤い残響・生体試作" if bio_route else "共鳴遺跡・従来試作"),Vector2(22,43),12,COLORS[2])
-	japanese("曼珠沙華",Vector2(224,103),48,Color("203b59"))
-	japanese("曼珠沙華",Vector2(221,100),48,WHITE)
-	centered("MANJUSHAGE",116,COLORS[0],3)
+	# First playable metallic crimson/silver title treatment, not a finished PNG logo.
+	draw_rect(Rect2(125,66,390,80),Color("0d1227"))
+	draw_rect(Rect2(125,66,390,80),Color("946b66"),false,2)
+	draw_rect(Rect2(131,72,378,2),Color("e39b7b"))
+	draw_rect(Rect2(132,139,376,2),Color("63253e"))
+	for j in range(10):
+		var ray_x=147+j*37
+		draw_line(Vector2(ray_x,78),Vector2(ray_x+17,94),Color(.89,.24,.35,.25),1)
+	japanese("曼珠沙華",Vector2(227,107),48,Color("45142e"))
+	japanese("曼珠沙華",Vector2(222,103),48,Color("e7455f"))
+	japanese("曼珠沙華",Vector2(219,99),48,Color("f1f0e6"))
+	centered("MANJUSHAGE",122,Color("f2bfa3"),2)
 	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
 	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
 	ship(Vector2(319,181),COLORS[0],2)
@@ -899,7 +963,7 @@ func draw_menu():
 	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
 	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
 	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
-	text_at("PROTOTYPE 0.8",Vector2(22,345),Color("3e536f"))
+	text_at("PROTOTYPE 0.8 / ART PASS 01",Vector2(22,345),Color("71849b"))
 	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
 	text_at("F11 FULLSCREEN",Vector2(540,345),Color("3e536f"))
 	if show_help:
