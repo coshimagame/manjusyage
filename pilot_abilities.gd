@@ -60,6 +60,8 @@ static func eat(g,p) -> bool:
 		if e.hp>0 and e.hp<=3 and p.pos.distance_to(e.pos)<85:
 			p.charge-=40
 			p.pending_technique=e.get("technique","aimed")
+			# Record which enemy body Mafio actually swallowed, not merely killed.
+			g.mafio_archive.capture(e)
 			p.digest=1.2
 			p.fusion_flash=.9 # Captured a technique: first luminous convergence
 			e.hp=0
