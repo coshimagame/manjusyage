@@ -50,8 +50,9 @@ func run():
 	game.enemies.append({"pos":Vector2(350,150),"hp":3,"analysis_eligible":true})
 	game.special_analysis(pilot)
 	assert(game.enemies[-1].hp==3 and pilot.analysis_uses==2)
+	var test_path=game.enemy_analysis.save_path
 	game.queue_free()
 	await process_frame
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(game.enemy_analysis.save_path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(test_path))
 	print("JIYOZA ANALYSIS PASS: first-sighting and boss immunity, bullet-source filtering, item gauge and two-use cap")
 	quit(0)
