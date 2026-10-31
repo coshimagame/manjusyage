@@ -64,3 +64,19 @@ godot --path . --script tests/test_input_audio.gd
 - ソロで両方のパズルが理解できるか。ショット／弾幕が見やすいか。
 
 Godotのキャッシュ・生成PCKは.gitignoreで除外。WAV原本と生成スクリプトは管理対象。
+
+## 2026-11-01 追加の必須回帰テスト
+リポジトリ最新版ではGodot 4.6での実行がまだ未検証。以下はテスト**実行指示**であり、PASS報告ではない。必ず本来のセーブとは別のGodot user:// プロファイルを使う。
+```text
+godot --headless --path . --script tests/test_art_slots.gd
+godot --headless --path . --script tests/test_prologue.gd
+godot --headless --path . --script tests/test_cormii_fortune.gd
+godot --headless --path . --script tests/test_setting_updates.gd
+godot --headless --path . --script tests/test_briefing_progress.gd
+godot --headless --path . --script tests/test_briefing_game_flow.gd
+godot --headless --path . --script tests/test_jiyoza_analysis.gd
+godot --headless --path . --script tests/test_save.gd
+godot --headless --path . --script tests/test_music_story.gd
+godot --headless --path . --script tests/test_biological_stage.gd
+```
+Godot 4.6のプロジェクトインポート→すべてのSCRIPT ERRORゼロ→1/2/3人自動走行→実機音・ゲームパッド・縦横スリム機体の見た目を検証。現行audioにはending.wavとwistful_demo.wavがないため、既存曲への安全フォールバックが正しく動くことも確認。詳細 docs/manjushage/STATUS_AUDIT_2026-11-01.md。
