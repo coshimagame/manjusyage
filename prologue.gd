@@ -26,6 +26,7 @@ var age := 0.0
 var clock := 0.0
 var finished := false
 var font: SystemFont
+var planet_tex: ImageTexture
 var music: AudioStreamPlayer
 var test_shot := false
 var frames := 0
@@ -34,6 +35,7 @@ func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
+	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.stream = load("res://audio/title.wav")
@@ -48,6 +50,22 @@ func _ready():
 		if arg == "--training-shot": test_shot=true;page=2;age=4.0
 		if arg == "--workshop-shot": test_shot=true;page=4;age=4.0
 	queue_redraw()
+
+# Cache the static 163x163 planet once, instead of drawing ~20,000 tiny
+# rectangles every frame. All original lighting/detail values are retained.
+func cache_planet_texture():
+	var image=Image.create(163,163,false,Image.FORMAT_RGBA8)
+	image.fill(Color(0,0,0,0))
+	for py in range(-81,82):
+		for px in range(-81,82):
+			var radius=Vector2(px,py).length()
+			if radius>81: continue
+			var light=clampf((float(-px-py)+100)/210.0,.05,1.0)
+			var col=Color("172945").lerp(Color("7eafb2"),light)
+			if sin(py*.17+sin(px*.045)*2)>.6: col=col.lerp(Color("c4c9bb"),.22)
+			if radius>78: col=Color("a7d6df").lerp(Color("294b76"),1-light)
+			image.set_pixel(px+81,py+81,col)
+	planet_tex=ImageTexture.create_from_image(image)
 
 func _loop_music():
 	if not finished: music.play()
@@ -108,17 +126,8 @@ func _draw():
 			var x = fposmod(i*31.0+band*19-clock*(2+band*.4),740)-50
 			var y = 90+band*9+sin(i*.9+band)*13
 			draw_rect(Rect2(x,y,34,3),Color(.24,.25+band*.008,.46,.20))
-	# Shaded planet with atmospheric rim and cloud stripes.
-	var center = Vector2(438,132)
-	for py in range(-81,82):
-		for px in range(-81,82):
-			var radius = Vector2(px,py).length()
-			if radius > 81: continue
-			var light = clampf((float(-px-py)+100)/210,0.05,1)
-			var c = Color("172945").lerp(Color("7eafb2"),light)
-			if sin(py*.17+sin(px*.045)*2)>0.6: c=c.lerp(Color("c4c9bb"),.22)
-			if radius>78: c=Color("a7d6df").lerp(Color("294b76"),1-light)
-			draw_rect(Rect2(center+Vector2(px,py),Vector2.ONE),c)
+	# Planet is now drawn as one cached texture instead of thousands of rects.
+	if planet_tex!=null: draw_texture(planet_tex,Vector2(357,51))
 	# Fracture through the horizon.
 	var crack = PackedVector2Array([Vector2(175,0),Vector2(210,55),Vector2(194,92),Vector2(239,132),Vector2(220,177),Vector2(265,226)])
 	draw_polyline(crack,Color(.52,.36,.9,.15),13)
