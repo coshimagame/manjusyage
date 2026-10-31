@@ -6,6 +6,8 @@ static func initialize(p, character):
 	p.experience=0
 	p.learned="none"
 	p.digest=0.0
+	p.digest_total=1.0
+	p.shot_hold=0.0
 	p.pending_technique="none"
 	# Purely visual cue; it never alters a weapon or enemy hitbox.
 	p.fusion_flash=0.0
@@ -44,15 +46,26 @@ static func label(p,time):
 		var stable=clampi(int(p.get("stability",0)),0,3)
 		return "確率安定 "+str(stable)+"/3" if stable>0 else "確率変動"
 	if p.character==1: return "解析 Lv"+str(level(p)+1)
-	return "消化中" if p.digest>0 else ("捕食待ち" if p.learned=="none" else "習得："+("拡散" if p.learned=="fan" else "狙い撃ち"))
+	return ("一時装備："+("拡散" if p.learned=="fan" else "狙い撃ち")+" "+str(snappedf(p.digest,.1))+"秒") if p.digest>0 else "通常武器"
 
+# Captured enemy ability is ACTIVE during digestion, then returns to
+# normal shots when the enemy-specific digestion timer ends.
 static func digest(p,dt):
 	if p.digest<=0: return
 	p.digest=maxf(0,p.digest-dt)
-	if p.digest==0:
-		p.learned=p.pending_technique
+	if p.digest<=0:
+		p.learned="none"
+		p.pending_technique="none"
 		p.experience+=8
-		p.fusion_flash=.72 # Technique gained: second luminous convergence
+		p.fusion_flash=.72
+
+static func digestion_seconds(enemy) -> float:
+	# Each enemy can override this with digest_seconds when introduced.
+	var variations={"aimed":8.0,"fan":5.5,"pierce":5.0,"pulse":6.5,"curve":7.0,
+		"delay":7.5,"petal":5.5,"seed":4.5,"phase":7.5,"bend":6.5,
+		"predict":8.0,"echo":6.0,"halo":9.0,"beam":4.0,"boomerang":6.5,
+		"return":5.5,"sync":8.5,"shield":7.0}
+	return clampf(float(enemy.get("digest_seconds",variations.get(str(enemy.get("technique","aimed")),6.0))),2.0,20.0)
 
 static func eat(g,p) -> bool:
 	if p.digest>0 or p.charge<40: return false
@@ -60,9 +73,11 @@ static func eat(g,p) -> bool:
 		if e.hp>0 and e.hp<=3 and p.pos.distance_to(e.pos)<85:
 			p.charge-=40
 			p.pending_technique=e.get("technique","aimed")
+			p.learned=p.pending_technique # Equipped immediately on capture.
+			p.digest_total=digestion_seconds(e)
 			# Record which enemy body Mafio actually swallowed, not merely killed.
 			g.mafio_archive.capture(e)
-			p.digest=1.2
+			p.digest=p.digest_total
 			p.fusion_flash=.9 # Captured a technique: first luminous convergence
 			e.hp=0
 			g.explode(e.pos,Color("ffdf86"),18)
