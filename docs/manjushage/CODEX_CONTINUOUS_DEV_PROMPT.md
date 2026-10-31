@@ -49,3 +49,8 @@
 ## Codexが止まったときの再開プロンプト
 
 `coshimagame/starlink-squad` の `AGENTS.md` と `docs/manjushage/CODEX_CONTINUOUS_DEV_PROMPT.md`、`docs/manjushage/NEXT_ACTION.md`、`HANDOFF.md` を読み、前回の実装・テスト・コミットを確認して、**未完了の最優先タスクから継続**してください。安全な範囲で「実装→検証→修正→記録→次のタスク」を繰り返し、資料だけで終わらせないでください。
+
+
+## 2026-10-31 次の連続制作：全体を仮組み→実ゲーム検証→調整
+未決でも仮案で統一して進めるため、[PROVISIONAL_VISUAL_BIBLE_V01.md](PROVISIONAL_VISUAL_BIBLE_V01.md) と [CLASSIC_STG_INSPIRATIONS_V01.md](CLASSIC_STG_INSPIRATIONS_V01.md) を読む。**人物3人の性別**、3機の系譜、各世界線で曼珠沙華の花色が変わる発想、見やすい弾幕とアイテム、赤×白銀ロゴを維持。4作品からは**横縦変化・状況判断するアイテム・配置型防御・出撃前装備選択**の原理を参考にし、原作素材の流用は不可。
+[NEXT_ACTION.md](NEXT_ACTION.md)の**完了単位A（Godot画面改善）**を最初に実装・テストし、**完了単位B（名作STGから着想した独自操作要素）**を小分けで続ける。テキストの提案だけで「開発完了」としない。コントローラーやセーブを壊さず、実画面のbefore/afterと回帰試験を記録。文書更新はCodexの無期限自動実行を設定しない。
