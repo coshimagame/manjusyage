@@ -935,6 +935,7 @@ func _draw():
 		return
 	if vertical.active and mode in ["play","pause","over"]:
 		vertical.draw(self)
+		if analysis_flash>0: draw_analysis_scan()
 		draw_hud()
 		if mode=="pause": centered("PAUSED / START TO RESUME",185,WHITE,2)
 		if mode=="over": draw_result()
@@ -1009,6 +1010,7 @@ func _draw():
 		else:
 			draw_rect(Rect2(part.pos,Vector2(2,2)),tint)
 	draw_set_transform(Vector2.ZERO)
+	if analysis_flash>0: draw_analysis_scan()
 	draw_hud()
 	if notice_time>0:
 		if notice.begins_with("SHIP DOWN"):
@@ -1030,6 +1032,17 @@ func _draw():
 	elif mode in ["clear","over"]: draw_result()
 
 # Compact multi-pilot avionics. No Japanese names intrude into the battle area.
+# A non-obscuring blue-white scanner overlay. Keep hostile bullets visible.
+func draw_analysis_scan():
+	var alpha=clampf(analysis_flash/.56,0.0,1.0)
+	for n in range(11):
+		var py=43+n*26.0
+		draw_line(Vector2(0,py),Vector2(640,py),Color(.55,.91,1.0,.23*alpha),1)
+	for n in range(17):
+		var px=17+n*38.0
+		draw_line(Vector2(px,44),Vector2(px,333),Color(.35,.82,1.0,.11*alpha),1)
+	draw_rect(Rect2(4,42,632,292),Color(.72,.97,1.0,.45*alpha),false,2)
+	text_at("ANALYSIS COMPLETE",Vector2(259,49),Color(.75,.96,1.0,alpha))
 func draw_hud():
 	draw_rect(Rect2(0,0,640,40),Color("08101e"))
 	draw_rect(Rect2(0,39,640,1),Color("803951"))
@@ -1042,6 +1055,8 @@ func draw_hud():
 		draw_rect(Rect2(x,3,28,2),accent)
 		text_at("P"+str(i+1),Vector2(x+5,10),accent)
 		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
+		if p.character==1 and p.down<=0:
+			text_at("A"+str(enemy_analysis.count_observed()),Vector2(x+94,10),Color("c0f7ff"))
 		if p.character==0 and p.down<=0 and p.stability>0:
 			text_at("S"+str(p.stability),Vector2(x+93,10),Color("ffe8af"))
 		if p.character==2 and p.down<=0:
@@ -1275,6 +1290,7 @@ func draw_jiyoza_status(p):
 	draw_line(Vector2(449,227),Vector2(561,227),Color("7ddfeb"),1)
 	draw_line(Vector2(505,168),Vector2(505,286),Color("7ddfeb"),1)
 	japanese("取得経験 "+str(p.experience),Vector2(56,283),15,WHITE)
+	japanese("記録した敵種 "+str(enemy_analysis.count_observed()),Vector2(298,299),12,Color("b0e8f5"))
 	japanese("解析精度と出力が着実に上がる",Vector2(58,306),14,Color("a9d8e7"))
 
 func draw_mafio_status(p):
