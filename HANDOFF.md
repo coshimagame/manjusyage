@@ -231,3 +231,7 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 **実コード**：prologue.gdに8場面（従来6場面）とムゥ整備室の動く簡易ドット演出、ムゥと3人の仮会話の字送りを追加（コミット30b39e65）。台詞・人物容姿は未正式採用。**Godot実描画・連打・スキップは未検収**。
 **音源原本**：tools/render_manjushage_gagaku_future.py をGitHubに追加。156 BPM、16小節、約24.6秒の新作デモをこのチャットでMP3/WAV生成確認。**WAV/MP3はGitHub未登録、Godotへの音源組込／実聴のレビューなし**。musicガイド SOUND_DESIGN.md が最新。
 **開発の恒久指示**：PROTOTYPE_FIRST_DIRECTIVE.md＝企画案も実ゲームに仮採用し、動かして評価・修正を繰り返す。MU_CINEMATICS_V01.md＝整備、飛行教習、ムゥの予期せぬ別れと2周目の救済の章構成。次はGodot4.6インポート・起動、音／映像実テスト、キャラクターとボスの改良、各章の無線会話へ進む。Issue #2／#3。Codexのセッションをこの更新で自動起動したとは言わない。
+
+
+## 2026-10-31 制作チーム命名（ユーザー正式決定）
+チーム名を **Mw-fActory（ムゥファクトリー）** に決定。以後ChatGPT・Codex・サウンド、アート、ゲームデザイン等の専門ロールを含む制作チームの公式呼称にする。表記 **Mw-fActory** 厳守。作品名 **曼珠沙華（MANJUSHAGE）** は変わらない。GAME上のチームロゴやスタッフロールは今回未変更、保存IDやrepo名は保全。CANON.mdのC-050を参照。
