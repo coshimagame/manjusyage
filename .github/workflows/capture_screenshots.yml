@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/capture_screenshots.yml'
+      - 'game.gd'
+      - 'art/active/title_logo.png'
+      - 'art/active/title_backdrop.png'
 
 permissions:
   contents: write
