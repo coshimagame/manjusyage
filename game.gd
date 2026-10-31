@@ -886,9 +886,18 @@ func background():
 # HP and energy have distinct silhouettes, not tiny lettered boxes.
 func draw_collectible(item):
 	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
-	var image=artwork.texture("item_stability" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy"))
+	var image=artwork.texture("item_analysis" if item.kind==3 else ("item_stability" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy")))
 	if image!=null:
 		draw_texture_rect(image,Rect2(p-Vector2(10,10),Vector2(20,20)),false)
+		return
+	if item.kind==3:
+		# Pale cyan eight-facet crystal. Unlike ordinary energy it never refills over time.
+		draw_circle(p,12,Color(.30,.94,1.0,.15))
+		draw_arc(p,10,clock*.7,clock*.7+TAU,20,Color(.38,.8,1.0,.6),1.2)
+		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-10),p+Vector2(5,-5),p+Vector2(8,0),p+Vector2(5,6),p+Vector2(0,9),p+Vector2(-6,4),p+Vector2(-8,0),p+Vector2(-4,-6)]),Color("234a73"))
+		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-8),p+Vector2(5,-4),p+Vector2(6,0),p+Vector2(1,6),p+Vector2(-4,3),p+Vector2(-5,0)]),Color("5bdbef"))
+		draw_rect(Rect2(p+Vector2(-1,-5),Vector2(2,10)),Color("e1ffff"))
+		draw_rect(Rect2(p+Vector2(-5,-1),Vector2(10,2)),Color("e1ffff"))
 		return
 	if item.kind==2:
 		# Gold hexagonal probability core: two counter-rotating probability rings.
@@ -1101,10 +1110,16 @@ func draw_hud():
 		for h in range(4):
 			draw_rect(Rect2(x+6+h*15,21,12,6),Color("ff9ab2") if h<p.hp else Color("28334b"))
 			if h<p.hp: draw_rect(Rect2(x+7+h*15,21,9,2),Color("ffe5dd"))
+		var active_gauge=float(p.analysis_charge) if p.character==1 else float(p.charge)
 		draw_rect(Rect2(x+6,31,87,3),Color("26364a"))
-		draw_rect(Rect2(x+6,31,87*clampf(p.charge/100.0,0,1),3),accent)
-		if p.charge>=100 and p.down<=0: text_at("READY",Vector2(x+98,27),Color("ffe3a4"))
-		elif p.down>0: text_at("RESCUE",Vector2(x+98,27),Color("ffaf82"))
+		draw_rect(Rect2(x+6,31,87*clampf(active_gauge/100.0,0,1),3),Color("89eeff") if p.character==1 else accent)
+		if p.down>0:
+			text_at("RESCUE",Vector2(x+98,27),Color("ffaf82"))
+		elif p.character==1:
+			if p.analysis_uses>=2: text_at("MAX 2",Vector2(x+98,27),DIM)
+			elif p.analysis_charge>=100: text_at("READY",Vector2(x+98,27),Color("b4faff"))
+			else: text_at(str(int(p.analysis_charge))+"%",Vector2(x+102,27),Color("b4d9e4"))
+		elif p.charge>=100: text_at("READY",Vector2(x+98,27),Color("ffe3a4"))
 		else: text_at(str(int(p.charge))+"%",Vector2(x+103,27),DIM)
 	draw_rect(Rect2(444,3,190,33),Color("111a2c"))
 	draw_rect(Rect2(444,3,190,33),Color("5a4054"),false,1)
@@ -1319,6 +1334,7 @@ func draw_jiyoza_status(p):
 	draw_line(Vector2(505,168),Vector2(505,286),Color("7ddfeb"),1)
 	japanese("取得経験 "+str(p.experience),Vector2(56,283),15,WHITE)
 	japanese("記録した敵種 "+str(enemy_analysis.count_observed()),Vector2(298,299),12,Color("b0e8f5"))
+	japanese("解析ゲージ "+str(p.analysis_charge)+"%   使用 "+str(p.analysis_uses)+"/2",Vector2(57,326),13,Color("b9f4ff"))
 	japanese("解析精度と出力が着実に上がる",Vector2(58,306),14,Color("a9d8e7"))
 
 func draw_mafio_status(p):
