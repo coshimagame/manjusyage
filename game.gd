@@ -21,6 +21,8 @@ var vertical=VerticalPassage.new()
 var mixed_scroll=true
 var pilot_offset=0
 var new_music=false
+const ArtCatalog = preload("res://art_catalog.gd")
+var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
@@ -80,6 +82,9 @@ const CONTROL_ACTIONS = ["up","down","left","right","fire","color","burst","star
 const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色切り替えのボタン","バーストのボタン","決定・ポーズのボタン"]
 
 func _ready():
+	artwork.reload()
+	# Pixel textures stay sharp at integer scaling.
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	randomize()
 	build_planet_texture()
@@ -691,9 +696,16 @@ func sprite(rows,pos,palette,size=1):
 					if above!=ch: draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,1),base.lightened(.28))
 					if x==rows[y].length()-1 or rows[y][x+1]==".": draw_rect(Rect2(floor(pos.x+(x+1)*size-1),floor(pos.y+y*size),1,size),base.darkened(.32))
 
-func ship(pos,color,size=1):
-	var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
-	sprite(SHIP,pos-Vector2(12,5)*size,pal,size)
+func ship(pos,color,size=1,character=-1):
+	var pilot_slot=""
+	if character>=0 and character<3:
+		pilot_slot=["ship_cormii","ship_jiyoza","ship_mafio"][character]
+	var art=artwork.texture(pilot_slot) if pilot_slot!="" else null
+	if art!=null:
+		draw_texture_rect(art,Rect2(pos-Vector2(16,10)*size,Vector2(32,20)*size),false)
+	else:
+		var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
+		sprite(SHIP,pos-Vector2(12,5)*size,pal,size)
 	draw_rect(Rect2(pos.x-18*size,pos.y-2*size,(6+int(clock*20)%4)*size,4*size),Color("ff8b4e"))
 	draw_rect(Rect2(pos.x-14*size,pos.y-size,5*size,2*size),Color("ffedb0"))
 
@@ -709,6 +721,12 @@ func build_planet_texture():
 	planet_texture=ImageTexture.create_from_image(img)
 
 func background():
+	if mode=="menu":
+		var cover=artwork.texture("title_backdrop")
+		if cover!=null:
+			draw_texture_rect(cover,Rect2(0,0,W,H),false)
+			draw_rect(Rect2(0,0,W,H),Color(0,0,0,.25))
+			return
 	if bio_route:
 		bio.draw_background(self)
 		return
@@ -750,6 +768,10 @@ func background():
 # HP and energy have distinct silhouettes, not tiny lettered boxes.
 func draw_collectible(item):
 	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
+	var image=artwork.texture("item_hp" if item.kind==0 else "item_energy")
+	if image!=null:
+		draw_texture_rect(image,Rect2(p-Vector2(10,10),Vector2(20,20)),false)
+		return
 	var heart=item.kind==0
 	var outline=Color("3c152f") if heart else Color("112b4e")
 	var glow=Color(.98,.32,.52,.13) if heart else Color(.25,.79,1.0,.15)
@@ -794,7 +816,12 @@ func _draw():
 			draw_rect(Rect2(e.pos+Vector2(-27,-2),Vector2(3,3)),Color("ffd5a0"))
 		else:
 			draw_line(e.pos+Vector2(11,0),e.pos+Vector2(23,0),Color("7194b6"),2)
-		sprite(FOE_BLOOM if is_fan else FOE_LANCE,e.pos-Vector2(16,9),[Color("22213d"),Color("5e7390") if not is_fan else Color("8f456c"),Color("c9a5b3"),WHITE if e.flash>0 else Color("ffc37d")],2)
+		var enemy_art=artwork.texture("enemy_bloom" if is_fan else "enemy_lance")
+		if enemy_art!=null:
+			draw_texture_rect(enemy_art,Rect2(e.pos-Vector2(17,11),Vector2(34,22)),false)
+			if e.flash>0: draw_circle(e.pos,5,Color(1,1,1,.6))
+		else:
+			sprite(FOE_BLOOM if is_fan else FOE_LANCE,e.pos-Vector2(16,9),[Color("22213d"),Color("5e7390") if not is_fan else Color("8f456c"),Color("c9a5b3"),WHITE if e.flash>0 else Color("ffc37d")],2)
 	for b in bullets:
 		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
 		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
@@ -816,7 +843,7 @@ func _draw():
 			text_at("SOS",p.pos+Vector2(-8,-15),COLORS[i])
 			draw_rect(Rect2(p.pos+Vector2(-12,11),Vector2(24*p.rescue/1.5,2)),WHITE)
 		elif p.inv<=0 or int(clock*14)%2==0:
-			ship(p.pos,COLORS[p.color])
+			ship(p.pos,COLORS[p.color],1,p.character)
 			text_at(str(i+1),p.pos+Vector2(-5,-17),COLORS[i])
 			# A small diamond marks the precise player hitbox.
 			draw_rect(Rect2(p.pos-Vector2(1,1),Vector2(2,2)),COLORS[p.color])
@@ -947,23 +974,28 @@ func draw_menu():
 	text_at("AN ORIGINAL CO-OP ARCADE SHOOTER",Vector2(22,20),DIM)
 	text_at("LOCAL 1-3P",Vector2(552,20),COLORS[0])
 	japanese("F3：ルート切替 / "+("赤い残響・生体試作" if bio_route else "共鳴遺跡・従来試作"),Vector2(22,43),12,COLORS[2])
-	# First playable metallic crimson/silver title treatment, not a finished PNG logo.
-	draw_rect(Rect2(125,66,390,80),Color("0d1227"))
-	draw_rect(Rect2(125,66,390,80),Color("946b66"),false,2)
-	draw_rect(Rect2(131,72,378,2),Color("e39b7b"))
-	draw_rect(Rect2(132,139,376,2),Color("63253e"))
-	for j in range(10):
-		var ray_x=147+j*37
-		draw_line(Vector2(ray_x,78),Vector2(ray_x+17,94),Color(.89,.24,.35,.25),1)
-	japanese("曼珠沙華",Vector2(227,107),48,Color("45142e"))
-	japanese("曼珠沙華",Vector2(222,103),48,Color("e7455f"))
-	japanese("曼珠沙華",Vector2(219,99),48,Color("f1f0e6"))
-	centered("MANJUSHAGE",122,Color("f2bfa3"),2)
+	# A user-supplied or original PNG logo overrides the procedural plate.
+	# Keep the fallback if the asset has not been imported into Godot yet.
+	var logo=artwork.texture("title_logo")
+	if logo!=null:
+		draw_texture_rect(logo,Rect2(122,64,396,82),false)
+	else:
+		draw_rect(Rect2(125,66,390,80),Color("0d1227"))
+		draw_rect(Rect2(125,66,390,80),Color("946b66"),false,2)
+		draw_rect(Rect2(131,72,378,2),Color("e39b7b"))
+		draw_rect(Rect2(132,139,376,2),Color("63253e"))
+		for j in range(10):
+			var ray_x=147+j*37
+			draw_line(Vector2(ray_x,78),Vector2(ray_x+17,94),Color(.89,.24,.35,.25),1)
+		japanese("曼珠沙華",Vector2(227,107),48,Color("45142e"))
+		japanese("曼珠沙華",Vector2(222,103),48,Color("e7455f"))
+		japanese("曼珠沙華",Vector2(219,99),48,Color("f1f0e6"))
+		centered("MANJUSHAGE",122,Color("f2bfa3"),2)
 	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
 	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
-	ship(Vector2(319,181),COLORS[0],2)
-	ship(Vector2(240,180),COLORS[1])
-	ship(Vector2(397,180),COLORS[2])
+	ship(Vector2(319,181),COLORS[0],2,pilot_offset)
+	ship(Vector2(240,180),COLORS[1],1,(pilot_offset+1)%3)
+	ship(Vector2(397,180),COLORS[2],1,(pilot_offset+2)%3)
 	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
 	draw_rect(Rect2(220,239,200,28),COLORS[0])
 	centered("LAUNCH SQUAD",249,Color("0a1830"),1)
