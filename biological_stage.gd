@@ -95,6 +95,38 @@ func draw_spider_lily(g, pos: Vector2, radius: float, opacity: float):
 	g.draw_circle(pos,3.5,Color(.82,.16,.30,opacity*.9))
 
 func draw_background(g):
+	var background_image=g.artwork.texture("bio_backdrop")
+	if background_image!=null:
+		# Imported scene art replaces the distant illustration, but keeps the
+		# actual lethal ceiling/floor edges visible and aligned to collision.
+		g.draw_texture_rect(background_image,Rect2(0,33,640,305),false)
+	else:
+		draw_scenery(g)
+	if g.travel<500 and g.mode!="menu": return
+	# Keep ceiling/floor exactly aligned with the existing damage geometry.
+	for x in range(0,640,4):
+		var top=ceiling(x,g.travel,g.clock)
+		var bottom=floor_y(x,g.travel,g.clock)
+		g.draw_rect(Rect2(x,33,4,top-33),Color("532538"))
+		g.draw_rect(Rect2(x,top-10,4,10),Color("a34a5d"))
+		g.draw_rect(Rect2(x,top-3,4,3),Color("f69a81"))
+		g.draw_rect(Rect2(x,bottom,4,338-bottom),Color("532538"))
+		g.draw_rect(Rect2(x,bottom,4,3),Color("f69a81"))
+		g.draw_rect(Rect2(x,bottom+3,4,7),Color("a34a5d"))
+	# Articulated ribs and bioluminescent veins along the safe area edges.
+	for i in range(14):
+		var x=floor(fposmod(float(i)*63-g.travel*.44,800.0)-90)
+		for side in [0,1]:
+			var upper=side==0
+			var border=ceiling(x,g.travel,g.clock) if upper else floor_y(x,g.travel,g.clock)
+			var direction=1 if upper else -1
+			var root=Vector2(x,border)
+			var rib=Vector2(x+22,border+direction*17)
+			g.draw_line(root,rib,Color("311b33"),6)
+			g.draw_line(root+Vector2(0,direction*2),rib,Color("cb6876"),2)
+			g.draw_rect(Rect2(x+13,border+direction*13,3,3),Color("ffd0a2"))
+
+func draw_scenery(g):
 	# Deep space / dusty crimson atmosphere. No repetitive neon wire circles.
 	for y in range(33,338,2):
 		var blend=float(y-33)/305.0
@@ -121,30 +153,6 @@ func draw_background(g):
 		var y=110+float((i*53)%155)
 		var size=float(21+(i%4)*7)
 		draw_spider_lily(g,Vector2(x,y),size,.22 if i%3==0 else .13)
-	if g.travel<500 and g.mode!="menu": return
-	# Keep ceiling/floor exactly aligned with the existing damage geometry.
-	for x in range(0,640,4):
-		var top=ceiling(x,g.travel,g.clock)
-		var bottom=floor_y(x,g.travel,g.clock)
-		g.draw_rect(Rect2(x,33,4,top-33),Color("532538"))
-		g.draw_rect(Rect2(x,top-10,4,10),Color("a34a5d"))
-		g.draw_rect(Rect2(x,top-3,4,3),Color("f69a81"))
-		g.draw_rect(Rect2(x,bottom,4,338-bottom),Color("532538"))
-		g.draw_rect(Rect2(x,bottom,4,3),Color("f69a81"))
-		g.draw_rect(Rect2(x,bottom+3,4,7),Color("a34a5d"))
-	# Articulated ribs and bioluminescent veins along the safe area edges.
-	for i in range(14):
-		var x=floor(fposmod(float(i)*63-g.travel*.44,800.0)-90)
-		for side in [0,1]:
-			var upper=side==0
-			var border=ceiling(x,g.travel,g.clock) if upper else floor_y(x,g.travel,g.clock)
-			var direction=1 if upper else -1
-			var root=Vector2(x,border)
-			var rib=Vector2(x+22,border+direction*17)
-			g.draw_line(root,rib,Color("311b33"),6)
-			g.draw_line(root+Vector2(0,direction*2),rib,Color("cb6876"),2)
-			g.draw_rect(Rect2(x+13,border+direction*13,3,3),Color("ffd0a2"))
-
 func draw_organs(g):
 	for organ in organs:
 		var p=organ.pos
@@ -158,26 +166,30 @@ func draw_organs(g):
 func draw_boss(g):
 	var p=g.boss.pos
 	var pulse=1+sin(g.boss.age*3.4)*.035
-	for side in [-1,1]:
-		var points=PackedVector2Array()
-		for j in range(15):
-			points.append(p+Vector2(30-j*6,side*(43+sin(j*.27+g.boss.age)*20)))
-		g.draw_polyline(points,Color("6b3455"),12)
-		g.draw_polyline(points,Color("d26a7c"),3)
-	# Layered pixel strips form two lobes and a tapering heart, with a lit left rim.
-	for row in range(-49,56,2):
-		var half=0.0
-		if row< -13:
-			half=28+sqrt(maxf(0,27*27-(row+25)*(row+25)))
-		else:
-			half=53*(56.0-row)/69.0
-		var shade=Color("682d51").lerp(Color("d36b7e"),1.0-float(row+49)/120)
-		g.draw_rect(Rect2(p.x-half*pulse,p.y+row*pulse,half*2*pulse,3),shade)
-		g.draw_rect(Rect2(p.x-half*pulse+3,p.y+row*pulse,4,2),Color("f7a598"))
-		g.draw_rect(Rect2(p.x+half*pulse-7,p.y+row*pulse,7,3),Color("703451"))
-	g.draw_line(p+Vector2(-2,-48),p+Vector2(-2,-29),Color("422540"),5)
-	for i in range(6):
-		g.draw_line(p+Vector2(i*7-26,-25),p+Vector2(i*4-18,23),Color("6e3153"),2)
+	var image=g.artwork.texture("boss_body")
+	if image!=null:
+		g.draw_texture_rect(image,Rect2(p-Vector2(67,68),Vector2(134,136)),false)
+	else:
+		for side in [-1,1]:
+			var points=PackedVector2Array()
+			for j in range(15):
+				points.append(p+Vector2(30-j*6,side*(43+sin(j*.27+g.boss.age)*20)))
+			g.draw_polyline(points,Color("6b3455"),12)
+			g.draw_polyline(points,Color("d26a7c"),3)
+		# Layered pixel strips form two lobes and a tapering heart, with a lit left rim.
+		for row in range(-49,56,2):
+			var half=0.0
+			if row< -13:
+				half=28+sqrt(maxf(0,27*27-(row+25)*(row+25)))
+			else:
+				half=53*(56.0-row)/69.0
+			var shade=Color("682d51").lerp(Color("d36b7e"),1.0-float(row+49)/120)
+			g.draw_rect(Rect2(p.x-half*pulse,p.y+row*pulse,half*2*pulse,3),shade)
+			g.draw_rect(Rect2(p.x-half*pulse+3,p.y+row*pulse,4,2),Color("f7a598"))
+			g.draw_rect(Rect2(p.x+half*pulse-7,p.y+row*pulse,7,3),Color("703451"))
+		g.draw_line(p+Vector2(-2,-48),p+Vector2(-2,-29),Color("422540"),5)
+		for i in range(6):
+			g.draw_line(p+Vector2(i*7-26,-25),p+Vector2(i*4-18,23),Color("6e3153"),2)
 	var core=g.COLORS[g.boss.color] if exposed() else Color("796285")
 	g.draw_circle(p+Vector2(-11,0),19,Color("34233f"))
 	g.draw_circle(p+Vector2(-12,-2),12,Color("fff3d6") if g.boss.flash>0 else core)
