@@ -18,6 +18,12 @@ var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
+const BriefingProgress=preload("res://briefing_progress.gd")
+var briefing_progress=BriefingProgress.new()
+var briefing_stage=2
+var briefing_slot=0
+var briefing_chars=[0,1,2]
+var briefing_custom_squad=false
 var enemy_analysis=EnemyAnalysis.new()
 var analysis_flash=0.0
 var mafio_archive=MafioArchive.new()
@@ -94,6 +100,7 @@ func _ready():
 	artwork.reload()
 	mafio_archive.load_data()
 	enemy_analysis.load_data()
+	briefing_progress.load_data()
 	# Pixel textures stay sharp at integer scaling.
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
@@ -148,6 +155,8 @@ func _ready():
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
+		if screenshot_mode=="briefing":
+			mode="briefing"; briefing_stage=2
 		if screenshot_mode=="status": mode="status"
 		if screenshot_mode=="archive":
 			mode="status"; status_slot=0
@@ -278,6 +287,32 @@ func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
 
+# BRIEFING v0.1: stage 1 is an immediate launch on first arrival.
+# Finished stage 1 unlocks the preparation room, but no fake stage 2 battle.
+func open_briefing(stage: int=2):
+	briefing_stage=clampi(stage,1,briefing_progress.highest_unlocked)
+	briefing_slot=0
+	mode="briefing"
+	notice_time=0
+	track("title")
+
+func change_briefing_character():
+	if briefing_slot>=count: return
+	var original=int(briefing_chars[briefing_slot])
+	var next=(original+1)%3
+	for i in range(count):
+		if i!=briefing_slot and int(briefing_chars[i])==next:
+			briefing_chars[i]=original
+			break
+	briefing_chars[briefing_slot]=next
+	sfx("switch")
+
+func launch_from_briefing():
+	if not briefing_progress.can_launch(briefing_stage):
+		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
+		return
+	briefing_custom_squad=true
+	start_game()
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -287,7 +322,10 @@ func start_game():
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
-	for i in range(count): Abilities.initialize(players[i],(i+pilot_offset)%3)
+	for i in range(count):
+		var character=int(briefing_chars[i]) if briefing_custom_squad else (i+pilot_offset)%3
+		Abilities.initialize(players[i],character)
+	briefing_custom_squad=false
 	mode = "play"
 	show_help = false
 	track("wistful_demo" if new_music else "ruins")
@@ -306,6 +344,15 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key = event.physical_keycode
+		if mode=="briefing":
+			if key==KEY_ESCAPE: mode="menu"; track("title")
+			elif key==KEY_LEFT: briefing_stage=maxi(1,briefing_stage-1)
+			elif key==KEY_RIGHT: briefing_stage=mini(briefing_progress.highest_unlocked,briefing_stage+1)
+			elif key==KEY_UP: briefing_slot=(briefing_slot+count-1)%count
+			elif key==KEY_DOWN: briefing_slot=(briefing_slot+1)%count
+			elif key in [KEY_X,KEY_C]: change_briefing_character()
+			elif key in [KEY_ENTER,KEY_SPACE]: launch_from_briefing()
+			return
 		if mode=="status":
 			if key in [KEY_ESCAPE,KEY_TAB,KEY_ENTER]:
 				mode=status_return_mode
@@ -323,6 +370,8 @@ func _input(event):
 		if key==KEY_TAB and mode in ["play","pause"]:
 			status_return_mode=mode; mode="status"; status_slot=0; archive_page=false
 			return
+		if key==KEY_L and mode=="menu" and briefing_progress.highest_unlocked>=2:
+			open_briefing(briefing_progress.next_briefing_stage()); return
 		if key==KEY_F4 and mode=="menu": pilot_offset=(pilot_offset+1)%3; return
 		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
 		if key==KEY_F8 and mode=="menu":
@@ -367,6 +416,8 @@ func _input(event):
 		elif mode == "pause":
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
+		elif mode == "clear":
+			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -445,6 +496,8 @@ func _process(dt):
 		var b = pad_action_edge(device,"burst",JOY_BUTTON_B)
 		var left = pad_action_edge(device,"left",JOY_BUTTON_DPAD_LEFT)
 		var right = pad_action_edge(device,"right",JOY_BUTTON_DPAD_RIGHT)
+		var up = pad_action_edge(device,"up",JOY_BUTTON_DPAD_UP)
+		var down = pad_action_edge(device,"down",JOY_BUTTON_DPAD_DOWN)
 		if mode == "menu":
 			if left: count=maxi(1,count-1)
 			if right: count=mini(3,count+1)
@@ -461,6 +514,14 @@ func _process(dt):
 			if x:
 				status_return_mode="pause"; status_slot=0; archive_page=false; mode="status"
 			elif start or a: mode="play"
+		elif mode == "briefing":
+			if b: mode="menu"; track("title")
+			elif left: briefing_stage=maxi(1,briefing_stage-1)
+			elif right: briefing_stage=mini(briefing_progress.highest_unlocked,briefing_stage+1)
+			elif up: briefing_slot=(briefing_slot+count-1)%count
+			elif down: briefing_slot=(briefing_slot+1)%count
+			elif x: change_briefing_character()
+			elif start or a: launch_from_briefing()
 		elif mode == "status":
 			if start or b: mode=status_return_mode
 			elif left:
@@ -469,11 +530,15 @@ func _process(dt):
 				status_slot=(status_slot+1)%maxi(1,players.size());archive_page=false
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
+		elif mode == "clear":
+			if start or a: open_briefing(briefing_progress.next_briefing_stage())
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
 		travel += dt*14
+		notice_time=maxf(0,notice_time-dt)
+	elif mode=="briefing":
 		notice_time=maxf(0,notice_time-dt)
 	for part in particles:
 		part.pos += part.vel*dt
@@ -742,6 +807,7 @@ func finish(won):
 	music.stop(); sfx("gate" if won else "burst")
 	if won: track("ending")
 	if won:
+		if not auto_test: briefing_progress.mark_cleared(1)
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
 	if not auto_test:
@@ -958,6 +1024,9 @@ func draw_mafio_fusion(p):
 
 func _draw():
 	background()
+	if mode=="briefing":
+		draw_briefing_screen()
+		return
 	if mode=="status":
 		draw_status_screen()
 		return
@@ -1226,6 +1295,8 @@ func draw_menu():
 	japanese("F2：十字キー・ボタン設定（クリック可）",Vector2(193,321),12,COLORS[0])
 	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
 	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
+	if briefing_progress.highest_unlocked>=2:
+		japanese("L：ブリーフィング・過去のステージへ",Vector2(179,315),12,Color("ffe0a6"))
 	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
 	text_at("PROTOTYPE 0.8 / ART PASS 01",Vector2(22,345),Color("71849b"))
 	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
@@ -1261,7 +1332,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
 
 
@@ -1403,3 +1474,49 @@ func draw_mafio_archive():
 		draw_circle(Vector2(472,185),43,Color("30344a"))
 		japanese("未捕食・詳細不明",Vector2(380,277),16,Color("91a1b7"))
 	text_at("UP / DOWN : SELECT",Vector2(355,310),Color("a5aac0"))
+
+# Preparation-room prototype; only stage 1 can actually launch today.
+func draw_briefing_screen():
+	draw_rect(Rect2(0,0,640,360),Color("0b1424"))
+	for i in range(12):
+		draw_line(Vector2(i*62,49),Vector2(i*62-80,337),Color(.3,.5,.65,.11),1)
+	draw_rect(Rect2(0,0,640,48),Color("1d2036"))
+	draw_rect(Rect2(0,46,640,2),Color("bc6384"))
+	japanese("出撃ブリーフィング",Vector2(24,30),23,Color("fff1d8"))
+	text_at("STAGE "+str(briefing_stage).pad_zeros(2),Vector2(488,17),Color("ffddab"),2)
+	japanese("ステージ選択／以前のステージも再挑戦できる",Vector2(23,69),13,WHITE)
+	for number in range(1,9):
+		var column=int((number-1)/4)
+		var row=(number-1)%4
+		var x=22+column*134
+		var y=77+row*29
+		var unlocked=briefing_progress.can_select(number)
+		var selected=number==briefing_stage
+		var shade=Color("70435e") if selected else Color("21354a")
+		draw_rect(Rect2(x,y,126,26),shade if unlocked else Color("18202f"))
+		draw_rect(Rect2(x,y,126,26),Color("ffe2a4") if selected else Color("45617a"),false,1)
+		text_at(str(number).pad_zeros(2)+" "+("REPLAY" if briefing_progress.cleared.get(number,false) else ("OPEN" if unlocked else "LOCK")),Vector2(x+9,y+9),WHITE if unlocked else DIM)
+	japanese("任務： "+briefing_progress.stage_name(briefing_stage),Vector2(24,227),16,Color("fff0d9"))
+	var launchable=briefing_progress.can_launch(briefing_stage)
+	japanese("戦闘エリア：出撃可能" if launchable else "戦闘エリア：制作中",Vector2(25,251),13,Color("b9e5d9") if launchable else Color("f2bca3"))
+	japanese("未完成ステージでは出撃できません",Vector2(25,273),12,DIM)
+	draw_rect(Rect2(305,65,312,154),Color("1a233b"))
+	draw_rect(Rect2(305,65,312,154),Color("836b8e"),false,1)
+	japanese("出撃メンバー",Vector2(322,85),16,Color("ffe4b3"))
+	for slot in range(count):
+		var character=int(briefing_chars[slot])
+		var y=99+slot*38
+		if slot==briefing_slot:
+			draw_rect(Rect2(313,y-10,297,35),Color("433650"))
+			draw_rect(Rect2(313,y-10,297,35),Color("ffda94"),false,1)
+		ship(Vector2(341,y+7),COLORS[slot],1,character)
+		japanese(str(slot+1)+"P  "+PILOT_NAMES[character],Vector2(373,y+15),14,WHITE)
+		japanese(["運試し","解析","捕食"][character],Vector2(525,y+15),12,Color("e5c6af"))
+	draw_rect(Rect2(307,225,307,61),Color("1b2537"))
+	japanese("ムゥの発明／記録装置",Vector2(322,245),14,Color("eacdbb"))
+	japanese("4面：捕食図鑑　5面：解析　6面：運試し",Vector2(321,266),11,DIM)
+	draw_rect(Rect2(383,294,225,38),Color("67acb7") if launchable else Color("5a5d6e"))
+	japanese("出撃する" if launchable else "まだ出撃できません",Vector2(425,320),18,Color("102033") if launchable else WHITE)
+	text_at("LEFT/RIGHT STAGE   UP/DOWN PILOT   X CHANGE   ENTER/A LAUNCH",Vector2(24,347),Color("b7d5d7"))
+	if notice_time>0:
+		japanese(notice,Vector2(26,304),12,Color("ffe2a2"))
