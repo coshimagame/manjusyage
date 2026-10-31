@@ -7,6 +7,8 @@ static func initialize(p, character):
 	p.learned="none"
 	p.digest=0.0
 	p.pending_technique="none"
+	# Purely visual cue; it never alters a weapon or enemy hitbox.
+	p.fusion_flash=0.0
 
 static func level(p):
 	return mini(3,int(p.experience/8))
@@ -34,6 +36,7 @@ static func digest(p,dt):
 	if p.digest==0:
 		p.learned=p.pending_technique
 		p.experience+=8
+		p.fusion_flash=.72 # Technique gained: second luminous convergence
 
 static func eat(g,p) -> bool:
 	if p.digest>0 or p.charge<40: return false
@@ -42,6 +45,7 @@ static func eat(g,p) -> bool:
 			p.charge-=40
 			p.pending_technique=e.get("technique","aimed")
 			p.digest=1.2
+			p.fusion_flash=.9 # Captured a technique: first luminous convergence
 			e.hp=0
 			g.explode(e.pos,Color("ffdf86"),18)
 			g.sfx("pickup")
