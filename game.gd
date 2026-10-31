@@ -749,7 +749,7 @@ func finish(won):
 		var cfg=ConfigFile.new()
 		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
 		cfg.save("user://scores.cfg")
-		var record={"version":"0.2.0","ruleset":"ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
+		var record={"version":"0.2.0","ruleset":"red-echo-bio-v1" if bio_route else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
 		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
 	else:
