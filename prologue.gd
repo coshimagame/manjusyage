@@ -34,7 +34,7 @@ var frames := 0
 func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	font = SystemFont.new()
-	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
+	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
