@@ -111,7 +111,7 @@ func _ready():
 	pads = Array(Input.get_connected_joypads())
 	Input.joy_connection_changed.connect(_pad_changed)
 	jp_font=SystemFont.new()
-	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
+	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
 	var input_cfg=ConfigFile.new()
 	if input_cfg.load("user://controls.cfg")==OK: pad_profiles=input_cfg.get_value("input","profiles",{})
 	var audio_cfg=ConfigFile.new()
