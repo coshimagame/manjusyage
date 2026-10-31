@@ -50,6 +50,15 @@ func update(g,dt):
 			continue
 		var input=g.movement(i)
 		if g.auto_test: input=[Vector2.ZERO,true];p.inv=100
+		if p.character==0:
+			if input[1]:
+				p.shot_hold=minf(1.7,float(p.shot_hold)+dt)
+			elif p.shot_hold>=.70:
+				var charged=g.Abilities.damage(p,g.elapsed,randf())*(3.0+maxf(0,p.shot_hold-.7)*1.5)
+				g.bullets.append({"pos":p.pos+Vector2(0,-18),"vel":Vector2(0,-430),"color":p.color,"owner":i,"damage":charged,"grade":"charged_"+str(p.last_power_grade)})
+				p.shot_hold=0.0
+				g.sfx("shot")
+			else: p.shot_hold=0.0
 		p.pos+=input[0]*155*dt
 		p.pos=p.pos.clamp(Vector2(65,100),Vector2(575,315))
 		if input[1] and p.cool<=0:
@@ -97,12 +106,17 @@ func draw(g):
 			var depth=35+sin(y*.04+age)*9
 			g.draw_rect(Rect2(0 if side==0 else 640-depth,y,depth,4),Color("684365"))
 	for e in g.enemies:g.sprite(g.FOE,e.pos-Vector2(16,10),[Color("473a67"),Color("ad83a7"),Color("d96f9c"),Color("ffda8b")],2)
-	for b in g.bullets:g.draw_rect(Rect2(b.pos-Vector2(2,8),Vector2(4,13)),g.COLORS[b.color])
+	for b in g.bullets:
+		if str(b.get("grade","")).begins_with("charged_"):
+			g.draw_circle(b.pos,9,Color("ffcc8e"))
+			g.draw_rect(Rect2(b.pos-Vector2(3,13),Vector2(6,22)),Color("fff1d3"))
+		else:
+			g.draw_rect(Rect2(b.pos-Vector2(2,8),Vector2(4,13)),g.COLORS[b.color])
 	for b in g.shots:g.draw_circle(b.pos,b.r,Color("ff9baa"))
 	for p in g.players:
 		if p.down>0:g.draw_circle(p.pos,5,Color("e1c9a4"));continue
 		g.draw_set_transform(p.pos,-PI/2)
-		g.ship(Vector2.ZERO,g.COLORS[p.color])
+		g.ship(Vector2.ZERO,g.COLORS[p.color],1,p.character)
 		g.draw_set_transform(Vector2.ZERO)
 	if age<2 or age>22:
 		g.draw_rect(Rect2(0,135,640,62),Color("121b33"))
