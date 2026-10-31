@@ -516,6 +516,17 @@ func update_game(dt):
 		Abilities.digest(p,dt)
 		p.cool-=dt; p.inv-=dt; p.burst=maxf(0,p.burst-dt)
 		p.charge=minf(100,p.charge+dt*2)
+		# Cor mii continues normal fire while storing a variable-power release shot.
+		if p.character==0:
+			if movement(i)[1] and p.down<=0:
+				p.shot_hold=minf(1.7,float(p.shot_hold)+dt)
+			elif p.shot_hold>=.70 and p.down<=0:
+				var charged=Abilities.damage(p,elapsed,randf())*(3.0+maxf(0,p.shot_hold-.7)*1.5)
+				bullets.append({"pos":p.pos+Vector2(19,0),"color":p.color,"owner":i,"vel":Vector2(430,0),"damage":charged,"grade":"charged_"+str(p.last_power_grade)})
+				p.shot_hold=0.0
+				sfx("shot")
+			else:
+				p.shot_hold=0.0
 		if p.down>0:
 			p.down=maxf(.01,p.down-dt)
 			var near=false
@@ -904,7 +915,7 @@ func draw_collectible(item):
 # Visual only, behind no enemy bullets, with four small lights at most.
 func draw_mafio_fusion(p):
 	if p.character!=2 or p.down>0: return
-	var digesting=clampf(float(p.digest)/1.2,0.0,1.0)
+	var digesting=clampf(float(p.digest)/maxf(.1,float(p.digest_total)),0.0,1.0)
 	var flash=clampf(float(p.get("fusion_flash",0.0)),0.0,1.0)
 	if digesting<=0.0 and flash<=0.0: return
 	var opacity=minf(.75,.20+digesting*.23+flash*.38)
@@ -960,7 +971,12 @@ func _draw():
 			sprite(FOE_BLOOM if is_fan else FOE_LANCE,e.pos-Vector2(16,9),[Color("22213d"),Color("5e7390") if not is_fan else Color("8f456c"),Color("c9a5b3"),WHITE if e.flash>0 else Color("ffc37d")],2)
 	for b in bullets:
 		var tier=b.get("grade","normal")
-		if tier=="jackpot":
+		if str(tier).begins_with("charged_"):
+			var bright=Color("ffeb9b") if tier=="charged_jackpot" else (Color("fcb0b8") if tier=="charged_normal" else Color("95889f"))
+			draw_circle(b.pos,10,Color(bright.r,bright.g,bright.b,.2))
+			draw_colored_polygon(PackedVector2Array([b.pos+Vector2(-16,0),b.pos+Vector2(-4,-6),b.pos+Vector2(13,0),b.pos+Vector2(-4,6)]),bright)
+			draw_rect(Rect2(b.pos+Vector2(-8,-1),Vector2(13,2)),WHITE)
+		elif tier=="jackpot":
 			# The reward remains unmistakable, even at 640x360.
 			draw_rect(Rect2(b.pos.x-16,b.pos.y-4,25,8),Color("ea4778"))
 			draw_rect(Rect2(b.pos.x-12,b.pos.y-2,23,4),Color("ffe59b"))
@@ -1057,6 +1073,9 @@ func draw_hud():
 		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
 		if p.character==1 and p.down<=0:
 			text_at("A"+str(enemy_analysis.count_observed()),Vector2(x+94,10),Color("c0f7ff"))
+		if p.character==0 and p.down<=0:
+			draw_rect(Rect2(x+94,34,29,2),Color("392c48"))
+			draw_rect(Rect2(x+94,34,29.0*clampf(p.shot_hold/1.0,0,1),2),Color("ffcf77"))
 		if p.character==0 and p.down<=0 and p.stability>0:
 			text_at("S"+str(p.stability),Vector2(x+93,10),Color("ffe8af"))
 		if p.character==2 and p.down<=0:
@@ -1064,7 +1083,7 @@ func draw_hud():
 			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
 			draw_rect(Rect2(x+105,7,5,3),Color("9a6ed8"))
 			if p.digest>0:
-				draw_rect(Rect2(x+100,12,10*(1.0-clampf(p.digest/1.2,0,1)),2),Color("d9faff"))
+				draw_rect(Rect2(x+100,12,10*(1.0-clampf(p.digest/maxf(.1,p.digest_total),0,1)),2),Color("d9faff"))
 		if p.down>0:
 			text_at("SOS",Vector2(x+103,10),Color("ffb77c"))
 		else:
@@ -1301,12 +1320,12 @@ func draw_mafio_status(p):
 	for n in range(6):
 		var y=111+n*25
 		draw_arc(Vector2(321,y),16,-PI/2,PI/2,12,Color("e9b7ff"),1)
-	var progress=1.0-clampf(float(p.digest)/1.2,0,1)
+	var progress=1.0-clampf(float(p.digest)/maxf(.1,float(p.digest_total)),0,1)
 	draw_arc(Vector2(319,182),66,0,TAU,40,Color("e1cfaf"),2)
 	draw_arc(Vector2(319,182),65,-PI/2,-PI/2+progress*TAU,40,Color("9addff"),4)
 	japanese("現在の技",Vector2(61,127),15,WHITE)
 	japanese("基本弾" if str(p.learned)=="none" else ("拡散弾" if str(p.learned)=="fan" else "狙い撃ち"),Vector2(61,170),20,Color("ffe5b4"))
-	japanese("消化 "+str(int(progress*100))+"%",Vector2(382,150),17,WHITE)
+	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(382,150),17,WHITE)
 	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(365,213),15,WHITE)
 	text_at("E / X : ENEMY ARCHIVE",Vector2(344,262),Color("d5baf6"))
 	japanese("敵の技を食べて、自分の力へ変える",Vector2(150,316),14,WHITE)
