@@ -1302,12 +1302,14 @@ func draw_status_screen():
 	text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
 
 func draw_cormii_status(p):
-	japanese("確率変動・出力抽選",Vector2(29,71),20,Color("ffd7d9"))
-	var stabil=clampi(int(p.get("stability",0)),0,3)
-	var chances=[25,13,6,2]
-	var jackpots=[20,21,20,20]
-	var low_chance=chances[stabil]
-	japanese("確率安定コア  "+str(stabil)+"/3",Vector2(30,105),15,Color("ffe6aa"))
+	japanese("開運盤・おみくじ",Vector2(29,71),20,Color("ffd7d9"))
+	var luck=clampi(int(p.get("luck",50)),0,100)
+	var low_chance=int(round(lerpf(36.0,6.0,float(luck)/100.0)))
+	var jackpot_chance=int(round(lerpf(8.0,46.0,float(luck)/100.0)))
+	var normal_chance=100-low_chance-jackpot_chance
+	japanese("現在の運気  "+str(luck)+"%   "+Abilities.luck_title(p),Vector2(29,104),18,Color("ffe6aa"))
+	draw_rect(Rect2(326,86,269,10),Color("40293c"))
+	draw_rect(Rect2(326,86,269.0*float(luck)/100.0,10),Color("ffca7b"))
 	for i in range(3):
 		var x=42+i*185
 		var tint=[Color("5f3e57"),Color("bd5374"),Color("ffbb70")][i]
@@ -1317,9 +1319,15 @@ func draw_cormii_status(p):
 		draw_circle(Vector2(x+80,201),28,tint.darkened(.35))
 		draw_arc(Vector2(x+80,201),26,-PI*.6,PI*.6,20,tint,3)
 		japanese(["弱威力","通常威力","大当たり！"][i],Vector2(x+45,249),14,WHITE)
-		var chance=[low_chance,80-low_chance,20][i]
+		var chance=[low_chance,normal_chance,jackpot_chance][i]
 		text_at(str(chance)+"%",Vector2(x+63,169),Color("fff2de"),2)
-	japanese("強い一撃は残し、低威力の確率を減らす",Vector2(114,308),15,WHITE)
+	japanese("おみくじは再抽選！ 運気が下がることもある",Vector2(33,293),14,WHITE)
+	var log: Array=p.get("fortune_history",[])
+	if log.size()>0:
+		var last: Dictionary=log[log.size()-1]
+		japanese("最新："+str(last.event)+"  "+str(last.before)+"% → "+str(last.after)+"%",Vector2(33,316),14,Color("ffe6aa"))
+	else:
+		japanese("運試し履歴：まだありません",Vector2(33,316),14,Color("ffe6aa"))
 
 func draw_jiyoza_status(p):
 	japanese("解析端末 / 精密・漸進成長",Vector2(29,71),19,Color("b6efff"))
