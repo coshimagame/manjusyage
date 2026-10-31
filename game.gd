@@ -525,6 +525,7 @@ func update_game(dt):
 			elif p.shot_hold>=.70 and p.down<=0:
 				var charged=Abilities.damage(p,elapsed,randf())*(3.0+maxf(0,p.shot_hold-.7)*1.5)
 				bullets.append({"pos":p.pos+Vector2(19,0),"color":p.color,"owner":i,"vel":Vector2(430,0),"damage":charged,"grade":"charged_"+str(p.last_power_grade)})
+				Abilities.consume_charged_luck(p) # After firing, never before the damage roll.
 				p.shot_hold=0.0
 				sfx("shot")
 			else:
@@ -636,9 +637,9 @@ func update_game(dt):
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
 			if randi()%4==0:
 				var kind=0 if randi()%4==0 else 1
-				# Rare, Cormii-only pickup; stop dropping it once the core is maxed.
-				var needs_stability=players.any(func(p): return p.character==0 and p.stability<3)
-				if needs_stability and kind==1 and randi()%3==0: kind=2
+				# Rare omikuji may LOWER luck; even at 100%, let players choose to dodge it.
+				var has_cormii=players.any(func(p): return p.character==0)
+				if has_cormii and kind==1 and randi()%3==0: kind=2
 				pickups.append({"pos":e.pos,"kind":kind})
 	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
 	for shot in shots:
@@ -651,7 +652,7 @@ func update_game(dt):
 		item.pos.x-=dt*40
 		for p in players:
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
-				# Stability core belongs to Cormii; other pilots must not consume it.
+				# Omikuji belongs to Cormii; other pilots must not consume it.
 				if item.kind==2 and p.character!=0: continue
 				if item.kind==3 and (p.character!=1 or p.analysis_uses>=2 or p.analysis_charge>=100): continue
 				if item.kind==0:
@@ -662,8 +663,10 @@ func update_game(dt):
 					p.analysis_charge=mini(100,int(p.analysis_charge)+25)
 					if p.analysis_charge>=100: tell("SPECIAL ANALYSIS / READY",2.0)
 				else:
-					p.stability=mini(3,p.stability+1)
-					tell("COR MII / STABILITY "+str(p.stability)+"/3",2.0)
+					# Reroll replaces current fortune instantly, not an upgrade.
+					var new_roll=randi_range(5,100)
+					var omen=Abilities.draw_omikuji(p,new_roll)
+					tell("CORMII LUCK "+str(omen.before)+"% > "+str(omen.after)+"%",2.2)
 				explode(item.pos,Color("96faff") if item.kind==3 else (Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff"))),11 if item.kind in [2,3] else 8)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
@@ -886,7 +889,7 @@ func background():
 # HP and energy have distinct silhouettes, not tiny lettered boxes.
 func draw_collectible(item):
 	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
-	var image=artwork.texture("item_analysis" if item.kind==3 else ("item_stability" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy")))
+	var image=artwork.texture("item_analysis" if item.kind==3 else ("item_omikuji" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy")))
 	if image!=null:
 		draw_texture_rect(image,Rect2(p-Vector2(10,10),Vector2(20,20)),false)
 		return
@@ -900,15 +903,17 @@ func draw_collectible(item):
 		draw_rect(Rect2(p+Vector2(-5,-1),Vector2(10,2)),Color("e1ffff"))
 		return
 	if item.kind==2:
-		# Gold hexagonal probability core: two counter-rotating probability rings.
-		var ring=.15*sin(clock*4.0)
-		draw_circle(p,12,Color(1,.78,.25,.12))
-		draw_arc(p,9,ring,PI+ring,14,Color("ffe2a1"),1.5)
-		draw_arc(p,9,PI+ring,TAU+ring,14,Color("a6eaff"),1.5)
-		draw_colored_polygon(PackedVector2Array([p+Vector2(-4,-7),p+Vector2(4,-7),p+Vector2(8,0),p+Vector2(4,7),p+Vector2(-4,7),p+Vector2(-8,0)]),Color("a97630"))
-		draw_colored_polygon(PackedVector2Array([p+Vector2(-3,-5),p+Vector2(3,-5),p+Vector2(6,0),p+Vector2(3,5),p+Vector2(-3,5),p+Vector2(-6,0)]),Color("fff0bc"))
-		draw_rect(Rect2(p+Vector2(-1,-4),Vector2(2,8)),Color("8ecfdf"))
-		draw_rect(Rect2(p+Vector2(-4,-1),Vector2(8,2)),Color("8ecfdf"))
+		# A tiny omikuji: ivory folded paper, vermilion seal and golden cord.
+		draw_circle(p,12,Color(.98,.7,.27,.12))
+		draw_arc(p,11,clock*.35,clock*.35+PI*1.3,12,Color("ffe3a1"),1.1)
+		draw_rect(Rect2(p+Vector2(-5,-9),Vector2(10,18)),Color("795038"))
+		draw_rect(Rect2(p+Vector2(-4,-8),Vector2(8,16)),Color("fff3d6"))
+		draw_rect(Rect2(p+Vector2(-3,-7),Vector2(6,3)),Color("d34758"))
+		draw_rect(Rect2(p+Vector2(-1,-6),Vector2(2,2)),Color("fff3d6"))
+		draw_rect(Rect2(p+Vector2(-2,-1),Vector2(4,1)),Color("a47b57"))
+		draw_rect(Rect2(p+Vector2(-2,2),Vector2(4,1)),Color("a47b57"))
+		draw_line(p+Vector2(-6,-9),p+Vector2(6,-9),Color("fbd37b"),2)
+		draw_line(p+Vector2(0,-10),p+Vector2(0,-13),Color("fbd37b"),1)
 		return
 	var heart=item.kind==0
 	var outline=Color("3c152f") if heart else Color("112b4e")
@@ -1094,8 +1099,8 @@ func draw_hud():
 		if p.character==0 and p.down<=0:
 			draw_rect(Rect2(x+94,34,29,2),Color("392c48"))
 			draw_rect(Rect2(x+94,34,29.0*clampf(p.shot_hold/1.0,0,1),2),Color("ffcf77"))
-		if p.character==0 and p.down<=0 and p.stability>0:
-			text_at("S"+str(p.stability),Vector2(x+93,10),Color("ffe8af"))
+		if p.character==0 and p.down<=0:
+			text_at(str(int(p.luck))+"%",Vector2(x+96,10),Color("ffe8af"))
 		if p.character==2 and p.down<=0:
 			# Hair motif / tech digestion marker: left self, right other.
 			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
