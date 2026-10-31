@@ -16,6 +16,12 @@ const FONT = {
 
 var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
+const MafioArchive=preload("res://mafio_archive.gd")
+var mafio_archive=MafioArchive.new()
+var status_slot=0
+var status_return_mode="play"
+var archive_page=false
+var archive_cursor=0
 const VerticalPassage=preload("res://vertical_passage.gd")
 var vertical=VerticalPassage.new()
 var mixed_scroll=true
@@ -83,6 +89,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 
 func _ready():
 	artwork.reload()
+	mafio_archive.load_data()
 	# Pixel textures stay sharp at integer scaling.
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
@@ -137,6 +144,11 @@ func _ready():
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
+		if screenshot_mode=="status": mode="status"
+		if screenshot_mode=="archive":
+			mode="status"; status_slot=players.find_custom(func(p):return p.character==2)
+			if status_slot<0: status_slot=0
+			archive_page=players[status_slot].character==2
 		for pilot in players: pilot.inv=0
 	queue_redraw()
 
@@ -287,6 +299,23 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key = event.physical_keycode
+		if mode=="status":
+			if key in [KEY_ESCAPE,KEY_TAB,KEY_ENTER]:
+				mode=status_return_mode
+			elif key in [KEY_LEFT,KEY_A]:
+				status_slot=(status_slot+players.size()-1)%maxi(1,players.size()); archive_page=false
+			elif key in [KEY_RIGHT,KEY_D]:
+				status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
+			elif key==KEY_E and players[status_slot].character==2:
+				archive_page=not archive_page
+			elif key==KEY_UP:
+				archive_cursor=maxi(0,archive_cursor-1)
+			elif key==KEY_DOWN:
+				archive_cursor=mini(MafioArchive.ENTRIES.size()-1,archive_cursor+1)
+			return
+		if key==KEY_TAB and mode in ["play","pause"]:
+			status_return_mode=mode; mode="status"; status_slot=0; archive_page=false
+			return
 		if key==KEY_F4 and mode=="menu": pilot_offset=(pilot_offset+1)%3; return
 		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
 		if key==KEY_F8 and mode=="menu":
@@ -364,7 +393,7 @@ func burst(i):
 
 func _process(dt):
 	clock += dt
-	music.stream_paused = mode == "pause"
+	music.stream_paused = mode in ["pause","status"]
 	frame_count += 1
 	if mode=="controls":
 		if not calibration_ready and calibration_device>=0:
@@ -391,7 +420,17 @@ func _process(dt):
 				if x: change_color(slot)
 				if b: burst(slot)
 		elif mode == "pause":
-			if start or a: mode="play"
+			if x:
+				status_return_mode="pause"; status_slot=0; archive_page=false; mode="status"
+			elif start or a: mode="play"
+		elif mode == "status":
+			if start or b: mode=status_return_mode
+			elif left:
+				status_slot=(status_slot+players.size()-1)%maxi(1,players.size());archive_page=false
+			elif right:
+				status_slot=(status_slot+1)%maxi(1,players.size());archive_page=false
+			elif x and players[status_slot].character==2: archive_page=not archive_page
+			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -845,6 +884,9 @@ func draw_mafio_fusion(p):
 
 func _draw():
 	background()
+	if mode=="status":
+		draw_status_screen()
+		return
 	if mode=="controls":
 		draw_controls()
 		return
@@ -943,6 +985,7 @@ func _draw():
 		centered("START / ENTER : RESUME",194)
 		centered("Q : RETURN TO TITLE",213,DIM)
 		centered("M : SOUND   F11 : FULLSCREEN",245,DIM)
+		centered("TAB / X : PILOT STATUS",259,Color("eacb9c"))
 		japanese("F2：コントローラー設定 / F6：音声テスト",Vector2(179,272))
 	elif mode in ["clear","over"]: draw_result()
 
@@ -1117,3 +1160,133 @@ func draw_result():
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
+
+
+# STATUS-001: All pilots share identical HP/heart language, while the rest
+# of the page is entirely separate avionics. TAB or pause-pad X opens.
+func draw_status_screen():
+	if players.is_empty(): return
+	status_slot=clampi(status_slot,0,players.size()-1)
+	var p=players[status_slot]
+	var char_id=int(p.character)
+	var accents=[Color("ee618c"),Color("68c8f4"),Color("f4c974")]
+	var bg=[Color("221322"),Color("071c32"),Color("211a25")][char_id]
+	var accent=accents[char_id]
+	draw_rect(Rect2(0,0,640,360),bg)
+	draw_rect(Rect2(0,0,640,4),accent)
+	for j in range(21):
+		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent,0.045),1.0)
+	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
+	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
+	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
+	japanese("ライフ",Vector2(306,24),12,WHITE)
+	for h in range(4):
+		var c=Color("ff8fa7") if h<int(p.hp) else Color("3c425a")
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(370+h*18,14),Vector2(374+h*18,10),
+			Vector2(378+h*18,14),Vector2(382+h*18,10),
+			Vector2(386+h*18,14),Vector2(378+h*18,23)
+		]),c)
+	draw_line(Vector2(22,41),Vector2(617,41),accent,2)
+	if archive_page and char_id==2:
+		draw_mafio_archive()
+	elif char_id==0:
+		draw_cormii_status(p)
+	elif char_id==1:
+		draw_jiyoza_status(p)
+	else:
+		draw_mafio_status(p)
+	text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
+
+func draw_cormii_status(p):
+	japanese("確率変動・出力抽選",Vector2(29,71),20,Color("ffd7d9"))
+	var stabil=clampi(int(p.get("stability",0)),0,3)
+	var chances=[25,13,6,2]
+	var jackpots=[20,21,20,20]
+	var low_chance=chances[stabil]
+	japanese("確率安定コア  "+str(stabil)+"/3",Vector2(30,105),15,Color("ffe6aa"))
+	for i in range(3):
+		var x=42+i*185
+		var tint=[Color("5f3e57"),Color("bd5374"),Color("ffbb70")][i]
+		draw_rect(Rect2(x,124,167,148),Color("3f2436"))
+		draw_rect(Rect2(x,124,167,148),tint,false,2)
+		text_at(["LOW","NORMAL","JACKPOT"][i],Vector2(x+17,143),tint,2)
+		draw_circle(Vector2(x+80,201),28,tint.darkened(.35))
+		draw_arc(Vector2(x+80,201),26,-PI*.6,PI*.6,20,tint,3)
+		japanese(["弱威力","通常威力","大当たり！"][i],Vector2(x+45,249),14,WHITE)
+		var chance=[low_chance,80-low_chance,20][i]
+		text_at(str(chance)+"%",Vector2(x+63,169),Color("fff2de"),2)
+	japanese("強い一撃は残し、低威力の確率を減らす",Vector2(114,308),15,WHITE)
+
+func draw_jiyoza_status(p):
+	japanese("解析端末 / 精密・漸進成長",Vector2(29,71),19,Color("b6efff"))
+	for n in range(11):
+		draw_line(Vector2(40+n*54,100),Vector2(40+n*54,298),Color("1c5673"),1)
+	for n in range(8):
+		draw_line(Vector2(40,100+n*27),Vector2(603,100+n*27),Color("1c5673"),1)
+	var level_now=Abilities.level(p)+1
+	text_at("ANALYSIS LV "+str(level_now),Vector2(55,119),Color("a4e8ff"),2)
+	for n in range(12):
+		draw_rect(Rect2(55+n*42,162,32,15),Color("50d8ed") if n<mini(12,int(p.experience)) else Color("183e60"))
+	for m in range(4):
+		draw_line(Vector2(80+m*55,234),Vector2(245+m*55,210),Color("67c9f4",.45),2)
+	draw_arc(Vector2(505,227),57,0,TAU,40,Color("3f81ad"),1)
+	draw_arc(Vector2(505,227),45,0,TAU*float(level_now)/4.0,40,Color("c6f5ff"),3)
+	draw_line(Vector2(449,227),Vector2(561,227),Color("7ddfeb"),1)
+	draw_line(Vector2(505,168),Vector2(505,286),Color("7ddfeb"),1)
+	japanese("取得経験 "+str(p.experience),Vector2(56,283),15,WHITE)
+	japanese("解析精度と出力が着実に上がる",Vector2(58,306),14,Color("a9d8e7"))
+
+func draw_mafio_status(p):
+	japanese("融合器官 / 捕食・消化・変異",Vector2(29,71),19,Color("ffe3b6"))
+	draw_rect(Rect2(32,90,286,203),Color("34262f"))
+	draw_rect(Rect2(318,90,284,203),Color("2c2448"))
+	draw_line(Vector2(318,90),Vector2(318,293),Color("fff0d0"),2)
+	for n in range(6):
+		var y=111+n*25
+		draw_arc(Vector2(321,y),16,-PI/2,PI/2,12,Color("e9b7ff"),1)
+	var progress=1.0-clampf(float(p.digest)/1.2,0,1)
+	draw_arc(Vector2(319,182),66,0,TAU,40,Color("e1cfaf"),2)
+	draw_arc(Vector2(319,182),65,-PI/2,-PI/2+progress*TAU,40,Color("9addff"),4)
+	japanese("現在の技",Vector2(61,127),15,WHITE)
+	japanese("基本弾" if str(p.learned)=="none" else ("拡散弾" if str(p.learned)=="fan" else "狙い撃ち"),Vector2(61,170),20,Color("ffe5b4"))
+	japanese("消化 "+str(int(progress*100))+"%",Vector2(382,150),17,WHITE)
+	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(365,213),15,WHITE)
+	text_at("E / X : ENEMY ARCHIVE",Vector2(344,262),Color("d5baf6"))
+	japanese("敵の技を食べて、自分の力へ変える",Vector2(150,316),14,WHITE)
+
+func draw_mafio_archive():
+	japanese("マフィオの捕食図鑑",Vector2(23,72),20,Color("fff0d4"))
+	text_at("E / X : STATUS",Vector2(474,64),Color("e0b8fc"))
+	var entries=MafioArchive.ENTRIES
+	var index=clampi(archive_cursor,0,entries.size()-1)
+	archive_cursor=index
+	var first=clampi(index-3,0,maxi(0,entries.size()-8))
+	for i in range(8):
+		var j=first+i
+		if j>=entries.size(): break
+		var item=entries[j]
+		var unlocked=mafio_archive.unlocked(str(item.id))
+		var row_y=91+i*28
+		if j==index:
+			draw_rect(Rect2(18,row_y-15,298,26),Color("5b3e59"))
+			draw_rect(Rect2(18,row_y-15,3,26),Color("f5c979"))
+		japanese(str(item.id)+"  "+(str(item.name) if unlocked else "？？？？？"),Vector2(28,row_y),14,WHITE if unlocked else Color("76849c"))
+		if unlocked:
+			text_at("x"+str(mafio_archive.captured.get(str(item.id),0)),Vector2(259,row_y-7),Color("aee7ec"))
+	draw_rect(Rect2(326,77,295,245),Color("1b233b"))
+	draw_rect(Rect2(326,77,295,245),Color("c8a8ce"),false,1)
+	var chosen=entries[index]
+	if mafio_archive.unlocked(str(chosen.id)):
+		japanese(str(chosen.name),Vector2(349,107),21,Color("ffe4bd"))
+		draw_circle(Vector2(472,168),35,Color("544066"))
+		draw_arc(Vector2(472,168),30,0,TAU,24,Color("edc785"),2)
+		draw_colored_polygon(PackedVector2Array([Vector2(472,143),Vector2(489,174),Vector2(456,174)]),Color("9fbcf5"))
+		japanese("敵の攻撃："+str(chosen.attack),Vector2(343,239),13,WHITE)
+		japanese("習得技："+str(chosen.ability),Vector2(343,266),13,Color("d8b4fc"))
+		japanese("捕食："+str(mafio_archive.captured.get(str(chosen.id),0))+" 回",Vector2(343,295),12,WHITE)
+	else:
+		text_at("UNKNOWN",Vector2(371,128),Color("72809d"),2)
+		draw_circle(Vector2(472,185),43,Color("30344a"))
+		japanese("未捕食・詳細不明",Vector2(380,277),16,Color("91a1b7"))
+	text_at("UP / DOWN : SELECT",Vector2(355,310),Color("a5aac0"))
