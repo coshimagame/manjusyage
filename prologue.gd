@@ -4,11 +4,23 @@ extends Node2D
 const PAGES = [
 	["PROLOGUE / 01", "星が消えた夜", "空が裂けた夜、宇宙はひとつではなくなった。\n昨日まで隣にあった星が、別の世界へ消えていった。"],
 	["PROLOGUE / 02", "八つの境界", "重力も、光の速さも、世界ごとに違っていた。\n帰る道を探すには、八つの境界を越えるしかない。"],
-	["PROLOGUE / 03", "後席から見た空", "それぞれの世界で、ムゥの後席に乗って操縦を学んだ。\nやるっきゃない。そう思いながら、少しずつ飛べるようになった。"],
+	["PROLOGUE / 03", "後席から見た空", "それぞれの世界で、ムゥの後席に乗って操縦を学んだ。\n不安な空にも、頼れる背中があった。"],
 	["PROLOGUE / 04", "似た機体、違う力", "よく似た機体から、異なる現象が生まれていた。\n三つの世界の法則が、この空で重なり始める。"],
-	["PROLOGUE / 05", "最後の出撃", "世界を渡るたび、シールドは少しずつ弱くなる。\nそれでも、帰る場所をあきらめるわけにはいかない。"],
-	["PROLOGUE / 06", "三つの光", "三機の光が、暗闇へ走り出す。\n今度こそ、この戦いの向こうへ。"]
+	["PROLOGUE / 05", "整備室の灯", "見た目は同じでも、それぞれの機体には違う癖がある。\nそれを一つずつ知っていたのが、ムゥだった。"],
+	["PROLOGUE / 06", "無線の約束", "飛ぶ場所は、誰かに決められるものじゃない。\n古い整備室で交わした言葉が、今も残っている。"],
+	["PROLOGUE / 07", "最後の出撃", "世界を渡るたび、シールドは少しずつ弱くなる。\nそれでも、帰る場所をあきらめるわけにはいかない。"],
+	["PROLOGUE / 08", "三つの光", "三機の光が、暗闇へ走り出す。\n今度こそ、この戦いの向こうへ。"]
 ]
+# The spoken lines are v0.1 proposal, not user-approved final script.
+# 3 different worldlines have corresponding versions of Mu; this does not
+# imply a single Mu necessarily trained every pilot across all worlds.
+const DIALOGUES = {
+	2: [["ムゥ", "視線は前だ。機体の音を聞いてみろ。"], ["コルミィ", "うん！ もっと速く飛べそう！"]],
+	3: [["ジヨーザ", "同じ設計でも、応答が違う。なぜだろう。"], ["ムゥ", "そこに気づいたか。ほうほう。"]],
+	4: [["ムゥ", "ここが壊れていた。直せば、まだ飛べる。"], ["マフィオ", "ねえ、これも食べて強くなれる？"]],
+	5: [["ムゥ", "飛ぶ場所は、自分たちで決めろ。"], ["三人", "やるっきゃない！"]]
+}
+
 var page := 0
 var age := 0.0
 var clock := 0.0
@@ -34,6 +46,7 @@ func _ready():
 			return
 		if arg == "--story-shot": test_shot = true; page = 1; age = 4.0
 		if arg == "--training-shot": test_shot=true;page=2;age=4.0
+		if arg == "--workshop-shot": test_shot=true;page=4;age=4.0
 	queue_redraw()
 
 func _loop_music():
@@ -118,7 +131,8 @@ func _draw():
 		points.append(Vector2(640,360)); points.append(Vector2(0,360))
 		draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
 	if page in [2,3]: draw_training()
-	if page>=4:
+	if page in [4,5]: draw_workshop()
+	if page>=6:
 		for i in range(3):
 			var pos=Vector2(95+i*41+sin(clock)*4,130+i*21)
 			var hull=PackedVector2Array([pos+Vector2(-20,0),pos+Vector2(-11,-5),pos+Vector2(-6,-13),pos+Vector2(3,-4),pos+Vector2(21,0),pos+Vector2(2,5),pos+Vector2(-8,12)])
@@ -126,6 +140,7 @@ func _draw():
 			draw_line(pos+Vector2(-15,0),pos+Vector2(13,0),Color("e1e8d4"),2)
 			draw_rect(Rect2(pos+Vector2(-3,-3),Vector2(6,3)),[Color("6cf1eb"),Color("ffad81"),Color("c8acff")][i])
 			draw_line(pos+Vector2(-19,1),pos+Vector2(-32-sin(clock*12)*4,1),Color("ffb474"),3)
+	if DIALOGUES.has(page): draw_story_dialogue()
 	draw_rect(Rect2(0,252,640,108),Color(.025,.04,.08,.94))
 	draw_line(Vector2(28,253),Vector2(612,253),Color("637e9b"))
 	var opacity=clampf(age*1.5,0,1)
@@ -136,7 +151,7 @@ func _draw():
 		var text=lines[i].substr(0,int(age*22))
 		draw_string(font,Vector2(30,307+i*21),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("d8e5ee"))
 	draw_string(font,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
-	draw_string(font,Vector2(574,350),str(page+1)+" / 6",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
+	draw_string(font,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
 
 
 func draw_training():
@@ -157,3 +172,58 @@ func draw_training():
 				var offset=Vector2(38+j*11,sin(clock*4+j)*(8 if i==0 else 2))
 				if i==2: offset.x=75-j*11-fposmod(clock*20,11)
 				draw_rect(Rect2(pos+offset,Vector2(3,2)),col)
+
+
+# 0.9 story-vignette treatment: a workshop seen in silhouette only.
+# Mu's face, hair, clothes and final voice have deliberately not been fixed.
+func draw_workshop():
+	draw_rect(Rect2(34,78,563,171),Color("151d35"))
+	draw_rect(Rect2(41,84,550,152),Color("253046"))
+	for i in range(11):
+		var x=56+i*51
+		draw_line(Vector2(x,84),Vector2(x,231),Color("344057"),1)
+	draw_rect(Rect2(58,107,264,100),Color("121f37"))
+	draw_rect(Rect2(62,111,256,92),Color("213d56"))
+	# Holographic maintenance diagram; pulses with a gentle breathing glow.
+	var breath=.55+.4*sin(clock*1.6)
+	draw_line(Vector2(79,153),Vector2(295,153),Color(.21,.78,.90,breath),1)
+	draw_circle(Vector2(196,150),43,Color("183550"))
+	draw_arc(Vector2(196,150),40,0,TAU,36,Color(.38,.88,.96,breath),2)
+	for i in range(3):
+		var x=140+i*49
+		var y=140+sin(clock*2.0+i)*5
+		var c=[Color("f38c91"),Color("88d4fc"),Color("efc579")][i]
+		draw_colored_polygon(PackedVector2Array([Vector2(x-16,y),Vector2(x-3,y-7),Vector2(x+15,y),Vector2(x-4,y+7)]),c.darkened(.38))
+		draw_line(Vector2(x-12,y),Vector2(x+12,y),c,2)
+	draw_rect(Rect2(354,183,200,43),Color("101727"))
+	draw_rect(Rect2(354,183,200,3),Color("ac6477"))
+	for j in range(9):
+		draw_rect(Rect2(365+j*20,197,11,3),Color("2c5668"))
+		draw_rect(Rect2(368+j*20,202,5,2),Color("75c3ce") if j%3==0 else Color("536375"))
+	# Engineer: back-facing silhouette with animated tools, no confirmed portrait.
+	var shoulder=Vector2(468+sin(clock*1.3)*1.5,151)
+	draw_colored_polygon(PackedVector2Array([shoulder+Vector2(-27,14),shoulder+Vector2(-20,-9),shoulder+Vector2(17,-9),shoulder+Vector2(29,14),shoulder+Vector2(35,72),shoulder+Vector2(-32,72)]),Color("394254"))
+	draw_circle(shoulder+Vector2(0,-15),17,Color("232b3c"))
+	draw_rect(Rect2(shoulder+Vector2(-17,-21),Vector2(35,4)),Color("687d8c"))
+	draw_line(shoulder+Vector2(-23,27),Vector2(409,202),Color("657889"),7)
+	draw_line(Vector2(409,202),Vector2(393+sin(clock*4)*2,198),Color("afc6bb"),2)
+	for k in range(7):
+		var x=390+float(k*5)
+		var y=186+sin(clock*3+k*2)*10
+		draw_rect(Rect2(x,y,2,2),Color(1,.76,.47,.3+.5*absf(sin(clock*2+k))))
+	draw_string(font,Vector2(63,99),"ANALYSIS / 3 WORLDLINES",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("87cde1"))
+
+func draw_story_dialogue():
+	var index=0 if age < 4.25 else 1
+	var entry=DIALOGUES[page][index]
+	var local_age=age if index==0 else age-4.25
+	var letters=maxi(0,int((local_age-.35)*23))
+	var dialogue=entry[1].substr(0,letters)
+	var reveal=clampf(local_age*2.0,0,1)
+	draw_rect(Rect2(62,209,518,37),Color(.025,.055,.115,.83*reveal))
+	draw_rect(Rect2(62,209,3,37),Color(.95,.48,.51,.87*reveal))
+	draw_string(font,Vector2(77,224),entry[0],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.95,.68,.54,reveal))
+	draw_string(font,Vector2(143,232),dialogue,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color(.95,.94,.87,reveal))
+	if int(clock*2)%2==0 and letters>=entry[1].length():
+		draw_rect(Rect2(555,232,7,2),Color(.91,.76,.54,reveal))
+
