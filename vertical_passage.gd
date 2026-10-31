@@ -56,6 +56,7 @@ func update(g,dt):
 			elif p.shot_hold>=.70:
 				var charged=g.Abilities.damage(p,g.elapsed,randf())*(3.0+maxf(0,p.shot_hold-.7)*1.5)
 				g.bullets.append({"pos":p.pos+Vector2(0,-18),"vel":Vector2(0,-430),"color":p.color,"owner":i,"damage":charged,"grade":"charged_"+str(p.last_power_grade)})
+				g.Abilities.consume_charged_luck(p) # Identical decay in vertical flight.
 				p.shot_hold=0.0
 				g.sfx("shot")
 			else: p.shot_hold=0.0
