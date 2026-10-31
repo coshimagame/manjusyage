@@ -20,7 +20,7 @@ for the game. Consult current user instructions for publishing/sharing decisions
 
 
 ## MANJUSHAGE official canon — 2026-10-30
-The game's official future title is **曼珠沙華 / MANJUSHAGE**. Before editing story, characters, artwork, stages, or multiplayer mechanics, read **docs/manjushage/INDEX.md** and **docs/manjushage/CODEX_HANDOFF.md**, then the related canon files. The three protagonists are **コルミィ, ジヨーザ, マフィオ**. **ジヨーザ is a boy (user-confirmed); never depict him as a girl in story or concept art.** The genders of コルミィ and マフィオ have not been confirmed. Do not use the outdated names コルミー or ショルマ as current character names. Separate approved canon from proposals, and implementation from plans. Keep asset provenance and continuity records updated; protect existing gameplay and tests.
+The game's official future title is **曼珠沙華 / MANJUSHAGE**. Before editing story, characters, artwork, stages, or multiplayer mechanics, read **docs/manjushage/INDEX.md** and **docs/manjushage/CODEX_HANDOFF.md**, then the related canon files. The three protagonists are **コルミィ, ジヨーザ, マフィオ**. **ジヨーザ is a boy (user-confirmed); never depict him as a girl in story or concept art. マフィオ is a girl with a boyish/tomboyish presentation (user-confirmed); never depict her as a boy. コルミィ's gender remains unconfirmed.** Do not use the outdated names コルミー or ショルマ as current character names. Separate approved canon from proposals, and implementation from plans. Keep asset provenance and continuity records updated; protect existing gameplay and tests.
 
 
 ## 2026-10-30 Sound creator role
