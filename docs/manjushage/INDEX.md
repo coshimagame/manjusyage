@@ -68,3 +68,7 @@
 - [PROVISIONAL_VISUAL_BIBLE_V01.md](PROVISIONAL_VISUAL_BIBLE_V01.md) — 正式な性別と性格を守りつつ、未決の髪型・衣装・機体外観・各世界線の花色・HUD・タイトルロゴまで、**AI仮案で統一した v0.1**。レビューごとに変更可能。
 - [CLASSIC_STG_INSPIRATIONS_V01.md](CLASSIC_STG_INSPIRATIONS_V01.md) — 沙羅曼蛇／ツインビー／R-TYPE／エリア88の設計の長所を研究し、世界線・花晶・護り花弁・ムゥ開発へ**独自の仮機能**として置き換える。原作素材や旋律のコピーはしない。
 - [NEXT_ACTION.md](NEXT_ACTION.md) — 上記をGodotの実ゲームへ段階実装し、画像比較・実動作テスト・コミットまで進める作業キュー。
+
+
+## 2026-10-31 実装済みビジュアル改修・第1弾
+- [VISUAL_PASS_01.md](VISUAL_PASS_01.md) — 実ユーザープレイ画面を受けて、`game.gd`・`biological_stage.gd` のコードを改修した記録。**GitHubソース反映済み、Godot実機テスト・画像比較待ち**。アートブック最終稿の完成ではない。
