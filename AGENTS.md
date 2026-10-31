@@ -33,3 +33,7 @@ For any music, sound effect, soundtrack or scene-scoring task, also assume the d
 
 ## 2026-10-31 Continuous development sessions (user request)
 When the user asks Codex to keep developing MANJUSHAGE without stopping after every small implementation, follow `docs/manjushage/CODEX_CONTINUOUS_DEV_PROMPT.md`. Prioritize **actual runnable Godot changes and tests** over documentation alone; complete one safely scoped milestone, capture real results, commit, then proceed to the next within the current session. Respect runtime and user-approval boundaries; never claim a prompt creates indefinite background execution. Preserve progress and next work in `docs/manjushage/NEXT_ACTION.md` at a session boundary. Start with the artbook-to-game visuals gap (Issue #1).
+
+
+## 2026-10-31 User direction: HUD, items, bullet scattering, cartridge-label-style title
+Read `docs/manjushage/HUD_UI_DIRECTION.md` and `docs/manjushage/LOGO_LABEL_DIRECTION.md` for the latest user request. Improve the **real playable Godot UI and logo**, not documentation only. Keep bullet/player/item readability highest priority, including 3P and vertical play. Make title art original: evoke luxurious Japanese 16-bit cartridge labels, but use no real platform trademarks or copied packaging. Log actual testing and before/after screenshots. The files are design briefs; game changes are not yet verified.
