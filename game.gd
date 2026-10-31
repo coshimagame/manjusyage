@@ -196,11 +196,18 @@ func sfx(name):
 			return
 
 func track(name):
-	if name=="wistful_demo" and not ResourceLoader.exists("res://audio/wistful_demo.wav"):
+	# Any absent optional song must fall back before load(), not emit errors
+	# or silently abandon playback after a stage clear.
+	var requested=str(name)
+	var path="res://audio/"+requested+".wav"
+	if not ResourceLoader.exists(path):
 		name="ruins" if mode=="play" else "title"
-		tell("NEW MUSIC NOT BUILT / USING ORIGINAL",5)
+		if not ResourceLoader.exists("res://audio/"+str(name)+".wav"):
+			push_warning("Neither requested music nor fallback is available")
+			return
+		tell("MUSIC "+requested+" UNAVAILABLE / FALLBACK",3.0)
 	music_name=name
-	music.stream = load("res://audio/"+name+".wav")
+	music.stream = load("res://audio/"+str(name)+".wav")
 	if music.stream == null:
 		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
 		return
