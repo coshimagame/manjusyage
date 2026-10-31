@@ -4,20 +4,21 @@ extends RefCounted
 # or destroyed using the screen clear; boss bullets are excluded too.
 # Data is separate from Mafio's capture archive.
 const SAVE_PATH="user://jiyoza_enemy_analysis.cfg"
+var save_path: String=SAVE_PATH
 var observed: Dictionary={}
 
 func load_data():
 	observed.clear()
 	var cfg=ConfigFile.new()
-	if cfg.load(SAVE_PATH)!=OK: return
-	for key in cfg.get_section_keys("observed") if cfg.has_section("observed") else []:
+	if cfg.load(save_path)!=OK or not cfg.has_section("observed"): return
+	for key in cfg.get_section_keys("observed"):
 		observed[str(key)]=bool(cfg.get_value("observed",str(key),false))
 
 func save_data() -> int:
 	var cfg=ConfigFile.new()
 	for key in observed:
 		cfg.set_value("observed",str(key),bool(observed[key]))
-	return cfg.save(SAVE_PATH)
+	return cfg.save(save_path)
 
 func previously_observed(enemy_id: String) -> bool:
 	return bool(observed.get(enemy_id,false))
