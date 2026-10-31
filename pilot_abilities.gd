@@ -13,26 +13,47 @@ static func initialize(p, character):
 	p.pending_technique="none"
 	# Purely visual cue; it never alters a weapon or enemy hitbox.
 	p.fusion_flash=0.0
-	p.stability=0 # Cormii-only stabilization cores, stage-local (0..3)
+	p.luck=50 # Cormii: fortune % shown as current omen, not guaranteed damage.
+	p.fortune_history=[] # Session-only log; Stage 6 diary is a later feature.
 	p.last_power_grade="normal"
 
 static func level(p):
 	return mini(3,int(p.experience/8))
 
-# Cormii's power is rolled once PER shot volley, not time-cycled.
-# Each core narrows low/high extremes but never removes the jackpot.
-# All numbers are playtest prototypes; future network simulation should
-# share/serialize the deterministic RNG seed, not call this on each client.
+# Current luck changes the chance of weak and jackpot volleys; it never
+# guarantees an outcome. A charged attack inherits this random roll.
+# Fortune is NOT permanent and does not use the old cumulative stability tiers.
 static func chance_profile(p, roll: float) -> Dictionary:
-	var level_stability=clampi(int(p.get("stability",0)),0,3)
-	var low_chance=[.25,.13,.06,.02][level_stability]
-	var normal_end=[.80,.79,.80,.80][level_stability]
-	var low_power=[.45,.75,.95,1.10][level_stability]
-	var standard_power=[1.00,1.08,1.20,1.30][level_stability]
-	var jackpot_power=[3.00,2.65,2.25,2.00][level_stability]
-	if roll<low_chance: return {"power":low_power,"grade":"low"}
-	if roll<normal_end: return {"power":standard_power,"grade":"normal"}
-	return {"power":jackpot_power,"grade":"jackpot"}
+	var fortune=clampf(float(p.get("luck",50))/100.0,0.0,1.0)
+	var unlucky=lerpf(.36,.06,fortune)
+	var jackpot=lerpf(.08,.46,fortune)
+	if roll<unlucky: return {"power":.55,"grade":"low"}
+	if roll>=1.0-jackpot: return {"power":3.0,"grade":"jackpot"}
+	return {"power":1.0,"grade":"normal"}
+
+static func draw_omikuji(p, result: int) -> Dictionary:
+	var before=clampi(int(p.get("luck",50)),0,100)
+	var after=clampi(result,0,100)
+	p.luck=after
+	p.fortune_history.append({"event":"おみくじ","before":before,"after":after})
+	if p.fortune_history.size()>8: p.fortune_history.pop_front()
+	return {"before":before,"after":after,"delta":after-before}
+
+static func consume_charged_luck(p) -> int:
+	# One fixed 8-point decline per fired charge shot, regardless of damage.
+	var before=clampi(int(p.get("luck",50)),0,100)
+	p.luck=maxi(0,before-8)
+	p.fortune_history.append({"event":"溜め撃ち","before":before,"after":int(p.luck)})
+	if p.fortune_history.size()>8: p.fortune_history.pop_front()
+	return int(p.luck)
+
+static func luck_title(p) -> String:
+	var value=int(p.get("luck",50))
+	if value>=85: return "大吉"
+	if value>=65: return "中吉"
+	if value>=45: return "吉"
+	if value>=25: return "末吉"
+	return "凶"
 
 static func damage(p, time, roll: float=.5):
 	var growth=level(p)
@@ -45,8 +66,7 @@ static func damage(p, time, roll: float=.5):
 
 static func label(p,time):
 	if p.character==0:
-		var stable=clampi(int(p.get("stability",0)),0,3)
-		return "確率安定 "+str(stable)+"/3" if stable>0 else "確率変動"
+		return "運気 "+str(int(p.get("luck",50)))+"% / "+luck_title(p)
 	if p.character==1: return "解析 Lv"+str(level(p)+1)
 	return ("一時装備："+("拡散" if p.learned=="fan" else "狙い撃ち")+" "+str(snappedf(p.digest,.1))+"秒") if p.digest>0 else "通常武器"
 
