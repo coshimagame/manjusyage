@@ -17,6 +17,9 @@ const FONT = {
 var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
+const EnemyAnalysis=preload("res://enemy_analysis.gd")
+var enemy_analysis=EnemyAnalysis.new()
+var analysis_flash=0.0
 var mafio_archive=MafioArchive.new()
 var status_slot=0
 var status_return_mode="play"
@@ -90,6 +93,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 func _ready():
 	artwork.reload()
 	mafio_archive.load_data()
+	enemy_analysis.load_data()
 	# Pixel textures stay sharp at integer scaling.
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
@@ -383,6 +387,9 @@ func burst(i):
 	var p = players[i]
 	if p.down>0: return
 	if bio_route and p.character==2 and Abilities.eat(self,p): return
+	if p.character==1:
+		special_analysis(p)
+		return
 	if p.charge<100: return
 	p.charge = 0; p.burst = .55; p.inv = 1
 	shots.clear()
@@ -394,8 +401,34 @@ func burst(i):
 	shake = 4
 	sfx("burst")
 
+
+# SPECIAL ANALYSIS: only previously observed normal enemies, never bosses.
+# Enemy-bullet tags travel from the source and are checked independently.
+func special_analysis(p):
+	if p.charge<100: return
+	var affected=0
+	for e in enemies:
+		if e.get("analysis_eligible",false) and float(e.get("hp",0.0))>0: affected+=1
+	for shot in shots:
+		if shot.get("analysis_eligible",false): affected+=1
+	if affected==0:
+		tell("UNKNOWN ENEMY / BOSS IMMUNE",2.2)
+		return
+	p.charge=0
+	p.burst=.48
+	p.inv=maxf(float(p.inv),.65)
+	analysis_flash=.56
+	for e in enemies:
+		if e.get("analysis_eligible",false) and float(e.get("hp",0.0))>0:
+			explode(e.pos,Color("a8eaff"),11)
+			e.hp=0
+			e.flash=.2
+	shots=shots.filter(func(shot):return not bool(shot.get("analysis_eligible",false)))
+	tell("ANALYSIS / KNOWN PATTERNS PURGED",2.2)
+	sfx("burst")
 func _process(dt):
 	clock += dt
+	analysis_flash=maxf(0.0,analysis_flash-dt)
 	music.stream_paused = mode in ["pause","status"]
 	frame_count += 1
 	if mode=="controls":
@@ -577,7 +610,7 @@ func update_game(dt):
 			e.cool=2.5
 			var target=players[wave_id%count].pos
 			for angle in ([-.2,0,.2] if bio_route and e.get("technique","")=="fan" else [0]):
-				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3})
+				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3,"analysis_eligible":e.get("analysis_eligible",false),"source_id":e.get("analysis_id","")})
 		for p in players:
 			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
 		if e.hp<=0:
@@ -619,8 +652,12 @@ func update_game(dt):
 func spawn_wave():
 	wave_id+=1
 	var base=85+(wave_id*61)%190
+	var pattern="fan" if wave_id%2==0 else "aimed"
+	var group: Array=[]
 	for j in range(3+count):
-		enemies.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":"fan" if wave_id%2==0 else "aimed"})
+		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern})
+	enemy_analysis.mark_new_group(group,"prototype/"+pattern)
+	enemies.append_array(group)
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
