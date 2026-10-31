@@ -8,6 +8,8 @@ static func initialize(p, character):
 	p.digest=0.0
 	p.digest_total=1.0
 	p.shot_hold=0.0
+	p.analysis_charge=0 # Separate Jiyoza scanner gauge; only scan crystals fill it.
+	p.analysis_uses=0 # Max twice per stage.
 	p.pending_technique="none"
 	# Purely visual cue; it never alters a weapon or enemy hitbox.
 	p.fusion_flash=0.0
