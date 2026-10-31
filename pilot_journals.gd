@@ -29,10 +29,11 @@ func save_data():
 	cfg.set_value("analysis","scanned",enemy_scanned)
 	return cfg.save(SAVE_PATH)
 
-func record_fortune(grade:String,power:float,stability:int):
+func record_fortune(grade:String,power:float,luck:int):
+	# Prototype journal. Luck is a rerolled percentage, NOT legacy stability levels.
 	if not chance_counts.has(grade): return
 	chance_counts[grade]=int(chance_counts[grade])+1
-	fortunes.append({"grade":grade,"power":snappedf(power,.01),"stability":stability})
+	fortunes.append({"grade":grade,"power":snappedf(power,.01),"luck":clampi(luck,0,100)})
 	if fortunes.size()>LIMIT: fortunes.pop_front()
 	if total_fortunes()%20==0: save_data()
 
