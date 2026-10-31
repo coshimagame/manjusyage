@@ -292,6 +292,17 @@ func tell(message, duration = 3.0):
 func open_briefing(stage: int=2):
 	briefing_stage=clampi(stage,1,briefing_progress.highest_unlocked)
 	briefing_slot=0
+	# Carry the current pilot choices into the preparation room.
+	var assigned=[]
+	for i in range(count):
+		var selected=int(players[i].character) if i<players.size() else (i+pilot_offset)%3
+		if assigned.has(selected):
+			for choice in range(3):
+				if not assigned.has(choice):
+					selected=choice
+					break
+		briefing_chars[i]=selected
+		assigned.append(selected)
 	mode="briefing"
 	notice_time=0
 	track("title")
@@ -421,6 +432,21 @@ func _input(event):
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
+		var click_pos=get_global_mouse_position()
+		for number in range(1,9):
+			var x=22+int((number-1)/4)*134
+			var y=77+((number-1)%4)*29
+			if Rect2(x,y,126,26).has_point(click_pos) and briefing_progress.can_select(number):
+				briefing_stage=number
+				return
+		for slot in range(count):
+			if Rect2(313,89+slot*38,297,35).has_point(click_pos):
+				briefing_slot=slot
+				change_briefing_character()
+				return
+		if Rect2(383,294,225,38).has_point(click_pos): launch_from_briefing()
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
 		if Rect2(220,236,200,32).has_point(p): start_game()
