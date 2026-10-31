@@ -2,17 +2,18 @@ extends RefCounted
 # BRIEFING-001: stage availability and Mu-invention milestones.
 # Do not confuse narrative stage availability with playable stage content.
 const SAVE_PATH="user://briefing_progress.cfg"
+var save_path: String=SAVE_PATH # Override in isolated tests.
 const MAX_STAGES=8
 const PLAYABLE_STAGES=[1] # Only stage 1 is implemented in the current game.
 const NAMES=[
 	"赤い残響",
-	"境界航路（仮）",
-	"海月回廊（仮）",
-	"記憶の庭（仮）",
-	"解析都市（仮）",
-	"運命の社（仮）",
-	"帰還の門（仮）",
-	"彼岸と此岸（仮）"
+	"追憶の海（仮）",
+	"孤独な庭（仮）",
+	"分岐する空（仮）",
+	"忘却の要塞（仮）",
+	"白い彼岸（仮）",
+	"輪廻の終点（仮）",
+	"曼珠沙華（仮）"
 ]
 const INVENTIONS={
 	"mafio":{"stage":4,"name":"ごちそうさま図鑑"},
@@ -27,7 +28,7 @@ func load_data():
 	highest_unlocked=1
 	cleared.clear()
 	var cfg=ConfigFile.new()
-	if cfg.load(SAVE_PATH)!=OK: return
+	if cfg.load(save_path)!=OK: return
 	highest_unlocked=clampi(int(cfg.get_value("stage","highest_unlocked",1)),1,MAX_STAGES)
 	for i in range(1,MAX_STAGES+1):
 		cleared[i]=bool(cfg.get_value("cleared",str(i),false))
@@ -40,7 +41,7 @@ func save_data() -> int:
 	cfg.set_value("stage","highest_unlocked",highest_unlocked)
 	for i in range(1,MAX_STAGES+1):
 		cfg.set_value("cleared",str(i),bool(cleared.get(i,false)))
-	return cfg.save(SAVE_PATH)
+	return cfg.save(save_path)
 
 func mark_cleared(stage: int):
 	if stage<1 or stage>MAX_STAGES: return
