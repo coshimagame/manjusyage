@@ -1,0 +1,131 @@
+name: Build MANJUSHAGE Windows playable preview
+on:
+  push:
+    branches:
+      - playtest/windows-build-20261101
+    paths:
+      - '.github/workflows/build_windows_playtest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.6 Standard and Windows executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq unzip zip libasound2t64 libgl1 libgl1-mesa-dri fonts-noto-cjk
+          curl -fLsS --retry 4 -o /tmp/godot-linux.zip 'https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip'
+          unzip -q /tmp/godot-linux.zip -d /tmp
+          sudo install -m755 /tmp/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
+          curl -fLsS --retry 4 -o /tmp/godot-windows.zip 'https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_win64.exe.zip'
+          unzip -q /tmp/godot-windows.zip -d /tmp/godot-win
+          godot --version
+          ls -lh /tmp/godot-win
+      - name: Generate game music and import the current Godot project
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/build_story_music.cjs
+          godot --headless --editor --path . --import --quit 2>&1 | tee /tmp/manjushage-import.log
+          if grep -Ei 'SCRIPT ERROR|Parse Error' /tmp/manjushage-import.log; then
+            echo 'Fatal script/import error'; exit 1
+          fi
+      - name: Create complete playable PCK including scripts, audio and art
+        shell: bash
+        run: |
+          cat >/tmp/manjushage_pack.gd <<'GD'
+          extends SceneTree
+
+          const SKIP_DIRS := [".git", ".github", "docs", "books", "browser-prototype", "tests", "tools", "runtime", "dist", "userdata", "editor"]
+          const EXTENSIONS := ["gd", "uid", "tscn", "tres", "res", "import", "png", "jpg", "jpeg", "webp", "wav", "ogg", "mp3", "ctex", "stex", "sample", "json", "cfg", "bin", "gdshader"]
+
+          func _walk(folder: String, files: Array[String]) -> void:
+              var dir := DirAccess.open(folder)
+              if dir == null:
+                  push_error("Missing folder: " + folder)
+                  return
+              dir.include_hidden = true
+              dir.list_dir_begin()
+              while true:
+                  var name := dir.get_next()
+                  if name.is_empty():
+                      break
+                  if name == "." or name == "..":
+                      continue
+                  var path := folder.path_join(name)
+                  if dir.current_is_dir():
+                      if not name in SKIP_DIRS:
+                          _walk(path, files)
+                  elif name == "project.godot" or name.get_extension().to_lower() in EXTENSIONS:
+                      files.append(path)
+              dir.list_dir_end()
+
+          func _initialize() -> void:
+              var files: Array[String] = []
+              _walk("res://", files)
+              files.sort()
+              var packer := PCKPacker.new()
+              var result := packer.pck_start("/tmp/MANJUSHAGE.pck")
+              if result != OK:
+                  push_error("PCK start failed: " + str(result))
+                  quit(1)
+                  return
+              for file in files:
+                  var err := packer.add_file(file, file)
+                  if err != OK:
+                      push_error("PCK add failed: " + file + ", " + str(err))
+                      quit(1)
+                      return
+              result = packer.flush()
+              if result != OK:
+                  push_error("PCK flush failed: " + str(result))
+                  quit(1)
+                  return
+              print("PACKAGED: ", files.size(), " files, ", FileAccess.get_file_as_bytes("/tmp/MANJUSHAGE.pck").size(), " bytes")
+              quit(0)
+          GD
+          godot --headless --path . --script /tmp/manjushage_pack.gd 2>&1 | tee /tmp/manjushage-pack.log
+          test -s /tmp/MANJUSHAGE.pck
+      - name: Smoke test packaged game in Godot
+        shell: bash
+        run: |
+          set -eo pipefail
+          timeout 50s godot --headless --audio-driver Dummy --main-pack /tmp/MANJUSHAGE.pck --quit-after 120 -- --autotest --players=1 2>&1 | tee /tmp/manjushage-smoke.log
+          if grep -Ei 'SCRIPT ERROR|Parse Error|Failed to load|Failed loading resource|Error loading' /tmp/manjushage-smoke.log; then
+            echo 'Packaged game startup error'; exit 1
+          fi
+      - name: Create one-folder Windows game package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/MANJUSHAGE_Windows
+          cp /tmp/godot-win/Godot_v4.6-stable_win64.exe dist/MANJUSHAGE_Windows/MANJUSHAGE.exe
+          cp /tmp/MANJUSHAGE.pck dist/MANJUSHAGE_Windows/MANJUSHAGE.pck
+          cp GODOT-LICENSE.txt GODOT-COPYRIGHT.txt dist/MANJUSHAGE_Windows/
+          printf '@echo off\r\ncd /d "%%~dp0"\r\nstart "" "%%~dp0MANJUSHAGE.exe" --main-pack "%%~dp0MANJUSHAGE.pck"\r\n' >dist/MANJUSHAGE_Windows/START.cmd
+          cat >dist/MANJUSHAGE_Windows/README.txt <<'TXT'
+          MANJUSHAGE / 曼珠沙華 — Windows 試遊版 (GitHub main: 2026-11-01)
+          1. ZIP をすべて展開してください。
+          2. START.cmd をダブルクリックするとゲームが起動します。
+          3. プロローグは Esc でスキップ可能。タイトルは Enter で出撃。
+          4. キーボード：矢印キーで移動、Zで射撃、Xで属性切替、Cで特殊攻撃。
+          5. コントローラーにも対応。詳しい操作はゲーム画面に従ってください。
+          ※ 開発中の試遊版です。Windows のアンチくんがローカルで編集した
+            未コミットの変更は含まれません。GitHub の登録済みソースから作成。
+          TXT
+          ls -lh dist/MANJUSHAGE_Windows
+      - name: Upload Windows playable game files
+        uses: actions/upload-artifact@v4
+        with:
+          name: MANJUSHAGE-Windows-Playtest
+          path: dist/MANJUSHAGE_Windows/
+          if-no-files-found: error
+          retention-days: 7
