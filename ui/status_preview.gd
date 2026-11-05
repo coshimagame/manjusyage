@@ -17,7 +17,10 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
+		if event.keycode in [KEY_1, KEY_2, KEY_3]:
+			selected = event.keycode - KEY_1
+			queue_redraw()
+		elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
 			launch_game()
 		elif event.keycode in [KEY_RIGHT, KEY_D]:
 			selected = (selected + 1) % 3
@@ -28,6 +31,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_A:
 			launch_game()
+		elif event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
+			selected = (selected + 1) % 3
+			queue_redraw()
+		elif event.button_index == JOY_BUTTON_LEFT_SHOULDER:
+			selected = (selected + 2) % 3
+			queue_redraw()
 		elif event.button_index == JOY_BUTTON_DPAD_RIGHT:
 			selected = (selected + 1) % 3
 			queue_redraw()
