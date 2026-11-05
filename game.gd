@@ -533,6 +533,9 @@ func _process(dt):
 	clock += dt
 	analysis_flash=maxf(0.0,analysis_flash-dt)
 	music.stream_paused = mode in ["pause","status"]
+	# Keep the launch/boss/result PCM cue audible above the stage BGM.
+	# Restore the original mix as soon as the cue ends; do not mute music permanently.
+	music.volume_db = -12.0 if jingle_player.playing else 0.0
 	frame_count += 1
 	if mode=="controls":
 		if not calibration_ready and calibration_device>=0:
