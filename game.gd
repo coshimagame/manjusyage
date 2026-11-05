@@ -73,6 +73,8 @@ var boss = {}
 var notice = ""
 var notice_time = 0.0
 var shake = 0.0
+const JingleCues = preload("res://jingle_cues.gd")
+var jingle_player: AudioStreamPlayer
 var music: AudioStreamPlayer
 var sounds = {}
 var sfx_pool: Array = []
@@ -118,6 +120,9 @@ func _ready():
 	if audio_cfg.load("user://audio.cfg")==OK:
 		var output=str(audio_cfg.get_value("audio","output","Default"))
 		if AudioServer.get_output_device_list().has(output): AudioServer.output_device=output
+	jingle_player = AudioStreamPlayer.new()
+	add_child(jingle_player)
+	jingle_player.volume_db = -7.0
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.volume_db = -3
@@ -167,6 +172,11 @@ func _ready():
 			archive_page=players[status_slot].character==2
 		for pilot in players: pilot.inv=0
 	queue_redraw()
+
+func play_jingle(cue: String):
+	if muted or auto_test: return
+	jingle_player.stream = JingleCues.make_stream(cue)
+	jingle_player.play()
 
 func _repeat_music():
 	music.play()
@@ -345,6 +355,7 @@ func start_game():
 		Abilities.initialize(players[i],character)
 	briefing_custom_squad=false
 	mode = "play"
+	play_jingle("launch")
 	show_help = false
 	track("wistful_demo" if new_music else "ruins")
 	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
@@ -838,6 +849,7 @@ func explode(pos,color,amount):
 func finish(won):
 	mode="clear" if won else "over"
 	music.stop(); sfx("gate" if won else "burst")
+	play_jingle("clear" if won else "fail")
 	if won: track("ending")
 	if won:
 		if not auto_test: briefing_progress.mark_cleared(1)
