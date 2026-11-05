@@ -3,7 +3,8 @@ extends RefCounted
 # break gameplay when a file is missing. Textures load at game startup.
 const ROOT = "res://art/active/"
 const SLOTS = [
-	"title_logo", "title_backdrop", "button_sortie",
+	"title_logo", "title_backdrop", "button_sortie", "button_start", "button_continue", "button_stage", "button_status",
+	"panel_cormii", "panel_jiyoza", "panel_mafio", "hud_life", "hud_boss", "hud_energy", "hud_items", "item_crystal",
 	"portrait_cormii", "portrait_jiyoza", "portrait_mafio",
 	"ship_cormii", "ship_jiyoza", "ship_mafio",
 	"enemy_lance", "enemy_bloom",
