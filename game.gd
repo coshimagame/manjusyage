@@ -16,6 +16,7 @@ const FONT = {
 
 var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
+const StageInterludes=preload("res://stage_interludes.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
 const BriefingProgress=preload("res://briefing_progress.gd")
@@ -27,6 +28,7 @@ var briefing_custom_squad=false
 var enemy_analysis=EnemyAnalysis.new()
 var analysis_flash=0.0
 var mafio_archive=MafioArchive.new()
+var interlude_page=0
 var status_slot=0
 var status_return_mode="play"
 var archive_page=false
@@ -452,7 +454,10 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: mode="interlude"; interlude_page=0
+		elif mode=="interlude":
+			if key==KEY_ESCAPE: open_briefing(briefing_progress.next_briefing_stage())
+			elif key in [KEY_ENTER,KEY_SPACE]: advance_interlude()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -581,7 +586,10 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: mode="interlude"; interlude_page=0
+		elif mode == "interlude":
+			if b: open_briefing(briefing_progress.next_briefing_stage())
+			elif start or a: advance_interlude()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1077,8 +1085,27 @@ func draw_mafio_fusion(p):
 		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
 		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
 
+func advance_interlude():
+	interlude_page+=1
+	var lines: Array=StageInterludes.page(1).get("lines",[])
+	if interlude_page>=lines.size(): open_briefing(briefing_progress.next_briefing_stage())
+
+func draw_interlude_screen():
+	var entry=StageInterludes.page(1)
+	var lines: Array=entry.get("lines",[])
+	draw_rect(Rect2(0,0,640,360),Color("0b1429"))
+	draw_rect(Rect2(22,36,596,286),Color("172b42"))
+	draw_rect(Rect2(25,39,590,280),Color("0c1728"))
+	japanese(str(entry.get("title","STORY")),Vector2(42,79),24,Color("f4dba5"))
+	japanese(str(entry.get("speaker","記録")),Vector2(43,139),16,Color("78d8e9"))
+	if not lines.is_empty(): japanese(str(lines[clampi(interlude_page,0,lines.size()-1)]),Vector2(43,185),17,WHITE)
+	japanese("決定：次へ   戻る：スキップ",Vector2(43,290),12,DIM)
+
 func _draw():
 	background()
+	if mode=="interlude":
+		draw_interlude_screen()
+		return
 	if mode=="briefing":
 		draw_briefing_screen()
 		return
