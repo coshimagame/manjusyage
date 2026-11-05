@@ -100,6 +100,11 @@ const CONTROL_ACTIONS = ["up","down","left","right","fire","color","burst","star
 const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色切り替えのボタン","バーストのボタン","決定・ポーズのボタン"]
 
 func _ready():
+	# One-shot pilot selection from the optional status preview scene.
+	# Do not overwrite --pilot CLI test arguments or persistent player saves.
+	if get_tree().has_meta("manjushage_selected_pilot"):
+		pilot_offset = clampi(int(get_tree().get_meta("manjushage_selected_pilot")), 0, 2)
+		get_tree().remove_meta("manjushage_selected_pilot")
 	artwork.reload()
 	mafio_archive.load_data()
 	enemy_analysis.load_data()

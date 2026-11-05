@@ -85,7 +85,7 @@ func _draw() -> void:
 			_draw_placeholder(center, accent)
 		draw_string(font, box.position + Vector2(12, 179), "機体 / SHIP 0" + str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#dce5ee"))
 		draw_string(font, box.position + Vector2(12, 200), "画像差替え対応", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("#a0b7c7"))
-	draw_string(font, Vector2(24, 338), "試作UI / 選択は本編に未反映", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#9aadc0"))
+	draw_string(font, Vector2(24, 338), "試作UI / 先頭機体を本編へ引継", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#9aadc0"))
 	draw_rect(LAUNCH_RECT, Color("#773243"))
 	draw_rect(LAUNCH_RECT, Color("#f0c778"), false, 2)
 	draw_string(font, Vector2(460, 339), "出撃テスト ▶", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#fff3db"))
@@ -99,9 +99,10 @@ func _draw_placeholder(center: Vector2, accent: Color) -> void:
 	draw_line(center + Vector2(-27, 0), center + Vector2(25, 0), accent, 3)
 	draw_rect(Rect2(center + Vector2(-5, -4), Vector2(10, 8)), Color("#e8f2f0"))
 
-## Starts the existing playable game menu; pilot selection is not transferred yet.
+## Transfer only the chosen lead pilot to the existing game menu (no save-file mutation).
 func launch_game() -> void:
 	if launching:
 		return
 	launching = true
+	get_tree().set_meta("manjushage_selected_pilot", clampi(selected, 0, 2))
 	get_tree().call_deferred("change_scene_to_file", "res://main.tscn")
