@@ -41,6 +41,8 @@ var new_music=true
 const ArtCatalog = preload("res://art_catalog.gd")
 var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
+const LivingTerrain = preload("res://living_terrain.gd")
+var living_terrain=LivingTerrain.new()
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
@@ -103,6 +105,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 
 func _ready():
 	artwork.reload()
+	living_terrain.setup(1)
 	mafio_archive.load_data()
 	enemy_analysis.load_data()
 	briefing_progress.load_data()
@@ -635,6 +638,11 @@ func update_game(dt):
 	if combo_time<0: combo=1
 	if gate==0 and boss.is_empty(): travel+=dt*(28 if bio_route else 35)
 	if bio_route: bio.update(self,dt)
+	if mode=="play":
+		living_terrain.tick(dt)
+		for pilot in players:
+			if pilot.down<=0 and living_terrain.is_hazard(pilot.pos) and pilot.inv<=0:
+				hurt(pilot)
 	for i in range(count):
 		var p=players[i]
 		p.fusion_flash=maxf(0.0,float(p.get("fusion_flash",0.0))-dt)
@@ -979,6 +987,7 @@ func background():
 			return
 	if bio_route:
 		bio.draw_background(self)
+		living_terrain.draw_layer(self)
 		return
 	# Four independent scroll planes; fine highlights stay on the native pixel grid.
 	for y in range(360):
@@ -1128,6 +1137,7 @@ func _draw():
 		return
 	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
 	if bio_route: bio.draw_organs(self)
+	if not bio_route: living_terrain.draw_layer(self)
 	if gate>0: draw_gate()
 	for e in enemies:
 		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)
