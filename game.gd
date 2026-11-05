@@ -1342,6 +1342,8 @@ func draw_menu():
 	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
 	# Optional original sortie button PNG; ornate pixel fallback stays playable.
 	var sortie_button=artwork.texture("button_sortie")
+	if sortie_button==null:
+		sortie_button=artwork.texture("button_start")
 	if sortie_button!=null:
 		draw_texture_rect(sortie_button,Rect2(220,236,200,32),false)
 	else:
@@ -1420,6 +1422,25 @@ func draw_status_screen():
 		draw_rect(Rect2(253,6,43,32),Color("101625"))
 		draw_rect(Rect2(253,6,43,32),accent,false,1)
 		ship(Vector2(275,22),accent,1,char_id)
+	# Original 2026-11-05 character UI artwork, supplied by the creator.
+	# The status screen remains usable with procedural fallback when assets are absent.
+	var original_panel_key=["panel_cormii","panel_jiyoza","panel_mafio"][char_id]
+	var original_panel=artwork.texture(original_panel_key)
+	if original_panel!=null:
+		draw_texture_rect(original_panel,Rect2(12,53,616,246),false)
+		# Live stats are shown separately; artwork's printed mock values are not game state.
+		draw_rect(Rect2(13,302,614,30),Color("100e1c"))
+		draw_rect(Rect2(13,302,614,30),accent,false,1)
+		var live_text=""
+		if char_id==0:
+			live_text="運気 "+str(int(p.luck))+"% / "+Abilities.luck_title(p)
+		elif char_id==1:
+			live_text="解析 "+str(p.analysis_charge)+"% / 使用 "+str(p.analysis_uses)+"/2"
+		else:
+			live_text="消化残り "+str(snappedf(p.digest,.1))+"秒 / 技 "+str(p.learned)
+		japanese(live_text,Vector2(24,323),15,WHITE)
+		text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
+		return
 	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
 	japanese("ライフ",Vector2(306,24),12,WHITE)
 	for h in range(4):
