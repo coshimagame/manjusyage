@@ -487,8 +487,17 @@ func change_color(i):
 func burst(i):
 	var p = players[i]
 	if p.down>0: return
-	if p.character==2 and Abilities.eat(self,p):
-		tell("MAFIO CAPTURE / "+str(p.learned).to_upper(),1.8)
+	if p.character==2:
+		if Abilities.eat(self,p):
+			tell("MAFIO CAPTURE / "+str(p.learned).to_upper(),1.8)
+			return
+		# A failed capture must not accidentally consume a full-screen bomb.
+		if p.digest>0:
+			tell("MAFIO / DIGESTING "+str(snappedf(p.digest,.1))+"s",1.2)
+		elif p.charge<40:
+			tell("MAFIO / NEED 40 ENERGY",1.2)
+		else:
+			tell("MAFIO / WEAKEN ENEMY (HP <= 3), MOVE WITHIN 85",1.5)
 		return
 	if p.character==1:
 		special_analysis(p)
@@ -1225,6 +1234,11 @@ func draw_hud():
 		if p.character==0 and p.down<=0:
 			text_at(str(int(p.luck))+"%",Vector2(x+96,10),Color("ffe8af"))
 		if p.character==2 and p.down<=0:
+			# Digestion timer is visible in battle, not only on the status page.
+			if p.digest>0:
+				text_at(str(ceili(p.digest))+"s",Vector2(x+96,10),Color("ffe3a4"))
+			else:
+				text_at("EAT",Vector2(x+96,10),Color("ffe3a4"))
 			# Hair motif / tech digestion marker: left self, right other.
 			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
 			draw_rect(Rect2(x+105,7,5,3),Color("9a6ed8"))
