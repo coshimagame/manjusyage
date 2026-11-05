@@ -783,6 +783,9 @@ func update_game(dt):
 					var omen=Abilities.draw_omikuji(p,new_roll)
 					tell("CORMII LUCK "+str(omen.before)+"% > "+str(omen.after)+"%",2.2)
 				explode(item.pos,Color("96faff") if item.kind==3 else (Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff"))),11 if item.kind in [2,3] else 8)
+				# Confirm actual gameplay effect to the collecting player.
+				var pickup_names=["ライフ回復","エネルギー +25","おみくじ","解析 +25"]
+				tell(PILOT_NAMES[int(p.character)]+" / "+pickup_names[clampi(int(item.kind),0,3)],1.5)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0: finish(true)
@@ -1403,6 +1406,13 @@ func draw_status_screen():
 	for j in range(21):
 		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent.r,accent.g,accent.b,.045),1.0)
 	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
+	# Optional original character art. Never substitute newly generated concept art.
+	var portrait_key=["portrait_cormii","portrait_jiyoza","portrait_mafio"][char_id]
+	var portrait=artwork.texture(portrait_key)
+	if portrait!=null:
+		draw_rect(Rect2(472,50,148,142),Color("07101e"))
+		draw_texture_rect(portrait,Rect2(479,57,134,128),false)
+		draw_rect(Rect2(472,50,148,142),Color(accent.r,accent.g,accent.b,.18),false,2.0)
 	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
 	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
 	japanese("ライフ",Vector2(306,24),12,WHITE)
