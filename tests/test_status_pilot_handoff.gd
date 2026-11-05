@@ -25,10 +25,10 @@ func _run() -> void:
 		if int(get_meta(META_KEY)) != pilot:
 			_fail("pilot mismatch: expected %d" % pilot)
 			return
-		# A deferred scene transition was scheduled. Check one selection per run
-		# to avoid racing deferred scene changes or affecting player data.
-		break
-	print("PASS status pilot handoff: selected=0, metadata=0")
+		# The deferred scene transition has not run yet; reset the launch guard
+		# to check all three indices synchronously before the next frame.
+		ui.launching = false
+	print("PASS status pilot handoff: selected=0,1,2 metadata matched")
 	quit(0)
 
 func _fail(message: String) -> void:
