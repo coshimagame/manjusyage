@@ -1099,6 +1099,7 @@ func draw_interlude_screen():
 	japanese(str(entry.get("title","STORY")),Vector2(42,79),24,Color("f4dba5"))
 	japanese(str(entry.get("speaker","記録")),Vector2(43,139),16,Color("78d8e9"))
 	if not lines.is_empty(): japanese(str(lines[clampi(interlude_page,0,lines.size()-1)]),Vector2(43,185),17,WHITE)
+	japanese(str(interlude_page+1)+" / "+str(lines.size()),Vector2(530,290),12,DIM)
 	japanese("決定：次へ   戻る：スキップ",Vector2(43,290),12,DIM)
 
 func _draw():
@@ -1414,7 +1415,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : STORY" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
 
 
