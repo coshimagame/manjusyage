@@ -9,6 +9,9 @@ const LINES = [
 	["マフィオ", "ねえ、次は何が食べられる？"],
 	["ムゥ", "焦らず、一つずつ確かめよう。"]
 ]
+signal intermission_finished
+## Set this from the stage-clear caller; empty path emits the signal only.
+@export_file("*.tscn") var next_scene_path: String = "res://main.tscn"
 var line_index := 0
 var visible_chars := 0.0
 var log_open := false
@@ -51,6 +54,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _advance() -> void:
+	if LINES.is_empty():
+		_finish()
+		return
 	if visible_chars < LINES[line_index][1].length():
 		visible_chars = float(LINES[line_index][1].length())
 	elif line_index < LINES.size() - 1:
@@ -60,8 +66,13 @@ func _advance() -> void:
 		_finish()
 
 func _finish() -> void:
-	# Preview returns to existing title; integration into stage progression is separate.
-	get_tree().change_scene_to_file("res://main.tscn")
+	intermission_finished.emit()
+	if next_scene_path.is_empty():
+		return
+	if not ResourceLoader.exists(next_scene_path):
+		push_error("Intermission next scene not found: " + next_scene_path)
+		return
+	get_tree().change_scene_to_file(next_scene_path)
 
 func _draw() -> void:
 	var w := size.x
@@ -79,8 +90,10 @@ func _draw() -> void:
 	draw_rect(Rect2(18, h - 115, w - 36, 2), Color("#e88b9a"))
 	if log_open:
 		draw_string(font, Vector2(32, 32), "会話ログ / L または Y で閉じる", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#f3dfcc"))
-		for i in range(LINES.size()):
+		for i in range(line_index + 1):
 			draw_string(font, Vector2(32, 68 + i * 31), LINES[i][0] + "： " + LINES[i][1], HORIZONTAL_ALIGNMENT_LEFT, w - 64, 15, Color("#d4e9ef") if i <= line_index else Color("#637d87"))
+		return
+	if LINES.is_empty():
 		return
 	draw_string(font, Vector2(32, h - 90), LINES[line_index][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("#ffd49a"))
 	draw_string(font, Vector2(32, h - 55), LINES[line_index][1].substr(0, int(visible_chars)), HORIZONTAL_ALIGNMENT_LEFT, w - 64, 18, Color("#e9f5f3"))
