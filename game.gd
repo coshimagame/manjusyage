@@ -1336,9 +1336,21 @@ func draw_menu():
 		centered("MANJUSHAGE",122,Color("f2bfa3"),2)
 	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
 	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
-	ship(Vector2(319,181),COLORS[0],2,pilot_offset)
-	ship(Vector2(240,180),COLORS[1],1,(pilot_offset+1)%3)
-	ship(Vector2(397,180),COLORS[2],1,(pilot_offset+2)%3)
+	# Show the actual launch roster, including the solo and 2P cases.
+	# F4 / pad X rotates the lead pilot without altering saved progress.
+	for slot in range(3):
+		var selected=slot<count
+		var character=(pilot_offset+slot)%3
+		var card_x=180+slot*99
+		var card_color=[Color("ee618c"),Color("68c8f4"),Color("f4c974")][character]
+		draw_rect(Rect2(card_x,165,91,42),Color("11192b") if selected else Color("0b1020"))
+		draw_rect(Rect2(card_x,165,91,42),card_color if selected else Color("3d4358"),false,1)
+		if selected:
+			ship(Vector2(card_x+16,179),card_color,1,character)
+			japanese(PILOT_NAMES[character],Vector2(card_x+32,182),11,WHITE)
+			text_at("P"+str(slot+1),Vector2(card_x+32,196),card_color)
+		else:
+			japanese("未参加",Vector2(card_x+23,190),11,DIM)
 	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
 	draw_rect(Rect2(220,239,200,28),COLORS[0])
 	centered("LAUNCH SQUAD",249,Color("0a1830"),1)
