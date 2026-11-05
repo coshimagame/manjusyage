@@ -410,6 +410,9 @@ func _input(event):
 		if key==KEY_TAB and mode in ["play","pause"]:
 			status_return_mode=mode; mode="status"; status_slot=0; archive_page=false
 			return
+		if key==KEY_P and mode=="menu":
+			get_tree().call_deferred("change_scene_to_file", "res://ui/status_preview.tscn")
+			return
 		if key==KEY_L and mode=="menu" and briefing_progress.highest_unlocked>=2:
 			open_briefing(briefing_progress.next_briefing_stage()); return
 		if key==KEY_F4 and mode=="menu": pilot_offset=(pilot_offset+1)%3; return
@@ -1340,6 +1343,7 @@ func draw_menu():
 		japanese("曼珠沙華",Vector2(219,99),48,Color("f1f0e6"))
 		centered("MANJUSHAGE",122,Color("f2bfa3"),2)
 	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
+	japanese("P：主人公ステータス・選択画面",Vector2(207,174),11,WHITE)
 	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
 	ship(Vector2(319,181),COLORS[0],2,pilot_offset)
 	ship(Vector2(240,180),COLORS[1],1,(pilot_offset+1)%3)
