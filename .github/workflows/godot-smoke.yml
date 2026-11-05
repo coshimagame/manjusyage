@@ -1,0 +1,38 @@
+name: Godot 4.6 gameplay smoke
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**.gd'
+      - '**.tscn'
+      - 'project.godot'
+      - 'audio/**'
+      - 'tests/**'
+      - '.github/workflows/godot-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  gameplay-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      XDG_DATA_HOME: ${{ runner.temp }}/manjushage-test-data
+      XDG_CONFIG_HOME: ${{ runner.temp }}/manjushage-test-config
+      XDG_CACHE_HOME: ${{ runner.temp }}/manjushage-test-cache
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.6
+        shell: bash
+        run: |
+          curl -fL --retry 3 -o godot.zip https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          chmod +x Godot_v4.6-stable_linux.x86_64
+          echo "$PWD" >> "$GITHUB_PATH"
+      - name: Import project and check scripts
+        run: Godot_v4.6-stable_linux.x86_64 --headless --editor --path . --import --quit
+      - name: Save regression
+        run: Godot_v4.6-stable_linux.x86_64 --headless --path . --script tests/test_save.gd
+      - name: Solo gameplay to boss and clear (synthetic autoplay)
+        run: Godot_v4.6-stable_linux.x86_64 --headless --path . --fixed-fps 60 -- --autotest --players=1
+      - name: Three-player gameplay to boss and clear (synthetic autoplay)
+        run: Godot_v4.6-stable_linux.x86_64 --headless --path . --fixed-fps 60 -- --autotest --players=3
