@@ -21,5 +21,14 @@ func reload():
 		if resource is Texture2D:
 			images[key] = resource
 
+## Report absent optional artwork without loading or changing gameplay assets.
+## Useful for diagnosing why a Windows build shows fallback vector drawings.
+func missing_slots() -> Array[String]:
+	var missing: Array[String] = []
+	for key in SLOTS:
+		if not images.has(key):
+			missing.append(key)
+	return missing
+
 func texture(key: String) -> Texture2D:
 	return images.get(key, null) as Texture2D
