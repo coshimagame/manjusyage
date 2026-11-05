@@ -109,7 +109,15 @@ static func eat(g,p) -> bool:
 
 static func velocities(p,forward,targets):
 	if p.character!=2 or p.learned=="none": return [forward*390]
+	# Experimental captured-weapon patterns. All return shot velocities only;
+	# collision, penetration and status effects remain the caller's responsibility.
+	# Existing P-001 aimed and P-002 fan behavior is preserved.
 	if p.learned=="fan": return [forward.rotated(-.15)*390,forward*390,forward.rotated(.15)*390]
+	if p.learned=="petal": return [forward.rotated(-.28)*350,forward.rotated(-.12)*380,forward*400,forward.rotated(.12)*380,forward.rotated(.28)*350]
+	if p.learned=="seed": return [forward.rotated(-.22)*320,forward*390,forward.rotated(.22)*320]
+	if p.learned=="halo": return [forward.rotated(-.45)*260,forward.rotated(-.2)*310,forward*360,forward.rotated(.2)*310,forward.rotated(.45)*260]
+	if p.learned=="beam": return [forward*520]
+	if p.learned=="pierce": return [forward*450] # Speed only; piercing requires projectile hit handling.
 	var nearest=null
 	var distance=10000.0
 	for e in targets:
