@@ -42,6 +42,8 @@ const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
+const PortraitSlots = preload("res://portrait_slots.gd")
+var portrait_slots = PortraitSlots.new()
 var mode = "menu"
 var count = 1
 var players: Array = []
@@ -1442,6 +1444,16 @@ func draw_status_expression(p,char_id,accent):
 		var digest=float(p.get("digesting",0.0))
 		mood=1 if digest>0.0 else 0
 		mood_label="消化中" if mood==1 else "わくわく"
+	var expression="neutral"
+	if mood==1:
+		expression="happy" if char_id==0 else ("focused" if char_id==1 else "digesting")
+	elif mood==-1:
+		expression="worried"
+	var portrait=portrait_slots.get_portrait(char_id,expression)
+	if portrait != null:
+		draw_texture_rect(portrait,Rect2(548,44,62,39),false)
+		japanese(mood_label,Vector2(508,88),11,WHITE)
+		return
 	var cx=579.0
 	var cy=63.0
 	draw_rect(Rect2(502,43,113,54),Color("101523"))
