@@ -17,6 +17,9 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			get_tree().call_deferred("change_scene_to_file", "res://main.tscn")
+			return
 		if event.keycode in [KEY_1, KEY_2, KEY_3]:
 			selected = event.keycode - KEY_1
 			queue_redraw()
@@ -73,7 +76,7 @@ func _draw() -> void:
 	for y in range(0, 360, 4):
 		draw_line(Vector2(0, y), Vector2(640, y), Color("#25304a", 0.24))
 	draw_string(font, Vector2(24, 34), "MANJUSHAGE  /  STATUS", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("#f3e9d9"))
-	draw_string(font, Vector2(24, 62), "機体情報  •  方向キー / タップで切替", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#a6bdcf"))
+	draw_string(font, Vector2(24, 62), "機体情報  •  方向キー / タップで切替  •  ESCで戻る", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#a6bdcf"))
 	for i in range(3):
 		var box := Rect2(24 + i * 204, 90, 192, 218)
 		var accent: Color = COLORS[i]
