@@ -35,7 +35,7 @@ const VerticalPassage=preload("res://vertical_passage.gd")
 var vertical=VerticalPassage.new()
 var mixed_scroll=true
 var pilot_offset=0
-var new_music=false
+var new_music=true
 const ArtCatalog = preload("res://art_catalog.gd")
 var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
@@ -73,6 +73,9 @@ var boss = {}
 var notice = ""
 var notice_time = 0.0
 var shake = 0.0
+const JingleCues = preload("res://jingle_cues.gd")
+const AmbientStageMusic = preload("res://ambient_stage_music.gd")
+var jingle_player: AudioStreamPlayer
 var music: AudioStreamPlayer
 var sounds = {}
 var sfx_pool: Array = []
@@ -118,6 +121,9 @@ func _ready():
 	if audio_cfg.load("user://audio.cfg")==OK:
 		var output=str(audio_cfg.get_value("audio","output","Default"))
 		if AudioServer.get_output_device_list().has(output): AudioServer.output_device=output
+	jingle_player = AudioStreamPlayer.new()
+	add_child(jingle_player)
+	jingle_player.volume_db = -7.0
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.volume_db = -3
@@ -168,6 +174,11 @@ func _ready():
 		for pilot in players: pilot.inv=0
 	queue_redraw()
 
+func play_jingle(cue: String):
+	if muted or auto_test: return
+	jingle_player.stream = JingleCues.make_stream(cue)
+	jingle_player.play()
+
 func _repeat_music():
 	music.play()
 
@@ -196,6 +207,11 @@ func sfx(name):
 			return
 
 func track(name):
+	if str(name) == "ambient_stage":
+		music_name = "ambient_stage"
+		music.stream = AmbientStageMusic.make_stream()
+		if not auto_test: music.play()
+		return
 	# Any absent optional song must fall back before load(), not emit errors
 	# or silently abandon playback after a stage clear.
 	var requested=str(name)
@@ -345,8 +361,9 @@ func start_game():
 		Abilities.initialize(players[i],character)
 	briefing_custom_squad=false
 	mode = "play"
+	play_jingle("launch")
 	show_help = false
-	track("wistful_demo" if new_music else "ruins")
+	track("ambient_stage" if new_music else "ruins")
 	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
 
 func button_edge(device, button):
@@ -394,7 +411,7 @@ func _input(event):
 		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
 		if key==KEY_F8 and mode=="menu":
 			new_music=not new_music
-			track("wistful_demo" if new_music else "title")
+			track("ambient_stage" if new_music else "title")
 			return
 		if key==KEY_F3 and mode=="menu":
 			bio_route=not bio_route
@@ -798,6 +815,7 @@ func begin_boss():
 	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
 	if bio_route: bio.begin_boss(count)
 	track("sentinel")
+	play_jingle("boss")
 	tell("WARNING / LIVING CORE - EXPERIMENT" if bio_route else "WARNING / PRISM SENTINEL",4)
 
 func update_boss(dt):
@@ -838,6 +856,7 @@ func explode(pos,color,amount):
 func finish(won):
 	mode="clear" if won else "over"
 	music.stop(); sfx("gate" if won else "burst")
+	play_jingle("clear" if won else "fail")
 	if won: track("ending")
 	if won:
 		if not auto_test: briefing_progress.mark_cleared(1)
