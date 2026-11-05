@@ -12,7 +12,7 @@ static func play(parent: Node) -> void:
 	pcm.resize(sample_count * 2)
 	for i in range(sample_count):
 		var t := float(i) / SAMPLE_RATE
-		var signal := 0.0
+		var amplitude := 0.0
 		for j in range(NOTES.size()):
 			var local_t := t - NOTE_START[j]
 			if local_t < 0.0 or local_t >= 0.32:
@@ -21,9 +21,9 @@ static func play(parent: Node) -> void:
 			var phase := TAU * NOTES[j] * local_t
 			# Warm triangle fundamental plus a quiet overtone.
 			var triangle := (2.0 / PI) * asin(sin(phase))
-			signal += envelope * (triangle * 0.23 + sin(phase * 2.0) * 0.045)
+			amplitude += envelope * (triangle * 0.23 + sin(phase * 2.0) * 0.045)
 		var fade := minf(1.0, (LENGTH - t) / 0.15)
-		var sample := int(clampf(signal * maxf(0.0, fade), -0.95, 0.95) * 32767.0)
+		var sample := int(clampf(amplitude * maxf(0.0, fade), -0.95, 0.95) * 32767.0)
 		pcm[i * 2] = sample & 255
 		pcm[i * 2 + 1] = (sample >> 8) & 255
 	var stream := AudioStreamWAV.new()
