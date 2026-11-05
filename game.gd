@@ -1340,8 +1340,15 @@ func draw_menu():
 	ship(Vector2(240,180),COLORS[1],1,(pilot_offset+1)%3)
 	ship(Vector2(397,180),COLORS[2],1,(pilot_offset+2)%3)
 	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
-	draw_rect(Rect2(220,239,200,28),COLORS[0])
-	centered("LAUNCH SQUAD",249,Color("0a1830"),1)
+	# Optional original sortie button PNG; ornate pixel fallback stays playable.
+	var sortie_button=artwork.texture("button_sortie")
+	if sortie_button!=null:
+		draw_texture_rect(sortie_button,Rect2(220,236,200,32),false)
+	else:
+		draw_rect(Rect2(220,236,200,32),Color("3b091b"))
+		draw_rect(Rect2(220,236,200,32),Color("f4bd78"),false,2)
+		draw_rect(Rect2(224,240,192,24),Color("a82c48"),false,1)
+		japanese("出撃",Vector2(298,260),22,Color("fff1cb"))
 	japanese("左右で人数選択 / A または Enter で出撃",Vector2(189,282),13,WHITE)
 	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+" / BGM "+("OFF" if muted else ("ON" if music.playing else "ERROR"))+" / F6 AUDIO TEST",294,COLORS[2])
 	japanese("F2：十字キー・ボタン設定（クリック可）",Vector2(193,321),12,COLORS[0])
@@ -1404,6 +1411,15 @@ func draw_status_screen():
 		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent.r,accent.g,accent.b,.045),1.0)
 	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
 	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
+	# Three independent portrait slots; retain existing avionics and HP.
+	var portrait_key=["portrait_cormii","portrait_jiyoza","portrait_mafio"][char_id]
+	var portrait=artwork.texture(portrait_key)
+	if portrait!=null:
+		draw_texture_rect(portrait,Rect2(253,6,43,32),false)
+	else:
+		draw_rect(Rect2(253,6,43,32),Color("101625"))
+		draw_rect(Rect2(253,6,43,32),accent,false,1)
+		ship(Vector2(275,22),accent,1,char_id)
 	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
 	japanese("ライフ",Vector2(306,24),12,WHITE)
 	for h in range(4):
