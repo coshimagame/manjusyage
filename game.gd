@@ -809,6 +809,7 @@ func begin_boss():
 	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
 	if bio_route: bio.begin_boss(count)
 	track("sentinel")
+	play_jingle("boss")
 	tell("WARNING / LIVING CORE - EXPERIMENT" if bio_route else "WARNING / PRISM SENTINEL",4)
 
 func update_boss(dt):
