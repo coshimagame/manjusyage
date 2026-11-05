@@ -41,6 +41,7 @@ var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
+const DepartureJingle = preload("res://departure_jingle.gd")
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
 var mode = "menu"
 var count = 1
@@ -347,6 +348,7 @@ func start_game():
 	mode = "play"
 	show_help = false
 	track("wistful_demo" if new_music else "ruins")
+	DepartureJingle.play(self)
 	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
 
 func button_edge(device, button):
