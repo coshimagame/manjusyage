@@ -487,7 +487,9 @@ func change_color(i):
 func burst(i):
 	var p = players[i]
 	if p.down>0: return
-	if bio_route and p.character==2 and Abilities.eat(self,p): return
+	if p.character==2 and Abilities.eat(self,p):
+		tell("MAFIO CAPTURE / "+str(p.learned).to_upper(),1.8)
+		return
 	if p.character==1:
 		special_analysis(p)
 		return
@@ -1256,7 +1258,7 @@ func draw_hud():
 	draw_rect(Rect2(0,336,640,24),Color("08101e"))
 	draw_rect(Rect2(0,336,640,1),Color("803951"))
 	text_at("01 / RED ECHO" if bio_route else "01 / RUINS",Vector2(12,346),WHITE)
-	if bio_route and count==1: japanese(Abilities.label(players[0],elapsed),Vector2(156,355),10,COLORS[0])
+	if count==1: japanese(Abilities.label(players[0],elapsed),Vector2(156,355),10,COLORS[0])
 	text_at("M MUSIC "+("OFF" if muted else "ON"),Vector2(365,346),DIM)
 	draw_rect(Rect2(502,347,124,4),Color("28374e"))
 	draw_rect(Rect2(502,347,minf(124.0,travel/4800.0*124.0),4),Color("ef8c95"))
