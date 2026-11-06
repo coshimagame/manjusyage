@@ -1,6 +1,7 @@
 extends Node2D
 ## Erii/Marii standalone boss prototype. Run res://erii_marii_test.tscn in Godot.
-## Provisional geometric ship graphics; never replaces approved pilot artwork.
+## Erii: energetic orange short-haired older sister; Marii: quiet green long-haired younger sister.
+## Provisional geometric ships; never replaces approved pilot artwork.
 const W := 640
 const H := 360
 var player := Vector2(110, 180)
@@ -91,18 +92,18 @@ func _emit_attack() -> void:
 		var center := Vector2(490, 180)
 		for i in range(18):
 			var angle := elapsed * 0.7 + float(i) * TAU / 18
-			_bullet(center, Vector2.from_angle(angle) * 105, Color("#ffa0df") if i % 2 else Color("#8ddaff"))
+			_bullet(center, Vector2.from_angle(angle) * 105, Color("#ff9c35") if i % 2 else Color("#6cf6a4"))
 		return
 	for which in range(2):
 		if (which == 0 and erii_hp <= 0) or (which == 1 and marii_hp <= 0):
 			continue
 		var origin := _ship_pos(which)
-		var tint := Color("#76caff") if which == 0 else Color("#ff6aa4")
+		var tint := Color("#ff9837") if which == 0 else Color("#6ceca5")
 		var aim := (player - origin).angle()
-		var spread := 5 if phase == 0 else 7
+		var spread := (5 if phase == 0 else 7) if which == 0 else (3 if phase == 0 else 5)
 		for j in range(spread):
-			var angle := aim + (j - (spread - 1) * 0.5) * (0.17 if which == 0 else 0.24)
-			_bullet(origin, Vector2.from_angle(angle) * (95 if which == 0 else 125), tint)
+			var angle := aim + (j - (spread - 1) * 0.5) * (0.24 if which == 0 else 0.12)
+			_bullet(origin, Vector2.from_angle(angle) * (145 if which == 0 else 78), tint)
 		if phase == 1:
 			for j in range(5):
 				_bullet(origin, Vector2(-90, (j - 2) * 35), tint)
@@ -129,15 +130,15 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font, Vector2(12, 22), "ERII & MARII  |  BOSS PROTOTYPE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
 	draw_string(ThemeDB.fallback_font, Vector2(12, 351), "ARROWS / WASD: MOVE    Z / SPACE: FIRE    R: RESTART", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#c3bedc"))
 	if phase < 2:
-		if erii_hp > 0: _ship(_ship_pos(0), Color("#69bbff"), true)
-		if marii_hp > 0: _ship(_ship_pos(1), Color("#ff619e"))
+		if erii_hp > 0: _ship(_ship_pos(0), Color("#ff9a32"), true)
+		if marii_hp > 0: _ship(_ship_pos(1), Color("#64e7a2"))
 		draw_rect(Rect2(405, 38, maxf(0, erii_hp) * 2, 4), Color("#69bbff"))
 		draw_rect(Rect2(405, 46, maxf(0, marii_hp) * 2, 4), Color("#ff619e"))
 	else:
 		_ship(Vector2(490, 158), Color("#69bbff"), true)
 		_ship(Vector2(490, 202), Color("#ff619e"))
 		draw_circle(Vector2(490, 180), 13, Color("#ffe2fa"))
-		draw_rect(Rect2(405, 38, maxf(0, combined_hp) * 1.6, 6), Color("#f2a1ff"))
+		draw_rect(Rect2(405, 38, maxf(0, combined_hp) * 1.6, 6), Color("#f7dc83"))
 	for b in enemy_bullets:
 		draw_circle(b.pos, 4, b.color)
 	for b in friendly_bullets:
