@@ -235,3 +235,10 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 
 ## 2026-10-31 制作チーム命名（ユーザー正式決定）
 チーム名を **Mw-fActory（ムゥファクトリー）** に決定。以後ChatGPT・Codex・サウンド、アート、ゲームデザイン等の専門ロールを含む制作チームの公式呼称にする。表記 **Mw-fActory** 厳守。作品名 **曼珠沙華（MANJUSHAGE）** は変わらない。GAME上のチームロゴやスタッフロールは今回未変更、保存IDやrepo名は保全。CANON.mdのC-050を参照。
+
+
+## 2026-11-06 敵64体素材の取り込み
+assets/enemies/manjushage_64_v1/ に既存ZIPの131ファイル（敵PNG64、切り出し原画64、一覧原画、manifest、README）を原本のまま追加。原画参照を補正したmanifest.runtime.json、検証情報、docs/manjushage/CODEX_ENEMY_64_IMPLEMENTATION.mdを追加。
+ZIP CRC、PNG129点のチャンクCRC・圧縮データ展開、64 ID・8面×8スロット、全sprite/source_cropパスを検査。転送原本はGit blobハッシュ照合。既存承認素材は上書きしない。
+ゲームコード変更、Godot実行、切り出し全体の目視QA、ゲーム内の表示確認は未実施。次は指示書に従い1面8体を実戦描画に接続し、全64体の横・縦表示を検証する。素材収録と全8面完成を区別する。専用ブランチとPRのみ、mainマージなし。
+抜き取り目視でS05E01の文字混入、S08E08の文字混入・絵の切れ、暗い背景残留を記録。tools/verify_enemy_64.pyを追加しローカルPASS（終了コード0）。
