@@ -19,11 +19,17 @@ const ORGANIZED_PATHS = {
 	"enemy_lance": "res://art/enemies/lance/sprite.png",
 	"enemy_bloom": "res://art/enemies/bloom/sprite.png",
 	"bio_backdrop": "res://art/backgrounds/stage_01/backdrop.png",
+	"item_hp": "res://art/items/common/hp/icon.png",
+	"item_energy": "res://art/items/common/energy/icon.png",
+	"item_omikuji": "res://art/items/characters/cormii/omikuji/icon.png",
+	"item_analysis": "res://art/items/characters/jiyoza/analysis/icon.png",
+	"boss_body": "res://art/enemies/boss/body.png"
+}
+const PREVIOUS_ITEM_PATHS = {
 	"item_hp": "res://art/items/hp/icon.png",
 	"item_energy": "res://art/items/energy/icon.png",
 	"item_omikuji": "res://art/items/omikuji/icon.png",
-	"item_analysis": "res://art/items/analysis/icon.png",
-	"boss_body": "res://art/enemies/boss/body.png"
+	"item_analysis": "res://art/items/analysis/icon.png"
 }
 var images: Dictionary = {}
 
@@ -33,6 +39,8 @@ func reload():
 		var candidates: Array[String] = []
 		if ORGANIZED_PATHS.has(key):
 			candidates.append(ORGANIZED_PATHS[key])
+		if PREVIOUS_ITEM_PATHS.has(key):
+			candidates.append(PREVIOUS_ITEM_PATHS[key])
 		candidates.append(ROOT + key + ".png")
 		for file_path in candidates:
 			if not ResourceLoader.exists(file_path, "Texture2D"):
