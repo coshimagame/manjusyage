@@ -15,6 +15,7 @@ const FONT = {
 }
 
 var planet_texture: ImageTexture
+const StageEnemyArt=preload("res://scripts/stage_enemy_art.gd")
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
@@ -1107,7 +1108,10 @@ func _draw():
 			draw_rect(Rect2(e.pos+Vector2(-27,-2),Vector2(3,3)),Color("ffd5a0"))
 		else:
 			draw_line(e.pos+Vector2(11,0),e.pos+Vector2(23,0),Color("7194b6"),2)
-		var enemy_art=artwork.texture("enemy_bloom" if is_fan else "enemy_lance")
+		# Prefer stage-specific approved PNG when present; preserve existing art fallback.
+		var enemy_art=StageEnemyArt.load_sprite(1,2 if is_fan else 1)
+		if enemy_art==null:
+			enemy_art=artwork.texture("enemy_bloom" if is_fan else "enemy_lance")
 		if enemy_art!=null:
 			draw_texture_rect(enemy_art,Rect2(e.pos-Vector2(17,11),Vector2(34,22)),false)
 			if e.flash>0: draw_circle(e.pos,5,Color(1,1,1,.6))
