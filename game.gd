@@ -452,7 +452,7 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: get_tree().change_scene_to_file.call_deferred("res://stage_interlude.tscn")
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
