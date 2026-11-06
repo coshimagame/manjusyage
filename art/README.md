@@ -2,6 +2,12 @@
 
 **画像はキャラ・敵・背景ごとに保存**。新フォルダにPNGを置くと、既存13スロットのうち対応するものは自動で読み込む。旧 `art/active/*.png` も残して互換性を維持。
 
+## UI装飾
+
+- `art/ui/logos/`：ロゴ（`title_logo.png` は新しい場所から自動読込、旧パスにも対応）
+- `art/ui/buttons/`：「出撃」などのボタン画像（**ゲームへの画像接続は未実装**）
+- `art/ui/decorations/`：ステータス画面・HUD・枠・カーソル（**画像接続は未実装**）
+
 ## 保存場所
 
 | 対象 | PNGの保存先 | ゲーム表示 |
@@ -18,7 +24,7 @@
 | 1面の生体遠景 | `art/backgrounds/stage_01/backdrop.png` | 対応 |
 | 2〜8面の背景 | `art/backgrounds/stage_02/`〜`stage_08/backdrop.png` | **未接続**（各面の実装待ち） |
 
-**従来のまま：** タイトルロゴ `art/active/title_logo.png`、4種のアイテム `art/active/item_*.png`。無理に移動しない。
+**従来のまま使える：** 旧タイトルロゴ `art/active/title_logo.png`、4種のアイテム `art/active/item_*.png`。旧パスは削除しない。
 
 ## 差し替え方法
 
