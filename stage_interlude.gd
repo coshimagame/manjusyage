@@ -26,8 +26,10 @@ const PORTRAIT_PATHS = {
 	"ジヨーザ": "res://art/active/portrait_jiyoza.png",
 	"マフィオ": "res://art/active/portrait_mafio.png",
 	"クゥ": "res://art/active/portrait_kuu.png",
-	"ムゥの整備記録": "res://art/active/portrait_muu.png"
+	"ムゥの整備記録": "res://art/active/muu_worldlines/muu_present.png"
 }
+# Approved v2.2 Muu: shaved-head mechanic and pilot.
+# Alternate-worldline portraits are selected only by explicit story events.
 var portraits: Dictionary = {}
 func _load_portraits() -> void:
 	for speaker in PORTRAIT_PATHS:
