@@ -17,6 +17,7 @@ const FONT = {
 var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
 const StageInterludes=preload("res://stage_interludes.gd")
+const StageEnemyCatalog=preload("res://stage_enemy_catalog.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
 const BriefingProgress=preload("res://briefing_progress.gd")
@@ -62,6 +63,7 @@ var travel = 0.0
 var elapsed = 0.0
 var wave_timer = 1.0
 var wave_id = 0
+var miniboss_spawned=false
 var score = 0
 var reserves = 3
 var combo = 1
@@ -353,6 +355,7 @@ func launch_from_briefing():
 	briefing_custom_squad=true
 	start_game()
 func start_game():
+	miniboss_spawned=false
 	bio.reset()
 	vertical.reset()
 	pads = Array(Input.get_connected_joypads())
@@ -714,6 +717,8 @@ func update_game(dt):
 		finish(false)
 		return
 	if gate==0 and boss.is_empty():
+		if gates_done==1 and not miniboss_spawned and travel>=1850:
+			spawn_stage_miniboss()
 		if travel>=1400 and gates_done==0: begin_gate(1)
 		elif travel>=3000 and gates_done==1: begin_gate(2)
 		elif travel>=4800: begin_boss()
@@ -747,12 +752,11 @@ func update_game(dt):
 			bullet.pos.x=800
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
-		e.age+=dt; e.flash=maxf(0,e.flash-dt)
-		e.pos.x-=e.speed*dt
-		e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
+		e.flash=maxf(0,e.flash-dt)
+		StageEnemyCatalog.motion(e,dt,players[wave_id%count].pos)
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
-			e.cool=2.5
+			e.cool=1.5 if e.get("miniboss",false) else 2.5
 			var target=players[wave_id%count].pos
 			for angle in ([-.2,0,.2] if bio_route and e.get("technique","")=="fan" else [0]):
 				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3,"analysis_eligible":e.get("analysis_eligible",false),"source_id":e.get("analysis_id","")})
@@ -812,9 +816,17 @@ func spawn_wave():
 	var pattern="fan" if wave_id%2==0 else "aimed"
 	var group: Array=[]
 	for j in range(3+count):
-		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern,"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
+		var spec=StageEnemyCatalog.small(1,wave_id+j)
+		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":float(spec.speed),"amplitude":23.0,"hp":int(spec.hp)+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":str(spec.shot),"move":str(spec.move),"enemy_id":str(spec.id),"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
 	enemy_analysis.mark_new_group(group,"prototype/"+pattern)
 	enemies.append_array(group)
+
+func spawn_stage_miniboss():
+	miniboss_spawned=true
+	var spec=StageEnemyCatalog.mid(1)
+	enemies.append({"pos":Vector2(670,180),"base":180.0,"age":0.0,"phase":0.0,"speed":0.0,"amplitude":0.0,"hp":float(spec.hp)*count,"cool":1.4,"flash":0.0,"technique":str(spec.shot),"move":str(spec.move),"enemy_id":str(spec.id),"miniboss":true})
+	tell("WARNING / ARTERY GATE",3.0)
+	play_jingle("boss")
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
