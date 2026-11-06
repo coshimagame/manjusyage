@@ -17,7 +17,25 @@ const LOG_ROWS := 4
 var seconds := 0.0
 var font: Font
 var departing := false
+# Optional approved portraits; missing files preserve the existing workshop silhouettes.
+const PORTRAIT_PATHS = {
+	"コルミィ": "res://art/active/portrait_cormii.png",
+	"ジヨーザ": "res://art/active/portrait_jiyoza.png",
+	"マフィオ": "res://art/active/portrait_mafio.png",
+	"クゥ": "res://art/active/portrait_kuu.png",
+	"ムゥの整備記録": "res://art/active/portrait_muu.png"
+}
+var portraits: Dictionary = {}
+func _load_portraits() -> void:
+	for speaker in PORTRAIT_PATHS:
+		var path: String = PORTRAIT_PATHS[speaker]
+		if ResourceLoader.exists(path, "Texture2D"):
+			var loaded = ResourceLoader.load(path)
+			if loaded is Texture2D:
+				portraits[speaker] = loaded
+
 func _ready() -> void:
+	_load_portraits()
 	font = SystemFont.new()
 	(font as SystemFont).font_names = PackedStringArray(["Noto Sans CJK JP","Yu Gothic","Meiryo","sans-serif"])
 	queue_redraw()
@@ -76,6 +94,15 @@ func _draw() -> void:
 		var x = 140+i*170
 		draw_line(Vector2(x,90),Vector2(x,204),Color("#445b69"),3)
 		draw_colored_polygon(PackedVector2Array([Vector2(x-37,166),Vector2(x,141),Vector2(x+32,166),Vector2(x,186)]),[Color("#e7c75a"),Color("#6ca9ef"),Color("#e76e7c")][i])
+	# Approved character PNGs appear only when explicitly provided.
+	var speaker: String = LINES[line_index][0]
+	if portraits.has(speaker):
+		var portrait: Texture2D = portraits[speaker]
+		var original := portrait.get_size()
+		if original.x > 0 and original.y > 0:
+			var scale_factor: float = minf(135.0 / original.x, 145.0 / original.y)
+			var target := original * scale_factor
+			draw_texture_rect(portrait, Rect2(Vector2(576, 226) - target, target), false)
 	draw_rect(Rect2(18,236,604,105),Color("#151529"))
 	draw_rect(Rect2(18,236,604,2),Color("#dc9e83"))
 	if history_open:
