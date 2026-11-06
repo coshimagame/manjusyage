@@ -11,6 +11,7 @@ const SLOTS = [
 	"bio_backdrop", "boss_body"
 ]
 const ORGANIZED_PATHS = {
+	"title_logo": "res://art/ui/logos/title_logo.png",
 	"title_backdrop": "res://art/backgrounds/title/backdrop.png",
 	"ship_cormii": "res://art/characters/cormii/ship.png",
 	"ship_jiyoza": "res://art/characters/jiyoza/ship.png",
