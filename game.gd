@@ -1109,7 +1109,11 @@ func _draw():
 		else:
 			draw_line(e.pos+Vector2(11,0),e.pos+Vector2(23,0),Color("7194b6"),2)
 		# Prefer stage-specific approved PNG when present; preserve existing art fallback.
-		var enemy_art=StageEnemyArt.load_sprite(1,2 if is_fan else 1)
+		var enemy_variant=2 if is_fan else 1
+		var enemy_path=StageEnemyArt.sprite_path(1,enemy_variant)
+		var enemy_art: Texture2D = null
+		if not enemy_path.is_empty() and ResourceLoader.exists(enemy_path):
+			enemy_art=StageEnemyArt.load_sprite(1,enemy_variant)
 		if enemy_art==null:
 			enemy_art=artwork.texture("enemy_bloom" if is_fan else "enemy_lance")
 		if enemy_art!=null:
