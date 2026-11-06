@@ -154,3 +154,10 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - **実ゲームコード変更**：prologue.gdを8ページに増補し、ムゥの整備室（後ろ姿・工具・火花・解析ホログラム）、教習会話・字幕の段階的な字送り、8ページのカウンター、--workshop-shot を追加。コミット 30b39e65。**Godot4.6による実レンダリングと操作テスト未実施**。
 - **音楽再生成コード追加**：tools/render_manjushage_gagaku_future.py。オリジナルの雅楽風×156 BPMアクション音楽デモを生成できるPython原本を保存。会話で約24.6秒のWAV／MP3を生成したが、GitHubに音声ファイルを配置したわけではなく、**Godotへの音源統合とユーザーの試聴評価は未実施**。詳細 SOUND_DESIGN.md。
 - ユーザー決定：雅楽の幽玄、哀愁、少しの不気味さ、美しく儚い、永い時の未来感とSTGの躍動感、制作チーム内のA/B批評。提案も仮実装して磨く方針。ストーリー演出計画 MU_CINEMATICS_V01.md、開発指示 PROTOTYPE_FIRST_DIRECTIVE.md。課題管理はIssue #2（音）／Issue #3（物語）。
+
+
+## 2026-11-06 敵64体素材の取り込み
+assets/enemies/manjushage_64_v1/ に既存ZIPの131ファイル（敵PNG64、切り出し原画64、一覧原画、manifest、README）を原本のまま追加。原画参照を補正したmanifest.runtime.json、検証情報、docs/manjushage/CODEX_ENEMY_64_IMPLEMENTATION.mdを追加。
+ZIP CRC、PNG129点のチャンクCRC・圧縮データ展開、64 ID・8面×8スロット、全sprite/source_cropパスを検査。転送原本はGit blobハッシュ照合。既存承認素材は上書きしない。
+ゲームコード変更、Godot実行、切り出し全体の目視QA、ゲーム内の表示確認は未実施。次は指示書に従い1面8体を実戦描画に接続し、全64体の横・縦表示を検証する。素材収録と全8面完成を区別する。専用ブランチとPRのみ、mainマージなし。
+抜き取り目視でS05E01の文字混入、S08E08の文字混入・絵の切れ、暗い背景残留を記録。tools/verify_enemy_64.pyを追加しローカルPASS（終了コード0）。

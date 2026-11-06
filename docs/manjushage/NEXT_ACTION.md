@@ -59,3 +59,7 @@
 優先1：Godot 4.6で全GDScriptをインポートしテストを実行。更新したtest_prologue.gd、test_setting_updates.gd、test_music_story.gd、test_save.gd、および新しいtest_briefing_progress.gd、test_briefing_game_flow.gd、test_jiyoza_analysis.gd、test_cormii_fortune.gdと既存1〜3人自動走行を確認。異常を直す。
 優先2：実際のプレイ画面で細身3機PNG、縦横方向、1面クリア→ブリーフィング→再出撃、2面未完成のブロック、図鑑の4/5/6面解放、敵弾を残す特殊解析を確認する。
 優先3：不足しているending.wavや雅楽的な新曲、敵バリエーション、マフィオ食感レポート、ブリーフィング演出、ステージ2を制作する。今は旧曲へ安全フォールバックするが、専用曲の完成ではない。
+
+
+## 2026-11-06 次の敵素材実装
+[64体の敵素材実装指示](CODEX_ENEMY_64_IMPLEMENTATION.md)を実行する。素材131ファイルを専用ブランチへ登録。1面8体の実戦描画、全64体の縦横確認、透過・切り抜き修正を優先。素材登録のみで本編未接続・Godot未検証。既存素材は上書きせずmainへマージしない。

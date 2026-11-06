@@ -1,0 +1,968 @@
+{
+  "project": "MANJUSHAGE",
+  "count": 64,
+  "source_image": "image_shows_a_detailed_pixel_art_infographic_tit.png",
+  "note": "Concept-sheet crops. NOT individually drawn directional animation sprites. Side/vertical games may reuse the same sprite provisionally; directional art and animations are NOT included. Names are provisional.",
+  "enemies": [
+    {
+      "stage": 1,
+      "slot": 1,
+      "id": "S01E01",
+      "name_provisional": "flower_drone",
+      "sprite": "sprites/s01_e01_flower_drone.png",
+      "source_crop": "source_crops/s01_e01_flower_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 2,
+      "id": "S01E02",
+      "name_provisional": "flower_turret",
+      "sprite": "sprites/s01_e02_flower_turret.png",
+      "source_crop": "source_crops/s01_e02_flower_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 3,
+      "id": "S01E03",
+      "name_provisional": "jelly_crab",
+      "sprite": "sprites/s01_e03_jelly_crab.png",
+      "source_crop": "source_crops/s01_e03_jelly_crab.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 4,
+      "id": "S01E04",
+      "name_provisional": "flower_bullet",
+      "sprite": "sprites/s01_e04_flower_bullet.png",
+      "source_crop": "source_crops/s01_e04_flower_bullet.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 5,
+      "id": "S01E05",
+      "name_provisional": "patrol_ray",
+      "sprite": "sprites/s01_e05_patrol_ray.png",
+      "source_crop": "source_crops/s01_e05_patrol_ray.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 6,
+      "id": "S01E06",
+      "name_provisional": "parasite_spine",
+      "sprite": "sprites/s01_e06_parasite_spine.png",
+      "source_crop": "source_crops/s01_e06_parasite_spine.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 7,
+      "id": "S01E07",
+      "name_provisional": "flower_runner",
+      "sprite": "sprites/s01_e07_flower_runner.png",
+      "source_crop": "source_crops/s01_e07_flower_runner.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 1,
+      "slot": 8,
+      "id": "S01E08",
+      "name_provisional": "crystal_flower",
+      "sprite": "sprites/s01_e08_crystal_flower.png",
+      "source_crop": "source_crops/s01_e08_crystal_flower.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 1,
+      "id": "S02E01",
+      "name_provisional": "sea_butterfly",
+      "sprite": "sprites/s02_e01_sea_butterfly.png",
+      "source_crop": "source_crops/s02_e01_sea_butterfly.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 2,
+      "id": "S02E02",
+      "name_provisional": "crystal_jellyfish",
+      "sprite": "sprites/s02_e02_crystal_jellyfish.png",
+      "source_crop": "source_crops/s02_e02_crystal_jellyfish.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 3,
+      "id": "S02E03",
+      "name_provisional": "bubble_shell",
+      "sprite": "sprites/s02_e03_bubble_shell.png",
+      "source_crop": "source_crops/s02_e03_bubble_shell.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 4,
+      "id": "S02E04",
+      "name_provisional": "sunken_turret",
+      "sprite": "sprites/s02_e04_sunken_turret.png",
+      "source_crop": "source_crops/s02_e04_sunken_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 5,
+      "id": "S02E05",
+      "name_provisional": "school_fish",
+      "sprite": "sprites/s02_e05_school_fish.png",
+      "source_crop": "source_crops/s02_e05_school_fish.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 6,
+      "id": "S02E06",
+      "name_provisional": "water_hedgehog",
+      "sprite": "sprites/s02_e06_water_hedgehog.png",
+      "source_crop": "source_crops/s02_e06_water_hedgehog.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 7,
+      "id": "S02E07",
+      "name_provisional": "sea_worm",
+      "sprite": "sprites/s02_e07_sea_worm.png",
+      "source_crop": "source_crops/s02_e07_sea_worm.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 2,
+      "slot": 8,
+      "id": "S02E08",
+      "name_provisional": "ruins_octopus",
+      "sprite": "sprites/s02_e08_ruins_octopus.png",
+      "source_crop": "source_crops/s02_e08_ruins_octopus.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 1,
+      "id": "S03E01",
+      "name_provisional": "garden_bit",
+      "sprite": "sprites/s03_e01_garden_bit.png",
+      "source_crop": "source_crops/s03_e01_garden_bit.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 2,
+      "id": "S03E02",
+      "name_provisional": "vine_pod",
+      "sprite": "sprites/s03_e02_vine_pod.png",
+      "source_crop": "source_crops/s03_e02_vine_pod.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 3,
+      "id": "S03E03",
+      "name_provisional": "flower_guard_drone",
+      "sprite": "sprites/s03_e03_flower_guard_drone.png",
+      "source_crop": "source_crops/s03_e03_flower_guard_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 4,
+      "id": "S03E04",
+      "name_provisional": "capture_vine",
+      "sprite": "sprites/s03_e04_capture_vine.png",
+      "source_crop": "source_crops/s03_e04_capture_vine.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 5,
+      "id": "S03E05",
+      "name_provisional": "pollen_sprinkler",
+      "sprite": "sprites/s03_e05_pollen_sprinkler.png",
+      "source_crop": "source_crops/s03_e05_pollen_sprinkler.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 6,
+      "id": "S03E06",
+      "name_provisional": "greenhouse_hover",
+      "sprite": "sprites/s03_e06_greenhouse_hover.png",
+      "source_crop": "source_crops/s03_e06_greenhouse_hover.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 7,
+      "id": "S03E07",
+      "name_provisional": "mimic_bud",
+      "sprite": "sprites/s03_e07_mimic_bud.png",
+      "source_crop": "source_crops/s03_e07_mimic_bud.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 3,
+      "slot": 8,
+      "id": "S03E08",
+      "name_provisional": "giant_bud",
+      "sprite": "sprites/s03_e08_giant_bud.png",
+      "source_crop": "source_crops/s03_e08_giant_bud.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 1,
+      "id": "S04E01",
+      "name_provisional": "factory_drone",
+      "sprite": "sprites/s04_e01_factory_drone.png",
+      "source_crop": "source_crops/s04_e01_factory_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 2,
+      "id": "S04E02",
+      "name_provisional": "excavation_crawler",
+      "sprite": "sprites/s04_e02_excavation_crawler.png",
+      "source_crop": "source_crops/s04_e02_excavation_crawler.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 3,
+      "id": "S04E03",
+      "name_provisional": "heavy_turret",
+      "sprite": "sprites/s04_e03_heavy_turret.png",
+      "source_crop": "source_crops/s04_e03_heavy_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 4,
+      "id": "S04E04",
+      "name_provisional": "steel_fan",
+      "sprite": "sprites/s04_e04_steel_fan.png",
+      "source_crop": "source_crops/s04_e04_steel_fan.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 5,
+      "id": "S04E05",
+      "name_provisional": "transport_unit",
+      "sprite": "sprites/s04_e05_transport_unit.png",
+      "source_crop": "source_crops/s04_e05_transport_unit.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 6,
+      "id": "S04E06",
+      "name_provisional": "molten_slug",
+      "sprite": "sprites/s04_e06_molten_slug.png",
+      "source_crop": "source_crops/s04_e06_molten_slug.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 7,
+      "id": "S04E07",
+      "name_provisional": "mechanical_spine",
+      "sprite": "sprites/s04_e07_mechanical_spine.png",
+      "source_crop": "source_crops/s04_e07_mechanical_spine.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 4,
+      "slot": 8,
+      "id": "S04E08",
+      "name_provisional": "compression_core",
+      "sprite": "sprites/s04_e08_compression_core.png",
+      "source_crop": "source_crops/s04_e08_compression_core.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 1,
+      "id": "S05E01",
+      "name_provisional": "shadow_butterfly",
+      "sprite": "sprites/s05_e01_shadow_butterfly.png",
+      "source_crop": "source_crops/s05_e01_shadow_butterfly.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 2,
+      "id": "S05E02",
+      "name_provisional": "wandering_lantern",
+      "sprite": "sprites/s05_e02_wandering_lantern.png",
+      "source_crop": "source_crops/s05_e02_wandering_lantern.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 3,
+      "id": "S05E03",
+      "name_provisional": "mist_bit",
+      "sprite": "sprites/s05_e03_mist_bit.png",
+      "source_crop": "source_crops/s05_e03_mist_bit.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 4,
+      "id": "S05E04",
+      "name_provisional": "echo_lens",
+      "sprite": "sprites/s05_e04_echo_lens.png",
+      "source_crop": "source_crops/s05_e04_echo_lens.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 5,
+      "id": "S05E05",
+      "name_provisional": "phantom_drone",
+      "sprite": "sprites/s05_e05_phantom_drone.png",
+      "source_crop": "source_crops/s05_e05_phantom_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 6,
+      "id": "S05E06",
+      "name_provisional": "hollow_clone",
+      "sprite": "sprites/s05_e06_hollow_clone.png",
+      "source_crop": "source_crops/s05_e06_hollow_clone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 7,
+      "id": "S05E07",
+      "name_provisional": "boundary_worm",
+      "sprite": "sprites/s05_e07_boundary_worm.png",
+      "source_crop": "source_crops/s05_e07_boundary_worm.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 5,
+      "slot": 8,
+      "id": "S05E08",
+      "name_provisional": "oblivion_eye",
+      "sprite": "sprites/s05_e08_oblivion_eye.png",
+      "source_crop": "source_crops/s05_e08_oblivion_eye.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 1,
+      "id": "S06E01",
+      "name_provisional": "prayer_bit",
+      "sprite": "sprites/s06_e01_prayer_bit.png",
+      "source_crop": "source_crops/s06_e01_prayer_bit.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 2,
+      "id": "S06E02",
+      "name_provisional": "rotating_organ",
+      "sprite": "sprites/s06_e02_rotating_organ.png",
+      "source_crop": "source_crops/s06_e02_rotating_organ.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 3,
+      "id": "S06E03",
+      "name_provisional": "sacred_flower_drone",
+      "sprite": "sprites/s06_e03_sacred_flower_drone.png",
+      "source_crop": "source_crops/s06_e03_sacred_flower_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 4,
+      "id": "S06E04",
+      "name_provisional": "bell_turret",
+      "sprite": "sprites/s06_e04_bell_turret.png",
+      "source_crop": "source_crops/s06_e04_bell_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 5,
+      "id": "S06E05",
+      "name_provisional": "whisper_flare",
+      "sprite": "sprites/s06_e05_whisper_flare.png",
+      "source_crop": "source_crops/s06_e05_whisper_flare.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 6,
+      "id": "S06E06",
+      "name_provisional": "blessing_arch",
+      "sprite": "sprites/s06_e06_blessing_arch.png",
+      "source_crop": "source_crops/s06_e06_blessing_arch.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 7,
+      "id": "S06E07",
+      "name_provisional": "halo_ring",
+      "sprite": "sprites/s06_e07_halo_ring.png",
+      "source_crop": "source_crops/s06_e07_halo_ring.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 6,
+      "slot": 8,
+      "id": "S06E08",
+      "name_provisional": "sacred_tree_seed",
+      "sprite": "sprites/s06_e08_sacred_tree_seed.png",
+      "source_crop": "source_crops/s06_e08_sacred_tree_seed.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 1,
+      "id": "S07E01",
+      "name_provisional": "reverse_trace",
+      "sprite": "sprites/s07_e01_reverse_trace.png",
+      "source_crop": "source_crops/s07_e01_reverse_trace.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 2,
+      "id": "S07E02",
+      "name_provisional": "mirror_drone",
+      "sprite": "sprites/s07_e02_mirror_drone.png",
+      "source_crop": "source_crops/s07_e02_mirror_drone.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 3,
+      "id": "S07E03",
+      "name_provisional": "branching_bot",
+      "sprite": "sprites/s07_e03_branching_bot.png",
+      "source_crop": "source_crops/s07_e03_branching_bot.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 4,
+      "id": "S07E04",
+      "name_provisional": "backlight_turret",
+      "sprite": "sprites/s07_e04_backlight_turret.png",
+      "source_crop": "source_crops/s07_e04_backlight_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 5,
+      "id": "S07E05",
+      "name_provisional": "paradox_fish",
+      "sprite": "sprites/s07_e05_paradox_fish.png",
+      "source_crop": "source_crops/s07_e05_paradox_fish.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 6,
+      "id": "S07E06",
+      "name_provisional": "difference_sphere",
+      "sprite": "sprites/s07_e06_difference_sphere.png",
+      "source_crop": "source_crops/s07_e06_difference_sphere.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 7,
+      "id": "S07E07",
+      "name_provisional": "duplicate_body",
+      "sprite": "sprites/s07_e07_duplicate_body.png",
+      "source_crop": "source_crops/s07_e07_duplicate_body.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 7,
+      "slot": 8,
+      "id": "S07E08",
+      "name_provisional": "reverse_flower",
+      "sprite": "sprites/s07_e08_reverse_flower.png",
+      "source_crop": "source_crops/s07_e08_reverse_flower.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 1,
+      "id": "S08E01",
+      "name_provisional": "higan_flower_bullet",
+      "sprite": "sprites/s08_e01_higan_flower_bullet.png",
+      "source_crop": "source_crops/s08_e01_higan_flower_bullet.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 2,
+      "id": "S08E02",
+      "name_provisional": "reincarnation_butterfly",
+      "sprite": "sprites/s08_e02_reincarnation_butterfly.png",
+      "source_crop": "source_crops/s08_e02_reincarnation_butterfly.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 3,
+      "id": "S08E03",
+      "name_provisional": "rebirth_unit",
+      "sprite": "sprites/s08_e03_rebirth_unit.png",
+      "source_crop": "source_crops/s08_e03_rebirth_unit.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 4,
+      "id": "S08E04",
+      "name_provisional": "collapse_turret",
+      "sprite": "sprites/s08_e04_collapse_turret.png",
+      "source_crop": "source_crops/s08_e04_collapse_turret.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 5,
+      "id": "S08E05",
+      "name_provisional": "returning_jellyfish",
+      "sprite": "sprites/s08_e05_returning_jellyfish.png",
+      "source_crop": "source_crops/s08_e05_returning_jellyfish.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 6,
+      "id": "S08E06",
+      "name_provisional": "end_thorn",
+      "sprite": "sprites/s08_e06_end_thorn.png",
+      "source_crop": "source_crops/s08_e06_end_thorn.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 7,
+      "id": "S08E07",
+      "name_provisional": "cycle_ring",
+      "sprite": "sprites/s08_e07_cycle_ring.png",
+      "source_crop": "source_crops/s08_e07_cycle_ring.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    },
+    {
+      "stage": 8,
+      "slot": 8,
+      "id": "S08E08",
+      "name_provisional": "memory_bud",
+      "sprite": "sprites/s08_e08_memory_bud.png",
+      "source_crop": "source_crops/s08_e08_memory_bud.png",
+      "scroll_modes": [
+        "horizontal",
+        "vertical"
+      ],
+      "directional_variants_available": false,
+      "animation_frames": 1,
+      "status": "concept crop; requires artist QA"
+    }
+  ]
+}
