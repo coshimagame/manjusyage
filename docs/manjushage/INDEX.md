@@ -16,6 +16,22 @@
 | [BOOK_PLAN.md](BOOK_PLAN.md) | 後日制作する資料本の目次・収録ルール |
 | [CODEX_HANDOFF.md](CODEX_HANDOFF.md) | Codexで開発を続けるための指示書 |
 
+## 分野別の読み口（詳細な旧稿は既存ファイルに保存）
+
+| 分野 | 最初に読む文書 |
+| --- | --- |
+| キャラクター各人 | [コルミィ](characters/CORMII.md)・[ジヨーザ](characters/JIYOZA.md)・[マフィオ](characters/MAFIO.md)・[ムゥ](characters/MUU.md)・[クゥ](characters/KUU.md) |
+| 世界観・歴史 | [WORLD_HISTORY.md](WORLD_HISTORY.md)・[STORY.md](STORY.md) |
+| 敵・ボス | [ENEMIES.md](ENEMIES.md)（24種は未承認案） |
+| 世界線・周回 | [WORLDLINE_LOOPS.md](WORLDLINE_LOOPS.md) |
+| ステージ | [STAGES.md](STAGES.md)（8面名は仮称） |
+| 武器・アイテム | [WEAPONS_ITEMS.md](WEAPONS_ITEMS.md) |
+| 弾幕・エフェクト | [ART_EFFECTS.md](ART_EFFECTS.md) |
+| 画像の原本・差し替え | [ART_ASSETS.md](ART_ASSETS.md)・[art/README.md](../../art/README.md) |
+| 新旧の設定差分 | [CURRENT_SPEC.md](CURRENT_SPEC.md)・[CANON.md](CANON.md) |
+
+**更新ルール：** 各分野の文書は最新の概要と参照先を示す。過去の長い検討経緯は既存の詳細文書に保存し、同じ本文を複製しない。決定／提案／未決／実装済みを混同しない。
+
 ## 優先順位
 1. **ユーザーの明示的な最新決定**（例：「ジヨーザ」への改名）
 2. 公式設定台帳にある「決定」
