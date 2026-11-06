@@ -1,5 +1,7 @@
 extends Node2D
 
+const IntermissionScene = preload("res://intermission_preview.tscn")
+var intermission_overlay: Control
 const W = 640.0
 const H = 360.0
 const COLORS = [Color("67ecff"), Color("ff668e"), Color("ffce63")]
@@ -452,7 +454,9 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: open_intermission()
+		elif mode == "intermission":
+			pass # The overlay owns input.
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -581,7 +585,9 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: open_intermission()
+		elif mode == "intermission":
+			pass # Prevent starting another run while the dialogue is open.
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -852,6 +858,23 @@ func explode(pos,color,amount):
 	for i in range(mini(amount,maxi(0,210-particles.size()))):
 		var lifetime=randf_range(.22,.62)
 		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(26,102),"life":lifetime,"max_life":lifetime,"color":color,"petal":i%3==0})
+
+func open_intermission() -> void:
+	if mode == "intermission": return
+	mode = "intermission"
+	intermission_overlay = IntermissionScene.instantiate() as Control
+	intermission_overlay.next_scene_path = ""
+	intermission_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(intermission_overlay)
+	intermission_overlay.position = Vector2.ZERO
+	intermission_overlay.size = Vector2(W,H)
+	intermission_overlay.intermission_finished.connect(_on_intermission_finished)
+
+func _on_intermission_finished() -> void:
+	if is_instance_valid(intermission_overlay):
+		intermission_overlay.queue_free()
+	intermission_overlay = null
+	open_briefing(briefing_progress.next_briefing_stage())
 
 func finish(won):
 	mode="clear" if won else "over"
