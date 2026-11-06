@@ -22,7 +22,7 @@ static func sprite_path(stage_number: int, enemy_variant: int) -> String:
 static func load_sprite(stage_number: int, enemy_variant: int) -> Texture2D:
 	var path := sprite_path(stage_number, enemy_variant)
 	if path.is_empty() or not ResourceLoader.exists(path):
-		return null
+		return make_placeholder(stage_number, enemy_variant)
 	return load(path) as Texture2D
 
 static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Sprite2D:
@@ -40,3 +40,32 @@ static func enemy_id(stage_number: int, enemy_variant: int) -> String:
 	if stage_number < 1 or stage_number > 8 or enemy_variant < 1 or enemy_variant > 3:
 		return ""
 	return ENEMY_IDS[stage_number - 1][enemy_variant - 1]
+
+# Distinct transparent fallback sprites allow stage previews before PNG import.
+# Temporary 16x16 silhouettes, not approved character artwork.
+static func make_placeholder(stage_number: int, enemy_variant: int) -> Texture2D:
+	if stage_number < 1 or stage_number > 8 or enemy_variant < 1 or enemy_variant > 3:
+		return null
+	var palettes := [
+		Color("d94465"), Color("42b5dc"), Color("84c978"), Color("a8a2fa"),
+		Color("d59c61"), Color("e2e5c7"), Color("a779df"), Color("ed6f9e")
+	]
+	var primary: Color = palettes[stage_number - 1]
+	var image := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	image.fill(Color.TRANSPARENT)
+	for y in range(2, 14):
+		for x in range(1, 15):
+			var dx := abs(x - 7)
+			var dy := abs(y - 7)
+			var occupied := false
+			match enemy_variant:
+				1: occupied = (dx + dy < 9 and (dy < 4 or dx < 4))
+				2: occupied = (dx < 6 and dy < 5 and (dx < 3 or dy < 3))
+				3: occupied = (dx * dx + dy * dy < 43)
+			if occupied:
+				var edge := dx >= 5 or dy >= 5
+				image.set_pixel(x, y, primary.darkened(0.42) if edge else primary)
+	for x in range(6, 10):
+		image.set_pixel(x, 7, Color("f8f4dc"))
+		image.set_pixel(x, 8, Color("273045"))
+	return ImageTexture.create_from_image(image)
