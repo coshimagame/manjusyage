@@ -347,6 +347,14 @@ func launch_from_briefing():
 		return
 	briefing_custom_squad=true
 	start_game()
+func retry_cleared_stage():
+	# Preserve the squad from the completed flight; reset stage-only state.
+	if mode!="clear": return
+	for i in range(count):
+		if i<players.size(): briefing_chars[i]=int(players[i].character)
+	briefing_custom_squad=true
+	start_game()
+
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -453,6 +461,7 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			elif key==KEY_R: retry_cleared_stage()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -581,7 +590,8 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if b: retry_cleared_stage()
+			elif start or a: open_briefing(briefing_progress.next_briefing_stage())
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1385,7 +1395,8 @@ func draw_result():
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
-	centered("ESC : TITLE",289,DIM)
+	centered("R / B : RETRY STAGE 01" if mode=="clear" else "ESC : TITLE",289,DIM)
+	if mode=="clear": centered("ESC : TITLE",313,DIM)
 
 
 # STATUS-001: All pilots share identical HP/heart language, while the rest
