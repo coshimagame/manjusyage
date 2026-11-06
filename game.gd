@@ -42,6 +42,8 @@ const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
+const PortraitSlots = preload("res://portrait_slots.gd")
+var portrait_slots = PortraitSlots.new()
 var mode = "menu"
 var count = 1
 var players: Array = []
@@ -1422,7 +1424,56 @@ func draw_status_screen():
 		draw_jiyoza_status(p)
 	else:
 		draw_mafio_status(p)
+	draw_status_expression(p,char_id,accent)
 	text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
+
+# Small code-drawn emotional readout. This does not replace or claim to be
+# the approved portrait artwork; later replace with registered expression sprites.
+func draw_status_expression(p,char_id,accent):
+	var mood=0
+	var mood_label="通常"
+	if char_id==0:
+		var luck=int(p.get("luck",50))
+		mood=1 if luck>=65 else (-1 if luck<=30 else 0)
+		mood_label="絶好調" if mood==1 else ("不調" if mood==-1 else "元気")
+	elif char_id==1:
+		var charge=int(p.get("analysis_charge",0))
+		mood=1 if charge>=80 else 0
+		mood_label="解析集中" if mood==1 else "冷静"
+	else:
+		var digest=float(p.get("digesting",0.0))
+		mood=1 if digest>0.0 else 0
+		mood_label="消化中" if mood==1 else "わくわく"
+	var expression="neutral"
+	if mood==1:
+		expression="happy" if char_id==0 else ("focused" if char_id==1 else "digesting")
+	elif mood==-1:
+		expression="worried"
+	var portrait=portrait_slots.get_portrait(char_id,expression)
+	if portrait != null:
+		draw_texture_rect(portrait,Rect2(548,44,62,39),false)
+		japanese(mood_label,Vector2(508,88),11,WHITE)
+		return
+	var cx=579.0
+	var cy=63.0
+	draw_rect(Rect2(502,43,113,54),Color("101523"))
+	draw_rect(Rect2(502,43,113,54),accent,false,1.0)
+	draw_circle(Vector2(cx,cy),17.0,accent.darkened(.55))
+	draw_arc(Vector2(cx,cy),16.0,0.0,TAU,28,accent,1.5)
+	var eyes_y=cy-3.0
+	for dx in [-6.0,6.0]:
+		if mood==1:
+			draw_line(Vector2(cx+dx-3.0,eyes_y),Vector2(cx+dx,eyes_y-2.0),WHITE,1.5)
+			draw_line(Vector2(cx+dx,eyes_y-2.0),Vector2(cx+dx+3.0,eyes_y),WHITE,1.5)
+		else:
+			draw_circle(Vector2(cx+dx,eyes_y),1.7,WHITE)
+	if mood==-1:
+		draw_arc(Vector2(cx,cy+11.0),5.0,PI*1.13,PI*1.87,12,WHITE,1.5)
+	elif mood==1:
+		draw_arc(Vector2(cx,cy+3.0),6.0,0.15,PI-0.15,12,WHITE,1.5)
+	else:
+		draw_line(Vector2(cx-5.0,cy+7.0),Vector2(cx+5.0,cy+7.0),WHITE,1.5)
+	japanese(mood_label,Vector2(508,88),11,WHITE)
 
 func draw_cormii_status(p):
 	japanese("開運盤・おみくじ",Vector2(29,71),20,Color("ffd7d9"))
