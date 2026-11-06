@@ -56,20 +56,22 @@ func _unhandled_input(event: InputEvent) -> void:
 			_depart()
 		elif event.keycode == KEY_L:
 			history_open = not history_open
-			if history_open: log_scroll = maxi(0, line_index + 1 - LOG_ROWS)
+			if history_open: log_scroll = maxi(0, _log_entry_count() - LOG_ROWS)
 		elif history_open and event.keycode in [KEY_UP, KEY_W]:
 			log_scroll = maxi(0, log_scroll - 1)
 		elif history_open and event.keycode in [KEY_DOWN, KEY_S]:
-			log_scroll = mini(maxi(0, line_index + 1 - LOG_ROWS), log_scroll + 1)
+			log_scroll = mini(maxi(0, _log_entry_count() - LOG_ROWS), log_scroll + 1)
 		elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
 			_advance()
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_START: _depart()
+		elif history_open and event.button_index == JOY_BUTTON_B:
+			history_open = false
 		elif event.button_index == JOY_BUTTON_Y:
 			history_open = not history_open
 			if history_open: log_scroll = maxi(0, line_index + 1 - LOG_ROWS)
 		elif history_open and event.button_index == JOY_BUTTON_DPAD_UP: log_scroll = maxi(0, log_scroll - 1)
-		elif history_open and event.button_index == JOY_BUTTON_DPAD_DOWN: log_scroll = mini(maxi(0, line_index + 1 - LOG_ROWS), log_scroll + 1)
+		elif history_open and event.button_index == JOY_BUTTON_DPAD_DOWN: log_scroll = mini(maxi(0, _log_entry_count() - LOG_ROWS), log_scroll + 1)
 		elif event.button_index == JOY_BUTTON_A: _advance()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_advance()
@@ -125,6 +127,12 @@ func _dialogue_pages() -> Array[String]:
 		pages.append(page)
 	return pages
 
+func _log_entry_count() -> int:
+	# The active line is not a completed memory until every page has been read.
+	var pages := _dialogue_pages()
+	var completed := dialogue_page == pages.size() - 1 and visible_chars >= float(pages[dialogue_page].length())
+	return line_index + (1 if completed else 0)
+
 func _fit_log_text(value: String, width: float, size: int) -> String:
 	var result := ""
 	for character in value:
@@ -159,7 +167,7 @@ func _draw() -> void:
 		draw_string(font,Vector2(35,260),"LOG / TRANSCRIPT",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("#ffdcaa"))
 		for row in range(LOG_ROWS):
 			var j := log_scroll + row
-			if j > line_index: break
+			if j >= _log_entry_count(): break
 			var entry: String = LINES[j][0]+": "+LINES[j][1]
 			draw_string(font,Vector2(35,281+row*13),_fit_log_text(entry,MAX_LOG_WIDTH,11),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("#d4e4dd"))
 	else:
@@ -169,5 +177,5 @@ func _draw() -> void:
 		var visible_rows := shown.split("\n")
 		for row in range(visible_rows.size()):
 			draw_string(font, Vector2(35, 295 + row * DIALOGUE_ROW_HEIGHT), visible_rows[row], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#edf2f5"))
-		draw_string(font,Vector2(430,329),"%d/%d" % [line_index+1,LINES.size()],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#9ab4c9"))
-	draw_string(font,Vector2(22,353),"ENTER/A: NEXT   L/Y: LOG   UP/DOWN: SCROLL   ESC/START: SKIP",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#aab5c6"))
+		draw_string(font,Vector2(423,329),"%d/%d  P%d/%d" % [line_index+1,LINES.size(),dialogue_page+1,pages.size()],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#9ab4c9"))
+	draw_string(font,Vector2(22,353),"ENTER/A: NEXT   L/Y: LOG   B: CLOSE   ESC/START: SKIP",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#aab5c6"))
