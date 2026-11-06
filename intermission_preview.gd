@@ -36,7 +36,7 @@ func _on_dialogue_finished() -> void:
 	if stage > 7:
 		stage = 1
 		loop_index += 1
-	status_label.text = "STAGE %02d READY  /  ENTER・A：次の幕間へ" % (stage + 1)
+	status_label.text = "STAGE %02d READY  /  ENTER・A：次の幕間へ" % stage
 	# No fabricated stage 2-8 gameplay: this preview only advances the narrative.
 
 func _unhandled_input(event: InputEvent) -> void:
