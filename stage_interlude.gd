@@ -17,6 +17,7 @@ const LOG_ROWS := 4
 var seconds := 0.0
 var font: Font
 var departing := false
+var dialogue_page := 0
 const MAX_DIALOGUE_WIDTH := 550.0
 const MAX_LOG_WIDTH := 545.0
 # Optional approved portraits; missing files preserve the existing workshop silhouettes.
@@ -45,7 +46,8 @@ func _process(delta: float) -> void:
 	if departing: return
 	seconds += delta
 	if not history_open:
-		visible_chars = minf(float(LINES[line_index][1].length()),visible_chars + delta * 22.0)
+		var pages := _dialogue_pages()
+		visible_chars = minf(float(pages[dialogue_page].length()), visible_chars + delta * 22.0)
 	queue_redraw()
 func _unhandled_input(event: InputEvent) -> void:
 	if departing: return
@@ -75,10 +77,15 @@ func _advance() -> void:
 	if history_open:
 		history_open = false
 		return
-	if visible_chars < LINES[line_index][1].length():
-		visible_chars = float(LINES[line_index][1].length())
+	var pages := _dialogue_pages()
+	if visible_chars < pages[dialogue_page].length():
+		visible_chars = float(pages[dialogue_page].length())
+	elif dialogue_page < pages.size() - 1:
+		dialogue_page += 1
+		visible_chars = 0
 	elif line_index < LINES.size()-1:
 		line_index += 1
+		dialogue_page = 0
 		visible_chars = 0
 	else:
 		_depart()
@@ -87,9 +94,38 @@ func _depart() -> void:
 	departing = true
 	# Existing briefing unlock is stored on stage clear. No fake stage 2 launch.
 	get_tree().change_scene_to_file.call_deferred("res://main.tscn")
-# Pixel-space clipping avoids long Japanese lines escaping the dialogue panel.
-# Character-by-character layout preserves the typewriter effect and CJK glyph widths.
-func _fit_text(value: String, width: float, size: int) -> String:
+# Width-aware Japanese wrapping: retain every character instead of truncating dialogue.
+# Maximum lines are reserved inside the dialogue panel; longer speeches paginate.
+const DIALOGUE_ROWS := 2
+const DIALOGUE_ROW_HEIGHT := 20
+func _wrap_text(value: String, width: float, size: int) -> Array[String]:
+	var rows: Array[String] = []
+	var row := ""
+	for character in value:
+		if character == "\n":
+			rows.append(row)
+			row = ""
+			continue
+		if font.get_string_size(row + character, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width and not row.is_empty():
+			rows.append(row)
+			row = character
+		else:
+			row += character
+	rows.append(row)
+	return rows
+
+func _dialogue_pages() -> Array[String]:
+	var rows := _wrap_text(LINES[line_index][1], MAX_DIALOGUE_WIDTH, 16)
+	var pages: Array[String] = []
+	for start in range(0, rows.size(), DIALOGUE_ROWS):
+		var page := ""
+		for row in range(start, mini(start + DIALOGUE_ROWS, rows.size())):
+			if not page.is_empty(): page += "\n"
+			page += rows[row]
+		pages.append(page)
+	return pages
+
+func _fit_log_text(value: String, width: float, size: int) -> String:
 	var result := ""
 	for character in value:
 		if font.get_string_size(result + character, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
@@ -125,9 +161,13 @@ func _draw() -> void:
 			var j := log_scroll + row
 			if j > line_index: break
 			var entry: String = LINES[j][0]+": "+LINES[j][1]
-			draw_string(font,Vector2(35,281+row*13),_fit_text(entry,MAX_LOG_WIDTH,11),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("#d4e4dd"))
+			draw_string(font,Vector2(35,281+row*13),_fit_log_text(entry,MAX_LOG_WIDTH,11),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("#d4e4dd"))
 	else:
 		draw_string(font,Vector2(35,264),LINES[line_index][0],HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color("#ffdb9d"))
-		draw_string(font,Vector2(35,299),_fit_text(LINES[line_index][1].substr(0,int(visible_chars)),MAX_DIALOGUE_WIDTH,16),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#edf2f5"))
+		var pages := _dialogue_pages()
+		var shown := pages[dialogue_page].substr(0, int(visible_chars))
+		var visible_rows := shown.split("\n")
+		for row in range(visible_rows.size()):
+			draw_string(font, Vector2(35, 295 + row * DIALOGUE_ROW_HEIGHT), visible_rows[row], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#edf2f5"))
 		draw_string(font,Vector2(430,329),"%d/%d" % [line_index+1,LINES.size()],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#9ab4c9"))
 	draw_string(font,Vector2(22,353),"ENTER/A: NEXT   L/Y: LOG   UP/DOWN: SCROLL   ESC/START: SKIP",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#aab5c6"))
