@@ -6,6 +6,10 @@ func _initialize():
 	var art=ArtCatalog.new()
 	art.reload()
 	assert(ArtCatalog.SLOTS.size()==13)
+	assert(ArtCatalog.ORGANIZED_PATHS.size()==8)
+	assert(ArtCatalog.ORGANIZED_PATHS["ship_cormii"]=="res://art/characters/cormii/ship.png")
+	assert(ArtCatalog.ORGANIZED_PATHS["enemy_bloom"]=="res://art/enemies/bloom/sprite.png")
+	assert(ArtCatalog.ORGANIZED_PATHS["bio_backdrop"]=="res://art/backgrounds/stage_01/backdrop.png")
 	for key in ArtCatalog.SLOTS:
 		var texture=art.texture(key)
 		assert(texture==null or (texture.get_width()>0 and texture.get_height()>0))
