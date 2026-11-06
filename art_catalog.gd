@@ -5,6 +5,7 @@ const ROOT = "res://art/active/"
 const SLOTS = [
 	"title_logo", "title_backdrop",
 	"ship_cormii", "ship_jiyoza", "ship_mafio",
+	"portrait_cormii", "portrait_jiyoza", "portrait_mafio",
 	"enemy_lance", "enemy_bloom",
 	"item_hp", "item_energy", "item_omikuji", "item_analysis",
 	"bio_backdrop", "boss_body"

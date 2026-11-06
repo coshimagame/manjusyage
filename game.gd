@@ -16,6 +16,8 @@ const FONT = {
 
 var planet_texture: ImageTexture
 const Abilities=preload("res://pilot_abilities.gd")
+const StageInterludes=preload("res://stage_interludes.gd")
+const StageEnemyCatalog=preload("res://stage_enemy_catalog.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
 const BriefingProgress=preload("res://briefing_progress.gd")
@@ -27,6 +29,7 @@ var briefing_custom_squad=false
 var enemy_analysis=EnemyAnalysis.new()
 var analysis_flash=0.0
 var mafio_archive=MafioArchive.new()
+var interlude_page=0
 var status_slot=0
 var status_return_mode="play"
 var archive_page=false
@@ -39,6 +42,8 @@ var new_music=true
 const ArtCatalog = preload("res://art_catalog.gd")
 var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
+const LivingTerrain = preload("res://living_terrain.gd")
+var living_terrain=LivingTerrain.new()
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
@@ -58,6 +63,7 @@ var travel = 0.0
 var elapsed = 0.0
 var wave_timer = 1.0
 var wave_id = 0
+var miniboss_spawned=false
 var score = 0
 var reserves = 3
 var combo = 1
@@ -101,6 +107,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 
 func _ready():
 	artwork.reload()
+	living_terrain.setup(1)
 	mafio_archive.load_data()
 	enemy_analysis.load_data()
 	briefing_progress.load_data()
@@ -348,6 +355,7 @@ func launch_from_briefing():
 	briefing_custom_squad=true
 	start_game()
 func start_game():
+	miniboss_spawned=false
 	bio.reset()
 	vertical.reset()
 	pads = Array(Input.get_connected_joypads())
@@ -452,7 +460,10 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: mode="interlude"; interlude_page=0
+		elif mode=="interlude":
+			if key==KEY_ESCAPE: open_briefing(briefing_progress.next_briefing_stage())
+			elif key in [KEY_ENTER,KEY_SPACE]: advance_interlude()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -581,7 +592,10 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: mode="interlude"; interlude_page=0
+		elif mode == "interlude":
+			if b: open_briefing(briefing_progress.next_briefing_stage())
+			elif start or a: advance_interlude()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -627,6 +641,11 @@ func update_game(dt):
 	if combo_time<0: combo=1
 	if gate==0 and boss.is_empty(): travel+=dt*(28 if bio_route else 35)
 	if bio_route: bio.update(self,dt)
+	if mode=="play":
+		living_terrain.tick(dt)
+		for pilot in players:
+			if pilot.down<=0 and living_terrain.is_hazard(pilot.pos) and pilot.inv<=0:
+				hurt(pilot)
 	for i in range(count):
 		var p=players[i]
 		p.fusion_flash=maxf(0.0,float(p.get("fusion_flash",0.0))-dt)
@@ -698,6 +717,8 @@ func update_game(dt):
 		finish(false)
 		return
 	if gate==0 and boss.is_empty():
+		if gates_done==1 and not miniboss_spawned and travel>=1850:
+			spawn_stage_miniboss()
 		if travel>=1400 and gates_done==0: begin_gate(1)
 		elif travel>=3000 and gates_done==1: begin_gate(2)
 		elif travel>=4800: begin_boss()
@@ -731,12 +752,11 @@ func update_game(dt):
 			bullet.pos.x=800
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
-		e.age+=dt; e.flash=maxf(0,e.flash-dt)
-		e.pos.x-=e.speed*dt
-		e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
+		e.flash=maxf(0,e.flash-dt)
+		StageEnemyCatalog.motion(e,dt,players[wave_id%count].pos)
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
-			e.cool=2.5
+			e.cool=1.5 if e.get("miniboss",false) else 2.5
 			var target=players[wave_id%count].pos
 			for angle in ([-.2,0,.2] if bio_route and e.get("technique","")=="fan" else [0]):
 				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3,"analysis_eligible":e.get("analysis_eligible",false),"source_id":e.get("analysis_id","")})
@@ -783,6 +803,9 @@ func update_game(dt):
 					var omen=Abilities.draw_omikuji(p,new_roll)
 					tell("CORMII LUCK "+str(omen.before)+"% > "+str(omen.after)+"%",2.2)
 				explode(item.pos,Color("96faff") if item.kind==3 else (Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff"))),11 if item.kind in [2,3] else 8)
+				# Confirm actual gameplay effect to the collecting player.
+				var pickup_names=["ライフ回復","エネルギー +25","おみくじ","解析 +25"]
+				tell(PILOT_NAMES[int(p.character)]+" / "+pickup_names[clampi(int(item.kind),0,3)],1.5)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0: finish(true)
@@ -793,9 +816,17 @@ func spawn_wave():
 	var pattern="fan" if wave_id%2==0 else "aimed"
 	var group: Array=[]
 	for j in range(3+count):
-		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern,"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
+		var spec=StageEnemyCatalog.small(1,wave_id+j)
+		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":float(spec.speed),"amplitude":23.0,"hp":int(spec.hp)+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":str(spec.shot),"move":str(spec.move),"enemy_id":str(spec.id),"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
 	enemy_analysis.mark_new_group(group,"prototype/"+pattern)
 	enemies.append_array(group)
+
+func spawn_stage_miniboss():
+	miniboss_spawned=true
+	var spec=StageEnemyCatalog.mid(1)
+	enemies.append({"pos":Vector2(670,180),"base":180.0,"age":0.0,"phase":0.0,"speed":0.0,"amplitude":0.0,"hp":float(spec.hp)*count,"cool":1.4,"flash":0.0,"technique":str(spec.shot),"move":str(spec.move),"enemy_id":str(spec.id),"miniboss":true})
+	tell("WARNING / ARTERY GATE",3.0)
+	play_jingle("boss")
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
@@ -968,6 +999,7 @@ func background():
 			return
 	if bio_route:
 		bio.draw_background(self)
+		living_terrain.draw_layer(self)
 		return
 	# Four independent scroll planes; fine highlights stay on the native pixel grid.
 	for y in range(360):
@@ -1074,8 +1106,28 @@ func draw_mafio_fusion(p):
 		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
 		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
 
+func advance_interlude():
+	interlude_page+=1
+	var lines: Array=StageInterludes.page(1).get("lines",[])
+	if interlude_page>=lines.size(): open_briefing(briefing_progress.next_briefing_stage())
+
+func draw_interlude_screen():
+	var entry=StageInterludes.page(1)
+	var lines: Array=entry.get("lines",[])
+	draw_rect(Rect2(0,0,640,360),Color("0b1429"))
+	draw_rect(Rect2(22,36,596,286),Color("172b42"))
+	draw_rect(Rect2(25,39,590,280),Color("0c1728"))
+	japanese(str(entry.get("title","STORY")),Vector2(42,79),24,Color("f4dba5"))
+	japanese(str(entry.get("speaker","記録")),Vector2(43,139),16,Color("78d8e9"))
+	if not lines.is_empty(): japanese(str(lines[clampi(interlude_page,0,lines.size()-1)]),Vector2(43,185),17,WHITE)
+	japanese(str(interlude_page+1)+" / "+str(lines.size()),Vector2(530,290),12,DIM)
+	japanese("決定：次へ   戻る：スキップ",Vector2(43,290),12,DIM)
+
 func _draw():
 	background()
+	if mode=="interlude":
+		draw_interlude_screen()
+		return
 	if mode=="briefing":
 		draw_briefing_screen()
 		return
@@ -1097,6 +1149,7 @@ func _draw():
 		return
 	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
 	if bio_route: bio.draw_organs(self)
+	if not bio_route: living_terrain.draw_layer(self)
 	if gate>0: draw_gate()
 	for e in enemies:
 		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)
@@ -1384,7 +1437,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : STORY" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
 
 
@@ -1403,6 +1456,13 @@ func draw_status_screen():
 	for j in range(21):
 		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent.r,accent.g,accent.b,.045),1.0)
 	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
+	# Optional original character art. Never substitute newly generated concept art.
+	var portrait_key=["portrait_cormii","portrait_jiyoza","portrait_mafio"][char_id]
+	var portrait=artwork.texture(portrait_key)
+	if portrait!=null:
+		draw_rect(Rect2(472,50,148,142),Color("07101e"))
+		draw_texture_rect(portrait,Rect2(479,57,134,128),false)
+		draw_rect(Rect2(472,50,148,142),Color(accent.r,accent.g,accent.b,.18),false,2.0)
 	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
 	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
 	japanese("ライフ",Vector2(306,24),12,WHITE)
