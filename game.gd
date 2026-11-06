@@ -37,6 +37,8 @@ var mixed_scroll=true
 var pilot_offset=0
 var new_music=true
 const ArtCatalog = preload("res://art_catalog.gd")
+const StageClearStory = preload("res://stage_clear_story.gd")
+var story_line := 0
 var artwork = ArtCatalog.new()
 const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
@@ -452,7 +454,10 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: _advance_clear_story()
+		elif mode == "clear_story":
+			if key in [KEY_ENTER, KEY_SPACE]: _advance_clear_story()
+			elif key == KEY_ESCAPE: _leave_clear_story()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -581,7 +586,9 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: _advance_clear_story()
+		elif mode == "clear_story":
+			if start or a: _advance_clear_story()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -855,6 +862,7 @@ func explode(pos,color,amount):
 
 func finish(won):
 	mode="clear" if won else "over"
+	story_line = 0
 	music.stop(); sfx("gate" if won else "burst")
 	play_jingle("clear" if won else "fail")
 	if won: track("ending")
@@ -1190,6 +1198,7 @@ func _draw():
 		centered("TAB / X : PILOT STATUS",259,Color("eacb9c"))
 		japanese("F2：コントローラー設定 / F6：音声テスト",Vector2(179,272))
 	elif mode in ["clear","over"]: draw_result()
+	elif mode == "clear_story": draw_clear_story()
 
 # Compact multi-pilot avionics. No Japanese names intrude into the battle area.
 # A non-obscuring blue-white scanner overlay. Keep hostile bullets visible.
@@ -1374,6 +1383,35 @@ func draw_controls():
 		text_at("DEVICE "+str(calibration_device+1),Vector2(282,245),DIM)
 	japanese("Esc：キャンセル（元の設定を維持）",Vector2(203,292),13)
 	japanese("登録完了後は、決定ボタンを一度離してください",Vector2(167,318),12,DIM)
+
+func _advance_clear_story() -> void:
+	if mode == "clear":
+		mode = "clear_story"
+		story_line = 0
+	elif mode == "clear_story":
+		if StageClearStory.is_last(story_line):
+			_leave_clear_story()
+		else:
+			story_line += 1
+
+func _leave_clear_story() -> void:
+	open_briefing(briefing_progress.next_briefing_stage())
+
+func draw_clear_story() -> void:
+	draw_rect(Rect2(0, 0, W, H), Color("#0a1024"))
+	for i in range(36):
+		var x := float((i * 79 + 17) % W)
+		var y := float((i * 41 + 11) % 240)
+		draw_circle(Vector2(x, y), 1.5, Color("#bd6287"))
+	centered("AFTER THE RED ECHO", 49, Color("#f4b0cb"), 2)
+	japanese("第一境界の向こう", Vector2(221, 94), 17, Color("#f7d6e0"))
+	draw_rect(Rect2(40, 145, 560, 148), Color("#18213d"))
+	draw_rect(Rect2(42, 147, 556, 144), Color("#29304b"))
+	var line: Array = StageClearStory.line_at(story_line)
+	japanese(str(line[0]), Vector2(65, 161), 18, Color("#ffccaa"))
+	japanese(str(line[1]), Vector2(65, 205), 16, Color.WHITE)
+	centered(str(story_line + 1) + " / " + str(StageClearStory.LINES.size()), 309, Color("#d2b8ce"))
+	centered("ENTER / A : NEXT     ESC : SKIP", 332, Color("#a8b5d5"))
 
 func draw_result():
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
