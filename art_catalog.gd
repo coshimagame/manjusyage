@@ -18,6 +18,10 @@ const ORGANIZED_PATHS = {
 	"enemy_lance": "res://art/enemies/lance/sprite.png",
 	"enemy_bloom": "res://art/enemies/bloom/sprite.png",
 	"bio_backdrop": "res://art/backgrounds/stage_01/backdrop.png",
+	"item_hp": "res://art/items/hp/icon.png",
+	"item_energy": "res://art/items/energy/icon.png",
+	"item_omikuji": "res://art/items/omikuji/icon.png",
+	"item_analysis": "res://art/items/analysis/icon.png",
 	"boss_body": "res://art/enemies/boss/body.png"
 }
 var images: Dictionary = {}
