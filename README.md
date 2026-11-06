@@ -9,8 +9,8 @@
 | やりたいこと | 開く場所 |
 | --- | --- |
 | **ゲームを開発・実行する** | [開発手順](docs/DEVELOPMENT.md)・[現在の引き継ぎ](HANDOFF.md) |
-| **決定済みの設定を確認する** | [公式設定台帳](docs/manjushage/CANON.md) |
-| **3人のキャラクターを確認する** | [キャラクター設定](docs/manjushage/CHARACTERS.md)・[画像素材台帳](docs/manjushage/ART_ASSETS.md) |
+| **最新設定と旧案の違いを確認する** | [統合設定案内](docs/manjushage/CURRENT_SPEC.md)・[公式設定台帳](docs/manjushage/CANON.md) |
+| **3人のキャラクター・画像を確認する** | [キャラクター設定](docs/manjushage/CHARACTERS.md)・[画像フォルダ案内](art/README.md)・[素材台帳](docs/manjushage/ART_ASSETS.md) |
 | **ストーリー・世界線を確認する** | [ストーリー](docs/manjushage/STORY.md)・[周回と世界線](docs/manjushage/WORLDLINE_LOOPS.md) |
 | **8ステージを確認する** | [ステージ設定](docs/manjushage/STAGES.md) |
 | **Codexに作業を引き継ぐ** | [開発者ルール](AGENTS.md)・[Codex引き継ぎ](docs/manjushage/CODEX_HANDOFF.md) |
