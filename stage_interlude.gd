@@ -12,6 +12,8 @@ const LINES = [
 var line_index := 0
 var visible_chars := 0.0
 var history_open := false
+var log_scroll := 0
+const LOG_ROWS := 4
 var seconds := 0.0
 var font: Font
 var departing := false
@@ -32,10 +34,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			_depart()
 		elif event.keycode == KEY_L:
 			history_open = not history_open
+			if history_open: log_scroll = maxi(0, line_index + 1 - LOG_ROWS)
+		elif history_open and event.keycode in [KEY_UP, KEY_W]:
+			log_scroll = maxi(0, log_scroll - 1)
+		elif history_open and event.keycode in [KEY_DOWN, KEY_S]:
+			log_scroll = mini(maxi(0, line_index + 1 - LOG_ROWS), log_scroll + 1)
 		elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
 			_advance()
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_START: _depart()
+		elif history_open and event.button_index == JOY_BUTTON_DPAD_UP: log_scroll = maxi(0, log_scroll - 1)
+		elif history_open and event.button_index == JOY_BUTTON_DPAD_DOWN: log_scroll = mini(maxi(0, line_index + 1 - LOG_ROWS), log_scroll + 1)
 		elif event.button_index == JOY_BUTTON_A: _advance()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_advance()
@@ -71,10 +80,13 @@ func _draw() -> void:
 	draw_rect(Rect2(18,236,604,2),Color("#dc9e83"))
 	if history_open:
 		draw_string(font,Vector2(35,260),"LOG / TRANSCRIPT",HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("#ffdcaa"))
-		for j in range(LINES.size()):
-			draw_string(font,Vector2(35,278+j*10),LINES[j][0]+": "+LINES[j][1],HORIZONTAL_ALIGNMENT_LEFT,560,11,Color("#d4e4dd"))
+		for row in range(LOG_ROWS):
+			var j := log_scroll + row
+			if j > line_index: break
+			var entry: String = LINES[j][0]+": "+LINES[j][1]
+			draw_string(font,Vector2(35,281+row*13),entry,HORIZONTAL_ALIGNMENT_LEFT,555,11,Color("#d4e4dd"))
 	else:
 		draw_string(font,Vector2(35,264),LINES[line_index][0],HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color("#ffdb9d"))
 		draw_string(font,Vector2(35,299),LINES[line_index][1].substr(0,int(visible_chars)),HORIZONTAL_ALIGNMENT_LEFT,565,16,Color("#edf2f5"))
 		draw_string(font,Vector2(430,329),"%d/%d" % [line_index+1,LINES.size()],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#9ab4c9"))
-	draw_string(font,Vector2(22,353),"ENTER: NEXT   L: LOG   ESC: SKIP",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#aab5c6"))
+	draw_string(font,Vector2(22,353),"ENTER: NEXT   L: LOG   UP/DOWN: SCROLL   ESC: SKIP",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#aab5c6"))
