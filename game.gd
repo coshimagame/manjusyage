@@ -46,6 +46,8 @@ var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
 var mode = "menu"
+# Stage-1 clear intermission is a provisional in-game scene, not approved canon.
+var intermission_page = 0
 var count = 1
 var players: Array = []
 var bullets: Array = []
@@ -456,7 +458,10 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: mode = "intermission"; intermission_page = 0
+		elif mode == "intermission":
+			if key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
+			elif key == KEY_ESCAPE: open_briefing(briefing_progress.next_briefing_stage())
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -585,7 +590,9 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: mode = "intermission"; intermission_page = 0
+		elif mode == "intermission":
+			if start or a: advance_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1078,8 +1085,31 @@ func draw_mafio_fusion(p):
 		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
 		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
 
+func advance_intermission():
+	intermission_page += 1
+	if intermission_page >= 3:
+		open_briefing(briefing_progress.next_briefing_stage())
+
+func draw_intermission():
+	# Temporary dialogue. No new portraits or ship artwork are assumed approved.
+	draw_rect(Rect2(0,0,W,H),Color("081525"))
+	for i in range(13):
+		draw_line(Vector2(0,30+i*24),Vector2(W,30+i*24),Color(0.25,0.55,0.68,0.07),1)
+	centered("INTERMISSION 01",48,COLORS[0],2)
+	japanese("第一面・帰投後 / 仮台詞",Vector2(24,86),15,DIM)
+	var speaker = ["ムゥ", "クゥ", "コルミィ / ジヨーザ / マフィオ"][clampi(intermission_page,0,2)]
+	var line = ["機体の損傷を確認する。まずは無事でよかった。", "みんなの信号、届いているよ。次も気をつけて。", "それぞれの思いを胸に、次の航路へ向かう。"][clampi(intermission_page,0,2)]
+	draw_rect(Rect2(24,112,592,174),Color("14283c"))
+	draw_rect(Rect2(24,112,592,2),COLORS[0])
+	japanese(speaker,Vector2(45,150),22,COLORS[2])
+	japanese(line,Vector2(45,208),16,WHITE)
+	centered("ENTER / A : NEXT   ESC : SKIP",324,DIM)
+
 func _draw():
 	background()
+	if mode=="intermission":
+		draw_intermission()
+		return
 	if mode=="briefing":
 		draw_briefing_screen()
 		return
