@@ -16,6 +16,7 @@ var invulnerable := 0.0
 var game_over := false
 var boss_spawned := false
 var stage_complete := false
+var result_saved := false
 var enemies: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
 var enemy_shots: Array[Dictionary] = []
@@ -39,6 +40,7 @@ func _load_stage() -> void:
  fire_clock = 0.0
  boss_spawned = false
  stage_complete = false
+ result_saved = false
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -54,6 +56,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
    vertical = not vertical
    _load_stage()
   elif event.keycode == KEY_ESCAPE:
+   get_tree().change_scene_to_file("res://prologue.tscn")
+  elif event.keycode in [KEY_ENTER,KEY_SPACE] and game_over:
    get_tree().change_scene_to_file("res://prologue.tscn")
   elif event.keycode == KEY_R:
    stage = 2
@@ -76,6 +80,12 @@ func _process(delta: float) -> void:
   queue_redraw()
   return
  if stage_complete:
+  if not result_saved:
+   result_saved = true
+   # Match the existing briefing save format without overwriting other flags.
+   var progress = load("res://briefing_progress.gd").new()
+   progress.load_data()
+   progress.mark_cleared(stage)
   game_over = true
   queue_redraw()
   return
@@ -158,5 +168,6 @@ func _draw() -> void:
  draw_string(ThemeDB.fallback_font,Vector2(12,350),"ARROWS/WASD MOVE | Z/SPACE SHOOT | TAB ORIENTATION | R RESTART",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
  if game_over:
   draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
-  draw_string(ThemeDB.fallback_font,Vector2(195,160),"STAGE 02 COMPLETE / GAME OVER",HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
-  draw_string(ThemeDB.fallback_font,Vector2(230,190),"PRESS R TO RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
+  draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER: TITLE  /  R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
