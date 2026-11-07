@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/stage01_asset_gallery.gd" id="1"]
+
+[node name="Stage01AssetGallery" type="Node2D"]
+script = ExtResource("1")
