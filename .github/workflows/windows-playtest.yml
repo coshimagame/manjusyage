@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - ci/windows-playtest-zip-20261105
+      - integration/playable-story-enemy-20261107
   schedule:
     - cron: '0 11 * * *' # 20:00 JST
 permissions:
