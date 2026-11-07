@@ -34,7 +34,17 @@ func _initialize() -> void:
 					placeholders += 1
 				else:
 					imported += 1
+			# Release both imported and placeholder sprites after every check.
+			if is_instance_valid(sprite):
 				sprite.free()
+	# Reject invalid variants as well as out-of-range stages.
+	for variant in [0, 4]:
+		if not EnemyArt.enemy_id(1, variant).is_empty():
+			failures.append("Out-of-range variant accepted")
+		var invalid_visual := EnemyArt.create_visual(1, variant)
+		if invalid_visual != null:
+			failures.append("Out-of-range variant visual accepted")
+			invalid_visual.free()
 	for stage in [0, 9]:
 		if not EnemyArt.enemy_id(stage, 1).is_empty():
 			failures.append("Out-of-range stage accepted")
