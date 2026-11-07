@@ -1,0 +1,162 @@
+extends Node2D
+## Standalone integration: uses draft PNGs from the companion ZIP.
+## Main game and approved assets remain unchanged.
+const W := 640.0
+const H := 360.0
+var stage := 2
+var vertical := false
+var player_pos := Vector2(100,180)
+var hp := 5
+var kills := 0
+var elapsed := 0.0
+var spawn_clock := 0.0
+var spawn_index := 0
+var fire_clock := 0.0
+var invulnerable := 0.0
+var game_over := false
+var boss_spawned := false
+var stage_complete := false
+var enemies: Array[Dictionary] = []
+var shots: Array[Dictionary] = []
+var enemy_shots: Array[Dictionary] = []
+var textures := {}
+
+func _ready() -> void:
+ _load_stage()
+
+func _enemy_id(slot: int) -> String:
+ if slot < 9:
+  return "EN%03d" % [stage * 100 + slot + 1] if stage > 1 else "EN%03d" % [slot + 1]
+ return ["SB","MB","BB"][slot-9] + "%02d" % stage
+
+func _load_stage() -> void:
+ enemies.clear()
+ shots.clear()
+ enemy_shots.clear()
+ elapsed = 0.0
+ spawn_clock = 0.0
+ spawn_index = 0
+ fire_clock = 0.0
+ boss_spawned = false
+ stage_complete = false
+ textures.clear()
+ for slot in range(12):
+  var eid := _enemy_id(slot)
+  var orientation := "v" if vertical else "h"
+  var path := "res://art/enemies/stage%02d_draft/%s_%s_draft.png" % [stage,eid,orientation]
+  if ResourceLoader.exists(path):
+   textures[eid] = load(path)
+ queue_redraw()
+
+func _unhandled_key_input(event: InputEvent) -> void:
+ if event is InputEventKey and event.pressed and not event.echo:
+  if event.keycode == KEY_TAB:
+   vertical = not vertical
+   _load_stage()
+  elif event.keycode == KEY_ESCAPE:
+   get_tree().change_scene_to_file("res://prologue.tscn")
+  elif event.keycode == KEY_R:
+   stage = 2
+   hp = 5
+   kills = 0
+   game_over = false
+   _load_stage()
+
+func _hurt() -> void:
+ hp -= 1
+ invulnerable = 1.1
+ if hp <= 0: game_over = true
+
+func _spawn(slot: int) -> void:
+ var pos := Vector2(60.0 + float(slot % 5) * 110.0,-35.0) if vertical else Vector2(675.0,75.0 + float(slot % 5) * 53.0)
+ enemies.append({"id":_enemy_id(slot),"slot":slot,"pos":pos,"origin":pos,"age":0.0,"speed":28.0 if slot >= 9 else 65.0,"hp":28 if slot == 11 else 2,"fire":1.0})
+
+func _process(delta: float) -> void:
+ if game_over:
+  queue_redraw()
+  return
+ if stage_complete:
+  game_over = true
+  queue_redraw()
+  return
+ elapsed += delta
+ invulnerable = maxf(0.0,invulnerable-delta)
+ var movement := Input.get_vector("ui_left","ui_right","ui_up","ui_down")
+ if Input.is_key_pressed(KEY_A): movement.x -= 1.0
+ if Input.is_key_pressed(KEY_D): movement.x += 1.0
+ if Input.is_key_pressed(KEY_W): movement.y -= 1.0
+ if Input.is_key_pressed(KEY_S): movement.y += 1.0
+ if movement.length() > 1.0: movement = movement.normalized()
+ player_pos += movement * 190.0 * delta
+ player_pos = player_pos.clamp(Vector2(14,35),Vector2(626,345))
+ fire_clock -= delta
+ if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE)) and fire_clock <= 0.0:
+  shots.append({"pos":player_pos + (Vector2(0,-15) if vertical else Vector2(16,0))})
+  fire_clock = 0.14
+ spawn_clock += delta
+ if spawn_index < 9 and spawn_clock >= 2.0:
+  spawn_clock = 0.0
+  _spawn(spawn_index)
+  spawn_index += 1
+ elif spawn_index >= 9 and not boss_spawned and enemies.is_empty():
+  boss_spawned = true
+  _spawn(11)
+ for i in range(shots.size()-1,-1,-1):
+  var s: Dictionary = shots[i]
+  s.pos += (Vector2.UP if vertical else Vector2.RIGHT) * 370.0 * delta
+  if s.pos.x > W or s.pos.y < 0: shots.remove_at(i)
+ for i in range(enemy_shots.size()-1,-1,-1):
+  var s: Dictionary = enemy_shots[i]
+  s.pos += s.vel * delta
+  if s.pos.x < -10 or s.pos.y > H+10 or s.pos.x > W+10 or s.pos.y < -10:
+   enemy_shots.remove_at(i)
+  elif invulnerable <= 0.0 and s.pos.distance_to(player_pos) < 11.0:
+   enemy_shots.remove_at(i)
+   _hurt()
+ for i in range(enemies.size()-1,-1,-1):
+  var e: Dictionary = enemies[i]
+  e.age += delta
+  var lateral: float = sin(e.age * (2.0 + float(e.slot % 3))) * 22.0
+  e.pos = e.origin + (Vector2(0,e.age*e.speed) if vertical else Vector2(-e.age*e.speed,0)) + (Vector2(lateral,0) if vertical else Vector2(0,lateral))
+  e.fire -= delta
+  if e.fire <= 0.0:
+   var direction: Vector2 = (player_pos-e.pos).normalized()
+   enemy_shots.append({"pos":e.pos,"vel":direction*105.0})
+   e.fire = 1.7 if e.slot < 9 else 0.45
+  for j in range(shots.size()-1,-1,-1):
+   if shots[j].pos.distance_to(e.pos) < (27.0 if e.slot >= 9 else 16.0):
+    shots.remove_at(j)
+    e.hp -= 1
+    break
+  if e.hp <= 0:
+   enemies.remove_at(i)
+   kills += 1
+   if e.slot == 11: stage_complete = true
+  elif e.pos.x < -80 or e.pos.y > H+80:
+   enemies.remove_at(i)
+  elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
+   _hurt()
+ queue_redraw()
+
+func _draw() -> void:
+ draw_rect(Rect2(0,0,W,H),Color("#0b1725"))
+ for x in range(0,640,40): draw_line(Vector2(x,0),Vector2(x,360),Color("#193047"),1.0)
+ for y in range(0,360,40): draw_line(Vector2(0,y),Vector2(640,y),Color("#193047"),1.0)
+ for e in enemies:
+  var texture: Texture2D = textures.get(e.id)
+  if texture != null:
+   var size := Vector2(72,72) if e.slot >= 9 else Vector2(37,37)
+   draw_texture_rect(texture,Rect2(e.pos-size/2.0,size),false)
+  else: draw_circle(e.pos,14,Color.RED)
+ for s in shots: draw_circle(s.pos,3.0,Color("#63dfff"))
+ for s in enemy_shots: draw_circle(s.pos,4.0,Color("#ff6c9c"))
+ if invulnerable <= 0.0 or int(elapsed*10.0)%2 == 0:
+  var ship := PackedVector2Array([player_pos+Vector2(15,0),player_pos+Vector2(-11,-9),player_pos+Vector2(-6,0),player_pos+Vector2(-11,9)])
+  if vertical: ship = PackedVector2Array([player_pos+Vector2(0,-15),player_pos+Vector2(-9,11),player_pos,player_pos+Vector2(9,11)])
+  draw_colored_polygon(ship,Color("#ffd46d"))
+ draw_string(ThemeDB.fallback_font,Vector2(12,20),"STAGE %d  HP %d  KILLS %d  %s" % [stage,hp,kills,"VERTICAL" if vertical else "HORIZONTAL"],HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+ draw_string(ThemeDB.fallback_font,Vector2(12,350),"ARROWS/WASD MOVE | Z/SPACE SHOOT | TAB ORIENTATION | R RESTART",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ if game_over:
+  draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
+  draw_string(ThemeDB.fallback_font,Vector2(195,160),"STAGE 02 COMPLETE / GAME OVER",HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(230,190),"PRESS R TO RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
