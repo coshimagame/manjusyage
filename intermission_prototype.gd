@@ -16,6 +16,7 @@ var visible_chars := 0.0
 var full_text := ""
 var history: Array[String] = []
 var show_log := false
+var finished := false
 var speaker_label: Label
 var dialogue_label: Label
 var hint_label: Label
@@ -52,6 +53,7 @@ func begin(completed_stage: int, active_players: Array[String]) -> void:
  line_index = 0
  history.clear()
  show_log = false
+ finished = false
  if is_node_ready(): _show_line()
 
 func _available_lines() -> Array[Dictionary]:
@@ -61,10 +63,16 @@ func _available_lines() -> Array[Dictionary]:
    result.append(entry)
  return result
 
+func _finish() -> void:
+ if finished: return
+ finished = true
+ set_process(false)
+ intermission_finished.emit(stage_number + 1 if stage_number < 8 else 0)
+
 func _show_line() -> void:
  var lines := _available_lines()
  if line_index >= lines.size():
-  intermission_finished.emit(mini(stage_number+1,8))
+  _finish()
   return
  var line: Dictionary = lines[line_index]
  speaker_label.text = str(line.speaker)
@@ -75,21 +83,26 @@ func _show_line() -> void:
  history.append("%s: %s" % [line.speaker,line.text])
 
 func _process(delta: float) -> void:
- if show_log: return
+ if show_log or finished: return
  visible_chars = minf(visible_chars+delta*28.0,float(full_text.length()))
  dialogue_label.visible_characters = int(visible_chars)
 
 func _unhandled_key_input(event: InputEvent) -> void:
- if not event is InputEventKey or not event.pressed or event.echo: return
+ if finished or not event is InputEventKey or not event.pressed or event.echo: return
  if event.keycode == KEY_ESCAPE:
-  intermission_finished.emit(mini(stage_number+1,8))
+  _finish()
  elif event.keycode == KEY_L:
   show_log = not show_log
-  dialogue_label.visible_characters = -1
   if show_log:
    speaker_label.text = "会話ログ（再閲覧）"
    dialogue_label.text = "\n".join(history)
-  else: _show_line()
+   dialogue_label.visible_characters = -1
+  else:
+   var lines := _available_lines()
+   if line_index < lines.size():
+    speaker_label.text = str(lines[line_index].speaker)
+    dialogue_label.text = full_text
+    dialogue_label.visible_characters = int(visible_chars)
  elif event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE]:
   if show_log: return
   if visible_chars < full_text.length():
