@@ -14,19 +14,30 @@ const ENEMY_IDS := [
 	["E-801", "E-802", "E-803"],
 ]
 
-static func sprite_path(stage_number: int, enemy_variant: int) -> String:
+# Direction-specific PNGs are separate illustrations, never rotated copies.
+# Legacy enemy_sNN_VV.png remains supported for older art packs.
+static func sprite_path(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> String:
 	if stage_number < 1 or stage_number > 8 or enemy_variant < 1 or enemy_variant > 3:
 		return ""
-	return "%senemy_s%02d_%02d.png" % [SPRITE_ROOT, stage_number, enemy_variant]
+	var direction := "vertical" if vertical_scroll else "horizontal"
+	return "%senemy_s%02d_%02d_%s.png" % [SPRITE_ROOT, stage_number, enemy_variant, direction]
 
-static func load_sprite(stage_number: int, enemy_variant: int) -> Texture2D:
-	var path := sprite_path(stage_number, enemy_variant)
-	if path.is_empty() or not ResourceLoader.exists(path):
+static func load_sprite(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Texture2D:
+	var path := sprite_path(stage_number, enemy_variant, vertical_scroll)
+	if path.is_empty():
 		return null
-	return load(path) as Texture2D
+	if ResourceLoader.exists(path, "Texture2D"):
+		return ResourceLoader.load(path) as Texture2D
+	# Only use the old undirected file for horizontal gameplay.
+	# Rotating it would misrepresent the approved vertical design.
+	if not vertical_scroll:
+		var legacy_path := "%senemy_s%02d_%02d.png" % [SPRITE_ROOT, stage_number, enemy_variant]
+		if ResourceLoader.exists(legacy_path, "Texture2D"):
+			return ResourceLoader.load(legacy_path) as Texture2D
+	return null
 
 static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Sprite2D:
-	var texture := load_sprite(stage_number, enemy_variant)
+	var texture := load_sprite(stage_number, enemy_variant, vertical_scroll)
 	if texture == null:
 		texture = make_placeholder(stage_number, enemy_variant)
 	if texture == null:
@@ -34,8 +45,8 @@ static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll
 	var visual := Sprite2D.new()
 	visual.texture = texture
 	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# Source sprites face left/right for horizontal play; turn for vertical play.
-	visual.rotation_degrees = 90.0 if vertical_scroll else 0.0
+	# Vertical art is drawn top-down by the artist; do not rotate.
+	visual.rotation_degrees = 0.0
 	return visual
 
 static func enemy_id(stage_number: int, enemy_variant: int) -> String:
