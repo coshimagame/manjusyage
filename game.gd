@@ -592,7 +592,8 @@ func _process(dt):
 		elif mode == "clear":
 			if start or a: mode = "intermission"; intermission_page = 0
 		elif mode == "intermission":
-			if start or a: advance_intermission()
+			if b: open_briefing(briefing_progress.next_briefing_stage())
+			elif start or a: advance_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
