@@ -37,6 +37,19 @@ func _initialize() -> void:
 			# Release both imported and placeholder sprites after every check.
 			if is_instance_valid(sprite):
 				sprite.free()
+	# Directional fallback silhouettes must actually differ in pixels, not only metadata.
+	# Test the procedural textures directly even when optional imported art is installed.
+	var horizontal_fallback: Texture2D = EnemyArt.make_placeholder(1, 1, false)
+	var vertical_fallback: Texture2D = EnemyArt.make_placeholder(1, 1, true)
+	if horizontal_fallback == null or vertical_fallback == null:
+		failures.append("Directional fallback texture missing")
+	else:
+		var horizontal_image: Image = horizontal_fallback.get_image()
+		var vertical_image: Image = vertical_fallback.get_image()
+		if horizontal_image.get_size() != vertical_image.get_size():
+			failures.append("Directional fallback dimensions differ unexpectedly")
+		elif horizontal_image.get_data() == vertical_image.get_data():
+			failures.append("Horizontal and vertical fallback art are identical")
 	# Reject invalid variants as well as out-of-range stages.
 	for variant in [0, 4]:
 		if not EnemyArt.enemy_id(1, variant).is_empty():
