@@ -28,6 +28,12 @@ static func load_sprite(stage_number: int, enemy_variant: int, vertical_scroll: 
 		return null
 	if ResourceLoader.exists(path, "Texture2D"):
 		return ResourceLoader.load(path) as Texture2D
+	# Accept the stage01_enemy01_* names used in the external art-generation brief.
+	# Never overwrite the canonical enemy_s01_01_* files; both conventions are read-only.
+	var direction := "vertical" if vertical_scroll else "horizontal"
+	var import_path := "%sstage%02d_enemy%02d_%s.png" % [SPRITE_ROOT, stage_number, enemy_variant, direction]
+	if ResourceLoader.exists(import_path, "Texture2D"):
+		return ResourceLoader.load(import_path) as Texture2D
 	# Only use the old undirected file for horizontal gameplay.
 	# Rotating it would misrepresent the approved vertical design.
 	if not vertical_scroll:
