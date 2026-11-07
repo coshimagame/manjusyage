@@ -55,6 +55,13 @@ static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll
 	var visual := Sprite2D.new()
 	visual.texture = texture
 	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Runtime QA: identify whether the visible enemy uses an imported PNG or fallback art.
+	# This metadata never changes an approved sprite or save-game data.
+	var source_path := resolved_sprite_path(stage_number, enemy_variant, vertical_scroll)
+	visual.set_meta("enemy_art_source", source_path)
+	visual.set_meta("enemy_art_placeholder", source_path.is_empty())
+	visual.set_meta("enemy_art_id", enemy_id(stage_number, enemy_variant))
+	visual.set_meta("enemy_art_direction", "vertical" if vertical_scroll else "horizontal")
 	# Vertical art is drawn top-down by the artist; do not rotate.
 	visual.rotation_degrees = 0.0
 	return visual
