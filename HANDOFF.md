@@ -243,3 +243,10 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - Godot 4.6.3でインポート済み。`test_setting_updates.gd`、`test_biological_stage.gd`、`test_prologue.gd` はPASS。終了時のObjectDB/Resource解放警告は既知で残存。物理コントローラー、人間プレイ、音楽の実聴は未検証。
 - 次：この統合コミットを`main`へ非強制pushし、GitHub ActionsのWindows/Web書き出しを確認する。リモートブランチ削除は別途内容確認後に行う。
 
+# 2026-11-07 main 試遊版
+
+- `tools/pack.gd`を、mainの`art/`・`audio/`・`scripts/`とGodotインポート済みリソースを再帰収録し、`--output=`で任意のPCK出力先を指定できる形へ更新した。これによりmain統合後の画像・UI・機体をPCKへ落とせる。
+- `outputs/MANJUSHAGE-main-20261107-Windows.zip` を作成。既存Godot 4.6 Windows実行ファイルと、mainから再パックしたPCKの組み合わせ。PCK SHA-256: `34B1A2DB49205EDFDC572AED0B0A56EB4334D7A6CB1BEB24B7174CA1A6DB1988`。
+- 配布物を `--headless --main-pack ... --scene res://main.tscn -- --autotest --players=1` で起動し、終了コード0を確認。物理コントローラー、人間操作、音楽の実聴、画面キャプチャは未検証。
+- Godot標準Windows export templateはローカル未導入のため、通常`export-release`は使えない。GitHub Actionsの正式Windows書き出しは別途確認する。
+

@@ -161,3 +161,9 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - `tests/test_setting_updates.gd`を、現行のambient stage音楽デフォルトとループ実装に整合させた。
 - Godot 4.6.3のインポートと設定・生体ステージ・プロローグの回帰テストを実行。物理パッド、人間操作、実聴は未実施。
 
+# 2026-11-07 — main試遊版の再パック
+
+- `tools/pack.gd`を更新し、mainが使うスクリプト、`art/`、`audio/`、`scripts/`、Godotインポート済みリソースをPCKへ収録可能にした。
+- main統合済みのWindows試遊ZIPをローカル出力。配布PCKを既存Godot 4.6 Windows実行ファイルでヘッドレス起動し、終了コード0を確認。
+- 通常のWindows export templateはこのPCに未導入。GitHub Actionsの正式書き出しを次に確認する。
+
