@@ -49,7 +49,7 @@ static func load_sprite(stage_number: int, enemy_variant: int, vertical_scroll: 
 static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Sprite2D:
 	var texture := load_sprite(stage_number, enemy_variant, vertical_scroll)
 	if texture == null:
-		texture = make_placeholder(stage_number, enemy_variant)
+		texture = make_placeholder(stage_number, enemy_variant, vertical_scroll)
 	if texture == null:
 		return null
 	var visual := Sprite2D.new()
@@ -73,7 +73,7 @@ static func enemy_id(stage_number: int, enemy_variant: int) -> String:
 
 # Distinct transparent fallback sprites allow stage previews before PNG import.
 # Temporary 16x16 silhouettes, not approved character artwork.
-static func make_placeholder(stage_number: int, enemy_variant: int) -> Texture2D:
+static func make_placeholder(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Texture2D:
 	if stage_number < 1 or stage_number > 8 or enemy_variant < 1 or enemy_variant > 3:
 		return null
 	var palettes := [
@@ -95,7 +95,14 @@ static func make_placeholder(stage_number: int, enemy_variant: int) -> Texture2D
 			if occupied:
 				var edge := dx >= 5 or dy >= 5
 				image.set_pixel(x, y, primary.darkened(0.42) if edge else primary)
-	for x in range(6, 10):
-		image.set_pixel(x, 7, Color("f8f4dc"))
-		image.set_pixel(x, 8, Color("273045"))
+	# Temporary direction-specific silhouettes: horizontal faces left, vertical faces down.
+	# Keep approved PNGs untouched; this branch only affects procedural fallbacks.
+	if vertical_scroll:
+		for y in range(10, 14):
+			image.set_pixel(7, y, Color("f8f4dc"))
+			image.set_pixel(8, y, Color("273045"))
+	else:
+		for x in range(2, 6):
+			image.set_pixel(x, 7, Color("f8f4dc"))
+			image.set_pixel(x, 8, Color("273045"))
 	return ImageTexture.create_from_image(image)
