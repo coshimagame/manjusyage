@@ -22,25 +22,29 @@ static func sprite_path(stage_number: int, enemy_variant: int, vertical_scroll: 
 	var direction := "vertical" if vertical_scroll else "horizontal"
 	return "%senemy_s%02d_%02d_%s.png" % [SPRITE_ROOT, stage_number, enemy_variant, direction]
 
-static func load_sprite(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Texture2D:
+# Returns the actual imported asset path, or an empty string when a placeholder is needed.
+# Used by asset QA so procedural fallback art is never mistaken for approved PNGs.
+static func resolved_sprite_path(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> String:
 	var path := sprite_path(stage_number, enemy_variant, vertical_scroll)
 	if path.is_empty():
-		return null
+		return ""
 	if ResourceLoader.exists(path, "Texture2D"):
-		return ResourceLoader.load(path) as Texture2D
-	# Accept the stage01_enemy01_* names used in the external art-generation brief.
-	# Never overwrite the canonical enemy_s01_01_* files; both conventions are read-only.
+		return path
 	var direction := "vertical" if vertical_scroll else "horizontal"
 	var import_path := "%sstage%02d_enemy%02d_%s.png" % [SPRITE_ROOT, stage_number, enemy_variant, direction]
 	if ResourceLoader.exists(import_path, "Texture2D"):
-		return ResourceLoader.load(import_path) as Texture2D
-	# Only use the old undirected file for horizontal gameplay.
-	# Rotating it would misrepresent the approved vertical design.
+		return import_path
 	if not vertical_scroll:
 		var legacy_path := "%senemy_s%02d_%02d.png" % [SPRITE_ROOT, stage_number, enemy_variant]
 		if ResourceLoader.exists(legacy_path, "Texture2D"):
-			return ResourceLoader.load(legacy_path) as Texture2D
-	return null
+			return legacy_path
+	return ""
+
+static func load_sprite(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Texture2D:
+	var path := resolved_sprite_path(stage_number, enemy_variant, vertical_scroll)
+	if path.is_empty():
+		return null
+	return ResourceLoader.load(path) as Texture2D
 
 static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Sprite2D:
 	var texture := load_sprite(stage_number, enemy_variant, vertical_scroll)
