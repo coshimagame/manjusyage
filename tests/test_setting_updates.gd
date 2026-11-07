@@ -62,8 +62,10 @@ func run():
 
 	g.new_music=true
 	g.start_game()
-	assert(g.music_name==("wistful_demo" if ResourceLoader.exists("res://audio/wistful_demo.wav") else "ruins"))
-	assert(g.music.stream!=null and g.music.stream.get_length()>20)
+	# The current default is the generated ambient stream; F8 retains the ruins
+	# fallback.  Keep the test aligned with the actual selectable music path.
+	assert(g.music_name=="ambient_stage")
+	assert(g.music.stream is AudioStreamWAV and g.music.stream.loop_end>160000)
 	g.queue_free()
 	await process_frame
 	print("SETTINGS PASS: character order, fortune rerolls, Jiyoza growth, Mafio temporary digestion, vertical stage and music")

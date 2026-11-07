@@ -235,3 +235,11 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 
 ## 2026-10-31 制作チーム命名（ユーザー正式決定）
 チーム名を **Mw-fActory（ムゥファクトリー）** に決定。以後ChatGPT・Codex・サウンド、アート、ゲームデザイン等の専門ロールを含む制作チームの公式呼称にする。表記 **Mw-fActory** 厳守。作品名 **曼珠沙華（MANJUSHAGE）** は変わらない。GAME上のチームロゴやスタッフロールは今回未変更、保存IDやrepo名は保全。CANON.mdのC-050を参照。
+# 2026-11-07 main 再統合
+
+- ユーザーの指示でGitHub `main`（`aeb3b21`）を唯一の統合基準にした。ここにはAntigravity側の機体PNG、タイトル、Web/Windows書き出し、既存ステータス・戦闘実装が含まれる。
+- 検証済みv12は `snapshot/v12-local-20261107` としてローカル保全し、mainへ上書きしない。全差分を押し込むとAntigravity成果を削除するため、必要なものだけを小さく統合する。
+- 今回はユーザー提供の `character_hub_ui_20261106.png` と `character_system_ui_20261106.png` を無加工で追加。後者の肖像だけを、ライブHP・経験値・捕食データを保ったステータス画面へ表示する。画像内の例示ステータス、台詞、メニュー表記はゲーム設定・実データへ採用していない。
+- Godot 4.6.3でインポート済み。`test_setting_updates.gd`、`test_biological_stage.gd`、`test_prologue.gd` はPASS。終了時のObjectDB/Resource解放警告は既知で残存。物理コントローラー、人間プレイ、音楽の実聴は未検証。
+- 次：この統合コミットを`main`へ非強制pushし、GitHub ActionsのWindows/Web書き出しを確認する。リモートブランチ削除は別途内容確認後に行う。
+

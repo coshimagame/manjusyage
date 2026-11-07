@@ -154,3 +154,10 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - **実ゲームコード変更**：prologue.gdを8ページに増補し、ムゥの整備室（後ろ姿・工具・火花・解析ホログラム）、教習会話・字幕の段階的な字送り、8ページのカウンター、--workshop-shot を追加。コミット 30b39e65。**Godot4.6による実レンダリングと操作テスト未実施**。
 - **音楽再生成コード追加**：tools/render_manjushage_gagaku_future.py。オリジナルの雅楽風×156 BPMアクション音楽デモを生成できるPython原本を保存。会話で約24.6秒のWAV／MP3を生成したが、GitHubに音声ファイルを配置したわけではなく、**Godotへの音源統合とユーザーの試聴評価は未実施**。詳細 SOUND_DESIGN.md。
 - ユーザー決定：雅楽の幽玄、哀愁、少しの不気味さ、美しく儚い、永い時の未来感とSTGの躍動感、制作チーム内のA/B批評。提案も仮実装して磨く方針。ストーリー演出計画 MU_CINEMATICS_V01.md、開発指示 PROTOTYPE_FIRST_DIRECTIVE.md。課題管理はIssue #2（音）／Issue #3（物語）。
+# 2026-11-07 — main 統合: 3人の固定ビジュアルをライブステータスへ接続
+
+- GitHub `main`をベースに、ユーザー提供の3人用UI原本2枚を`art/ui/`へ追加。
+- `game.gd`は `character_system_ui_20261106.png` の肖像部分のみをプロフィール枠として描画。ゲーム内のHP、成長、捕食は既存のライブ値を維持し、原本に描かれた例示数値や文章は採用しない。
+- `tests/test_setting_updates.gd`を、現行のambient stage音楽デフォルトとループ実装に整合させた。
+- Godot 4.6.3のインポートと設定・生体ステージ・プロローグの回帰テストを実行。物理パッド、人間操作、実聴は未実施。
+

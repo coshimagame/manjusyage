@@ -15,6 +15,9 @@ const FONT = {
 }
 
 var planet_texture: ImageTexture
+# User-provided protagonist boards are used only as visual portraits.  Their
+# printed stats/dialogue stay reference material; live state remains in Player data.
+var character_system_ui: Texture2D
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 const EnemyAnalysis=preload("res://enemy_analysis.gd")
@@ -101,6 +104,7 @@ const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色�
 
 func _ready():
 	artwork.reload()
+	character_system_ui=load("res://art/ui/character_system_ui_20261106.png")
 	mafio_archive.load_data()
 	enemy_analysis.load_data()
 	briefing_progress.load_data()
@@ -1422,7 +1426,21 @@ func draw_status_screen():
 		draw_jiyoza_status(p)
 	else:
 		draw_mafio_status(p)
+	if not archive_page:
+		draw_fixed_pilot_visual(char_id,accent)
 	text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
+
+# The crop is portrait-only. It intentionally does not make the source board's
+# example values, menu labels, or dialogue into game data or confirmed canon.
+func draw_fixed_pilot_visual(char_id:int,accent:Color):
+	if not character_system_ui: return
+	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+	var panel=Rect2(447,51,166,166)
+	draw_rect(panel,Color("080d1c",.93))
+	draw_texture_rect_region(character_system_ui,Rect2(454,55,152,143),sources[char_id])
+	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
+	draw_rect(Rect2(454,198,152,12),Color("101525",.88))
+	text_at("LIVE PROFILE",Vector2(468,201),accent,1)
 
 func draw_cormii_status(p):
 	japanese("開運盤・おみくじ",Vector2(29,71),20,Color("ffd7d9"))

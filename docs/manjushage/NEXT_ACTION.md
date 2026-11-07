@@ -59,3 +59,10 @@
 優先1：Godot 4.6で全GDScriptをインポートしテストを実行。更新したtest_prologue.gd、test_setting_updates.gd、test_music_story.gd、test_save.gd、および新しいtest_briefing_progress.gd、test_briefing_game_flow.gd、test_jiyoza_analysis.gd、test_cormii_fortune.gdと既存1〜3人自動走行を確認。異常を直す。
 優先2：実際のプレイ画面で細身3機PNG、縦横方向、1面クリア→ブリーフィング→再出撃、2面未完成のブロック、図鑑の4/5/6面解放、敵弾を残す特殊解析を確認する。
 優先3：不足しているending.wavや雅楽的な新曲、敵バリエーション、マフィオ食感レポート、ブリーフィング演出、ステージ2を制作する。今は旧曲へ安全フォールバックするが、専用曲の完成ではない。
+# 2026-11-07 main 統合後の最優先
+
+1. `main`を唯一の作業基準にし、`snapshot/v12-local-20261107`は復元用に残す。Antigravityの機体PNG・タイトル・CIを上書きしない。
+2. GitHub ActionsのWindows/Web書き出しで、追加した3人のプロフィール画像が実際のビルドに含まれることを確認する。
+3. 実際のプレイ画面を、メニュー・横戦闘・縦区間・ボス・3人それぞれのステータスで撮る。今回のヘッドレス起動では画像書き出し経路を確認できなかったため、キャプチャ成功とは記録しない。
+4. 次のゲーム本体改修は、Stage 1の背景・敵・弾幕・撃破演出を既存main上で一単位ずつ行い、1〜3人、救出、被弾無敵、横縦、保存を回帰する。
+
