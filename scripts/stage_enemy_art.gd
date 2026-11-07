@@ -22,11 +22,13 @@ static func sprite_path(stage_number: int, enemy_variant: int) -> String:
 static func load_sprite(stage_number: int, enemy_variant: int) -> Texture2D:
 	var path := sprite_path(stage_number, enemy_variant)
 	if path.is_empty() or not ResourceLoader.exists(path):
-		return make_placeholder(stage_number, enemy_variant)
+		return null
 	return load(path) as Texture2D
 
 static func create_visual(stage_number: int, enemy_variant: int, vertical_scroll: bool = false) -> Sprite2D:
 	var texture := load_sprite(stage_number, enemy_variant)
+	if texture == null:
+		texture = make_placeholder(stage_number, enemy_variant)
 	if texture == null:
 		return null
 	var visual := Sprite2D.new()
