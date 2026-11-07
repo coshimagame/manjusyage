@@ -1097,7 +1097,13 @@ func draw_intermission():
 		draw_line(Vector2(0,30+i*24),Vector2(W,30+i*24),Color(0.25,0.55,0.68,0.07),1)
 	centered("INTERMISSION 01",48,COLORS[0],2)
 	japanese("第一面・帰投後 / 仮台詞",Vector2(24,86),15,DIM)
-	var speaker = ["ムゥ", "クゥ", "コルミィ / ジヨーザ / マフィオ"][clampi(intermission_page,0,2)]
+	var active_names: Array[String] = []
+	for pilot in players:
+		var character_id = int(pilot.get("character", -1))
+		if character_id >= 0 and character_id < PILOT_NAMES.size() and not active_names.has(PILOT_NAMES[character_id]):
+			active_names.append(PILOT_NAMES[character_id])
+	var squad_label = " / ".join(active_names) if not active_names.is_empty() else "出撃隊"
+	var speaker = ["ムゥ", "クゥ", squad_label][clampi(intermission_page,0,2)]
 	var line = ["機体の損傷を確認する。まずは無事でよかった。", "みんなの信号、届いているよ。次も気をつけて。", "それぞれの思いを胸に、次の航路へ向かう。"][clampi(intermission_page,0,2)]
 	draw_rect(Rect2(24,112,592,174),Color("14283c"))
 	draw_rect(Rect2(24,112,592,2),COLORS[0])
