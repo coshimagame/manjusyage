@@ -71,7 +71,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			history_open = false
 		elif event.button_index == JOY_BUTTON_Y:
 			history_open = not history_open
-			if history_open: log_scroll = maxi(0, line_index + 1 - LOG_ROWS)
+			if history_open: log_scroll = maxi(0, _log_entry_count() - LOG_ROWS)
 		elif history_open and event.button_index == JOY_BUTTON_DPAD_UP: log_scroll = maxi(0, log_scroll - 1)
 		elif history_open and event.button_index == JOY_BUTTON_DPAD_DOWN: log_scroll = mini(maxi(0, _log_entry_count() - LOG_ROWS), log_scroll + 1)
 		elif event.button_index == JOY_BUTTON_A: _advance()
