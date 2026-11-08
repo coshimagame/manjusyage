@@ -34,6 +34,11 @@ func _load_stage() -> void:
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
+ player_pos = Vector2(100,180)
+ hp = 5
+ kills = 0
+ invulnerable = 0.0
+ game_over = false
  elapsed = 0.0
  spawn_clock = 0.0
  spawn_index = 0
@@ -81,6 +86,13 @@ func _spawn(slot: int) -> void:
 
 func _process(delta: float) -> void:
  if game_over:
+  var pad_retry := false
+  for device in Input.get_connected_joypads():
+   if Input.is_joy_button_pressed(device, JOY_BUTTON_Y):
+    pad_retry = true
+    break
+  if pad_retry:
+   _load_stage()
   queue_redraw()
   return
  if stage_complete:
@@ -155,7 +167,7 @@ func _process(delta: float) -> void:
    enemies.remove_at(i)
    kills += 1
    if e.slot == 11: stage_complete = true
-  elif e.pos.x < -80 or e.pos.y > H+80:
+  elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
    _hurt()
