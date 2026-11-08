@@ -348,6 +348,10 @@ func change_briefing_character():
 	sfx("switch")
 
 func launch_from_briefing():
+	# Provisional stage 2 battle integrated with story and pilot selection.
+	if briefing_stage == 2 and briefing_progress.can_select(2):
+		get_tree().change_scene_to_file("res://scenes/stage02_combat.tscn")
+		return
 	if not briefing_progress.can_launch(briefing_stage):
 		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
 		return
