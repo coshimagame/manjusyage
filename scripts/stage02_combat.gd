@@ -186,7 +186,23 @@ func _draw() -> void:
   if texture != null:
    var size := Vector2(72,72) if e.slot >= 9 else Vector2(37,37)
    draw_texture_rect(texture,Rect2(e.pos-size/2.0,size),false)
-  else: draw_circle(e.pos,14,Color.RED)
+  else:
+   # Distinctive procedural fallback silhouettes; never overwrite approved PNGs.
+   var slot: int = int(e.get("slot", 0))
+   if slot == 11:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(-32,0),e.pos+Vector2(-15,-20),e.pos+Vector2(0,-12),e.pos+Vector2(15,-20),e.pos+Vector2(32,0),e.pos+Vector2(12,19),e.pos+Vector2(-12,19)]),Color("#8e3158"))
+    draw_circle(e.pos,8.0,Color("#ffb3cc"))
+    draw_arc(e.pos,24.0,0.0,TAU,24,Color("#ff7097"),2.0)
+   elif slot >= 9:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(0,-21),e.pos+Vector2(22,0),e.pos+Vector2(0,21),e.pos+Vector2(-22,0)]),Color("#c25374"))
+    draw_circle(e.pos,5.0,Color("#ffe1a3"))
+   elif slot % 3 == 0:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(-15,-11),e.pos+Vector2(15,0),e.pos+Vector2(-15,11)]),Color("#f17c69"))
+   elif slot % 3 == 1:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(0,-16),e.pos+Vector2(14,0),e.pos+Vector2(0,16),e.pos+Vector2(-14,0)]),Color("#e3a75f"))
+   else:
+    draw_circle(e.pos,12.0,Color("#875eb8"))
+    draw_circle(e.pos,5.0,Color("#d5b7ff"))
  # Readable boss HP indicator without replacing any approved sprite art.
  for e in enemies:
   if int(e.get("slot", -1)) == 11:
