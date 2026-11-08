@@ -171,6 +171,15 @@ func _draw() -> void:
    var size := Vector2(72,72) if e.slot >= 9 else Vector2(37,37)
    draw_texture_rect(texture,Rect2(e.pos-size/2.0,size),false)
   else: draw_circle(e.pos,14,Color.RED)
+ # Readable boss HP indicator without replacing any approved sprite art.
+ for e in enemies:
+  if int(e.get("slot", -1)) == 11:
+   var boss_hp: float = clampf(float(e.get("hp", 0)) / 28.0, 0.0, 1.0)
+   draw_rect(Rect2(180, 26, 280, 13), Color("#070e1c"))
+   draw_rect(Rect2(182, 28, 276.0 * boss_hp, 9), Color("#ff668c"))
+   draw_rect(Rect2(180, 26, 280, 13), Color("#f6cbd7"), false, 1.0)
+   draw_string(ThemeDB.fallback_font, Vector2(180, 23), "STAGE 02 BOSS", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+   break
  for s in shots: draw_circle(s.pos,3.0,Color("#63dfff"))
  for s in enemy_shots: draw_circle(s.pos,4.0,Color("#ff6c9c"))
  if invulnerable <= 0.0 or int(elapsed*10.0)%2 == 0:
