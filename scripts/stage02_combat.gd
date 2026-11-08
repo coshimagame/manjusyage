@@ -41,6 +41,11 @@ func _load_stage() -> void:
  boss_spawned = false
  stage_complete = false
  result_saved = false
+ player_pos = Vector2(100,180)
+ hp = 5
+ kills = 0
+ invulnerable = 0.0
+ game_over = false
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -155,7 +160,7 @@ func _process(delta: float) -> void:
    enemies.remove_at(i)
    kills += 1
    if e.slot == 11: stage_complete = true
-  elif e.pos.x < -80 or e.pos.y > H+80:
+  elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
    _hurt()
