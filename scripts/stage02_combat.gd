@@ -31,6 +31,11 @@ func _enemy_id(slot: int) -> String:
  return ["SB","MB","BB"][slot-9] + "%02d" % stage
 
 func _load_stage() -> void:
+ player_pos = Vector2(100, 180)
+ hp = 5
+ kills = 0
+ game_over = false
+ invulnerable = 0.0
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
@@ -61,9 +66,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
    get_tree().change_scene_to_file("res://prologue.tscn")
   elif event.keycode == KEY_R:
    stage = 2
-   hp = 5
-   kills = 0
-   game_over = false
    _load_stage()
 
 func _first_pad() -> int:
