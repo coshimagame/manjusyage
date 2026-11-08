@@ -50,6 +50,16 @@ func _run() -> void:
     _check(combat.hp == 5 and is_zero_approx(combat.invulnerable), "TAB resets attempt state")
     combat._spawn(11)
     _check(combat.enemies.size() == 1 and combat.enemies[0].slot == 11, "boss spawn is retained")
+    # The final boss must remain on screen long enough to be defeated.
+    # Disable regular spawning and advance one frame without player input.
+    combat.spawn_index = 9
+    combat.boss_spawned = true
+    combat.enemies[0].hp = 1
+    combat.shots.append({"pos": Vector2(520, 95) if combat.vertical else Vector2(520, combat.enemies[0].pos.y)})
+    combat._process(0.0)
+    _check(combat.stage_complete, "defeating boss marks stage complete")
+    _check(combat.enemies.is_empty(), "defeated boss leaves enemy list")
+    # Avoid calling _process again: the next frame saves player progress.
     combat.queue_free()
     if failures.is_empty():
         print("Stage 2 regression checks passed")
