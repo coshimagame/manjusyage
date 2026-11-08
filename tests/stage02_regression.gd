@@ -54,6 +54,12 @@ func _run() -> void:
     # Disable regular spawning and advance one frame without player input.
     combat.spawn_index = 9
     combat.boss_spawned = true
+    # Regression: boss must not be removed by ordinary enemy offscreen cleanup.
+    # Its original spawn is outside the 640px arena in horizontal mode.
+    combat.enemies[0].age = 60.0
+    combat._process(0.0)
+    _check(combat.enemies.size() == 1 and int(combat.enemies[0].slot) == 11, "boss survives offscreen cleanup")
+    _check(combat.enemies[0].pos.x <= 540.0 and combat.enemies[0].pos.x >= 100.0, "boss stays in horizontal combat bounds" if not combat.vertical else "boss stays in vertical combat bounds")
     combat.enemies[0].hp = 1
     combat.shots.append({"pos": Vector2(520, 95) if combat.vertical else Vector2(520, combat.enemies[0].pos.y)})
     combat._process(0.0)
