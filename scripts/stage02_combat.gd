@@ -14,6 +14,7 @@ var spawn_index := 0
 var fire_clock := 0.0
 var invulnerable := 0.0
 var game_over := false
+var paused := false
 var boss_spawned := false
 var stage_complete := false
 var result_saved := false
@@ -37,6 +38,7 @@ func _load_stage() -> void:
  kills = 0
  invulnerable = 0.0
  game_over = false
+ paused = false
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
@@ -58,7 +60,13 @@ func _load_stage() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
-  if event.keycode == KEY_TAB:
+  if event.keycode == KEY_P and not game_over:
+   paused = not paused
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+  elif paused:
+   return
+  elif event.keycode == KEY_TAB:
    vertical = not vertical
    _load_stage()
   elif event.keycode == KEY_ESCAPE:
@@ -75,6 +83,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
  # Pad retry/return mirrors the keyboard flow without touching the save format.
  if event is InputEventJoypadButton and event.pressed:
+  if event.button_index == JOY_BUTTON_START and not game_over:
+   paused = not paused
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+   return
+  if paused:
+   return
   if game_over and event.button_index == JOY_BUTTON_Y:
    _load_stage()
    get_viewport().set_input_as_handled()
@@ -96,6 +111,8 @@ func _spawn(slot: int) -> void:
  enemies.append({"id":_enemy_id(slot),"slot":slot,"pos":pos,"origin":pos,"age":0.0,"speed":28.0 if slot >= 9 else 65.0,"hp":28 if slot == 11 else 2,"fire":1.0})
 
 func _process(delta: float) -> void:
+ if paused:
+  return
  if game_over:
   queue_redraw()
   return
@@ -219,7 +236,11 @@ func _draw() -> void:
   if vertical: ship = PackedVector2Array([player_pos+Vector2(0,-15),player_pos+Vector2(-9,11),player_pos,player_pos+Vector2(9,11)])
   draw_colored_polygon(ship,Color("#ffd46d"))
  draw_string(ThemeDB.fallback_font,Vector2(12,20),"STAGE %d  HP %d  KILLS %d  %s" % [stage,hp,kills,"VERTICAL" if vertical else "HORIZONTAL"],HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
- draw_string(ThemeDB.fallback_font,Vector2(12,350),"ARROWS/WASD MOVE | Z/SPACE SHOOT | TAB ORIENTATION | R RESTART",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ draw_string(ThemeDB.fallback_font,Vector2(12,350),"MOVE: ARROWS/WASD | SHOOT: Z/SPACE | TAB: ORIENT | P/START: PAUSE | R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ if paused:
+  draw_rect(Rect2(170,125,300,105),Color("#090c16e8"))
+  draw_string(ThemeDB.fallback_font,Vector2(270,165),"PAUSED",HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(208,200),"P / START : RESUME",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
  if game_over:
   draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
