@@ -17,6 +17,7 @@ var game_over := false
 var boss_spawned := false
 var stage_complete := false
 var result_saved := false
+var save_attempted := false
 var enemies: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
 var enemy_shots: Array[Dictionary] = []
@@ -41,6 +42,7 @@ func _load_stage() -> void:
  boss_spawned = false
  stage_complete = false
  result_saved = false
+ save_attempted = false
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -84,12 +86,17 @@ func _process(delta: float) -> void:
   queue_redraw()
   return
  if stage_complete:
-  if not result_saved:
-   result_saved = true
-   # Match the existing briefing save format without overwriting other flags.
+  if not save_attempted:
+   save_attempted = true
+   # Preserve existing progress and verify the result reached persistent storage.
    var progress = load("res://briefing_progress.gd").new()
    progress.load_data()
    progress.mark_cleared(stage)
+   var verified = load("res://briefing_progress.gd").new()
+   verified.load_data()
+   result_saved = bool(verified.cleared.get(stage, false))
+   if not result_saved:
+    push_warning("Stage %d clear progress could not be verified in user://briefing_progress.cfg" % stage)
   game_over = true
   queue_redraw()
   return
@@ -183,4 +190,5 @@ func _draw() -> void:
   draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
-  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER: TITLE  /  R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  var save_label := "PROGRESS SAVED" if result_saved else ("SAVE FAILED - CHECK STORAGE" if stage_complete else "ENTER: TITLE  /  R: RETRY")
+  draw_string(ThemeDB.fallback_font,Vector2(175,190),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
