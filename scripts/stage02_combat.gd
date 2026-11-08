@@ -108,7 +108,8 @@ func _process(delta: float) -> void:
  player_pos += movement * 190.0 * delta
  player_pos = player_pos.clamp(Vector2(14,35),Vector2(626,345))
  fire_clock -= delta
- if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(_first_pad(), JOY_BUTTON_A)) and fire_clock <= 0.0:
+ var pad_firing := pad >= 0 and Input.is_joy_button_pressed(pad, JOY_BUTTON_A)
+ if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or pad_firing) and fire_clock <= 0.0:
   shots.append({"pos":player_pos + (Vector2(0,-15) if vertical else Vector2(16,0))})
   fire_clock = 0.14
  spawn_clock += delta
@@ -135,7 +136,11 @@ func _process(delta: float) -> void:
   var e: Dictionary = enemies[i]
   e.age += delta
   var lateral: float = sin(e.age * (2.0 + float(e.slot % 3))) * 22.0
-  e.pos = e.origin + (Vector2(0,e.age*e.speed) if vertical else Vector2(-e.age*e.speed,0)) + (Vector2(lateral,0) if vertical else Vector2(0,lateral))
+  if e.slot == 11:
+   # Boss must remain reachable by player shots until defeated.
+   e.pos = Vector2(clampf(e.origin.x + lateral, 100.0, 540.0), 95.0) if vertical else Vector2(520.0, clampf(e.origin.y + lateral, 55.0, 305.0))
+  else:
+   e.pos = e.origin + (Vector2(0,e.age*e.speed) if vertical else Vector2(-e.age*e.speed,0)) + (Vector2(lateral,0) if vertical else Vector2(0,lateral))
   e.fire -= delta
   if e.fire <= 0.0:
    var direction: Vector2 = (player_pos-e.pos).normalized()
