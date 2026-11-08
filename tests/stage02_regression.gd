@@ -30,6 +30,24 @@ func _run() -> void:
     _check(combat.kills == 0, "retry clears kills")
     _check(is_zero_approx(combat.invulnerable), "retry clears invulnerability")
     _check(not combat.game_over, "retry clears game-over state")
+    # Exercise the actual keyboard entry points, not only the reset helper.
+    combat.player_pos = Vector2(420, 260)
+    combat.hp = 2
+    combat.game_over = true
+    var retry := InputEventKey.new()
+    retry.keycode = KEY_R
+    retry.pressed = true
+    combat._unhandled_key_input(retry)
+    _check(combat.hp == 5 and not combat.game_over and combat.player_pos == Vector2(100, 180), "R key retries from game over")
+    combat.hp = 1
+    combat.invulnerable = 0.9
+    var previous_orientation: bool = combat.vertical
+    var orientation := InputEventKey.new()
+    orientation.keycode = KEY_TAB
+    orientation.pressed = true
+    combat._unhandled_key_input(orientation)
+    _check(combat.vertical != previous_orientation, "TAB toggles orientation")
+    _check(combat.hp == 5 and is_zero_approx(combat.invulnerable), "TAB resets attempt state")
     combat._spawn(11)
     _check(combat.enemies.size() == 1 and combat.enemies[0].slot == 11, "boss spawn is retained")
     combat.queue_free()
