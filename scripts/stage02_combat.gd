@@ -31,6 +31,12 @@ func _enemy_id(slot: int) -> String:
  return ["SB","MB","BB"][slot-9] + "%02d" % stage
 
 func _load_stage() -> void:
+ # Restart and orientation switches must not carry state from a previous run.
+ player_pos = Vector2(320.0, 290.0) if vertical else Vector2(100.0, 180.0)
+ invulnerable = 0.0
+ game_over = false
+ hp = 5
+ kills = 0
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
