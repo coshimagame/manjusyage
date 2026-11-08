@@ -61,7 +61,7 @@ func _run() -> void:
     _check(combat.enemies.size() == 1 and int(combat.enemies[0].slot) == 11, "boss survives offscreen cleanup")
     _check(combat.enemies[0].pos.x <= 540.0 and combat.enemies[0].pos.x >= 100.0, "boss stays in horizontal combat bounds" if not combat.vertical else "boss stays in vertical combat bounds")
     combat.enemies[0].hp = 1
-    combat.shots.append({"pos": Vector2(520, 95) if combat.vertical else Vector2(520, combat.enemies[0].pos.y)})
+    combat.shots.append({"pos": combat.enemies[0].pos})
     combat._process(0.0)
     _check(combat.stage_complete, "defeating boss marks stage complete")
     _check(combat.enemies.is_empty(), "defeated boss leaves enemy list")
