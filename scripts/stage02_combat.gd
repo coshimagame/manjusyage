@@ -31,6 +31,9 @@ func _enemy_id(slot: int) -> String:
  return ["SB","MB","BB"][slot-9] + "%02d" % stage
 
 func _load_stage() -> void:
+ # A retry/orientation reload must start with a clean playable state.
+ player_pos = Vector2(100, 180)
+ invulnerable = 0.0
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
