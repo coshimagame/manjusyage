@@ -1,5 +1,5 @@
 extends Node2D
-## Standalone integration: uses draft PNGs from the companion ZIP.
+## Provisional Stage 2 combat integrated via main game briefing; draft PNGs optional.
 ## Main game and approved assets remain unchanged.
 const W := 640.0
 const H := 360.0
@@ -66,6 +66,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
    game_over = false
    _load_stage()
 
+func _first_pad() -> int:
+ var connected := Input.get_connected_joypads()
+ return connected[0] if not connected.is_empty() else -1
+
 func _hurt() -> void:
  hp -= 1
  invulnerable = 1.1
@@ -92,15 +96,19 @@ func _process(delta: float) -> void:
  elapsed += delta
  invulnerable = maxf(0.0,invulnerable-delta)
  var movement := Input.get_vector("ui_left","ui_right","ui_up","ui_down")
+ var pad := _first_pad()
+ if pad >= 0:
+  movement += Vector2(Input.get_joy_axis(pad,JOY_AXIS_LEFT_X),Input.get_joy_axis(pad,JOY_AXIS_LEFT_Y))
  if Input.is_key_pressed(KEY_A): movement.x -= 1.0
  if Input.is_key_pressed(KEY_D): movement.x += 1.0
  if Input.is_key_pressed(KEY_W): movement.y -= 1.0
  if Input.is_key_pressed(KEY_S): movement.y += 1.0
- if movement.length() > 1.0: movement = movement.normalized()
+ if movement.length() < 0.2: movement = Vector2.ZERO
+ elif movement.length() > 1.0: movement = movement.normalized()
  player_pos += movement * 190.0 * delta
  player_pos = player_pos.clamp(Vector2(14,35),Vector2(626,345))
  fire_clock -= delta
- if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE)) and fire_clock <= 0.0:
+ if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(_first_pad(), JOY_BUTTON_A)) and fire_clock <= 0.0:
   shots.append({"pos":player_pos + (Vector2(0,-15) if vertical else Vector2(16,0))})
   fire_clock = 0.14
  spawn_clock += delta
