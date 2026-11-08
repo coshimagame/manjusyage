@@ -31,6 +31,12 @@ func _enemy_id(slot: int) -> String:
  return ["SB","MB","BB"][slot-9] + "%02d" % stage
 
 func _load_stage() -> void:
+ # A fresh attempt must not inherit the previous player's combat state.
+ player_pos = Vector2(100, 180)
+ hp = 5
+ kills = 0
+ invulnerable = 0.0
+ game_over = false
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
@@ -155,7 +161,7 @@ func _process(delta: float) -> void:
    enemies.remove_at(i)
    kills += 1
    if e.slot == 11: stage_complete = true
-  elif e.pos.x < -80 or e.pos.y > H+80:
+  elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
    _hurt()
