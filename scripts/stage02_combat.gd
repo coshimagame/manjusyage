@@ -34,6 +34,12 @@ func _load_stage() -> void:
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
+ # A fresh stage attempt must not inherit player damage or invulnerability.
+ player_pos = Vector2(100, 180)
+ hp = 5
+ kills = 0
+ invulnerable = 0.0
+ game_over = false
  elapsed = 0.0
  spawn_clock = 0.0
  spawn_index = 0
@@ -155,7 +161,8 @@ func _process(delta: float) -> void:
    enemies.remove_at(i)
    kills += 1
    if e.slot == 11: stage_complete = true
-  elif e.pos.x < -80 or e.pos.y > H+80:
+  elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
+   # Only ordinary enemies may leave the screen; the boss must be defeated.
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
    _hurt()
