@@ -4,7 +4,7 @@ extends RefCounted
 const SAVE_PATH="user://briefing_progress.cfg"
 var save_path: String=SAVE_PATH # Override in isolated tests.
 const MAX_STAGES=8
-const PLAYABLE_STAGES=[1] # Only stage 1 is implemented in the current game.
+const PLAYABLE_STAGES=[1,2] # Stage 2 is a provisional combat route; multiplayer/art/story integration pending.
 const NAMES=[
 	"赤い残響",
 	"追憶の海（仮）",
