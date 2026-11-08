@@ -72,6 +72,16 @@ func _unhandled_key_input(event: InputEvent) -> void:
    game_over = false
    _load_stage()
 
+func _unhandled_input(event: InputEvent) -> void:
+ # Pad retry/return mirrors the keyboard flow without touching the save format.
+ if event is InputEventJoypadButton and event.pressed:
+  if game_over and event.button_index == JOY_BUTTON_Y:
+   _load_stage()
+   get_viewport().set_input_as_handled()
+  elif game_over and event.button_index == JOY_BUTTON_B:
+   get_tree().change_scene_to_file("res://prologue.tscn")
+   get_viewport().set_input_as_handled()
+
 func _first_pad() -> int:
  var connected := Input.get_connected_joypads()
  return connected[0] if not connected.is_empty() else -1
@@ -198,4 +208,4 @@ func _draw() -> void:
   draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
-  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER: TITLE  /  R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
