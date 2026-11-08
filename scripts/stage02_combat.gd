@@ -18,6 +18,7 @@ var paused := false
 var boss_spawned := false
 var stage_complete := false
 var result_saved := false
+var save_failed := false
 var enemies: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
 var enemy_shots: Array[Dictionary] = []
@@ -49,6 +50,7 @@ func _load_stage() -> void:
  boss_spawned = false
  stage_complete = false
  result_saved = false
+ save_failed = false
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -123,6 +125,10 @@ func _process(delta: float) -> void:
    var progress = load("res://briefing_progress.gd").new()
    progress.load_data()
    progress.mark_cleared(stage)
+   # Verify the persisted clear flag; a failed disk write must not look like a save success.
+   var verify = load("res://briefing_progress.gd").new()
+   verify.load_data()
+   save_failed = not bool(verify.cleared.get(stage, false))
   game_over = true
   queue_redraw()
   return
@@ -246,3 +252,6 @@ func _draw() -> void:
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  if stage_complete:
+   var save_label := "SAVE FAILED - CHECK DISK" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
+   draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
