@@ -110,6 +110,10 @@ func _ready():
 	mafio_archive.load_data()
 	enemy_analysis.load_data()
 	briefing_progress.load_data()
+	# Consume the Stage 2 result-screen handoff after save progress is loaded.
+	if get_tree().has_meta("manjushage_open_briefing"):
+		get_tree().remove_meta("manjushage_open_briefing")
+		call_deferred("open_briefing", 2)
 	# Pixel textures stay sharp at integer scaling.
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
