@@ -533,11 +533,28 @@ func special_analysis(p):
 	shots=shots.filter(func(shot):return not bool(shot.get("analysis_eligible",false)))
 	tell("ANALYSIS / KNOWN PATTERNS PURGED",2.2)
 	sfx("burst")
+func _capture_preview() -> void:
+	# Keep captures outside the project tree and away from approved art assets.
+	var safe_mode := screenshot_mode.validate_filename()
+	var destination := "user://manjushage_preview_%s.png" % safe_mode
+	var captured := get_viewport().get_texture().get_image()
+	if captured == null or captured.is_empty():
+		push_error("SCREENSHOT FAILED: viewport image unavailable")
+		return
+	var result := captured.save_png(destination)
+	if result == OK:
+		print("MANJUSHAGE_SCREENSHOT=", ProjectSettings.globalize_path(destination))
+	else:
+		push_error("SCREENSHOT FAILED: %s (%d)" % [destination, result])
+
 func _process(dt):
 	clock += dt
 	analysis_flash=maxf(0.0,analysis_flash-dt)
 	music.stream_paused = mode in ["pause","status"]
 	frame_count += 1
+	# Screenshot mode captures the actual rendered viewport, never a mockup.
+	if screenshot_mode != "" and frame_count == 30:
+		_capture_preview.call_deferred()
 	if mode=="controls":
 		if not calibration_ready and calibration_device>=0:
 			calibration_ready=not binding_down(calibration_device,calibration_previous)
