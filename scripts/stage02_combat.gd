@@ -284,7 +284,7 @@ func _draw() -> void:
   draw_string(ThemeDB.fallback_font,Vector2(270,165),"PAUSED",HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(208,200),"P / START : RESUME",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
  if game_over:
-  draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
+  draw_rect(Rect2(150,120,340,120),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
