@@ -51,6 +51,11 @@ func _load_stage() -> void:
  stage_complete = false
  result_saved = false
  save_failed = false
+ _load_enemy_textures()
+ queue_redraw()
+
+func _load_enemy_textures() -> void:
+ # Orientation changes must refresh only artwork, never restart combat.
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -58,7 +63,6 @@ func _load_stage() -> void:
   var path := "res://art/enemies/stage%02d_draft/%s_%s_draft.png" % [stage,eid,orientation]
   if ResourceLoader.exists(path):
    textures[eid] = load(path)
- queue_redraw()
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
@@ -68,9 +72,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
    get_viewport().set_input_as_handled()
   elif paused:
    return
-  elif event.keycode == KEY_TAB:
+  elif event.keycode == KEY_TAB and not game_over:
    vertical = not vertical
-   _load_stage()
+   _load_enemy_textures()
+   queue_redraw()
   elif event.keycode == KEY_L and game_over and stage_complete and not save_failed:
    _return_to_briefing()
   elif event.keycode == KEY_ESCAPE:
