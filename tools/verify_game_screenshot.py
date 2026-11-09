@@ -50,7 +50,10 @@ def validate(path: pathlib.Path) -> tuple[int, int]:
     channels = 3 if color == 2 else 4
     stride = width * channels
     expected = height * (stride + 1)
-    raw = zlib.decompress(bytes(image_data), max_length=expected + 1)
+    decoder = zlib.decompressobj()
+    raw = decoder.decompress(bytes(image_data), expected + 1)
+    if not decoder.eof or decoder.unconsumed_tail:
+        raise ValueError("PNG stream incomplete or oversized")
     if len(raw) != expected:
         raise ValueError("unexpected decompressed PNG size")
     # PNG filters are row-local. Reconstruct pixels before checking variation.
