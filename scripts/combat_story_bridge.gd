@@ -30,6 +30,9 @@ func _process(_delta: float) -> void:
 
 func _show_intermission() -> void:
 	awaiting_intermission = true
+	# Freeze combat and its input while the dialogue overlay owns the screen.
+	# Without this, N/R/shot can mutate the stage behind the intermission.
+	combat.process_mode = Node.PROCESS_MODE_DISABLED
 	overlay = IntermissionScene.instantiate()
 	add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -52,5 +55,7 @@ func _on_intermission_finished() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_free()
 		overlay = null
+	# Resume gameplay only after the overlay is dismissed and stage is reset.
+	combat.process_mode = Node.PROCESS_MODE_INHERIT
 	awaiting_intermission = false
 	stage_completed = false
