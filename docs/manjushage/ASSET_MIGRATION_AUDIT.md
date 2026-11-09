@@ -23,3 +23,8 @@
 - `main...cleanup/canon-and-art-folders-20261106` の比較は `diverged`、整理ブランチが77コミット先行、`main` が3コミット先行。変更65ファイル。**マージ可能判定だけではこの3コミットの内容整合性や動作を保証しない。**
 - この比較とファイル一覧確認はGitHub API上の静的検査。実PNGのSHA照合、リンクの全件検証、Godot実行テストを行ったことを意味しない。
 - `main` への反映前に、#50 → #51 の順序と他PRによる最新の変更を再照合する。承認済み原画未同定のままPNGを追加・置換しない。
+
+## 2026-11-09 20時台 JST 再監査
+- PR #50: `main` 向け open / 未マージ、head `39f209b71d99ac77ce051aba385c0bbcffdfa774`。PR #51: #50 ブランチ向け open / 未マージ、head `4f8cc5e7c65c7e093a23aa05a7c517d1651473bf`。
+- `main...cleanup/canon-and-art-folders-20261106` は `diverged`、78 ahead / 3 behind、変更65ファイル。比較に現れる `art/` の変更はREADMEのみで、承認済み原画PNGの移行が完了した根拠はない。
+- 現時点でGitHub APIによるPRメタデータ・変更パス確認まで。Godotの最新headに対する実行検証、SHA照合、実画面比較は未実施。完了条件未達のためマージは保留する。
