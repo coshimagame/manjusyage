@@ -71,6 +71,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
   elif event.keycode == KEY_TAB:
    vertical = not vertical
    _load_stage()
+  elif event.keycode == KEY_L and game_over and stage_complete and not save_failed:
+   _return_to_briefing()
   elif event.keycode == KEY_ESCAPE:
    get_tree().change_scene_to_file("res://prologue.tscn")
   elif event.keycode in [KEY_ENTER,KEY_SPACE] and game_over:
@@ -99,12 +101,21 @@ func _unhandled_input(event: InputEvent) -> void:
    _save_clear_progress()
    queue_redraw()
    get_viewport().set_input_as_handled()
+  elif game_over and stage_complete and not save_failed and event.button_index == JOY_BUTTON_A:
+   _return_to_briefing()
+   get_viewport().set_input_as_handled()
   elif game_over and event.button_index == JOY_BUTTON_Y:
    _load_stage()
    get_viewport().set_input_as_handled()
   elif game_over and event.button_index == JOY_BUTTON_B:
    get_tree().change_scene_to_file("res://prologue.tscn")
    get_viewport().set_input_as_handled()
+
+func _return_to_briefing() -> void:
+ # SceneTree metadata survives the scene change, unlike the Stage 2 node.
+ # Main scene consumes the one-shot flag only after it has initialized progress.
+ get_tree().set_meta("manjushage_open_briefing", true)
+ get_tree().change_scene_to_file("res://main.tscn")
 
 func _first_pad() -> int:
  var connected := Input.get_connected_joypads()
@@ -262,5 +273,5 @@ func _draw() -> void:
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
   if stage_complete:
-   var save_label := "SAVE FAILED - S / PAD X: RETRY SAVE" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
+   var save_label := "SAVE FAILED - S / PAD X: RETRY SAVE" if save_failed else "CLEAR SAVED - L / PAD A: BRIEFING"
    draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
