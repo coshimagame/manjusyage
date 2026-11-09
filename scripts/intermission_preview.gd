@@ -197,4 +197,45 @@ func set_portrait_paths(paths: Dictionary) -> void:
 
 ## Return dialogue progress for later save integration; no user:// writes here.
 func get_progress() -> Dictionary:
-	return {"line_index": index, "completed_ids": completed_line_ids.duplicate(), "complete": complete}
+	return {"line_index": index, "completed_ids": completed_line_ids.duplicate(), "complete": complete, "line_set_ids": _line_set_ids()}
+
+
+## Resume an intermission from a caller-owned save Dictionary. No user:// writes.
+## Unknown/mismatched line sets are rejected to avoid replaying a different script.
+func restore_progress(saved: Dictionary) -> bool:
+	if lines.is_empty() or not saved.has("line_index") or not saved.has("line_set_ids"):
+		return false
+	if saved["line_set_ids"] != _line_set_ids():
+		return false
+	var restored_index := int(saved["line_index"])
+	if restored_index < 0 or restored_index > lines.size():
+		return false
+	var ids_value = saved.get("completed_ids", [])
+	if not ids_value is Array or ids_value.size() != restored_index:
+		return false
+	for i in range(restored_index):
+		if String(ids_value[i]) != String(lines[i].get("id", "")):
+			return false
+	index = restored_index
+	shown = 0.0
+	show_log = false
+	complete = bool(saved.get("complete", false)) or index >= lines.size()
+	completed_line_ids.clear()
+	history.clear()
+	for i in range(index):
+		completed_line_ids.append(String(lines[i].get("id", "")))
+		history.append(String(lines[i].get("speaker", "")) + "： " + String(lines[i].get("text", "")))
+	if log_label != null:
+		log_label.visible = false
+	if complete:
+		hide()
+	else:
+		show()
+		_render()
+	return true
+
+func _line_set_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for entry in lines:
+		ids.append(String(entry.get("id", "")))
+	return ids
