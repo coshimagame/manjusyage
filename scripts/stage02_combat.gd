@@ -80,16 +80,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
    _return_to_briefing()
   elif event.keycode == KEY_ESCAPE:
    get_tree().change_scene_to_file("res://prologue.tscn")
-  elif event.keycode in [KEY_ENTER,KEY_SPACE] and game_over:
-   get_tree().change_scene_to_file("res://prologue.tscn")
+  elif event.keycode in [KEY_ENTER, KEY_SPACE] and game_over:
+   _load_stage()
   elif event.keycode == KEY_S and game_over and stage_complete and save_failed:
    _save_clear_progress()
    queue_redraw()
-  elif event.keycode == KEY_R:
-   stage = 2
-   hp = 5
-   kills = 0
-   game_over = false
+  elif event.keycode == KEY_R and game_over:
    _load_stage()
 
 func _unhandled_input(event: InputEvent) -> void:
