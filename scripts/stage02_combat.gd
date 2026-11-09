@@ -274,7 +274,7 @@ func _draw() -> void:
   if vertical: ship = PackedVector2Array([player_pos+Vector2(0,-15),player_pos+Vector2(-9,11),player_pos,player_pos+Vector2(9,11)])
   draw_colored_polygon(ship,Color("#ffd46d"))
  draw_string(ThemeDB.fallback_font,Vector2(12,20),"STAGE %d  HP %d  KILLS %d  %s" % [stage,hp,kills,"VERTICAL" if vertical else "HORIZONTAL"],HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
- draw_string(ThemeDB.fallback_font,Vector2(12,350),"MOVE: ARROWS/WASD | SHOOT: Z/SPACE | TAB: ORIENT | P/START: PAUSE | R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ draw_string(ThemeDB.fallback_font,Vector2(12,350),"MOVE: ARROWS/WASD | SHOOT: Z/SPACE | TAB: ORIENT | P/START: PAUSE",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
  if paused:
   draw_rect(Rect2(170,125,300,105),Color("#090c16e8"))
   draw_string(ThemeDB.fallback_font,Vector2(270,165),"PAUSED",HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color.WHITE)
@@ -283,7 +283,7 @@ func _draw() -> void:
   draw_rect(Rect2(150,120,340,120),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
-  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/SPACE/R/PAD Y: RETRY | ESC/PAD B: TITLE",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
   if stage_complete:
    var save_label := "SAVE FAILED - S / PAD X: RETRY SAVE" if save_failed else "CLEAR SAVED - L / PAD A: BRIEFING"
    draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
