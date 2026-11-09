@@ -75,6 +75,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
    get_tree().change_scene_to_file("res://prologue.tscn")
   elif event.keycode in [KEY_ENTER,KEY_SPACE] and game_over:
    get_tree().change_scene_to_file("res://prologue.tscn")
+  elif event.keycode == KEY_S and game_over and stage_complete and save_failed:
+   _save_clear_progress()
+   queue_redraw()
   elif event.keycode == KEY_R:
    stage = 2
    hp = 5
@@ -112,6 +115,15 @@ func _spawn(slot: int) -> void:
  var pos := Vector2(60.0 + float(slot % 5) * 110.0,-35.0) if vertical else Vector2(675.0,75.0 + float(slot % 5) * 53.0)
  enemies.append({"id":_enemy_id(slot),"slot":slot,"pos":pos,"origin":pos,"age":0.0,"speed":28.0 if slot >= 9 else 65.0,"hp":28 if slot == 11 else 2,"fire":1.0})
 
+func _save_clear_progress() -> void:
+ # Keep a failed write visible and allow an explicit retry from the result screen.
+ var progress = load("res://briefing_progress.gd").new()
+ progress.load_data()
+ progress.mark_cleared(stage)
+ var verify = load("res://briefing_progress.gd").new()
+ verify.load_data()
+ save_failed = not bool(verify.cleared.get(stage, false))
+
 func _process(delta: float) -> void:
  if paused:
   return
@@ -121,14 +133,7 @@ func _process(delta: float) -> void:
  if stage_complete:
   if not result_saved:
    result_saved = true
-   # Match the existing briefing save format without overwriting other flags.
-   var progress = load("res://briefing_progress.gd").new()
-   progress.load_data()
-   progress.mark_cleared(stage)
-   # Verify the persisted clear flag; a failed disk write must not look like a save success.
-   var verify = load("res://briefing_progress.gd").new()
-   verify.load_data()
-   save_failed = not bool(verify.cleared.get(stage, false))
+   _save_clear_progress()
   game_over = true
   queue_redraw()
   return
@@ -253,5 +258,5 @@ func _draw() -> void:
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
   if stage_complete:
-   var save_label := "SAVE FAILED - CHECK DISK" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
+   var save_label := "SAVE FAILED - S: RETRY SAVE" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
    draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
