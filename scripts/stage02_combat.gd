@@ -95,7 +95,11 @@ func _unhandled_input(event: InputEvent) -> void:
    return
   if paused:
    return
-  if game_over and event.button_index == JOY_BUTTON_Y:
+  if game_over and stage_complete and save_failed and event.button_index == JOY_BUTTON_X:
+   _save_clear_progress()
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+  elif game_over and event.button_index == JOY_BUTTON_Y:
    _load_stage()
    get_viewport().set_input_as_handled()
   elif game_over and event.button_index == JOY_BUTTON_B:
@@ -258,5 +262,5 @@ func _draw() -> void:
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
   draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/B: TITLE  /  R/Y: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
   if stage_complete:
-   var save_label := "SAVE FAILED - S: RETRY SAVE" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
+   var save_label := "SAVE FAILED - S / PAD X: RETRY SAVE" if save_failed else "CLEAR SAVED - TITLE: L FOR BRIEFING"
    draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
