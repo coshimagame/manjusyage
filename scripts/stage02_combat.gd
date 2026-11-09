@@ -144,6 +144,17 @@ func _save_clear_progress() -> void:
  verify.load_data()
  save_failed = not bool(verify.cleared.get(stage, false))
 
+func _finish_stage() -> void:
+ # Persist the clear immediately: game_over takes precedence over the next _process tick.
+ # A simultaneous lethal hit must not silently award a clear.
+ if game_over or hp <= 0 or stage_complete:
+  return
+ stage_complete = true
+ result_saved = true
+ _save_clear_progress()
+ game_over = true
+ queue_redraw()
+
 func _process(delta: float) -> void:
  if paused:
   return
@@ -218,7 +229,7 @@ func _process(delta: float) -> void:
   if e.hp <= 0:
    enemies.remove_at(i)
    kills += 1
-   if e.slot == 11: stage_complete = true
+   if e.slot == 11: _finish_stage()
   elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
