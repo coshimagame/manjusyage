@@ -533,6 +533,21 @@ func special_analysis(p):
 	shots=shots.filter(func(shot):return not bool(shot.get("analysis_eligible",false)))
 	tell("ANALYSIS / KNOWN PATTERNS PURGED",2.2)
 	sfx("burst")
+func _capture_preview() -> bool:
+	# Keep captures outside the project tree and away from approved art assets.
+	var safe_mode := screenshot_mode.validate_filename()
+	var destination := "user://manjushage_preview_%s.png" % safe_mode
+	var captured := get_viewport().get_texture().get_image()
+	if captured == null or captured.is_empty():
+		push_error("SCREENSHOT FAILED: viewport image unavailable")
+		return false
+	var result := captured.save_png(destination)
+	if result == OK:
+		print("MANJUSHAGE_SCREENSHOT=", ProjectSettings.globalize_path(destination))
+		return true
+	push_error("SCREENSHOT FAILED: %s (%d)" % [destination, result])
+	return false
+
 func _process(dt):
 	clock += dt
 	analysis_flash=maxf(0.0,analysis_flash-dt)
@@ -600,10 +615,12 @@ func _process(dt):
 	particles = particles.filter(func(p): return p.life>0)
 	shake = maxf(0,shake-dt*20)
 	queue_redraw()
-	if screenshot_mode != "" and frame_count == 12:
+	# Capture after the final draw so the PNG is the actual completed frame.
+	# Never write screenshots into res:// (which can overwrite project assets).
+	if screenshot_mode != "" and frame_count == 30:
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://"+screenshot_mode+".png")
-		get_tree().quit()
+		var capture_ok := _capture_preview()
+		get_tree().quit(0 if capture_ok else 1)
 	if auto_test and elapsed > 245 and not tests_done:
 		push_error("AUTOTEST TIMEOUT")
 		get_tree().quit(1)
