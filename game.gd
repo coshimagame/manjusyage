@@ -552,9 +552,6 @@ func _process(dt):
 	analysis_flash=maxf(0.0,analysis_flash-dt)
 	music.stream_paused = mode in ["pause","status"]
 	frame_count += 1
-	# Screenshot mode captures the actual rendered viewport, never a mockup.
-	if screenshot_mode != "" and frame_count == 30:
-		_capture_preview.call_deferred()
 	if mode=="controls":
 		if not calibration_ready and calibration_device>=0:
 			calibration_ready=not binding_down(calibration_device,calibration_previous)
@@ -617,9 +614,11 @@ func _process(dt):
 	particles = particles.filter(func(p): return p.life>0)
 	shake = maxf(0,shake-dt*20)
 	queue_redraw()
-	if screenshot_mode != "" and frame_count == 12:
+	# Capture after the final draw so the PNG is the actual completed frame.
+	# Never write screenshots into res:// (which can overwrite project assets).
+	if screenshot_mode != "" and frame_count == 30:
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://"+screenshot_mode+".png")
+		_capture_preview()
 		get_tree().quit()
 	if auto_test and elapsed > 245 and not tests_done:
 		push_error("AUTOTEST TIMEOUT")
