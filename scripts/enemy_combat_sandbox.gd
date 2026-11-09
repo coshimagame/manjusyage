@@ -17,14 +17,19 @@ var enemies: Array[Dictionary] = []
 var shots: Array[Vector2] = []
 var invincible := 0.0
 var ids: PackedStringArray
+var stage := 1
+var stage_kills := 0
+var boss_spawned := false
+var stage_clear := false
+const KILLS_TO_BOSS := 8
 
 func _ready() -> void:
-	ids = Catalog.all_ids()
+	_set_stage(1)
 	assert(Catalog.validate_catalog(), "Enemy catalog must have 100 unique entries.")
 	queue_redraw()
 
 func _process(delta: float) -> void:
-	if player_hp <= 0:
+	if player_hp <= 0 or stage_clear:
 		queue_redraw()
 		return
 	elapsed += delta
@@ -41,7 +46,7 @@ func _process(delta: float) -> void:
 		if shots[i].x > SIZE.x or shots[i].y < 0:
 			shots.remove_at(i)
 	spawn_timer -= delta
-	if spawn_timer <= 0.0:
+	if spawn_timer <= 0.0 and not boss_spawned:
 		spawn_timer = 1.2
 		var enemy_id := ids[next_enemy % ids.size()]
 		next_enemy += 1
@@ -52,7 +57,7 @@ func _process(delta: float) -> void:
 		var foe := enemies[i]
 		foe["age"] = float(foe["age"]) + delta
 		var pos := _enemy_pos(foe)
-		if pos.x < -35 or pos.y > 395:
+		if pos.x < -45 or pos.x > 690 or pos.y < -65 or pos.y > 415:
 			enemies.remove_at(i)
 			continue
 		var destroyed := false
@@ -71,6 +76,34 @@ func _process(delta: float) -> void:
 			player_hp -= 1
 			invincible = 1.2
 			enemies.remove_at(i)
+	if stage_kills >= KILLS_TO_BOSS and not boss_spawned:
+		boss_spawned = true
+		var boss_id := "B%02d-S" % stage
+		var spawn := Vector2(320, -20) if vertical_scroll else Vector2(660, 180)
+		enemies.clear()
+		enemies.append({"id": boss_id, "spawn": spawn, "age": 0.0, "hp": 12})
+	queue_redraw()
+
+func _set_stage(new_stage: int) -> void:
+	stage = clampi(new_stage, 1, 8)
+	ids.clear()
+	for enemy_id in Catalog.all_ids():
+		var spec := Catalog.get_enemy(enemy_id)
+		if int(spec.get("stage", 0)) == stage and String(spec.get("kind", "")) == "normal":
+			ids.append(enemy_id)
+	stage_kills = 0
+	boss_spawned = false
+	stage_clear = false
+	next_enemy = 0
+	player_hp = 3
+	score = 0
+	elapsed = 0.0
+	spawn_timer = 0.5
+	shot_timer = 0.0
+	invincible = 0.0
+	enemies.clear()
+	shots.clear()
+	player_pos = Vector2(320, 290) if vertical_scroll else Vector2(90, 180)
 	queue_redraw()
 
 func _enemy_pos(foe: Dictionary) -> Vector2:
@@ -85,12 +118,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			player_pos = Vector2(320, 290) if vertical_scroll else Vector2(90, 180)
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_R:
-			player_hp = 3
-			score = 0
-			next_enemy = 0
-			enemies.clear()
-			shots.clear()
-			invincible = 0.0
+			_set_stage(stage)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_N and stage_clear:
+			_set_stage(1 if stage == 8 else stage + 1)
 			get_viewport().set_input_as_handled()
 
 func _draw() -> void:
@@ -111,7 +142,9 @@ func _draw() -> void:
 		draw_circle(p, 12.0 if boss else 7.0, Color("#f67d93") if boss else Color("#73d8c8"))
 		draw_string(ThemeDB.fallback_font, p + Vector2(-13, -13), String(foe["id"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.WHITE)
 	var mode := "VERTICAL" if vertical_scroll else "HORIZONTAL"
-	draw_string(ThemeDB.fallback_font, Vector2(12, 19), "CATALOG COMBAT TEST / " + mode + "  HP " + str(player_hp) + "  SCORE " + str(score), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(12, 347), "ARROWS MOVE  Z/ENTER FIRE  TAB H/V  R RESET  |  PROVISIONAL SHAPES", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b8d3e7"))
+	draw_string(ThemeDB.fallback_font, Vector2(12, 19), "STAGE " + str(stage) + " / " + Catalog.STAGE_NAMES[stage - 1] + "  " + mode + "  HP " + str(player_hp) + "  SCORE " + str(score), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+	draw_string(ThemeDB.fallback_font, Vector2(12, 347), "ARROWS MOVE  Z/ENTER FIRE  TAB H/V  R RESET  N NEXT AFTER CLEAR", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b8d3e7"))
+	if stage_clear:
+		draw_string(ThemeDB.fallback_font, Vector2(180, 178), "STAGE CLEAR!  N: NEXT STAGE / R: RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#ffe38b"))
 	if player_hp <= 0:
 		draw_string(ThemeDB.fallback_font, Vector2(250, 178), "GAME OVER - R TO RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#ffadad"))
