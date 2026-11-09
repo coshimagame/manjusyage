@@ -20,6 +20,10 @@ var body_label: Label
 var hint_label: Label
 var log_label: RichTextLabel
 var history: Array[String] = []
+# Optional approved portraits; missing assets never replace established designs.
+var portrait: TextureRect
+var portrait_paths := {}
+var completed_line_ids: Array[String] = []
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -32,6 +36,16 @@ func _build_ui() -> void:
 	backdrop.color = Color(0.035, 0.055, 0.11, 1.0)
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backdrop)
+	portrait = TextureRect.new()
+	portrait.anchor_left = 0.34
+	portrait.anchor_right = 0.66
+	portrait.anchor_top = 0.06
+	portrait.anchor_bottom = 0.58
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.visible = false
+	add_child(portrait)
 	var frame := PanelContainer.new()
 	frame.anchor_left = 0.06
 	frame.anchor_right = 0.94
@@ -79,6 +93,7 @@ func begin(new_lines: Array) -> void:
 	show_log = false
 	complete = false
 	history.clear()
+	completed_line_ids.clear()
 	_render()
 
 func _process(delta: float) -> void:
@@ -123,6 +138,7 @@ func _advance() -> void:
 		body_label.visible_characters = -1
 		return
 	history.append(String(current.get("speaker", "")) + "： " + full_text)
+	completed_line_ids.append(String(current.get("id", "")))
 	index += 1
 	shown = 0.0
 	if index >= lines.size():
@@ -148,6 +164,16 @@ func _render() -> void:
 		return
 	var current := lines[index]
 	speaker_label.text = String(current.get("speaker", ""))
+	# Only display a real approved image when an explicit path was supplied.
+	portrait.visible = false
+	portrait.texture = null
+	var speaker := String(current.get("speaker", ""))
+	var path := String(portrait_paths.get(speaker, ""))
+	if not path.is_empty() and ResourceLoader.exists(path):
+		var resource := load(path)
+		if resource is Texture2D:
+			portrait.texture = resource
+			portrait.visible = true
 	body_label.text = String(current.get("text", ""))
 	body_label.visible_characters = 0
 	hint_label.text = "ENTER/A 全文表示   L 履歴   ESC スキップ"
@@ -162,3 +188,13 @@ func _end() -> void:
 		begin(SAMPLE_LINES)
 	else:
 		hide()
+
+## Caller may map approved, existing PNGs by speaker without changing canon.
+func set_portrait_paths(paths: Dictionary) -> void:
+	portrait_paths = paths.duplicate()
+	if not lines.is_empty() and not complete:
+		_render()
+
+## Return dialogue progress for later save integration; no user:// writes here.
+func get_progress() -> Dictionary:
+	return {"line_index": index, "completed_ids": completed_line_ids.duplicate(), "complete": complete}
