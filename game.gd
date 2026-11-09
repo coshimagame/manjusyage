@@ -156,7 +156,12 @@ func _ready():
 		count = test_count
 		start_game()
 		run_mechanics_tests()
-	elif screenshot_mode != "" and screenshot_mode != "menu":
+	elif screenshot_mode in ["menu", "title", "select"]:
+		# Menu previews must not accidentally launch Stage 1.
+		# Selection preview displays the actual three-player menu state.
+		if screenshot_mode == "select": count = 3
+		queue_redraw()
+	elif screenshot_mode != "":
 		count = 3
 		start_game()
 		if screenshot_mode == "vertical":
