@@ -14,9 +14,11 @@ var spawn_index := 0
 var fire_clock := 0.0
 var invulnerable := 0.0
 var game_over := false
+var paused := false
 var boss_spawned := false
 var stage_complete := false
 var result_saved := false
+var save_failed := false
 var enemies: Array[Dictionary] = []
 var shots: Array[Dictionary] = []
 var enemy_shots: Array[Dictionary] = []
@@ -31,6 +33,13 @@ func _enemy_id(slot: int) -> String:
  return ["SB","MB","BB"][slot-9] + "%02d" % stage
 
 func _load_stage() -> void:
+ # A fresh attempt must not inherit the previous player's combat state.
+ player_pos = Vector2(100, 180)
+ hp = 5
+ kills = 0
+ invulnerable = 0.0
+ game_over = false
+ paused = false
  enemies.clear()
  shots.clear()
  enemy_shots.clear()
@@ -41,6 +50,12 @@ func _load_stage() -> void:
  boss_spawned = false
  stage_complete = false
  result_saved = false
+ save_failed = false
+ _load_enemy_textures()
+ queue_redraw()
+
+func _load_enemy_textures() -> void:
+ # Orientation changes must refresh only artwork, never restart combat.
  textures.clear()
  for slot in range(12):
   var eid := _enemy_id(slot)
@@ -48,23 +63,60 @@ func _load_stage() -> void:
   var path := "res://art/enemies/stage%02d_draft/%s_%s_draft.png" % [stage,eid,orientation]
   if ResourceLoader.exists(path):
    textures[eid] = load(path)
- queue_redraw()
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
-  if event.keycode == KEY_TAB:
+  if event.keycode == KEY_P and not game_over:
+   paused = not paused
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+  elif paused:
+   return
+  elif event.keycode == KEY_TAB and not game_over:
    vertical = not vertical
-   _load_stage()
+   _load_enemy_textures()
+   queue_redraw()
+  elif event.keycode == KEY_L and game_over and stage_complete and not save_failed:
+   _return_to_briefing()
   elif event.keycode == KEY_ESCAPE:
    get_tree().change_scene_to_file("res://prologue.tscn")
-  elif event.keycode in [KEY_ENTER,KEY_SPACE] and game_over:
-   get_tree().change_scene_to_file("res://prologue.tscn")
-  elif event.keycode == KEY_R:
-   stage = 2
-   hp = 5
-   kills = 0
-   game_over = false
+  elif event.keycode in [KEY_ENTER, KEY_SPACE] and game_over:
    _load_stage()
+  elif event.keycode == KEY_S and game_over and stage_complete and save_failed:
+   _save_clear_progress()
+   queue_redraw()
+  elif event.keycode == KEY_R and game_over:
+   _load_stage()
+
+func _unhandled_input(event: InputEvent) -> void:
+ # Pad retry/return mirrors the keyboard flow without touching the save format.
+ if event is InputEventJoypadButton and event.pressed:
+  if event.button_index == JOY_BUTTON_START and not game_over:
+   paused = not paused
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+   return
+  if paused:
+   return
+  if game_over and stage_complete and save_failed and event.button_index == JOY_BUTTON_X:
+   _save_clear_progress()
+   queue_redraw()
+   get_viewport().set_input_as_handled()
+  elif game_over and stage_complete and not save_failed and event.button_index == JOY_BUTTON_A:
+   _return_to_briefing()
+   get_viewport().set_input_as_handled()
+  elif game_over and event.button_index == JOY_BUTTON_Y:
+   _load_stage()
+   get_viewport().set_input_as_handled()
+  elif game_over and event.button_index == JOY_BUTTON_B:
+   get_tree().change_scene_to_file("res://prologue.tscn")
+   get_viewport().set_input_as_handled()
+
+func _return_to_briefing() -> void:
+ # SceneTree metadata survives the scene change, unlike the Stage 2 node.
+ # Main scene consumes the one-shot flag only after it has initialized progress.
+ get_tree().set_meta("manjushage_open_briefing", true)
+ get_tree().change_scene_to_file("res://main.tscn")
 
 func _first_pad() -> int:
  var connected := Input.get_connected_joypads()
@@ -79,17 +131,36 @@ func _spawn(slot: int) -> void:
  var pos := Vector2(60.0 + float(slot % 5) * 110.0,-35.0) if vertical else Vector2(675.0,75.0 + float(slot % 5) * 53.0)
  enemies.append({"id":_enemy_id(slot),"slot":slot,"pos":pos,"origin":pos,"age":0.0,"speed":28.0 if slot >= 9 else 65.0,"hp":28 if slot == 11 else 2,"fire":1.0})
 
+func _save_clear_progress() -> void:
+ # Keep a failed write visible and allow an explicit retry from the result screen.
+ var progress = load("res://briefing_progress.gd").new()
+ progress.load_data()
+ progress.mark_cleared(stage)
+ var verify = load("res://briefing_progress.gd").new()
+ verify.load_data()
+ save_failed = not bool(verify.cleared.get(stage, false))
+
+func _finish_stage() -> void:
+ # Persist the clear immediately: game_over takes precedence over the next _process tick.
+ # A simultaneous lethal hit must not silently award a clear.
+ if game_over or hp <= 0 or stage_complete:
+  return
+ stage_complete = true
+ result_saved = true
+ _save_clear_progress()
+ game_over = true
+ queue_redraw()
+
 func _process(delta: float) -> void:
+ if paused:
+  return
  if game_over:
   queue_redraw()
   return
  if stage_complete:
   if not result_saved:
    result_saved = true
-   # Match the existing briefing save format without overwriting other flags.
-   var progress = load("res://briefing_progress.gd").new()
-   progress.load_data()
-   progress.mark_cleared(stage)
+   _save_clear_progress()
   game_over = true
   queue_redraw()
   return
@@ -154,8 +225,8 @@ func _process(delta: float) -> void:
   if e.hp <= 0:
    enemies.remove_at(i)
    kills += 1
-   if e.slot == 11: stage_complete = true
-  elif e.pos.x < -80 or e.pos.y > H+80:
+   if e.slot == 11: _finish_stage()
+  elif e.slot != 11 and (e.pos.x < -80 or e.pos.y > H+80):
    enemies.remove_at(i)
   elif invulnerable <= 0.0 and e.pos.distance_to(player_pos) < 22.0:
    _hurt()
@@ -170,7 +241,32 @@ func _draw() -> void:
   if texture != null:
    var size := Vector2(72,72) if e.slot >= 9 else Vector2(37,37)
    draw_texture_rect(texture,Rect2(e.pos-size/2.0,size),false)
-  else: draw_circle(e.pos,14,Color.RED)
+  else:
+   # Distinctive procedural fallback silhouettes; never overwrite approved PNGs.
+   var slot: int = int(e.get("slot", 0))
+   if slot == 11:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(-32,0),e.pos+Vector2(-15,-20),e.pos+Vector2(0,-12),e.pos+Vector2(15,-20),e.pos+Vector2(32,0),e.pos+Vector2(12,19),e.pos+Vector2(-12,19)]),Color("#8e3158"))
+    draw_circle(e.pos,8.0,Color("#ffb3cc"))
+    draw_arc(e.pos,24.0,0.0,TAU,24,Color("#ff7097"),2.0)
+   elif slot >= 9:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(0,-21),e.pos+Vector2(22,0),e.pos+Vector2(0,21),e.pos+Vector2(-22,0)]),Color("#c25374"))
+    draw_circle(e.pos,5.0,Color("#ffe1a3"))
+   elif slot % 3 == 0:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(-15,-11),e.pos+Vector2(15,0),e.pos+Vector2(-15,11)]),Color("#f17c69"))
+   elif slot % 3 == 1:
+    draw_colored_polygon(PackedVector2Array([e.pos+Vector2(0,-16),e.pos+Vector2(14,0),e.pos+Vector2(0,16),e.pos+Vector2(-14,0)]),Color("#e3a75f"))
+   else:
+    draw_circle(e.pos,12.0,Color("#875eb8"))
+    draw_circle(e.pos,5.0,Color("#d5b7ff"))
+ # Readable boss HP indicator without replacing any approved sprite art.
+ for e in enemies:
+  if int(e.get("slot", -1)) == 11:
+   var boss_hp: float = clampf(float(e.get("hp", 0)) / 28.0, 0.0, 1.0)
+   draw_rect(Rect2(180, 26, 280, 13), Color("#070e1c"))
+   draw_rect(Rect2(182, 28, 276.0 * boss_hp, 9), Color("#ff668c"))
+   draw_rect(Rect2(180, 26, 280, 13), Color("#f6cbd7"), false, 1.0)
+   draw_string(ThemeDB.fallback_font, Vector2(180, 23), "STAGE 02 BOSS", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+   break
  for s in shots: draw_circle(s.pos,3.0,Color("#63dfff"))
  for s in enemy_shots: draw_circle(s.pos,4.0,Color("#ff6c9c"))
  if invulnerable <= 0.0 or int(elapsed*10.0)%2 == 0:
@@ -178,9 +274,16 @@ func _draw() -> void:
   if vertical: ship = PackedVector2Array([player_pos+Vector2(0,-15),player_pos+Vector2(-9,11),player_pos,player_pos+Vector2(9,11)])
   draw_colored_polygon(ship,Color("#ffd46d"))
  draw_string(ThemeDB.fallback_font,Vector2(12,20),"STAGE %d  HP %d  KILLS %d  %s" % [stage,hp,kills,"VERTICAL" if vertical else "HORIZONTAL"],HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
- draw_string(ThemeDB.fallback_font,Vector2(12,350),"ARROWS/WASD MOVE | Z/SPACE SHOOT | TAB ORIENTATION | R RESTART",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ draw_string(ThemeDB.fallback_font,Vector2(12,350),"MOVE: ARROWS/WASD | SHOOT: Z/SPACE | TAB: ORIENT | P/START: PAUSE",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
+ if paused:
+  draw_rect(Rect2(170,125,300,105),Color("#090c16e8"))
+  draw_string(ThemeDB.fallback_font,Vector2(270,165),"PAUSED",HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(208,200),"P / START : RESUME",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
  if game_over:
-  draw_rect(Rect2(150,120,340,90),Color("#090c16dd"))
+  draw_rect(Rect2(150,120,340,120),Color("#090c16dd"))
   var result_label := "STAGE 02 CLEAR" if stage_complete else "GAME OVER"
   draw_string(ThemeDB.fallback_font,Vector2(195,160),result_label,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
-  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER: TITLE  /  R: RETRY",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  draw_string(ThemeDB.fallback_font,Vector2(175,190),"ENTER/SPACE/R/PAD Y: RETRY | ESC/PAD B: TITLE",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color.WHITE)
+  if stage_complete:
+   var save_label := "SAVE FAILED - S / PAD X: RETRY SAVE" if save_failed else "CLEAR SAVED - L / PAD A: BRIEFING"
+   draw_string(ThemeDB.fallback_font,Vector2(155,225),save_label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#ff8080") if save_failed else Color("#9de4bd"))
