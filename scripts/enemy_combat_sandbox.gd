@@ -20,7 +20,9 @@ var ids: PackedStringArray
 var stage := 1
 var stage_kills := 0
 var boss_spawned := false
+var boss_rank_index := 0
 var stage_clear := false
+const BOSS_RANKS := ["S", "M", "L"]
 const KILLS_TO_BOSS := 8
 
 func _ready() -> void:
@@ -68,7 +70,10 @@ func _process(delta: float) -> void:
 				if int(foe["hp"]) <= 0:
 					score += 100
 					if String(foe["id"]).begins_with("B"):
-						stage_clear = true
+						boss_rank_index += 1
+						boss_spawned = false
+						if boss_rank_index >= BOSS_RANKS.size():
+							stage_clear = true
 					else:
 						stage_kills += 1
 					destroyed = true
@@ -80,12 +85,13 @@ func _process(delta: float) -> void:
 			player_hp -= 1
 			invincible = 1.2
 			enemies.remove_at(i)
-	if stage_kills >= KILLS_TO_BOSS and not boss_spawned:
+	if stage_kills >= KILLS_TO_BOSS and not boss_spawned and not stage_clear:
 		boss_spawned = true
-		var boss_id := "B%02d-S" % stage
+		var boss_id := "B%02d-%s" % [stage, BOSS_RANKS[boss_rank_index]]
 		var spawn := Vector2(320, -20) if vertical_scroll else Vector2(660, 180)
 		enemies.clear()
-		enemies.append({"id": boss_id, "spawn": spawn, "age": 0.0, "hp": 12})
+		var boss_spec := Catalog.get_enemy(boss_id)
+		enemies.append({"id": boss_id, "spawn": spawn, "age": 0.0, "hp": int(boss_spec["hp_proposal"])})
 	queue_redraw()
 
 func _set_stage(new_stage: int) -> void:
@@ -97,6 +103,7 @@ func _set_stage(new_stage: int) -> void:
 			ids.append(enemy_id)
 	stage_kills = 0
 	boss_spawned = false
+	boss_rank_index = 0
 	stage_clear = false
 	next_enemy = 0
 	player_hp = 3
@@ -113,7 +120,7 @@ func _set_stage(new_stage: int) -> void:
 func _enemy_pos(foe: Dictionary) -> Vector2:
 	var p := Vector2(foe["spawn"]) + Catalog.offset_at(String(foe["id"]), float(foe["age"]), vertical_scroll)
 	if String(foe["id"]).begins_with("B"):
-		return Vector2(p.x, maxf(p.y, 76.0)) if vertical_scroll else Vector2(minf(p.x, 510.0), p.y)
+		return Vector2(clampf(p.x, 40.0, 600.0), clampf(p.y, 76.0, 290.0)) if vertical_scroll else Vector2(clampf(p.x, 400.0, 510.0), clampf(p.y, 36.0, 324.0))
 	return p
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -151,6 +158,8 @@ func _draw() -> void:
 	var mode := "VERTICAL" if vertical_scroll else "HORIZONTAL"
 	draw_string(ThemeDB.fallback_font, Vector2(12, 19), "STAGE " + str(stage) + " / " + Catalog.STAGE_NAMES[stage - 1] + "  " + mode + "  HP " + str(player_hp) + "  SCORE " + str(score), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	draw_string(ThemeDB.fallback_font, Vector2(12, 347), "ARROWS MOVE  Z/ENTER FIRE  TAB H/V  R RESET  N NEXT AFTER CLEAR", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b8d3e7"))
+	if boss_spawned and not stage_clear:
+		draw_string(ThemeDB.fallback_font, Vector2(12, 39), "BOSS %s / 3" % str(boss_rank_index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#ffe38b"))
 	if stage_clear:
 		draw_string(ThemeDB.fallback_font, Vector2(180, 178), "STAGE CLEAR!  N: NEXT STAGE / R: RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#ffe38b"))
 	if player_hp <= 0:
