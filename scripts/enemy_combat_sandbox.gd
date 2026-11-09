@@ -67,6 +67,10 @@ func _process(delta: float) -> void:
 				foe["hp"] = int(foe["hp"]) - 1
 				if int(foe["hp"]) <= 0:
 					score += 100
+					if String(foe["id"]).begins_with("B"):
+						stage_clear = true
+					else:
+						stage_kills += 1
 					destroyed = true
 				break
 		if destroyed:
@@ -107,7 +111,10 @@ func _set_stage(new_stage: int) -> void:
 	queue_redraw()
 
 func _enemy_pos(foe: Dictionary) -> Vector2:
-	return Vector2(foe["spawn"]) + Catalog.offset_at(String(foe["id"]), float(foe["age"]), vertical_scroll)
+	var p := Vector2(foe["spawn"]) + Catalog.offset_at(String(foe["id"]), float(foe["age"]), vertical_scroll)
+	if String(foe["id"]).begins_with("B"):
+		return Vector2(p.x, maxf(p.y, 76.0)) if vertical_scroll else Vector2(minf(p.x, 510.0), p.y)
+	return p
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
