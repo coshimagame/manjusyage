@@ -10,6 +10,8 @@ var overlay: Control
 var clear_seen := false
 var prior_game_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
 var paused_audio: Array[Node] = []
+const Stage2Prototype = preload("res://scenes/stage2_combat_prototype.tscn")
+var stage2_button: Button
 
 func _ready() -> void:
 	game = GameScene.instantiate()
@@ -67,8 +69,24 @@ func _finish_clear_dialogue() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_free()
 		overlay = null
-	# Do not pretend Stage 2 exists in the production game.
-	# Keep the original clear/result mode and its own navigation intact.
+	# Keep the production result screen; offer an explicit opt-in to the
+	# standalone Stage 2 prototype, without changing save/progression data.
 	_restore_game_audio()
 	if is_instance_valid(game):
 		game.process_mode = prior_game_process_mode
+	_show_stage2_option()
+
+# Prototype-only bridge. The player must opt in; no Stage 2 unlock or save is claimed.
+func _show_stage2_option() -> void:
+	if is_instance_valid(stage2_button):
+		return
+	stage2_button = Button.new()
+	stage2_button.text = "第2面 試作へ出撃（未完成）"
+	stage2_button.position = Vector2(360, 305)
+	stage2_button.size = Vector2(260, 42)
+	stage2_button.pressed.connect(_launch_stage2)
+	add_child(stage2_button)
+
+func _launch_stage2() -> void:
+	# Transition deferred so the same click cannot hit Stage 2 controls.
+	get_tree().change_scene_to_packed.call_deferred(Stage2Prototype)
