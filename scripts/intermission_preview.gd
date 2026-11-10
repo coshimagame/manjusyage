@@ -38,6 +38,13 @@ func _build_ui() -> void:
 	backdrop.color = Color(0.035, 0.055, 0.11, 1.0)
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backdrop)
+	# Parent CanvasItem drawing occurs behind children; use a dedicated layer
+	# above the opaque backdrop so the petal animation is actually visible.
+	var petal_layer := Control.new()
+	petal_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	petal_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	petal_layer.set_script(preload("res://scripts/intermission_petals.gd"))
+	add_child(petal_layer)
 	portrait = TextureRect.new()
 	portrait.anchor_left = 0.34
 	portrait.anchor_right = 0.66
@@ -100,7 +107,6 @@ func begin(new_lines: Array) -> void:
 
 func _process(delta: float) -> void:
 	petal_time += delta
-	queue_redraw()
 	if complete or show_log or lines.is_empty():
 		return
 	var length := String(lines[index].get("text", "")).length()
@@ -252,18 +258,3 @@ func _line_set_ids() -> Array[String]:
 		ids.append(String(entry.get("id", "")))
 	return ids
 
-# Quiet pixel-petal drift in the upper story area, behind no approved portraits.
-# Pure CanvasItem drawing: no new image dependency, no gameplay collision.
-func _draw() -> void:
-	var bounds: Vector2 = size
-	if bounds.x <= 0.0 or bounds.y <= 0.0:
-		return
-	var region_height: float = bounds.y * 0.55
-	for i in range(14):
-		var phase: float = float(i) * 2.39996
-		var x: float = fposmod(float(i) * 73.0 + sin(petal_time * 0.31 + phase) * 16.0, bounds.x)
-		var y: float = fposmod(float(i) * 41.0 - petal_time * (5.0 + float(i % 4) * 2.0), region_height)
-		var alpha: float = 0.11 + 0.09 * (0.5 + 0.5 * sin(petal_time + phase))
-		var tone: Color = Color(0.98, 0.26, 0.34, alpha)
-		draw_rect(Rect2(Vector2(roundf(x), roundf(y)), Vector2(3.0, 2.0)), tone)
-		draw_rect(Rect2(Vector2(roundf(x) + 1.0, roundf(y) - 1.0), Vector2(1.0, 4.0)), tone)
