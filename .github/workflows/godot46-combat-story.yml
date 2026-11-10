@@ -1,0 +1,41 @@
+name: Godot 4.6 combat-story regression
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/combat_story_bridge.gd'
+      - 'scripts/enemy_combat_sandbox.gd'
+      - 'scripts/intermission_preview.gd'
+      - 'scenes/**'
+      - 'tests/test_combat_story_*.gd'
+      - '.github/workflows/godot46-combat-story.yml'
+  workflow_dispatch:
+
+jobs:
+  combat-story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.6
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.0
+          use-dotnet: false
+          include-templates: false
+      - name: Import project
+        env:
+          HOME: ${{ runner.temp }}/manjushage-home
+        run: |
+          mkdir -p "$HOME"
+          godot --headless --editor --path . --import --quit
+      - name: Combat to intermission to next stage
+        env:
+          HOME: ${{ runner.temp }}/manjushage-home
+        run: godot --headless --path . --script res://tests/test_combat_story_bridge.gd
+      - name: Stage 8 wrap and save restore
+        env:
+          HOME: ${{ runner.temp }}/manjushage-home
+        run: godot --headless --path . --script res://tests/test_combat_story_save_wrap.gd
