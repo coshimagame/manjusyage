@@ -12,6 +12,7 @@ var stage_completed := false
 
 func _ready() -> void:
 	combat = CombatScene.instantiate()
+	combat.bridge_controls_stage_progress = true
 	add_child(combat)
 	var cfg := ConfigFile.new()
 	if cfg.load(SAVE_PATH) == OK:
