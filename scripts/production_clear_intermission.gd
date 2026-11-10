@@ -54,7 +54,11 @@ func _exit_tree() -> void:
 	_restore_game_audio()
 
 func _restore_game_audio() -> void:
-	_restore_game_audio()
+	# Restore only streams that this bridge paused and that still exist.
+	for player in paused_audio:
+		if is_instance_valid(player):
+			player.stream_paused = false
+	paused_audio.clear()
 
 func _finish_clear_dialogue() -> void:
 	if is_instance_valid(overlay):
@@ -62,9 +66,6 @@ func _finish_clear_dialogue() -> void:
 		overlay = null
 	# Do not pretend Stage 2 exists in the production game.
 	# Keep the original clear/result mode and its own navigation intact.
-	for player in paused_audio:
-		if is_instance_valid(player):
-			player.stream_paused = false
-	paused_audio.clear()
+	_restore_game_audio()
 	if is_instance_valid(game):
 		game.process_mode = Node.PROCESS_MODE_INHERIT
