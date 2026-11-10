@@ -8,6 +8,7 @@ const Dialogue = preload("res://scripts/intermission_stage_dialogue.gd")
 var game: Node2D
 var overlay: Control
 var clear_seen := false
+var paused_audio: Array[AudioStreamPlayer] = []
 
 func _ready() -> void:
 	game = GameScene.instantiate()
@@ -27,6 +28,13 @@ func _process(_delta: float) -> void:
 func _show_clear_dialogue() -> void:
 	# Disable input and simulation on the real game while the story owns the screen.
 	game.process_mode = Node.PROCESS_MODE_DISABLED
+	# Disabling node processing does not stop AudioStreamPlayer playback.
+	# Pause only the real game's active streams; leave the dialogue audio alone.
+	paused_audio.clear()
+	for child in game.get_children():
+		if child is AudioStreamPlayer and child.playing and not child.stream_paused:
+			child.stream_paused = true
+			paused_audio.append(child)
 	overlay = IntermissionScene.instantiate()
 	add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -40,4 +48,9 @@ func _finish_clear_dialogue() -> void:
 		overlay = null
 	# Do not pretend Stage 2 exists in the production game.
 	# Keep the original clear/result mode and its own navigation intact.
-	game.process_mode = Node.PROCESS_MODE_INHERIT
+	for player in paused_audio:
+		if is_instance_valid(player):
+			player.stream_paused = false
+	paused_audio.clear()
+	if is_instance_valid(game):
+		game.process_mode = Node.PROCESS_MODE_INHERIT
