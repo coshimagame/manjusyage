@@ -61,3 +61,10 @@
 | `docs/screenshots/latest/vertical.png` | `e62d07eb44ecabaf16fbf9bf8df422b3bbe70b87` |
 
 **残作業**：各画像の承認根拠と利用用途を照合し、必要なものだけ原本を保持したまま分類先へコピーする。コピー後にblob SHA一致を検証し、参照・ゲーム描画をテストする。現時点で画像の移行・承認・main統合を完了したとは扱わない。
+
+## 2026-11-11 07時台 JST 検証と実装方針の更新
+- PR #50、#51 はともに open・未マージ、GitHub競合判定は mergeable。ただし #51 のベースは #50 の整理ブランチであり、直接 main 向けではない。順序を維持する。
+- #51 の変更65ファイルを再取得。`art/` 内は分類先READMEであり、分類先へのPNG移行を示す追加画像は含まれていない。原本18パスの監査記録を維持する。
+- ユーザーの最新方針「まず動くゲーム、仮ビジュアルは後で差し替え可」を `PLAYABILITY_FIRST_POLICY.md` に明文化（コミット `bc154b5a4a5f97d7789b02b61ccaca7099f1577a`）。**承認済み原画の上書き許可ではない**。
+- 上記コミットに対する GitHub Actions `Art catalog and reference validation` は run `42910763779` が `completed/success`。限定的な自動検証であり、Windows実画面比較、原画承認、実画像移行、main統合後テストは未了。
+- この確認では画像の移動・置換・PRマージを行わない。mainへの整理反映は未完了。
