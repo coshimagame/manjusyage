@@ -16,6 +16,9 @@ var phase := "wave"
 var wave_kills := 0
 var fire_timer := 0.0
 var font := SystemFont.new()
+# Browser touch: drag the ship with one finger; shoot while held.
+var touch_finger := -1
+var touch_target := Vector2.ZERO
 
 func _ready() -> void:
 	font.font_names = PackedStringArray(["Noto Sans CJK JP", "Yu Gothic", "sans-serif"])
@@ -28,10 +31,14 @@ func _process(delta: float) -> void:
 	time += delta
 	invulnerable = maxf(0.0, invulnerable - delta)
 	var axis := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	pilot += axis * delta * 185.0
+	if touch_finger >= 0:
+		# Smooth tracking prevents teleporting through enemies on first contact.
+		pilot = pilot.move_toward(touch_target, delta * 260.0)
+	else:
+		pilot += axis * delta * 185.0
 	pilot = pilot.clamp(Vector2(16, 20), Vector2(610, 338))
 	fire_timer -= delta
-	if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(0, JOY_BUTTON_A)) and fire_timer <= 0.0:
+	if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(0, JOY_BUTTON_A) or touch_finger >= 0) and fire_timer <= 0.0:
 		shots.append(pilot + Vector2(16, 0))
 		fire_timer = 0.14
 	for i in range(shots.size() - 1, -1, -1):
@@ -90,6 +97,18 @@ func _hit() -> void:
 	if hp <= 0:
 		phase = "lost"
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed and touch_finger == -1 and phase not in ["won", "lost"]:
+			touch_finger = event.index
+			touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
+		elif not event.pressed and event.index == touch_finger:
+			touch_finger = -1
+	elif event is InputEventScreenDrag and event.index == touch_finger:
+		touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
+	elif event is InputEventScreenTouch and event.pressed and phase in ["won", "lost"]:
+		get_tree().reload_current_scene()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
 		get_tree().reload_current_scene()
@@ -123,7 +142,7 @@ func _draw() -> void:
 		draw_circle(p, 4, Color("#ff9eaa"))
 	draw_string(font, Vector2(15, 24), "STAGE 2 / 追憶の海  [試作]", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
 	draw_string(font, Vector2(15, 44), "HP %d  /  撃破 %d/15  /  BOSS %d" % [hp, wave_kills, maxi(boss_hp, 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d6e8ef"))
-	draw_string(font, Vector2(15, 347), "矢印: 移動  Z/Space/A: 攻撃  R/Start: リトライ", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
+	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Start: 再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
