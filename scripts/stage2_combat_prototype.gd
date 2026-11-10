@@ -99,15 +99,15 @@ func _hit() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		if event.pressed and touch_finger == -1 and phase not in ["won", "lost"]:
+		if event.pressed and phase in ["won", "lost"]:
+			get_tree().reload_current_scene()
+		elif event.pressed and touch_finger == -1:
 			touch_finger = event.index
 			touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
 		elif not event.pressed and event.index == touch_finger:
 			touch_finger = -1
 	elif event is InputEventScreenDrag and event.index == touch_finger:
 		touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
-	elif event is InputEventScreenTouch and event.pressed and phase in ["won", "lost"]:
-		get_tree().reload_current_scene()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
