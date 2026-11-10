@@ -3,6 +3,7 @@ extends Node2D
 ## This is NOT the production game flow. Uses separate user:// sandbox save.
 const CombatScene = preload("res://scenes/enemy_combat_sandbox.tscn")
 const IntermissionScene = preload("res://scenes/intermission_preview.tscn")
+const StageDialogue = preload("res://scripts/intermission_stage_dialogue.gd")
 const SAVE_PATH := "user://combat_story_preview.cfg"
 
 var combat: Node2D
@@ -39,10 +40,7 @@ func _show_intermission() -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.finished.connect(_on_intermission_finished, CONNECT_ONE_SHOT)
 	# Text is explicitly provisional; the final story must use approved dialogue IDs.
-	overlay.begin([
-		{"id":"bridge_s%02d_clear" % combat.stage, "speaker":"コルミィ", "text":"ここは越えたね。次の世界へ進もう！", "status":"proposal"},
-		{"id":"bridge_s%02d_ready" % combat.stage, "speaker":"ムゥ", "text":"機体を整備する。出撃準備を頼む。", "status":"proposal"}
-	])
+	overlay.begin(StageDialogue.lines_for(combat.stage))
 
 func _on_intermission_finished() -> void:
 	var next_stage: int = 1 if combat.stage >= 8 else combat.stage + 1
