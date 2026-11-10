@@ -28,3 +28,8 @@
 - PR #50: `main` 向け open / 未マージ、head `39f209b71d99ac77ce051aba385c0bbcffdfa774`。PR #51: #50 ブランチ向け open / 未マージ、head `4f8cc5e7c65c7e093a23aa05a7c517d1651473bf`。
 - `main...cleanup/canon-and-art-folders-20261106` は `diverged`、78 ahead / 3 behind、変更65ファイル。比較に現れる `art/` の変更はREADMEのみで、承認済み原画PNGの移行が完了した根拠はない。
 - 現時点でGitHub APIによるPRメタデータ・変更パス確認まで。Godotの最新headに対する実行検証、SHA照合、実画面比較は未実施。完了条件未達のためマージは保留する。
+
+## 2026-11-10 21時台 JST 自動検証記録
+- GitHub Actions `Art catalog and reference validation` は整理ブランチ head `0fe112c18da97adc1482a393c2fa55ee19b6d948` に対し、2026-11-09 11:16 UTC開始の2実行がともに `success`。ワークフロー定義上、Godot 4.6 headless import と `tests/test_art_slots.gd` を含む。ただしWindows実画面の承認原画比較や全リンク/SHA監査は含まない。
+- PR #50 と #51 は依然 open / 未マージ。#51 の変更65ファイル中、`art/` 配下の変更はREADMEのみで、承認済み原画の移行完了を示さない。
+- 上記成功は**分類ブランチ上の限定的な自動テスト成功**であり、`main` 統合後の動作・画像一致の保証ではない。未完了チェック項目を維持し、承認済み原画を推測で置換しない。
