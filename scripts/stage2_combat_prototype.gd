@@ -78,8 +78,16 @@ func _process(delta: float) -> void:
 				boss_hp -= 1
 		if boss_hp <= 0:
 			phase = "won"
+			enemy_shots.clear()
+			shots.clear()
+		elif pilot.distance_to(boss_pos) < 52.0:
+			# The boss body is hazardous too; _hit handles invulnerability.
+			_hit()
 		if phase == "boss" and int(time * 3.0) != int((time - delta) * 3.0):
 			enemy_shots.append(boss_pos + Vector2(-36, 0))
+	if phase == "won" or phase == "lost":
+		queue_redraw()
+		return
 	for i in range(enemy_shots.size() - 1, -1, -1):
 		enemy_shots[i].x -= delta * 135
 		if enemy_shots[i].x < 0:
