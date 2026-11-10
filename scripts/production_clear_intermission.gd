@@ -31,16 +31,30 @@ func _show_clear_dialogue() -> void:
 	# Disabling node processing does not stop AudioStreamPlayer playback.
 	# Pause only the real game's active streams; leave the dialogue audio alone.
 	paused_audio.clear()
-	for child in game.get_children():
-		if child is AudioStreamPlayer and child.playing and not child.stream_paused:
-			child.stream_paused = true
-			paused_audio.append(child)
+	_pause_game_audio(game)
 	overlay = IntermissionScene.instantiate()
 	add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.finished.connect(_finish_clear_dialogue, CONNECT_ONE_SHOT)
 	# These are unapproved preview lines, not canon.
 	overlay.begin(Dialogue.lines_for(1))
+
+# Audio players may live inside nested stage, HUD, or boss nodes.
+# Never touch the sibling intermission overlay or streams paused beforehand.
+func _pause_game_audio(root: Node) -> void:
+	for child in root.get_children():
+		if child is AudioStreamPlayer:
+			if child.playing and not child.stream_paused:
+				child.stream_paused = true
+				paused_audio.append(child)
+		_pause_game_audio(child)
+
+func _exit_tree() -> void:
+	# Ensure externally retained game/audio nodes cannot remain paused.
+	_restore_game_audio()
+
+func _restore_game_audio() -> void:
+	_restore_game_audio()
 
 func _finish_clear_dialogue() -> void:
 	if is_instance_valid(overlay):
