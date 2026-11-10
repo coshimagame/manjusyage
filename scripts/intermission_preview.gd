@@ -131,7 +131,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _advance() -> void:
 	if complete or show_log or lines.is_empty():
 		return
-	var current := lines[index]
+	var current: Dictionary = lines[index]
 	var full_text := String(current.get("text", ""))
 	if int(shown) < full_text.length():
 		shown = float(full_text.length())
@@ -162,7 +162,7 @@ func _render() -> void:
 	if lines.is_empty():
 		_end()
 		return
-	var current := lines[index]
+	var current: Dictionary = lines[index]
 	speaker_label.text = String(current.get("speaker", ""))
 	# Only display a real approved image when an explicit path was supplied.
 	portrait.visible = false

@@ -45,7 +45,7 @@ func _show_intermission() -> void:
 	])
 
 func _on_intermission_finished() -> void:
-	var next_stage := 1 if combat.stage >= 8 else combat.stage + 1
+	var next_stage: int = 1 if combat.stage >= 8 else combat.stage + 1
 	# Store only preview progress. Never touch the real player's save.
 	var cfg := ConfigFile.new()
 	cfg.set_value("progress", "stage", next_stage)

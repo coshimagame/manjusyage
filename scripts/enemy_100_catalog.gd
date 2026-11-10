@@ -34,9 +34,9 @@ static func get_enemy(enemy_id: String) -> Dictionary:
 		slot = int(parts[1])
 		if slot < 1 or slot > (10 if stage <= 4 else 9): return {}
 	var variant := (stage * 11 + slot * 3 + ["S", "M", "L"].find(rank)) if boss else (stage * 11 + slot * 3)
-	var motion_h := MOTIONS[variant % MOTIONS.size()]
-	var motion_v := MOTIONS[(variant + 3) % MOTIONS.size()]
-	var attack := ATTACKS[(variant + (2 if boss else 0)) % ATTACKS.size()]
+	var motion_h: String = MOTIONS[variant % MOTIONS.size()]
+	var motion_v: String = MOTIONS[(variant + 3) % MOTIONS.size()]
+	var attack: String = ATTACKS[(variant + (2 if boss else 0)) % ATTACKS.size()]
 	var hp := (30 if rank == "S" else (100 if rank == "M" else 350)) if boss else (2 + slot / 3)
 	return {
 		"id": enemy_id, "stage": stage, "stage_name": STAGE_NAMES[stage - 1],
