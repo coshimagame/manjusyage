@@ -22,6 +22,8 @@ var stage_kills := 0
 var boss_spawned := false
 var boss_rank_index := 0
 var stage_clear := false
+# When embedded, the parent bridge owns stage transitions.
+var bridge_controls_stage_progress := false
 const BOSS_RANKS := ["S", "M", "L"]
 const KILLS_TO_BOSS := 8
 
@@ -134,7 +136,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_R:
 			_set_stage(stage)
 			get_viewport().set_input_as_handled()
-		elif event.keycode == KEY_N and stage_clear:
+		elif event.keycode == KEY_N and stage_clear and not bridge_controls_stage_progress:
 			_set_stage(1 if stage == 8 else stage + 1)
 			get_viewport().set_input_as_handled()
 
