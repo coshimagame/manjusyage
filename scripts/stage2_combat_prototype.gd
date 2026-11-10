@@ -26,6 +26,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if phase == "won" or phase == "lost":
+		# Ignore held touch input after the round ends; retry requires a new press.
+		touch_finger = -1
 		queue_redraw()
 		return
 	time += delta
@@ -112,6 +114,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed and phase in ["won", "lost"]:
 			get_tree().reload_current_scene()
+			get_viewport().set_input_as_handled()
 		elif event.pressed and touch_finger == -1:
 			touch_finger = event.index
 			touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
@@ -121,7 +124,7 @@ func _input(event: InputEvent) -> void:
 		touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
+	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_R or (event.keycode == KEY_ENTER and phase in ["won", "lost"])):
 		get_tree().reload_current_scene()
 	elif event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START and phase in ["won", "lost"]:
 		get_tree().reload_current_scene()
@@ -153,7 +156,7 @@ func _draw() -> void:
 		draw_circle(p, 4, Color("#ff9eaa"))
 	draw_string(font, Vector2(15, 24), "STAGE 2 / 追憶の海  [試作]", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
 	draw_string(font, Vector2(15, 44), "HP %d  /  撃破 %d/15  /  BOSS %d" % [hp, wave_kills, maxi(boss_hp, 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d6e8ef"))
-	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Start: 再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
+	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
