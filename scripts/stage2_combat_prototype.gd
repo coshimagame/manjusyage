@@ -31,7 +31,7 @@ func _process(delta: float) -> void:
 	pilot += axis * delta * 185.0
 	pilot = pilot.clamp(Vector2(16, 20), Vector2(610, 338))
 	fire_timer -= delta
-	if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE)) and fire_timer <= 0.0:
+	if (Input.is_key_pressed(KEY_Z) or Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(0, JOY_BUTTON_A)) and fire_timer <= 0.0:
 		shots.append(pilot + Vector2(16, 0))
 		fire_timer = 0.14
 	for i in range(shots.size() - 1, -1, -1):
@@ -58,7 +58,7 @@ func _process(delta: float) -> void:
 						enemies.remove_at(i)
 						wave_kills += 1
 					break
-			if i < enemies.size() and pilot.distance_to(enemies[i].pos) < 20:
+			if e.hp > 0 and i < enemies.size() and pilot.distance_to(enemies[i].pos) < 20:
 				_hit()
 		if wave_kills >= 15:
 			enemies.clear()
@@ -71,7 +71,7 @@ func _process(delta: float) -> void:
 				boss_hp -= 1
 		if boss_hp <= 0:
 			phase = "won"
-		if int(time * 3.0) != int((time - delta) * 3.0):
+		if phase == "boss" and int(time * 3.0) != int((time - delta) * 3.0):
 			enemy_shots.append(boss_pos + Vector2(-36, 0))
 	for i in range(enemy_shots.size() - 1, -1, -1):
 		enemy_shots[i].x -= delta * 135
@@ -92,6 +92,8 @@ func _hit() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
+		get_tree().reload_current_scene()
+	elif event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START and phase in ["won", "lost"]:
 		get_tree().reload_current_scene()
 
 func _draw() -> void:
@@ -121,7 +123,7 @@ func _draw() -> void:
 		draw_circle(p, 4, Color("#ff9eaa"))
 	draw_string(font, Vector2(15, 24), "STAGE 2 / 追憶の海  [試作]", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
 	draw_string(font, Vector2(15, 44), "HP %d  /  撃破 %d/15  /  BOSS %d" % [hp, wave_kills, maxi(boss_hp, 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d6e8ef"))
-	draw_string(font, Vector2(15, 347), "矢印: 移動  Z/Space: 攻撃  R: リトライ", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
+	draw_string(font, Vector2(15, 347), "矢印: 移動  Z/Space/A: 攻撃  R/Start: リトライ", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
