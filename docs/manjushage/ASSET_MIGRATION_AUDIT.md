@@ -68,3 +68,12 @@
 - ユーザーの最新方針「まず動くゲーム、仮ビジュアルは後で差し替え可」を `PLAYABILITY_FIRST_POLICY.md` に明文化（コミット `bc154b5a4a5f97d7789b02b61ccaca7099f1577a`）。**承認済み原画の上書き許可ではない**。
 - 上記コミットに対する GitHub Actions `Art catalog and reference validation` は run `42910763779` が `completed/success`。限定的な自動検証であり、Windows実画面比較、原画承認、実画像移行、main統合後テストは未了。
 - この確認では画像の移動・置換・PRマージを行わない。mainへの整理反映は未完了。
+
+## 2026-11-11 08時台 JST mainとの実画像差分（重要）
+- Git treeの再帰取得（双方 `truncated=false`）で、**mainに画像20パス、整理ブランチに18パス**を確認。従来の「18パス」は整理ブランチ限定の数であり、リポジトリ全体の最新画像数ではない。
+- mainにのみ存在する実画像2点：
+  - `art/ui/character_hub_ui_20261106.png` — Git blob SHA-1 `0e2cb68d06e5cd563fd66373cde8a69a63803acf`
+  - `art/ui/character_system_ui_20261106.png` — Git blob SHA-1 `8b091ec2891a7e50860304f4692945524bb83da7`
+- 既存の `art/active/` 4画像、`art/concepts/` 3画像はmainと整理ブランチで同じGit blob SHA。上記2点の承認状態は未確認であり、未承認・削除対象と断定しない。
+- **統合前にmainのUI画像2点を保持することが必須。** ブランチに存在しないからといって消去しない。PR #50（main向け）と #51（#50向け）の依存関係を保ち、最新mainを取り込んだ上で差分・参照・Godot検証を実施する。
+- 今回はGit treeの静的照合のみ。PNGコピー、SHA-256照合、Windows実画面確認、main統合後のGodotテストは未実施。完了扱いしない。
