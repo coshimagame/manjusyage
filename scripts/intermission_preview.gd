@@ -110,23 +110,31 @@ func _process(delta: float) -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
+	var handled := true
 	if event.keycode == KEY_L:
 		_toggle_log()
 	elif event.keycode == KEY_ESCAPE:
 		_end()
 	elif event.keycode == KEY_ENTER or event.keycode == KEY_SPACE:
 		_advance()
-	get_viewport().set_input_as_handled()
+	else:
+		handled = false
+	if handled:
+		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed:
+		var handled := true
 		if event.button_index == JOY_BUTTON_A:
 			_advance()
 		elif event.button_index == JOY_BUTTON_START:
 			_end()
 		elif event.button_index == JOY_BUTTON_Y:
 			_toggle_log()
-		get_viewport().set_input_as_handled()
+		else:
+			handled = false
+		if handled:
+			get_viewport().set_input_as_handled()
 
 func _advance() -> void:
 	if complete or show_log or lines.is_empty():
