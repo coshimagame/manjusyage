@@ -57,6 +57,7 @@ func _process(delta: float) -> void:
 			if e.pos.x < -20:
 				enemies.remove_at(i)
 				continue
+			var defeated := false
 			for j in range(shots.size() - 1, -1, -1):
 				if e.pos.distance_to(shots[j]) < 16:
 					shots.remove_at(j)
@@ -64,8 +65,10 @@ func _process(delta: float) -> void:
 					if e.hp <= 0:
 						enemies.remove_at(i)
 						wave_kills += 1
-					break
-			if e.hp > 0 and i < enemies.size() and pilot.distance_to(enemies[i].pos) < 20:
+						defeated = true
+						break
+			# Do not collide with a defeated enemy or a shifted array element.
+			if not defeated and pilot.distance_to(e.pos) < 20:
 				_hit()
 		if wave_kills >= 15:
 			enemies.clear()
