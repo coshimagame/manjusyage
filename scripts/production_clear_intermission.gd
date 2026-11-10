@@ -9,7 +9,7 @@ var game: Node2D
 var overlay: Control
 var clear_seen := false
 var prior_game_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
-var paused_audio: Array[AudioStreamPlayer] = []
+var paused_audio: Array[Node] = []
 
 func _ready() -> void:
 	game = GameScene.instantiate()
@@ -42,10 +42,11 @@ func _show_clear_dialogue() -> void:
 	overlay.begin(Dialogue.lines_for(1))
 
 # Audio players may live inside nested stage, HUD, or boss nodes.
+# Include positional 2D/3D emitters, not only non-positional BGM players.
 # Never touch the sibling intermission overlay or streams paused beforehand.
 func _pause_game_audio(root: Node) -> void:
 	for child in root.get_children():
-		if child is AudioStreamPlayer:
+		if child is AudioStreamPlayer or child is AudioStreamPlayer2D or child is AudioStreamPlayer3D:
 			if child.playing and not child.stream_paused:
 				child.stream_paused = true
 				paused_audio.append(child)
