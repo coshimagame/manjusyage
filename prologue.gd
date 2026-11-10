@@ -93,7 +93,7 @@ func finish():
 	finished = true
 	music.stop()
 	# Deferred scene transition prevents the skip button reaching the title menu.
-	get_tree().change_scene_to_file.call_deferred("res://main.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/production_clear_intermission.tscn")
 
 func _process(dt):
 	if finished: return
