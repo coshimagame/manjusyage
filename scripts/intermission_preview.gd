@@ -24,6 +24,8 @@ var history: Array[String] = []
 var portrait: TextureRect
 var portrait_paths := {}
 var completed_line_ids: Array[String] = []
+# Procedural preview-only backdrop motion; no character art is replaced.
+var petal_time: float = 0.0
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -97,6 +99,8 @@ func begin(new_lines: Array) -> void:
 	_render()
 
 func _process(delta: float) -> void:
+	petal_time += delta
+	queue_redraw()
 	if complete or show_log or lines.is_empty():
 		return
 	var length := String(lines[index].get("text", "")).length()
@@ -247,3 +251,19 @@ func _line_set_ids() -> Array[String]:
 	for entry in lines:
 		ids.append(String(entry.get("id", "")))
 	return ids
+
+# Quiet pixel-petal drift in the upper story area, behind no approved portraits.
+# Pure CanvasItem drawing: no new image dependency, no gameplay collision.
+func _draw() -> void:
+	var bounds: Vector2 = size
+	if bounds.x <= 0.0 or bounds.y <= 0.0:
+		return
+	var region_height: float = bounds.y * 0.55
+	for i in range(14):
+		var phase: float = float(i) * 2.39996
+		var x: float = fposmod(float(i) * 73.0 + sin(petal_time * 0.31 + phase) * 16.0, bounds.x)
+		var y: float = fposmod(float(i) * 41.0 - petal_time * (5.0 + float(i % 4) * 2.0), region_height)
+		var alpha: float = 0.11 + 0.09 * (0.5 + 0.5 * sin(petal_time + phase))
+		var tone: Color = Color(0.98, 0.26, 0.34, alpha)
+		draw_rect(Rect2(Vector2(roundf(x), roundf(y)), Vector2(3.0, 2.0)), tone)
+		draw_rect(Rect2(Vector2(roundf(x) + 1.0, roundf(y) - 1.0), Vector2(1.0, 4.0)), tone)
