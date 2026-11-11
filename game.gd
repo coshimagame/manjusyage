@@ -456,7 +456,7 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: launch_stage_clear_interlude()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -856,6 +856,21 @@ func explode(pos,color,amount):
 	for i in range(mini(amount,maxi(0,210-particles.size()))):
 		var lifetime=randf_range(.22,.62)
 		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(26,102),"life":lifetime,"max_life":lifetime,"color":color,"petal":i%3==0})
+
+# Stage-one clear now enters the provisional workshop interlude before returning
+# to the existing game menu. Stage-two combat is not wired here yet.
+func launch_stage_clear_interlude() -> void:
+	if mode != "clear" or auto_test:
+		return
+	var dialogue: Array[Dictionary] = [
+		{"speaker":"クゥ", "text":"みんな、帰還信号を確認したわ。"},
+		{"speaker":"ムゥ", "text":"機体を点検する。次の出撃まで少し待ってくれ。"},
+		{"speaker":"コルミィ", "text":"うん。まだ飛べるよ！"}
+	]
+	var bridge = load("res://interlude_flow.gd")
+	if bridge == null or not bridge.launch(get_tree(), "res://main.tscn", dialogue):
+		# Do not trap players on a clear screen when the optional bridge fails.
+		open_briefing(briefing_progress.next_briefing_stage())
 
 func finish(won):
 	mode="clear" if won else "over"
