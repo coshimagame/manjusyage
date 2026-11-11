@@ -9,7 +9,9 @@ var enemies: Array[Dictionary] = []
 var enemy_shots: Array[Vector2] = []
 var time := 0.0
 var spawn_timer := 0.0
-var boss_hp := 30
+const BOSS_MAX_HP := 30
+var boss_hp := BOSS_MAX_HP
+var boss_warning := 0.0
 var hp := 4
 var invulnerable := 0.0
 var phase := "wave"
@@ -31,6 +33,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	time += delta
+	boss_warning = maxf(0.0, boss_warning - delta)
 	invulnerable = maxf(0.0, invulnerable - delta)
 	var axis := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if touch_finger >= 0:
@@ -84,6 +87,7 @@ func _process(delta: float) -> void:
 		if wave_kills >= 15:
 			enemies.clear()
 			phase = "boss"
+			boss_warning = 2.0
 	else:
 		var boss_pos := Vector2(530, 180 + 55 * sin(time * 0.8))
 		for j in range(shots.size() - 1, -1, -1):
@@ -165,7 +169,24 @@ func _draw() -> void:
 	for p in enemy_shots:
 		draw_circle(p, 4, Color("#ff9eaa"))
 	draw_string(font, Vector2(15, 24), "STAGE 2 / 追憶の海  [試作]", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
-	draw_string(font, Vector2(15, 44), "HP %d  /  撃破 %d/15  /  BOSS %d" % [hp, wave_kills, maxi(boss_hp, 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d6e8ef"))
+	# Readable 16-bit-style status HUD; procedural shapes never overwrite approved PNGs.
+	draw_rect(Rect2(9, 31, 258, 30), Color("#07111e", 0.88))
+	for i in range(4):
+		var heart_color := Color("#ff7189") if i < hp else Color("#3b4859")
+		var cx := 24.0 + i * 21.0
+		draw_circle(Vector2(cx - 4.0, 43.0), 5.0, heart_color)
+		draw_circle(Vector2(cx + 4.0, 43.0), 5.0, heart_color)
+		draw_colored_polygon(PackedVector2Array([Vector2(cx - 9, 44), Vector2(cx + 9, 44), Vector2(cx, 55)]), heart_color)
+	draw_string(font, Vector2(112, 50), "撃破 %d / 15" % wave_kills, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#d6e8ef"))
+	if phase == "boss" or phase == "won":
+		var bar_rect := Rect2(350, 13, 270, 13)
+		draw_rect(bar_rect, Color("#07111e"))
+		draw_rect(Rect2(bar_rect.position + Vector2(2, 2), Vector2((bar_rect.size.x - 4) * clampf(float(boss_hp) / float(BOSS_MAX_HP), 0.0, 1.0), 9)), Color("#ff849d"))
+		draw_rect(bar_rect, Color("#a9dce6"), false, 1.0)
+		draw_string(font, Vector2(350, 43), "BOSS  %d / %d" % [maxi(boss_hp, 0), BOSS_MAX_HP], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#f5dce4"))
+	if boss_warning > 0.0:
+		draw_rect(Rect2(195, 80, 250, 43), Color("#2c1024", 0.9))
+		draw_string(font, Vector2(218, 109), "WARNING  /  敵主力接近", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("#ffb5a5"))
 	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
