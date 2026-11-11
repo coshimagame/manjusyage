@@ -25,6 +25,12 @@ const ORGANIZED_PATHS = {
 	"item_analysis": "res://art/items/characters/jiyoza/analysis/icon.png",
 	"boss_body": "res://art/enemies/boss/body.png"
 }
+const COPIED_ORIGINAL_PATHS = {
+	"title_logo": "res://art/backgrounds/title/title_logo.png",
+	"ship_cormii": "res://art/characters/cormii/ship_cormii.png",
+	"ship_jiyoza": "res://art/characters/jiyoza/ship_jiyoza.png",
+	"ship_mafio": "res://art/characters/mafio/ship_mafio.png"
+}
 const PREVIOUS_ITEM_PATHS = {
 	"item_hp": "res://art/items/hp/icon.png",
 	"item_energy": "res://art/items/energy/icon.png",
@@ -39,6 +45,8 @@ func reload():
 		var candidates: Array[String] = []
 		if ORGANIZED_PATHS.has(key):
 			candidates.append(ORGANIZED_PATHS[key])
+		if COPIED_ORIGINAL_PATHS.has(key):
+			candidates.append(COPIED_ORIGINAL_PATHS[key])
 		if PREVIOUS_ITEM_PATHS.has(key):
 			candidates.append(PREVIOUS_ITEM_PATHS[key])
 		candidates.append(ROOT + key + ".png")
