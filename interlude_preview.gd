@@ -12,6 +12,7 @@ var lines: Array[Dictionary] = [
 var line_index := 0
 var visible_characters_float := 0.0
 var log_visible := false
+var finished := false
 var speaker_label: Label
 var dialogue_label: Label
 var log_label: RichTextLabel
@@ -91,12 +92,15 @@ func _show_line() -> void:
     _refresh_log()
 
 func _advance() -> void:
+    if finished:
+        return
     if log_visible:
         log_visible = false
         log_label.hide()
         return
     if dialogue_label.visible_characters < dialogue_label.get_total_character_count():
         dialogue_label.visible_characters = -1
+        visible_characters_float = float(dialogue_label.get_total_character_count())
         return
     line_index += 1
     _show_line()
@@ -107,10 +111,17 @@ func _refresh_log() -> void:
         log_label.add_text(str(lines[i].get("speaker", "")) + "： " + str(lines[i].get("text", "")) + "\n")
 
 func _toggle_log() -> void:
+    if finished:
+        return
     log_visible = not log_visible
     log_label.visible = log_visible
 
 func _finish() -> void:
+    if finished:
+        return
+    finished = true
+    set_process(false)
+    set_process_unhandled_input(false)
     completed.emit()
     if not next_scene.is_empty() and ResourceLoader.exists(next_scene):
         get_tree().change_scene_to_file.call_deferred(next_scene)
