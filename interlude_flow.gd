@@ -27,16 +27,23 @@ static func launch(tree: SceneTree, destination: String, dialogue: Array[Diction
         return false
     interlude.next_scene = destination
     interlude.lines = dialogue.duplicate(true)
-    # Defer scene replacement to avoid freeing the current scene mid-signal.
-    _swap.call_deferred(tree, interlude)
+    # Capture the originating stage so a later scene change cannot be overwritten.
+    var originating_scene := tree.current_scene
+    _swap.call_deferred(tree, originating_scene, interlude)
     return true
 
-static func _swap(tree: SceneTree, interlude: Node) -> void:
-    if tree == null or tree.root == null or tree.current_scene == null:
+static func _swap(tree: SceneTree, originating_scene: Node, interlude: Node) -> void:
+    if not is_instance_valid(interlude):
+        return
+    if tree == null or tree.root == null or not is_instance_valid(originating_scene):
         interlude.free()
         return
-    var old_scene := tree.current_scene
-    # Set current_scene before _ready() may emit completion; keep scene ownership consistent.
+    if tree.current_scene != originating_scene or originating_scene.is_queued_for_deletion():
+        # Another transition won the race; never replace its destination.
+        interlude.free()
+        return
+    # Adding the child triggers _ready(), so set the current scene immediately after.
+    # The interlude cannot complete until the next input/frame.
     tree.root.add_child(interlude)
     tree.current_scene = interlude
-    old_scene.queue_free()
+    originating_scene.queue_free()
