@@ -866,19 +866,28 @@ func explode(pos,color,amount):
 		var lifetime=randf_range(.22,.62)
 		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(26,102),"life":lifetime,"max_life":lifetime,"color":color,"petal":i%3==0})
 
-# Stage-one clear now enters the provisional workshop interlude before returning
-# to the existing game menu. Stage-two combat is not wired here yet.
+# Both playable stages enter the workshop; later stages remain locked for combat.
+# Dialogue is provisional and must not be mistaken for approved story canon.
 var interlude_active := false
 
 func launch_stage_clear_interlude() -> void:
 	if mode != "clear" or auto_test or interlude_active:
 		return
-	# Non-canon placeholder dialogue; do not replace approved artwork or dialogue.
-	var dialogue: Array[Dictionary] = [
-		{"speaker":"クゥ", "text":"みんな、帰還信号を確認したわ。"},
-		{"speaker":"ムゥ", "text":"機体を点検する。次の出撃まで少し待ってくれ。"},
-		{"speaker":"コルミィ", "text":"うん。まだ飛べるよ！"}
-	]
+	# Stage-specific provisional dialogue: stage 2 must not replay stage 1's lines.
+	# This training mission reuses combat, but its story is explicitly non-canon.
+	var dialogue: Array[Dictionary] = []
+	if current_stage == 2:
+		dialogue = [
+			{"speaker":"クゥ", "text":"訓練航路からの帰還を確認。みんな、お疲れさま。"},
+			{"speaker":"ムゥ", "text":"訓練記録を整理する。次の航路はまだ準備中だ。"},
+			{"speaker":"ジヨーザ", "text":"記録を見直そう。次の出撃に備えたい。"}
+		]
+	else:
+		dialogue = [
+			{"speaker":"クゥ", "text":"みんな、帰還信号を確認したわ。"},
+			{"speaker":"ムゥ", "text":"機体を点検する。次の出撃まで少し待ってくれ。"},
+			{"speaker":"コルミィ", "text":"うん。まだ飛べるよ！"}
+		]
 	var packed := load("res://interlude_preview.tscn") as PackedScene
 	if packed == null:
 		open_briefing(briefing_progress.next_briefing_stage())
