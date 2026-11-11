@@ -3,6 +3,7 @@ extends Node2D
 ## Run res://scenes/stage2_combat_prototype.tscn directly in Godot 4.6.
 const WIDTH := 640.0
 const HEIGHT := 360.0
+const PAUSE_RECT := Rect2(551, 32, 74, 29)
 const RESULT_RETRY_RECT := Rect2(155, 193, 148, 37)
 const RESULT_TITLE_RECT := Rect2(337, 193, 148, 37)
 var pilot := Vector2(90, 180)
@@ -17,6 +18,7 @@ var boss_warning := 0.0
 var hp := 4
 var invulnerable := 0.0
 var phase := "wave"
+var paused := false
 var wave_kills := 0
 var fire_timer := 0.0
 var font := SystemFont.new()
@@ -30,6 +32,9 @@ func _ready() -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	if paused:
+		queue_redraw()
+		return
 	if phase == "won" or phase == "lost":
 		# Ignore held touch input after the round ends; retry requires a new press.
 		touch_finger = -1
@@ -128,6 +133,31 @@ func _hit() -> void:
 		phase = "lost"
 
 func _input(event: InputEvent) -> void:
+	# In-game pause must not advance enemy timers or projectiles.
+	if phase not in ["won", "lost"]:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_P, KEY_ESCAPE]:
+			paused = not paused
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+		if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START:
+			paused = not paused
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and PAUSE_RECT.has_point(event.position):
+			paused = not paused
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+		if event is InputEventScreenTouch and event.pressed and PAUSE_RECT.has_point(event.position):
+			paused = not paused
+			get_viewport().set_input_as_handled()
+			queue_redraw()
+			return
+	if paused:
+		# Ignore gameplay touches and drags until resumed.
+		return
 	# Desktop/Web mouse users need the same explicit result choices as touch users.
 	# Only respond to a fresh left-click on a result button; clicks elsewhere do nothing.
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and phase in ["won", "lost"]:
@@ -164,6 +194,8 @@ func _return_to_title() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://prologue.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
+	if paused:
+		return
 	if phase in ["won", "lost"]:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if event.keycode in [KEY_LEFT, KEY_RIGHT]:
@@ -239,6 +271,13 @@ func _draw() -> void:
 		draw_rect(Rect2(195, 80, 250, 43), Color("#2c1024", 0.9))
 		draw_string(font, Vector2(218, 109), "WARNING  /  敵主力接近", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("#ffb5a5"))
 	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦  終了後T: タイトル", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
+	draw_rect(PAUSE_RECT, Color("#23465b"))
+	draw_rect(PAUSE_RECT, Color("#b3dfe6"), false, 2.0)
+	draw_string(font, Vector2(563, 52), "停止" if not paused else "再開", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+	if paused:
+		draw_rect(Rect2(174, 132, 292, 93), Color("#0a1628", 0.94))
+		draw_string(font, Vector2(240, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 27, Color("#ffe6b5"))
+		draw_string(font, Vector2(202, 204), "P / Esc / Start / 再開", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 113), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
