@@ -3,6 +3,8 @@ extends Node2D
 ## Run res://scenes/stage2_combat_prototype.tscn directly in Godot 4.6.
 const WIDTH := 640.0
 const HEIGHT := 360.0
+const RESULT_RETRY_RECT := Rect2(155, 193, 148, 37)
+const RESULT_TITLE_RECT := Rect2(337, 193, 148, 37)
 var pilot := Vector2(90, 180)
 var shots: Array[Vector2] = []
 var enemies: Array[Dictionary] = []
@@ -127,7 +129,11 @@ func _hit() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed and phase in ["won", "lost"]:
-			get_tree().reload_current_scene()
+			# Explicit result actions for mobile; never restart on an accidental tap.
+			if RESULT_RETRY_RECT.has_point(event.position):
+				get_tree().reload_current_scene.call_deferred()
+			elif RESULT_TITLE_RECT.has_point(event.position):
+				_return_to_title()
 			get_viewport().set_input_as_handled()
 		elif event.pressed and touch_finger == -1:
 			touch_finger = event.index
@@ -197,5 +203,10 @@ func _draw() -> void:
 		draw_string(font, Vector2(218, 109), "WARNING  /  敵主力接近", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("#ffb5a5"))
 	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦  終了後T: タイトル", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
-		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
+		draw_rect(Rect2(110, 133, 420, 113), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
+		for action_rect in [RESULT_RETRY_RECT, RESULT_TITLE_RECT]:
+			draw_rect(action_rect, Color("#23465b"))
+			draw_rect(action_rect, Color("#b3dfe6"), false, 2.0)
+		draw_string(font, Vector2(178, 218), "再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+		draw_string(font, Vector2(360, 218), "タイトル", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
