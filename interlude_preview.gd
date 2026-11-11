@@ -20,8 +20,8 @@ var prompt_label: Label
 func _ready() -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     mouse_filter = Control.MOUSE_FILTER_STOP
-    var backdrop := ColorRect.new()
-    backdrop.color = Color("#0b1327")
+    var backdrop := Control.new()
+    backdrop.set_script(load("res://interlude_workshop_visual.gd"))
     backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(backdrop)
     var panel := PanelContainer.new()
