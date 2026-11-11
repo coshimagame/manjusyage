@@ -137,7 +137,15 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == touch_finger:
 		touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
 
+func _return_to_title() -> void:
+	# Leave the standalone prototype without altering production progress or saves.
+	get_tree().change_scene_to_file.call_deferred("res://prologue.tscn")
+
 func _unhandled_input(event: InputEvent) -> void:
+	if phase in ["won", "lost"] and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_T:
+		_return_to_title()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_R or (event.keycode == KEY_ENTER and phase in ["won", "lost"])):
 		get_tree().reload_current_scene()
 	elif event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START and phase in ["won", "lost"]:
@@ -187,7 +195,7 @@ func _draw() -> void:
 	if boss_warning > 0.0:
 		draw_rect(Rect2(195, 80, 250, 43), Color("#2c1024", 0.9))
 		draw_string(font, Vector2(218, 109), "WARNING  /  敵主力接近", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("#ffb5a5"))
-	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
+	draw_string(font, Vector2(15, 347), "矢印/ドラッグ: 移動  Z/Space/A/タッチ: 攻撃  R/Enter/Start: 再挑戦  終了後T: タイトル", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d6e6"))
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 90), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
