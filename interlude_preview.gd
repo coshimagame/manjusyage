@@ -16,6 +16,7 @@ var speaker_label: Label
 var dialogue_label: Label
 var log_label: RichTextLabel
 var prompt_label: Label
+var touch_controls: HBoxContainer
 
 func _ready() -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -51,6 +52,24 @@ func _ready() -> void:
     log_label.visible = false
     log_label.scroll_active = true
     add_child(log_label)
+    touch_controls = HBoxContainer.new()
+    touch_controls.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+    touch_controls.offset_left = -226
+    touch_controls.offset_top = 8
+    touch_controls.offset_right = -8
+    touch_controls.offset_bottom = 42
+    add_child(touch_controls)
+    for label in ["ログ", "次へ", "スキップ"]:
+        var button := Button.new()
+        button.text = label
+        button.custom_minimum_size = Vector2(70, 34)
+        touch_controls.add_child(button)
+        if label == "ログ":
+            button.pressed.connect(_toggle_log)
+        elif label == "次へ":
+            button.pressed.connect(_advance)
+        else:
+            button.pressed.connect(_finish)
     _show_line()
 
 func _process(delta: float) -> void:
@@ -87,6 +106,10 @@ func _refresh_log() -> void:
     for i in range(mini(line_index + 1, lines.size())):
         log_label.add_text(str(lines[i].get("speaker", "")) + "： " + str(lines[i].get("text", "")) + "\n")
 
+func _toggle_log() -> void:
+    log_visible = not log_visible
+    log_label.visible = log_visible
+
 func _finish() -> void:
     completed.emit()
     if not next_scene.is_empty() and ResourceLoader.exists(next_scene):
@@ -99,8 +122,7 @@ func _unhandled_input(event: InputEvent) -> void:
         if event.keycode == KEY_ESCAPE:
             _finish()
         elif event.keycode == KEY_L:
-            log_visible = not log_visible
-            log_label.visible = log_visible
+            _toggle_log()
         elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
             _advance()
     elif event is InputEventJoypadButton and event.pressed:
@@ -109,8 +131,4 @@ func _unhandled_input(event: InputEvent) -> void:
         elif event.button_index == JOY_BUTTON_A:
             _advance()
 
-func _gui_input(event: InputEvent) -> void:
-    if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-        _advance()
-    elif event is InputEventScreenTouch and event.pressed:
-        _advance()
+# Touch and mouse input are handled by explicit buttons, avoiding double advance.
