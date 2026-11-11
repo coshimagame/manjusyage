@@ -72,6 +72,11 @@ func _process(delta: float) -> void:
 			# Do not collide with a defeated enemy or a shifted array element.
 			if not defeated and pilot.distance_to(e.pos) < 20:
 				_hit()
+				if phase == "lost":
+					break
+		if phase == "lost":
+			queue_redraw()
+			return
 		if wave_kills >= 15:
 			enemies.clear()
 			phase = "boss"
@@ -103,7 +108,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _hit() -> void:
-	if invulnerable > 0.0:
+	# A terminal result is immutable: no further damage, boss spawns or phase flips.
+	if phase == "won" or phase == "lost" or invulnerable > 0.0:
 		return
 	hp -= 1
 	invulnerable = 1.2
