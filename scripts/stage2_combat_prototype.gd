@@ -128,6 +128,15 @@ func _hit() -> void:
 		phase = "lost"
 
 func _input(event: InputEvent) -> void:
+	# Desktop/Web mouse users need the same explicit result choices as touch users.
+	# Only respond to a fresh left-click on a result button; clicks elsewhere do nothing.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and phase in ["won", "lost"]:
+		if RESULT_RETRY_RECT.has_point(event.position):
+			get_tree().reload_current_scene.call_deferred()
+		elif RESULT_TITLE_RECT.has_point(event.position):
+			_return_to_title()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed and phase in ["won", "lost"]:
 			# Explicit result actions for mobile; never restart on an accidental tap.
