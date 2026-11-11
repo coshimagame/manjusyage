@@ -860,18 +860,41 @@ func explode(pos,color,amount):
 
 # Stage-one clear now enters the provisional workshop interlude before returning
 # to the existing game menu. Stage-two combat is not wired here yet.
+var interlude_active := false
+
 func launch_stage_clear_interlude() -> void:
-	if mode != "clear" or auto_test:
+	if mode != "clear" or auto_test or interlude_active:
 		return
+	# Non-canon placeholder dialogue; do not replace approved artwork or dialogue.
 	var dialogue: Array[Dictionary] = [
 		{"speaker":"クゥ", "text":"みんな、帰還信号を確認したわ。"},
 		{"speaker":"ムゥ", "text":"機体を点検する。次の出撃まで少し待ってくれ。"},
 		{"speaker":"コルミィ", "text":"うん。まだ飛べるよ！"}
 	]
-	var bridge = load("res://interlude_flow.gd")
-	if bridge == null or not bridge.launch(get_tree(), "res://main.tscn", dialogue):
-		# Do not trap players on a clear screen when the optional bridge fails.
+	var packed := load("res://interlude_preview.tscn") as PackedScene
+	if packed == null:
 		open_briefing(briefing_progress.next_briefing_stage())
+		return
+	var interlude := packed.instantiate()
+	if interlude == null:
+		open_briefing(briefing_progress.next_briefing_stage())
+		return
+	interlude.lines = dialogue
+	# Keep the existing Game node alive so squad selection and unlocks survive.
+	# An empty next_scene makes the preview close itself after completed.
+	interlude.next_scene = ""
+	interlude.completed.connect(_on_stage_interlude_completed, CONNECT_ONE_SHOT)
+	interlude_active = true
+	set_process_input(false)
+	set_process(false)
+	get_tree().root.add_child(interlude)
+
+func _on_stage_interlude_completed() -> void:
+	# Both normal completion and skip lead to the unlocked briefing.
+	interlude_active = false
+	set_process_input(true)
+	set_process(true)
+	open_briefing(briefing_progress.next_briefing_stage())
 
 func finish(won):
 	mode="clear" if won else "over"
