@@ -24,6 +24,7 @@ const EnemyAnalysis=preload("res://enemy_analysis.gd")
 const BriefingProgress=preload("res://briefing_progress.gd")
 var briefing_progress=BriefingProgress.new()
 var briefing_stage=2
+var current_stage=1 # Stage 2 currently reuses stage-one combat as a training prototype.
 var briefing_slot=0
 var briefing_chars=[0,1,2]
 var briefing_custom_squad=false
@@ -350,8 +351,12 @@ func launch_from_briefing():
 		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
 		return
 	briefing_custom_squad=true
+	current_stage=briefing_stage
 	start_game()
 func start_game():
+	# Starting from the title always begins at stage one; briefing selects later stages.
+	if not briefing_custom_squad:
+		current_stage=1
 	bio.reset()
 	vertical.reset()
 	pads = Array(Input.get_connected_joypads())
@@ -368,7 +373,10 @@ func start_game():
 	play_jingle("launch")
 	show_help = false
 	track("ambient_stage" if new_music else "ruins")
-	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
+	if current_stage==2:
+		tell("STAGE 02 / TRAINING SIMULATION - PROVISIONAL",4)
+	else:
+		tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
 
 func button_edge(device, button):
 	var key = str(device)+":"+str(button)
@@ -902,7 +910,7 @@ func finish(won):
 	play_jingle("clear" if won else "fail")
 	if won: track("ending")
 	if won:
-		if not auto_test: briefing_progress.mark_cleared(1)
+		if not auto_test: briefing_progress.mark_cleared(current_stage)
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
 	if not auto_test:
@@ -1421,7 +1429,9 @@ func draw_controls():
 func draw_result():
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
 	centered("SECTOR CLEAR" if mode=="clear" else "SIGNAL LOST",83,COLORS[0] if mode=="clear" else COLORS[1],3)
-	if bio_route and mode=="clear":
+	if current_stage==2 and mode=="clear":
+		japanese("第2面・訓練用仮戦闘を完了。正式な敵と背景は制作中。",Vector2(62,126),13,WHITE)
+	elif bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
 	else: centered("THE RELAY SINGS AGAIN" if mode=="clear" else "REGROUP. RELOAD. RETURN.",119,DIM)
 	centered("%07d"%score,153,WHITE,4)
