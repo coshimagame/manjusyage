@@ -84,3 +84,9 @@
 - mainの `art/ui/character_hub_ui_20261106.png`（`0e2cb68d06e5cd563fd66373cde8a69a63803acf`）と `art/ui/character_system_ui_20261106.png`（`8b091ec2891a7e50860304f4692945524bb83da7`）は整理ブランチにはない。統合時に両方を保護する。
 - **新たな注意点**：`docs/screenshots/latest/` の5画像は同一パスでもmainと整理ブランチでblob SHAが異なる。boss、briefing、menu、status、verticalの5点を一括上書きせず、撮影元ビルド・更新日時・表示内容を比較して最新の適切なものを採用する。これらは原画ではなく動作証跡として扱う。
 - PR #50、#51はopen・未マージ。分類先の画像コピーとGit tree比較はGodotの描画確認やリンク全件検査の代替ではない。main統合後の検証まで完了扱いしない。
+
+## 2026-11-11 21時台 JST 画像ファイル名と実装スロットの差異
+- PR #50（main向け）とPR #51（#50向け）はともにopen・未マージ。#51 head `cf13440049b2712a93eefed0e2ac92409164c6cc`、変更73ファイル。
+- 分類先の7画像は `art/characters/{cormii,jiyoza,mafio}/ship_{名前}.png`、`pilot_*_slim_v01.png`、`art/backgrounds/title/title_logo.png`。一方、`art/README.md` の自動読込対象は機体 `ship.png`、人物 `portrait.png` / `face.png`、タイトル背景 `backdrop.png` と説明されている。**分類先へコピー済みであることとゲームの自動採用は別**。`art_catalog.gd` の実パス定義と照合し、必要なら元画像を保護したまま明示的なマッピングを追加すること。
+- `art/README.md` 末尾の「子フォルダは案内READMEのみ」は7画像追加以前の古い記述。今後の更新で「7画像はコピー済み、承認済み原画の同定とゲーム接続は未完了」と修正する。
+- 今回はPR・監査資料・保存先ガイドの静的確認のみ。Godot実行、全参照・全リンク検証、mainへの統合は未実施。**完了ではない**。
