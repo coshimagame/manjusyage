@@ -21,6 +21,7 @@ var wave_kills := 0
 var fire_timer := 0.0
 var font := SystemFont.new()
 # Browser touch: drag the ship with one finger; shoot while held.
+var result_selection := 0 # 0 retry, 1 title; keyboard/gamepad accessible
 var touch_finger := -1
 var touch_target := Vector2.ZERO
 
@@ -143,11 +144,38 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == touch_finger:
 		touch_target = event.position.clamp(Vector2(16, 20), Vector2(610, 338))
 
+func _activate_result_selection() -> void:
+	if result_selection == 1:
+		_return_to_title()
+	else:
+		get_tree().reload_current_scene.call_deferred()
+
 func _return_to_title() -> void:
 	# Leave the standalone prototype without altering production progress or saves.
 	get_tree().change_scene_to_file.call_deferred("res://prologue.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
+	if phase in ["won", "lost"]:
+		if event is InputEventKey and event.pressed and not event.echo:
+			if event.keycode in [KEY_LEFT, KEY_RIGHT]:
+				result_selection = 0 if event.keycode == KEY_LEFT else 1
+				queue_redraw()
+				get_viewport().set_input_as_handled()
+				return
+			if event.keycode in [KEY_ENTER, KEY_KP_ENTER]:
+				_activate_result_selection()
+				get_viewport().set_input_as_handled()
+				return
+		if event is InputEventJoypadButton and event.pressed:
+			if event.button_index in [JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_DPAD_RIGHT]:
+				result_selection = 0 if event.button_index == JOY_BUTTON_DPAD_LEFT else 1
+				queue_redraw()
+				get_viewport().set_input_as_handled()
+				return
+			if event.button_index == JOY_BUTTON_A:
+				_activate_result_selection()
+				get_viewport().set_input_as_handled()
+				return
 	if phase in ["won", "lost"] and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_T:
 		_return_to_title()
 		get_viewport().set_input_as_handled()
@@ -205,8 +233,10 @@ func _draw() -> void:
 	if phase == "won" or phase == "lost":
 		draw_rect(Rect2(110, 133, 420, 113), Color("#0a1628", 0.93))
 		draw_string(font, Vector2(165, 183), "試作クリア！" if phase == "won" else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color("#ffe6b5"))
-		for action_rect in [RESULT_RETRY_RECT, RESULT_TITLE_RECT]:
-			draw_rect(action_rect, Color("#23465b"))
-			draw_rect(action_rect, Color("#b3dfe6"), false, 2.0)
+		for action_index in range(2):
+			var action_rect: Rect2 = [RESULT_RETRY_RECT, RESULT_TITLE_RECT][action_index]
+			draw_rect(action_rect, Color("#315a6c") if action_index == result_selection else Color("#23465b"))
+			draw_rect(action_rect, Color("#ffe3a0") if action_index == result_selection else Color("#b3dfe6"), false, 3.0 if action_index == result_selection else 2.0)
 		draw_string(font, Vector2(178, 218), "再挑戦", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
 		draw_string(font, Vector2(360, 218), "タイトル", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+		draw_string(font, Vector2(177, 239), "← → 選択  Enter / A 決定", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d5e6ef"))
