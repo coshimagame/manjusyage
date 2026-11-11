@@ -69,6 +69,10 @@ func _process(delta: float) -> void:
 						wave_kills += 1
 						defeated = true
 						break
+			# Persist damage to surviving enemies; the local Dictionary must be written
+			# back explicitly so repeated hits can actually destroy a 2-HP enemy.
+			if not defeated:
+				enemies[i] = e
 			# Do not collide with a defeated enemy or a shifted array element.
 			if not defeated and pilot.distance_to(e.pos) < 20:
 				_hit()
