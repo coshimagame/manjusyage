@@ -44,7 +44,9 @@ func save_data() -> int:
 	return cfg.save(save_path)
 
 func mark_cleared(stage: int):
-	if stage<1 or stage>MAX_STAGES: return
+	# Never grant progress for an inaccessible or not-yet-playable stage.
+	# In particular, stage 3+ briefing placeholders must not unlock later stages.
+	if not can_launch(stage): return
 	cleared[stage]=true
 	highest_unlocked=maxi(highest_unlocked,mini(MAX_STAGES,stage+1))
 	save_data()
