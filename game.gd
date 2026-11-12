@@ -1135,18 +1135,30 @@ func draw_mafio_fusion(p):
 		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
 
 func draw_stage2_training_grid() -> void:
-	# Provisional stage-2 visual identity; no collision or gameplay changes.
-	# Keep the center quiet so hostile projectiles remain readable.
-	var offset := fposmod(travel * 0.18, 64.0)
+	# Temporary stage-2 simulation overlay. No approved sprites or collision altered.
+	# Restrict the brighter elements to the edges; bullets remain legible.
+	var far_shift := fposmod(travel * 0.06, 32.0)
+	var near_shift := fposmod(travel * 0.22, 64.0)
+	for i in range(22):
+		var x := float(i) * 32.0 - far_shift
+		draw_line(Vector2(x, 48), Vector2(x, 356), Color(0.12, 0.31, 0.43, 0.055), 1.0)
 	for i in range(12):
-		var x := float(i) * 64.0 - offset
-		draw_line(Vector2(x, 44), Vector2(x, 355), Color(0.18, 0.54, 0.68, 0.10), 1.0)
+		var x := float(i) * 64.0 - near_shift
+		draw_line(Vector2(x, 48), Vector2(x, 356), Color(0.20, 0.57, 0.67, 0.11), 1.0)
 	for i in range(6):
-		var y := 54.0 + float(i) * 56.0
-		draw_line(Vector2(0, y), Vector2(640, y), Color(0.18, 0.54, 0.68, 0.07), 1.0)
-	draw_rect(Rect2(500, 44, 132, 19), Color(0.025, 0.075, 0.12, 0.82))
-	draw_rect(Rect2(500, 44, 132, 19), Color(0.28, 0.72, 0.82, 0.6), false, 1.0)
-	text_at("STAGE 02 / TRAINING", Vector2(506, 49), Color(0.75, 0.94, 0.98))
+		var y := 56.0 + float(i) * 56.0
+		draw_line(Vector2(0, y), Vector2(640, y), Color(0.18, 0.54, 0.68, 0.065), 1.0)
+	# Edge-only navigation markings provide motion and depth without masking enemies.
+	var pulse := 0.5 + 0.5 * sin(clock * 1.7)
+	for side in [12.0, 628.0]:
+		draw_line(Vector2(side, 78), Vector2(side, 344), Color(0.24, 0.77, 0.83, 0.12 + pulse * 0.08), 1.0)
+		for marker in range(5):
+			var y := 88.0 + float(marker) * 54.0
+			var inner := 8.0 if side < 320.0 else -8.0
+			draw_line(Vector2(side, y), Vector2(side + inner, y), Color(0.42, 0.85, 0.90, 0.25), 1.0)
+	draw_rect(Rect2(492, 44, 140, 19), Color(0.025, 0.075, 0.12, 0.82))
+	draw_rect(Rect2(492, 44, 140, 19), Color(0.28, 0.72, 0.82, 0.6), false, 1.0)
+	text_at("STAGE 02 / TRAINING", Vector2(498, 49), Color(0.75, 0.94, 0.98))
 
 func _draw():
 	background()
