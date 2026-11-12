@@ -31,6 +31,17 @@ func _run() -> void:
     assert(restored.furthest_seen_index == 1)
     assert(restored.dialogue_label.visible_characters == 2)
     assert(restored.visible_characters_float == 2.0)
+    # _advance() uses -1 as the fully revealed sentinel; save the real length.
+    restored.dialogue_label.visible_characters = -1
+    var fully_revealed := restored.export_progress()
+    assert(fully_revealed["visible_characters"] == restored.dialogue_label.get_total_character_count())
+    var replay := Interlude.new()
+    replay.lines = restored.lines.duplicate(true)
+    replay.restore_progress(fully_revealed)
+    root.add_child(replay)
+    await process_frame
+    assert(replay.dialogue_label.visible_characters == replay.dialogue_label.get_total_character_count())
+    replay.queue_free()
     restored._rewind()
     assert(restored.line_index == 0)
     assert(restored.furthest_seen_index == 1)
