@@ -142,7 +142,8 @@ func export_progress() -> Dictionary:
     return {
         "line_index": line_index,
         "furthest_seen_index": furthest_seen_index,
-        "finished": finished
+        "finished": finished,
+        "visible_characters": 0 if not is_instance_valid(dialogue_label) else maxi(0, dialogue_label.visible_characters)
     }
 
 ## Call after the node enters the tree, before resuming player input.
@@ -167,6 +168,11 @@ func restore_progress(snapshot: Dictionary) -> void:
         log_label.hide()
     if is_instance_valid(dialogue_label):
         _show_line()
+        # Resume the subtitle reveal without replaying text already read.
+        var target := dialogue_label.get_total_character_count()
+        var restored_chars := clampi(int(snapshot.get("visible_characters", 0)), 0, target)
+        dialogue_label.visible_characters = restored_chars
+        visible_characters_float = float(restored_chars)
 
 func _toggle_log() -> void:
     if finished:
