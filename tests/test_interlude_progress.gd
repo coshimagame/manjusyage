@@ -17,8 +17,6 @@ func _run() -> void:
     await process_frame
     original._advance()
     original._advance()
-    original._advance()
-    original._advance()
     original.dialogue_label.visible_characters = 2
     var saved := original.export_progress()
     assert(saved["line_index"] == 1)
