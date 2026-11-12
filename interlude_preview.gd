@@ -42,7 +42,7 @@ func _ready() -> void:
     dialogue_label.custom_minimum_size.y = 72
     column.add_child(dialogue_label)
     prompt_label = Label.new()
-    prompt_label.text = "Enter / A / タップ: 次へ   L: ログ   Esc: スキップ"
+    prompt_label.text = "Enter/A: 次へ   ←/X: 戻る   L/Y: ログ   Esc/Start: スキップ"
     column.add_child(prompt_label)
     log_label = RichTextLabel.new()
     log_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -55,17 +55,19 @@ func _ready() -> void:
     add_child(log_label)
     touch_controls = HBoxContainer.new()
     touch_controls.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-    touch_controls.offset_left = -226
+    touch_controls.offset_left = -306
     touch_controls.offset_top = 8
     touch_controls.offset_right = -8
     touch_controls.offset_bottom = 42
     add_child(touch_controls)
-    for label in ["ログ", "次へ", "スキップ"]:
+    for label in ["戻る", "ログ", "次へ", "スキップ"]:
         var button := Button.new()
         button.text = label
         button.custom_minimum_size = Vector2(70, 34)
         touch_controls.add_child(button)
-        if label == "ログ":
+        if label == "戻る":
+            button.pressed.connect(_rewind)
+        elif label == "ログ":
             button.pressed.connect(_toggle_log)
         elif label == "次へ":
             button.pressed.connect(_advance)
@@ -105,6 +107,17 @@ func _advance() -> void:
     line_index += 1
     _show_line()
 
+func _rewind() -> void:
+    # Review the preceding line without changing progress or completion state.
+    if finished:
+        return
+    if log_visible:
+        log_visible = false
+        log_label.hide()
+    if line_index > 0:
+        line_index -= 1
+        _show_line()
+
 func _refresh_log() -> void:
     log_label.clear()
     for i in range(mini(line_index + 1, lines.size())):
@@ -134,6 +147,8 @@ func _unhandled_input(event: InputEvent) -> void:
             _finish()
         elif event.keycode == KEY_L:
             _toggle_log()
+        elif event.keycode == KEY_LEFT:
+            _rewind()
         elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
             _advance()
     elif event is InputEventJoypadButton and event.pressed:
@@ -141,5 +156,9 @@ func _unhandled_input(event: InputEvent) -> void:
             _finish()
         elif event.button_index == JOY_BUTTON_A:
             _advance()
+        elif event.button_index == JOY_BUTTON_X:
+            _rewind()
+        elif event.button_index == JOY_BUTTON_Y:
+            _toggle_log()
 
 # Touch and mouse input are handled by explicit buttons, avoiding double advance.
