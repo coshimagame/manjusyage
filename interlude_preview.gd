@@ -20,6 +20,9 @@ var dialogue_label: Label
 var log_label: RichTextLabel
 var prompt_label: Label
 var touch_controls: HBoxContainer
+# Restore may arrive before _ready() when a stage loader constructs this scene.
+var pending_progress: Dictionary = {}
+var has_pending_progress := false
 
 func _ready() -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -76,6 +79,11 @@ func _ready() -> void:
         else:
             button.pressed.connect(_finish)
     _show_line()
+    if has_pending_progress:
+        var snapshot := pending_progress.duplicate(true)
+        pending_progress.clear()
+        has_pending_progress = false
+        restore_progress(snapshot)
 
 func _process(delta: float) -> void:
     if lines.is_empty() or log_visible:
@@ -141,6 +149,10 @@ func export_progress() -> Dictionary:
 ## Invalid or outdated indices are clamped to the current script length.
 func restore_progress(snapshot: Dictionary) -> void:
     if finished:
+        return
+    if not is_node_ready():
+        pending_progress = snapshot.duplicate(true)
+        has_pending_progress = true
         return
     var count := lines.size()
     if count == 0:
