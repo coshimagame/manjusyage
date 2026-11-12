@@ -128,6 +128,34 @@ func _refresh_log() -> void:
     for i in range(mini(furthest_seen_index + 1, lines.size())):
         log_label.add_text(str(lines[i].get("speaker", "")) + "： " + str(lines[i].get("text", "")) + "\n")
 
+## Serializable dialogue cursor for a caller-managed stage save. Does not write user://.
+## Save this dictionary alongside the stage and worldline; do not treat it as canon.
+func export_progress() -> Dictionary:
+    return {
+        "line_index": line_index,
+        "furthest_seen_index": furthest_seen_index,
+        "finished": finished
+    }
+
+## Call after the node enters the tree, before resuming player input.
+## Invalid or outdated indices are clamped to the current script length.
+func restore_progress(snapshot: Dictionary) -> void:
+    if finished:
+        return
+    var count := lines.size()
+    if count == 0:
+        _finish()
+        return
+    var restored_index := clampi(int(snapshot.get("line_index", 0)), 0, count - 1)
+    var restored_seen := clampi(int(snapshot.get("furthest_seen_index", restored_index)), restored_index, count - 1)
+    line_index = restored_index
+    furthest_seen_index = restored_seen
+    log_visible = false
+    if is_instance_valid(log_label):
+        log_label.hide()
+    if is_instance_valid(dialogue_label):
+        _show_line()
+
 func _toggle_log() -> void:
     if finished:
         return
