@@ -457,6 +457,8 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			elif key == KEY_R: start_game()
+			elif key == KEY_ESCAPE: mode = "menu"; track("title")
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -585,7 +587,8 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if b: start_game()
+			elif start or a: open_briefing(briefing_progress.next_briefing_stage())
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1388,7 +1391,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : BRIEFING    R / B : RETRY" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
 
 
