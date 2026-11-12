@@ -46,6 +46,10 @@ func begin(dialogue: Array[Dictionary]) -> void:
 	index = 0
 	revealed = 0.0
 	show_history = false
+	if history_label != null:
+		history_label.visible = false
+	if subtitle_label != null:
+		subtitle_label.visible = true
 	active = not lines.is_empty()
 	visible = active
 	if active:
@@ -94,6 +98,7 @@ func skip() -> void:
 		return
 	active = false
 	visible = false
+	show_history = false
 	finished.emit()
 
 func toggle_history() -> void:
@@ -107,10 +112,13 @@ func toggle_history() -> void:
 		history_label.text = "（まだ会話履歴はありません）"
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not active or not event.is_pressed():
+	if not active or not event.is_pressed() or event.is_echo():
 		return
 	if event.is_action("ui_accept"):
 		advance()
+		get_viewport().set_input_as_handled()
+	elif event.is_action("ui_up"):
+		toggle_history()
 		get_viewport().set_input_as_handled()
 	elif event.is_action("ui_cancel"):
 		skip()
