@@ -1025,8 +1025,20 @@ func background():
 	if current_stage == 2 and mode in ["play", "pause", "over"]:
 		var stage2_art: Texture2D = artwork.texture("stage2_backdrop")
 		if stage2_art != null:
-			draw_texture_rect(stage2_art, Rect2(0, 0, W, H), false)
-			return
+			# Center-crop non-16:9 artwork instead of stretching character-like details.
+			# Draw at native pixel sampling and retain the procedural fallback for bad sizes.
+			var source_size: Vector2 = stage2_art.get_size()
+			if source_size.x > 0.0 and source_size.y > 0.0:
+				var target_ratio: float = W / H
+				var source_ratio: float = source_size.x / source_size.y
+				var crop_size: Vector2 = source_size
+				if source_ratio > target_ratio:
+					crop_size.x = source_size.y * target_ratio
+				else:
+					crop_size.y = source_size.x / target_ratio
+				var crop_origin: Vector2 = (source_size - crop_size) * 0.5
+				draw_texture_rect_region(stage2_art, Rect2(0, 0, W, H), Rect2(crop_origin, crop_size))
+				return
 	if mode=="menu":
 		var cover=artwork.texture("title_backdrop")
 		if cover!=null:
