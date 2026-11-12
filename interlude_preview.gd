@@ -143,7 +143,7 @@ func export_progress() -> Dictionary:
         "line_index": line_index,
         "furthest_seen_index": furthest_seen_index,
         "finished": finished,
-        "visible_characters": 0 if not is_instance_valid(dialogue_label) else maxi(0, dialogue_label.visible_characters)
+        "visible_characters": 0 if not is_instance_valid(dialogue_label) else (dialogue_label.get_total_character_count() if dialogue_label.visible_characters < 0 else dialogue_label.visible_characters)
     }
 
 ## Call after the node enters the tree, before resuming player input.
