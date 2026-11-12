@@ -1020,6 +1020,13 @@ func build_planet_texture():
 	planet_texture=ImageTexture.create_from_image(img)
 
 func background():
+	# Optional stage-2 artwork. The existing simulation remains the safe fallback.
+	# Use a separate slot so approved stage-1 and character art is untouched.
+	if current_stage == 2 and mode in ["play", "pause", "over"]:
+		var stage2_art: Texture2D = artwork.texture("stage2_backdrop")
+		if stage2_art != null:
+			draw_texture_rect(stage2_art, Rect2(0, 0, W, H), false)
+			return
 	if mode=="menu":
 		var cover=artwork.texture("title_backdrop")
 		if cover!=null:
