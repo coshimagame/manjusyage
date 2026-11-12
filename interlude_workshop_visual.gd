@@ -1,16 +1,30 @@
 extends Control
 ## Original provisional pixel-workshop background. No approved character art is replaced.
 ## Drawn at native 640x360; dialogue panel is layered above this Control.
+@export_file("*.png") var workshop_image_path := "res://art/active/interlude_workshop.png"
+var workshop_texture: Texture2D
 var elapsed := 0.0
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
+    # Optional artwork: never overwrite the approved PNG or alter the fallback.
+    if ResourceLoader.exists(workshop_image_path, "Texture2D"):
+        workshop_texture = load(workshop_image_path) as Texture2D
 
 func _process(delta: float) -> void:
     elapsed += delta
     queue_redraw()
 
 func _draw() -> void:
+    if workshop_texture != null:
+        var image_size := workshop_texture.get_size()
+        if image_size.x > 0.0 and image_size.y > 0.0 and size.x > 0.0 and size.y > 0.0:
+            # Cover, crop centrally; never stretch artwork out of proportion.
+            var scale_factor: float = maxf(size.x / image_size.x, size.y / image_size.y)
+            var draw_size: Vector2 = image_size * scale_factor
+            var destination := Rect2((size - draw_size) * 0.5, draw_size)
+            draw_texture_rect(workshop_texture, destination, false)
+            return
     var sx := size.x / 640.0
     var sy := size.y / 360.0
     draw_set_transform(Vector2.ZERO, 0.0, Vector2(sx, sy))
