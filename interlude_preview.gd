@@ -10,6 +10,8 @@ var lines: Array[Dictionary] = [
     {"speaker": "コルミィ", "text": "うん！ 次も行けるよ！"}
 ]
 var line_index := 0
+# Furthest line actually visited; rewinding must not erase the conversation log.
+var furthest_seen_index := -1
 var visible_characters_float := 0.0
 var log_visible := false
 var finished := false
@@ -84,9 +86,12 @@ func _process(delta: float) -> void:
         dialogue_label.visible_characters = mini(target, int(visible_characters_float))
 
 func _show_line() -> void:
+    if finished:
+        return
     if line_index >= lines.size():
         _finish()
         return
+    furthest_seen_index = maxi(furthest_seen_index, line_index)
     speaker_label.text = str(lines[line_index].get("speaker", ""))
     dialogue_label.text = str(lines[line_index].get("text", ""))
     dialogue_label.visible_characters = 0
@@ -120,7 +125,7 @@ func _rewind() -> void:
 
 func _refresh_log() -> void:
     log_label.clear()
-    for i in range(mini(line_index + 1, lines.size())):
+    for i in range(mini(furthest_seen_index + 1, lines.size())):
         log_label.add_text(str(lines[i].get("speaker", "")) + "： " + str(lines[i].get("text", "")) + "\n")
 
 func _toggle_log() -> void:
