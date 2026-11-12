@@ -1134,6 +1134,20 @@ func draw_mafio_fusion(p):
 		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
 		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
 
+func draw_stage2_training_grid() -> void:
+	# Provisional stage-2 visual identity; no collision or gameplay changes.
+	# Keep the center quiet so hostile projectiles remain readable.
+	var offset := fposmod(travel * 0.18, 64.0)
+	for i in range(12):
+		var x := float(i) * 64.0 - offset
+		draw_line(Vector2(x, 44), Vector2(x, 355), Color(0.18, 0.54, 0.68, 0.10), 1.0)
+	for i in range(6):
+		var y := 54.0 + float(i) * 56.0
+		draw_line(Vector2(0, y), Vector2(640, y), Color(0.18, 0.54, 0.68, 0.07), 1.0)
+	draw_rect(Rect2(500, 44, 132, 19), Color(0.025, 0.075, 0.12, 0.82))
+	draw_rect(Rect2(500, 44, 132, 19), Color(0.28, 0.72, 0.82, 0.6), false, 1.0)
+	text_at("STAGE 02 / TRAINING", Vector2(506, 49), Color(0.75, 0.94, 0.98))
+
 func _draw():
 	background()
 	if mode=="briefing":
@@ -1148,6 +1162,8 @@ func _draw():
 	if mode=="menu":
 		draw_menu()
 		return
+	if current_stage == 2 and mode in ["play","pause","over"]:
+		draw_stage2_training_grid()
 	if vertical.active and mode in ["play","pause","over"]:
 		vertical.draw(self)
 		if analysis_flash>0: draw_analysis_scan()
