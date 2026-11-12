@@ -107,7 +107,7 @@ func toggle_history() -> void:
 		history_label.text = "（まだ会話履歴はありません）"
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not active or not event.is_pressed() or event.is_echo():
+	if not active or not event.is_pressed():
 		return
 	if event.is_action("ui_accept"):
 		advance()
