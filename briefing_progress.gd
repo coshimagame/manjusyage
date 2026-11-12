@@ -52,7 +52,7 @@ func mark_cleared(stage: int):
 	save_data()
 
 func can_select(stage: int) -> bool:
-	return stage>=1 and stage<=highest_unlocked
+	return stage>=1 and stage<=MAX_STAGES and stage<=highest_unlocked
 
 func has_gameplay(stage: int) -> bool:
 	return PLAYABLE_STAGES.has(stage)
@@ -68,4 +68,6 @@ func next_briefing_stage() -> int:
 	return mini(MAX_STAGES,maxi(2,highest_unlocked))
 
 func stage_name(stage: int) -> String:
-	return NAMES[clampi(stage,1,MAX_STAGES)-1]
+	if stage < 1 or stage > MAX_STAGES:
+		return "不明なステージ"
+	return NAMES[stage-1]
