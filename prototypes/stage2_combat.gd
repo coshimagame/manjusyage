@@ -122,6 +122,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var position_in_game := get_global_transform_with_canvas().affine_inverse() * event.position
 		if event.pressed:
+			# Mobile players must be able to retry without a keyboard or pad.
+			if finished:
+				get_viewport().set_input_as_handled()
+				get_tree().reload_current_scene()
+				return
+			# Upper-right pause target, kept away from movement and fire zones.
+			if position_in_game.x >= 590.0 and position_in_game.y <= 44.0:
+				paused = not paused
+				if paused:
+					touch_move_id = -1
+					touch_fire_id = -1
+				get_viewport().set_input_as_handled()
+				return
+			if paused:
+					get_viewport().set_input_as_handled()
+					return
 			if position_in_game.x < SIZE.x * 0.5 and touch_move_id < 0:
 				touch_move_id = event.index
 				touch_origin = position_in_game
@@ -138,7 +154,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		get_viewport().set_input_as_handled()
 		return
-	if event is InputEventScreenDrag and event.index == touch_move_id:
+	if event is InputEventScreenDrag and not paused and not finished and event.index == touch_move_id:
 		touch_position = get_global_transform_with_canvas().affine_inverse() * event.position
 		get_viewport().set_input_as_handled()
 		return
@@ -184,6 +200,8 @@ func _draw() -> void:
 		draw_circle(touch_origin + (touch_position - touch_origin).limit_length(30.0), 9.0, Color("#79d4e6", 0.5))
 	if touch_fire_id >= 0:
 		draw_circle(Vector2(585, 300), 19.0, Color("#ffb36c", 0.4))
+	draw_rect(Rect2(590, 4, 46, 28), Color("#172a40"))
+	draw_string(ThemeDB.fallback_font, Vector2(595, 24), "II" if not paused else ">", HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color.WHITE)
 	if paused and not finished:
 		draw_rect(Rect2(160, 140, 320, 78), Color("#09111e"))
 		draw_string(ThemeDB.fallback_font, Vector2(205, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
@@ -191,4 +209,4 @@ func _draw() -> void:
 	if finished:
 		draw_rect(Rect2(150, 130, 340, 100), Color("#09111e"))
 		draw_string(ThemeDB.fallback_font, Vector2(185, 175), "CLEAR" if won else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color.WHITE)
-		draw_string(ThemeDB.fallback_font, Vector2(185, 208), "R / PAD B: RETRY (NO SAVE)", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(185, 208), "TAP / R / PAD B: RETRY (NO SAVE)", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
