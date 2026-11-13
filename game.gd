@@ -476,6 +476,20 @@ func _input(event):
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	# Android/Web: touch the clear screen to open the story; touch again to advance.
+	# A dedicated top-right skip region avoids requiring an Esc key on phones.
+	if event is InputEventScreenTouch and event.pressed:
+		if mode == "clear":
+			mode = "intermission"
+			intermission_page = 0
+			return
+		if mode == "intermission":
+			var touch_pos = get_global_transform_with_canvas().affine_inverse() * event.position
+			if Rect2(490,0,150,65).has_point(touch_pos):
+				open_briefing(briefing_progress.next_briefing_stage())
+			else:
+				advance_intermission()
+			return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
 		var click_pos=get_global_mouse_position()
 		for number in range(1,9):
@@ -1410,7 +1424,8 @@ func draw_intermission_bridge():
 	japanese(str(entry["speaker"]),Vector2(95,161),19,COLORS[2])
 	japanese(str(entry["line"]),Vector2(95,201),16,WHITE)
 	centered(str(intermission_page+1)+" / "+str(INTERMISSION_LINES.size()),255,DIM)
-	japanese("Enter / A：次へ   Esc / B：スキップ",Vector2(150,303),14,WHITE)
+	japanese("Enter / A / タップ：次へ   Esc / B：スキップ",Vector2(118,303),14,WHITE)
+	japanese("SKIP ▶",Vector2(545,30),13,COLORS[2])
 
 func draw_result():
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
