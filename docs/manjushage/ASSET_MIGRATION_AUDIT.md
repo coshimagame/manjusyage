@@ -90,3 +90,9 @@
 - 分類先の7画像は `art/characters/{cormii,jiyoza,mafio}/ship_{名前}.png`、`pilot_*_slim_v01.png`、`art/backgrounds/title/title_logo.png`。一方、`art/README.md` の自動読込対象は機体 `ship.png`、人物 `portrait.png` / `face.png`、タイトル背景 `backdrop.png` と説明されている。**分類先へコピー済みであることとゲームの自動採用は別**。`art_catalog.gd` の実パス定義と照合し、必要なら元画像を保護したまま明示的なマッピングを追加すること。
 - `art/README.md` 末尾の「子フォルダは案内READMEのみ」は7画像追加以前の古い記述。今後の更新で「7画像はコピー済み、承認済み原画の同定とゲーム接続は未完了」と修正する。
 - 今回はPR・監査資料・保存先ガイドの静的確認のみ。Godot実行、全参照・全リンク検証、mainへの統合は未実施。**完了ではない**。
+
+## 2026-11-13 14時台 JST 最新PR・CI再確認
+- PR #50 は `main` 向け open・未マージ（head `39f209b71d99ac77ce051aba385c0bbcffdfa774`）、PR #51 は #50 ブランチ向け open・未マージ（head `122977314ecb56938ca5b5f44bb89680bee9b1ca`）。両PRともGitHub上の `mergeable=true` は競合判定に過ぎず、素材の承認・参照・描画検証を意味しない。
+- `main...cleanup/canon-and-art-folders-20261106` 比較は `diverged`、整理ブランチ90コミット先行、mainが3コミット先行。main側の最新比較基点 `5adcf719334b9fe3886f02f6256e7d0df1b792f3`。main固有のUI画像2点と同名スクリーンショット5点の差異は既存監査のとおり保護・精査が必要。
+- #51 head `122977314ecb56938ca5b5f44bb89680bee9b1ca` に対するGitHub Actions `Art catalog and reference validation` run `43032336535` は `completed/success`。これはそのコミットの限定的なCI成功であり、Windows実画面比較、承認済み原画同定、全Markdownリンク・画像SHA検証、main統合後テストを証明しない。
+- 今回はGitHub APIでのPR状態・差分・CI確認。未確認の原画を移動・置換せず、PR #50→#51の順序を維持する。**main反映・全参照検証の完了条件は未達。**
