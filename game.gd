@@ -457,9 +457,20 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			elif key == KEY_R: start_game()
+			elif key == KEY_ESCAPE: mode = "menu"; track("title")
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if key in [KEY_ENTER,KEY_SPACE,KEY_R]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode in ["clear","over"]:
+		var result_tap = get_global_mouse_position()
+		if result_tap.y >= 280:
+			mode = "menu"
+			track("title")
+		elif result_tap.y >= 245:
+			if mode == "clear": open_briefing(briefing_progress.next_briefing_stage())
+			else: start_game()
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
 		var click_pos=get_global_mouse_position()
 		for number in range(1,9):
@@ -585,8 +596,12 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
-		elif start or a: start_game()
+			if b: mode="menu"; track("title")
+			elif x: start_game()
+			elif start or a: open_briefing(briefing_progress.next_briefing_stage())
+		elif mode == "over":
+			if b: mode="menu"; track("title")
+			elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
@@ -1389,7 +1404,7 @@ func draw_result():
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
-	centered("ESC : TITLE",289,DIM)
+	centered("R / X : RETRY     ESC / B : TITLE" if mode=="clear" else "ESC / B : TITLE",289,DIM)
 
 
 # STATUS-001: All pilots share identical HP/heart language, while the rest
