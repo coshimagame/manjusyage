@@ -35,10 +35,21 @@ func _process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S): axis.y += 1
 	if axis == Vector2.ZERO:
 		axis = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	# First connected controller can steer this single-ship prototype.
+	# Deadzone prevents drifting sticks from moving the ship.
+	if axis == Vector2.ZERO and not Input.get_connected_joypads().is_empty():
+		var device: int = Input.get_connected_joypads()[0]
+		var stick := Vector2(Input.get_joy_axis(device, JOY_AXIS_LEFT_X), Input.get_joy_axis(device, JOY_AXIS_LEFT_Y))
+		if stick.length() > 0.22:
+			axis = stick
 	ship += axis.limit_length(1.0) * 175.0 * delta
 	ship = ship.clamp(Vector2(12, 12), SIZE - Vector2(12, 12))
 	fire_cooldown -= delta
-	if (Input.is_key_pressed(KEY_SPACE) or Input.is_action_pressed("ui_accept")) and fire_cooldown <= 0:
+	var pad_fire := false
+	if not Input.get_connected_joypads().is_empty():
+		var device: int = Input.get_connected_joypads()[0]
+		pad_fire = Input.is_joy_button_pressed(device, JOY_BUTTON_A) or Input.is_joy_button_pressed(device, JOY_BUTTON_X)
+	if (Input.is_key_pressed(KEY_SPACE) or Input.is_action_pressed("ui_accept") or pad_fire) and fire_cooldown <= 0:
 		bullets.append(ship + Vector2(12, 0))
 		fire_cooldown = 0.16
 	for i in range(bullets.size() - 1, -1, -1):
@@ -137,6 +148,7 @@ func _draw() -> void:
 		draw_circle(center, 8, Color("#fff0c6"))
 		draw_rect(Rect2(Vector2(425, 10), Vector2(float(boss_hp) / 24.0 * 195.0, 5)), Color("#f16487"))
 	draw_string(ThemeDB.fallback_font, Vector2(12, 20), "STAGE 02 / PROTOTYPE - HP %d" % hp, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+	draw_string(ThemeDB.fallback_font, Vector2(12, 342), "MOVE: WASD / ARROWS / PAD LEFT STICK    FIRE: SPACE / PAD A,X", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d5e5"))
 	if paused and not finished:
 		draw_rect(Rect2(160, 140, 320, 78), Color("#09111e"))
 		draw_string(ThemeDB.fallback_font, Vector2(205, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
