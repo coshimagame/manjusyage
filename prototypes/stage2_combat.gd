@@ -14,13 +14,14 @@ var boss_hp := 24
 var boss_active := false
 var finished := false
 var won := false
+var paused := false
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	queue_redraw()
 
 func _process(delta: float) -> void:
-	if finished:
+	if finished or paused:
 		queue_redraw()
 		return
 	elapsed += delta
@@ -81,10 +82,22 @@ func _process(delta: float) -> void:
 			if hp <= 0: finished = true
 	queue_redraw()
 
-func _unhandled_key_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_R and finished:
+		if event.keycode == KEY_P or event.keycode == KEY_ESCAPE:
+			if not finished:
+				paused = not paused
+				get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_R and finished:
 			get_tree().reload_current_scene()
+			get_viewport().set_input_as_handled()
+	if event is InputEventJoypadButton and event.pressed:
+		if event.button_index == JOY_BUTTON_START and not finished:
+			paused = not paused
+			get_viewport().set_input_as_handled()
+		elif event.button_index == JOY_BUTTON_B and finished:
+			get_tree().reload_current_scene()
+			get_viewport().set_input_as_handled()
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#071329"))
@@ -104,7 +117,11 @@ func _draw() -> void:
 		draw_circle(center, 8, Color("#fff0c6"))
 		draw_rect(Rect2(Vector2(425, 10), Vector2(float(boss_hp) / 24.0 * 195.0, 5)), Color("#f16487"))
 	draw_string(ThemeDB.fallback_font, Vector2(12, 20), "STAGE 02 / PROTOTYPE - HP %d" % hp, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+	if paused and not finished:
+		draw_rect(Rect2(160, 140, 320, 78), Color("#09111e"))
+		draw_string(ThemeDB.fallback_font, Vector2(205, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(185, 201), "P / ESC / START: RESUME", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	if finished:
 		draw_rect(Rect2(150, 130, 340, 100), Color("#09111e"))
 		draw_string(ThemeDB.fallback_font, Vector2(185, 175), "CLEAR" if won else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color.WHITE)
-		draw_string(ThemeDB.fallback_font, Vector2(185, 208), "R: RETRY  (NO CAMPAIGN SAVE)", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(185, 208), "R / PAD B: RETRY (NO SAVE)", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
