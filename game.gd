@@ -46,6 +46,14 @@ var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
 var mode = "menu"
+# Stage-1 clear bridge: temporary dialogue, never official canon.
+var intermission_page = 0
+const INTERMISSION_LINES = [
+	{"speaker":"クゥ","line":"通信はつながっている。みんな、無事？"},
+	{"speaker":"コルミィ","line":"うん！ でも、まだ先があるんだよね。"},
+	{"speaker":"ジヨーザ","line":"この先の情報が必要だ。準備しよう。"},
+	{"speaker":"マフィオ","line":"次の出撃までに、ちょっと休憩したいな。"}
+]
 var count = 1
 var players: Array = []
 var bullets: Array = []
@@ -351,6 +359,11 @@ func launch_from_briefing():
 		return
 	briefing_custom_squad=true
 	start_game()
+func advance_intermission():
+	intermission_page+=1
+	if intermission_page>=INTERMISSION_LINES.size():
+		open_briefing(briefing_progress.next_briefing_stage())
+
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -456,7 +469,10 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: mode="intermission"; intermission_page=0
+		elif mode == "intermission":
+			if key == KEY_ESCAPE: open_briefing(briefing_progress.next_briefing_stage())
+			elif key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -585,7 +601,10 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: mode="intermission"; intermission_page=0
+		elif mode == "intermission":
+			if b: open_briefing(briefing_progress.next_briefing_stage())
+			elif start or a: advance_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1080,6 +1099,9 @@ func draw_mafio_fusion(p):
 
 func _draw():
 	background()
+	if mode=="intermission":
+		draw_intermission_bridge()
+		return
 	if mode=="briefing":
 		draw_briefing_screen()
 		return
@@ -1378,6 +1400,17 @@ func draw_controls():
 		text_at("DEVICE "+str(calibration_device+1),Vector2(282,245),DIM)
 	japanese("Esc：キャンセル（元の設定を維持）",Vector2(203,292),13)
 	japanese("登録完了後は、決定ボタンを一度離してください",Vector2(167,318),12,DIM)
+
+func draw_intermission_bridge():
+	# Text-only provisional bridge. No approved portrait or game art is overwritten.
+	draw_rect(Rect2(0,0,W,H),Color("081322"))
+	centered("STAGE 01 / INTERMISSION",65,COLORS[0],2)
+	japanese("第一面クリア後の通信（台詞は仮稿）",Vector2(130,112),15,DIM)
+	var entry=INTERMISSION_LINES[clampi(intermission_page,0,INTERMISSION_LINES.size()-1)]
+	japanese(str(entry["speaker"]),Vector2(95,161),19,COLORS[2])
+	japanese(str(entry["line"]),Vector2(95,201),16,WHITE)
+	centered(str(intermission_page+1)+" / "+str(INTERMISSION_LINES.size()),255,DIM)
+	japanese("Enter / A：次へ   Esc / B：スキップ",Vector2(150,303),14,WHITE)
 
 func draw_result():
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
