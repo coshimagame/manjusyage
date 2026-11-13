@@ -381,6 +381,12 @@ func _input(event):
 	if mode=="controls":
 		capture_binding(event)
 		return
+	# Native touch events are handled separately from mouse-emulated events.
+	# This enables a first launch on mobile without requiring a keyboard.
+	if event is InputEventScreenTouch and event.pressed and mode == "menu":
+		start_game()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key = event.physical_keycode
 		if mode=="briefing":
