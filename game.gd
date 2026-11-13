@@ -457,9 +457,16 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			elif key == KEY_R: start_game()
+			elif key == KEY_ESCAPE: mode = "menu"; track("title")
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if key in [KEY_ENTER,KEY_SPACE,KEY_R]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	# Result screens also accept a single tap on Android/Web.
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode in ["clear","over"]:
+		if mode == "clear": open_briefing(briefing_progress.next_briefing_stage())
+		else: start_game()
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
 		var click_pos=get_global_mouse_position()
 		for number in range(1,9):
@@ -1389,7 +1396,7 @@ func draw_result():
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
-	centered("ESC : TITLE",289,DIM)
+	centered("R : RETRY     ESC : TITLE     TAP : CONTINUE",289,DIM)
 
 
 # STATUS-001: All pilots share identical HP/heart language, while the rest
