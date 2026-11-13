@@ -10,6 +10,7 @@ var stage_cleared: bool = true
 var next_stage_playable: bool = false
 var _message: Label
 var _next: Button
+var _availability: Label
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -26,6 +27,10 @@ func _ready() -> void:
 	_message = Label.new()
 	_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(_message)
+	_availability = Label.new()
+	_availability.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_availability.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	layout.add_child(_availability)
 	_next = Button.new()
 	_next.pressed.connect(func(): briefing_requested.emit())
 	layout.add_child(_next)
@@ -49,6 +54,18 @@ func configure(cleared_stage: int, cleared: bool, has_next_battle: bool) -> void
 
 func _refresh() -> void:
 	_message.text = ("STAGE %02d CLEAR" if stage_cleared else "GAME OVER") % stage_number
-	_next.text = "次のブリーフィングへ / BRIEFING"
-	_next.disabled = not stage_cleared
-	_next.tooltip_text = "次の面が未完成の場合は準備室まで進みます。"
+	var has_next_stage := stage_number < 8
+	_next.disabled = not stage_cleared or not has_next_stage
+	if not stage_cleared:
+		_next.text = "クリア後に開放 / LOCKED"
+		_availability.text = "再出撃するかタイトルへ戻れます。"
+	elif not has_next_stage:
+		_next.text = "最終ステージ / FINAL"
+		_availability.text = "次のステージはありません。"
+	elif next_stage_playable:
+		_next.text = "次のブリーフィングへ / BRIEFING"
+		_availability.text = "次のステージはプレイ可能です。"
+	else:
+		_next.text = "準備室へ / BRIEFING"
+		_availability.text = "次のステージは制作中です。戦闘には進めません。"
+	_next.tooltip_text = _availability.text
