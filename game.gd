@@ -351,6 +351,14 @@ func launch_from_briefing():
 		return
 	briefing_custom_squad=true
 	start_game()
+# Preserve the chosen pilots when retrying from the results screen.
+# start_game() normally uses the default roster unless briefing_custom_squad is set.
+func retry_game():
+	for i in range(mini(count, players.size())):
+		briefing_chars[i] = int(players[i].character)
+	briefing_custom_squad = true
+	start_game()
+
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -457,7 +465,7 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
-			elif key == KEY_R: start_game()
+			elif key == KEY_R: retry_game()
 			elif key == KEY_ESCAPE: mode = "menu"; track("title")
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
@@ -587,7 +595,7 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if b: start_game()
+			if b: retry_game()
 			elif start or a: open_briefing(briefing_progress.next_briefing_stage())
 		elif start or a: start_game()
 	if mode == "play":
