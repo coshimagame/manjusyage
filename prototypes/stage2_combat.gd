@@ -4,6 +4,7 @@ extends Node2D
 const SIZE := Vector2(640, 360)
 var ship := Vector2(96, 180)
 var hp := 4
+var invulnerability := 0.0
 var elapsed := 0.0
 var fire_cooldown := 0.0
 var spawn_cooldown := 0.0
@@ -23,12 +24,14 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	elapsed += delta
+	invulnerability = maxf(0.0, invulnerability - delta)
 	var axis := Vector2.ZERO
 	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A): axis.x -= 1
 	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D): axis.x += 1
 	if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W): axis.y -= 1
 	if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S): axis.y += 1
-	axis += Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if axis == Vector2.ZERO:
+		axis = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	ship += axis.limit_length(1.0) * 175.0 * delta
 	ship = ship.clamp(Vector2(12, 12), SIZE - Vector2(12, 12))
 	fire_cooldown -= delta
@@ -52,9 +55,11 @@ func _process(delta: float) -> void:
 			foes.remove_at(i)
 			continue
 		if foes[i].distance_to(ship) < 15:
-			hp -= 1
 			foes.remove_at(i)
-			if hp <= 0: finished = true
+			if invulnerability <= 0.0:
+				hp -= 1
+				invulnerability = 1.0
+				if hp <= 0: finished = true
 			continue
 		for j in range(bullets.size() - 1, -1, -1):
 			if foes[i].distance_to(bullets[j]) < 13:
@@ -70,9 +75,10 @@ func _process(delta: float) -> void:
 				if boss_hp <= 0:
 					finished = true
 					won = true
-		if not finished and ship.distance_to(boss_pos) < 36:
-			hp = 0
-			finished = true
+		if not finished and ship.distance_to(boss_pos) < 36 and invulnerability <= 0.0:
+			hp -= 1
+			invulnerability = 1.0
+			if hp <= 0: finished = true
 	queue_redraw()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -85,7 +91,8 @@ func _draw() -> void:
 	for i in range(24):
 		var x := fposmod(float(i * 89) - elapsed * 24.0, 640.0)
 		draw_circle(Vector2(x, float((i * 53) % 360)), 1.0, Color("#4b7591"))
-	draw_colored_polygon(PackedVector2Array([ship + Vector2(14, 0), ship + Vector2(-11, -9), ship + Vector2(-6, 0), ship + Vector2(-11, 9)]), Color("#f04f5e"))
+	if invulnerability <= 0.0 or int(elapsed * 12.0) % 2 == 0:
+		draw_colored_polygon(PackedVector2Array([ship + Vector2(14, 0), ship + Vector2(-11, -9), ship + Vector2(-6, 0), ship + Vector2(-11, 9)]), Color("#f04f5e"))
 	for p in bullets: draw_rect(Rect2(p - Vector2(2, 1), Vector2(9, 3)), Color("#b7faff"))
 	for p in foes:
 		draw_circle(p, 11, Color("#a43c71"))
