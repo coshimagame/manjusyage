@@ -36,7 +36,7 @@ func _process(delta: float) -> void:
 		bullets.append(ship + Vector2(12, 0))
 		fire_cooldown = 0.16
 	for i in range(bullets.size() - 1, -1, -1):
-		bullets[i].x += 320.0 * delta
+		bullets[i] = bullets[i] + Vector2(320.0 * delta, 0)
 		if bullets[i].x > SIZE.x: bullets.remove_at(i)
 	if not boss_active and elapsed >= 25.0:
 		boss_active = true
@@ -47,7 +47,7 @@ func _process(delta: float) -> void:
 			foes.append(Vector2(650, randf_range(25, 335)))
 			spawn_cooldown = 0.85
 	for i in range(foes.size() - 1, -1, -1):
-		foes[i].x -= 105.0 * delta
+		foes[i] = foes[i] - Vector2(105.0 * delta, 0)
 		if foes[i].x < -20:
 			foes.remove_at(i)
 			continue
