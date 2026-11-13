@@ -44,6 +44,26 @@ jobs:
           test -d art/bullets
           test -d art/effects
           test -d art/items
+      - name: Verify seven copied PNG files preserve original bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          pairs=(
+            "art/active/ship_cormii.png art/characters/cormii/ship_cormii.png"
+            "art/active/ship_jiyoza.png art/characters/jiyoza/ship_jiyoza.png"
+            "art/active/ship_mafio.png art/characters/mafio/ship_mafio.png"
+            "art/concepts/pilot_cormii_slim_v01.png art/characters/cormii/pilot_cormii_slim_v01.png"
+            "art/concepts/pilot_jiyoza_slim_v01.png art/characters/jiyoza/pilot_jiyoza_slim_v01.png"
+            "art/concepts/pilot_mafio_slim_v01.png art/characters/mafio/pilot_mafio_slim_v01.png"
+            "art/active/title_logo.png art/backgrounds/title/title_logo.png"
+          )
+          for pair in "${pairs[@]}"; do
+            read -r original copy <<< "$pair"
+            test -s "$original"
+            test -s "$copy"
+            cmp "$original" "$copy"
+            echo "MATCH: $original -> $copy"
+          done
       - name: Import Godot resources
         run: godot --headless --path . --editor --import
       - name: Test catalog slots and fallbacks
