@@ -77,15 +77,18 @@ func _process(delta: float) -> void:
 			if enemy_hp <= 0:
 				state = "clear"
 				stage_cleared.emit()
+				break
 		elif shots[i].x > W:
 			shots.remove_at(i)
 	for i in range(hostile.size() - 1, -1, -1):
 		hostile[i].x -= 150.0 * dt
 		if hostile[i].distance_to(ship) < 14.0:
 			hostile.remove_at(i)
-			hp -= 1
+			if state == "playing":
+				hp -= 1
 			if hp <= 0:
 				state = "gameover"
+				break
 		elif hostile[i].x < 0.0:
 			hostile.remove_at(i)
 	queue_redraw()
