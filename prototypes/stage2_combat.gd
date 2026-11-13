@@ -17,6 +17,11 @@ var enemy_shots: Array[Vector2] = []
 var finished := false
 var won := false
 var paused := false
+# Separate touch fingers: left half steers, right half shoots.
+var touch_move_id := -1
+var touch_fire_id := -1
+var touch_origin := Vector2.ZERO
+var touch_position := Vector2.ZERO
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -42,6 +47,8 @@ func _process(delta: float) -> void:
 		var stick := Vector2(Input.get_joy_axis(device, JOY_AXIS_LEFT_X), Input.get_joy_axis(device, JOY_AXIS_LEFT_Y))
 		if stick.length() > 0.22:
 			axis = stick
+	if touch_move_id >= 0:
+		axis = (touch_position - touch_origin) / 48.0
 	ship += axis.limit_length(1.0) * 175.0 * delta
 	ship = ship.clamp(Vector2(12, 12), SIZE - Vector2(12, 12))
 	fire_cooldown -= delta
@@ -49,7 +56,7 @@ func _process(delta: float) -> void:
 	if not Input.get_connected_joypads().is_empty():
 		var device: int = Input.get_connected_joypads()[0]
 		pad_fire = Input.is_joy_button_pressed(device, JOY_BUTTON_A) or Input.is_joy_button_pressed(device, JOY_BUTTON_X)
-	if (Input.is_key_pressed(KEY_SPACE) or Input.is_action_pressed("ui_accept") or pad_fire) and fire_cooldown <= 0:
+	if (Input.is_key_pressed(KEY_SPACE) or Input.is_action_pressed("ui_accept") or pad_fire or touch_fire_id >= 0) and fire_cooldown <= 0:
 		bullets.append(ship + Vector2(12, 0))
 		fire_cooldown = 0.16
 	for i in range(bullets.size() - 1, -1, -1):
@@ -112,6 +119,29 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		var position_in_game := get_global_transform_with_canvas().affine_inverse() * event.position
+		if event.pressed:
+			if position_in_game.x < SIZE.x * 0.5 and touch_move_id < 0:
+				touch_move_id = event.index
+				touch_origin = position_in_game
+				touch_position = position_in_game
+			elif position_in_game.x >= SIZE.x * 0.5 and touch_fire_id < 0:
+				touch_fire_id = event.index
+			else:
+				return
+		elif event.index == touch_move_id:
+			touch_move_id = -1
+		elif event.index == touch_fire_id:
+			touch_fire_id = -1
+		else:
+			return
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventScreenDrag and event.index == touch_move_id:
+		touch_position = get_global_transform_with_canvas().affine_inverse() * event.position
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_P or event.keycode == KEY_ESCAPE:
 			if not finished:
@@ -148,7 +178,12 @@ func _draw() -> void:
 		draw_circle(center, 8, Color("#fff0c6"))
 		draw_rect(Rect2(Vector2(425, 10), Vector2(float(boss_hp) / 24.0 * 195.0, 5)), Color("#f16487"))
 	draw_string(ThemeDB.fallback_font, Vector2(12, 20), "STAGE 02 / PROTOTYPE - HP %d" % hp, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
-	draw_string(ThemeDB.fallback_font, Vector2(12, 342), "MOVE: WASD / ARROWS / PAD LEFT STICK    FIRE: SPACE / PAD A,X", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d5e5"))
+	draw_string(ThemeDB.fallback_font, Vector2(12, 342), "MOVE: LEFT TOUCH / WASD / PAD    FIRE: RIGHT TOUCH / SPACE / PAD A,X", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#b7d5e5"))
+	if touch_move_id >= 0:
+		draw_arc(touch_origin, 30.0, 0.0, TAU, 24, Color("#79d4e6", 0.5), 2.0)
+		draw_circle(touch_origin + (touch_position - touch_origin).limit_length(30.0), 9.0, Color("#79d4e6", 0.5))
+	if touch_fire_id >= 0:
+		draw_circle(Vector2(585, 300), 19.0, Color("#ffb36c", 0.4))
 	if paused and not finished:
 		draw_rect(Rect2(160, 140, 320, 78), Color("#09111e"))
 		draw_string(ThemeDB.fallback_font, Vector2(205, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
