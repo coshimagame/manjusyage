@@ -45,6 +45,8 @@ const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
+const StageResultPanel = preload("res://stage_clear_transition.gd")
+var stage_result_panel: Control
 var mode = "menu"
 var count = 1
 var players: Array = []
@@ -316,7 +318,33 @@ func tell(message, duration = 3.0):
 
 # BRIEFING v0.1: stage 1 is an immediate launch on first arrival.
 # Finished stage 1 unlocks the preparation room, but no fake stage 2 battle.
+func dismiss_stage_result_panel():
+	if is_instance_valid(stage_result_panel):
+		stage_result_panel.queue_free()
+	stage_result_panel = null
+
+func retry_stage_from_result():
+	# Preserve the actual 1–3P pilot selection before start_game() resets players.
+	for i in range(count):
+		briefing_chars[i] = int(players[i].character) if i < players.size() else (i + pilot_offset) % 3
+	briefing_custom_squad = true
+	start_game()
+
+func show_stage_result_panel(won: bool):
+	dismiss_stage_result_panel()
+	stage_result_panel = StageResultPanel.new()
+	add_child(stage_result_panel)
+	stage_result_panel.configure(1, won, briefing_progress.has_gameplay(2))
+	stage_result_panel.retry_requested.connect(retry_stage_from_result)
+	stage_result_panel.briefing_requested.connect(func(): open_briefing(briefing_progress.next_briefing_stage()))
+	stage_result_panel.title_requested.connect(func():
+		dismiss_stage_result_panel()
+		mode = "menu"
+		track("title")
+	)
+
 func open_briefing(stage: int=2):
+	dismiss_stage_result_panel()
 	briefing_stage=clampi(stage,1,briefing_progress.highest_unlocked)
 	briefing_slot=0
 	# Carry the current pilot choices into the preparation room.
@@ -352,6 +380,7 @@ func launch_from_briefing():
 	briefing_custom_squad=true
 	start_game()
 func start_game():
+	dismiss_stage_result_panel()
 	bio.reset()
 	vertical.reset()
 	pads = Array(Input.get_connected_joypads())
@@ -457,6 +486,9 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
 			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key == KEY_R: retry_stage_from_result()
+			if key == KEY_ESCAPE:
+				dismiss_stage_result_panel(); mode = "menu"; track("title")
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -861,6 +893,8 @@ func finish(won):
 	mode="clear" if won else "over"
 	music.stop(); sfx("gate" if won else "burst")
 	play_jingle("clear" if won else "fail")
+	if not auto_test:
+		show_stage_result_panel(won)
 	if won: track("ending")
 	if won:
 		if not auto_test: briefing_progress.mark_cleared(1)
