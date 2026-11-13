@@ -460,6 +460,11 @@ func _input(event):
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	# Browser touch taps are delivered as left mouse clicks when touch-to-mouse emulation is enabled.
+	# Allow advancing from the result screen without requiring a hardware keyboard.
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "clear":
+		open_briefing(briefing_progress.next_briefing_stage())
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
 		var click_pos=get_global_mouse_position()
 		for number in range(1,9):
