@@ -12,6 +12,8 @@ var bullets: Array[Vector2] = []
 var foes: Array[Vector2] = []
 var boss_hp := 24
 var boss_active := false
+var boss_fire_cooldown := 1.0
+var enemy_shots: Array[Vector2] = []
 var finished := false
 var won := false
 var paused := false
@@ -45,6 +47,7 @@ func _process(delta: float) -> void:
 	if not boss_active and elapsed >= 25.0:
 		boss_active = true
 		foes.clear()
+		boss_fire_cooldown = 1.0
 	if not boss_active:
 		spawn_cooldown -= delta
 		if spawn_cooldown <= 0:
@@ -69,6 +72,21 @@ func _process(delta: float) -> void:
 				break
 	if boss_active:
 		var boss_pos := Vector2(550, 180 + sin(elapsed * 1.8) * 90)
+		boss_fire_cooldown -= delta
+		if boss_fire_cooldown <= 0.0:
+			enemy_shots.append(boss_pos + Vector2(-30, 0))
+			boss_fire_cooldown = 0.75
+		for i in range(enemy_shots.size() - 1, -1, -1):
+			enemy_shots[i] += Vector2(-180.0 * delta, 0)
+			if enemy_shots[i].x < -10.0:
+				enemy_shots.remove_at(i)
+				continue
+			if enemy_shots[i].distance_to(ship) < 12.0:
+				enemy_shots.remove_at(i)
+				if invulnerability <= 0.0:
+					hp -= 1
+					invulnerability = 1.0
+					if hp <= 0: finished = true
 		for j in range(bullets.size() - 1, -1, -1):
 			if bullets[j].distance_to(boss_pos) < 30:
 				bullets.remove_at(j)
@@ -107,6 +125,8 @@ func _draw() -> void:
 	if invulnerability <= 0.0 or int(elapsed * 12.0) % 2 == 0:
 		draw_colored_polygon(PackedVector2Array([ship + Vector2(14, 0), ship + Vector2(-11, -9), ship + Vector2(-6, 0), ship + Vector2(-11, 9)]), Color("#f04f5e"))
 	for p in bullets: draw_rect(Rect2(p - Vector2(2, 1), Vector2(9, 3)), Color("#b7faff"))
+	for p in enemy_shots:
+		draw_circle(p, 4.0, Color("#ffb36c"))
 	for p in foes:
 		draw_circle(p, 11, Color("#a43c71"))
 		draw_circle(p, 5, Color("#f6b2ca"))
