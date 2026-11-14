@@ -30,7 +30,10 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
 		if state != "playing" and e.pressed:
-			_restart()
+			if state == "clear":
+				_return_to_title()
+			else:
+				_restart()
 			return
 		# Convert window touch coordinates to the 640x360 game canvas.
 		var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
@@ -54,7 +57,13 @@ func _input(event: InputEvent) -> void:
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
 	elif event is InputEventKey and event.pressed and not event.echo:
-		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
+		if event.keycode == KEY_ESCAPE:
+			_return_to_title()
+		elif state != "playing" and event.keycode == KEY_R:
+			_restart()
+		elif state == "clear" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE):
+			_return_to_title()
+		elif state == "gameover" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE):
 			_restart()
 
 func _process(delta: float) -> void:
@@ -104,6 +113,10 @@ func _process(delta: float) -> void:
 			hostile.remove_at(i)
 	queue_redraw()
 
+func _return_to_title() -> void:
+	# Use the project main scene rather than replaying the stage 2 prototype.
+	get_tree().change_scene_to_file("res://prologue.tscn")
+
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
@@ -140,4 +153,4 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
 		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(font, Vector2(205, 201), "ENTER / TAP : RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_string(font, Vector2(205, 201), ("ENTER / TAP : TITLE  |  R : RETRY" if state == "clear" else "ENTER / TAP : RETRY  |  ESC : TITLE"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
