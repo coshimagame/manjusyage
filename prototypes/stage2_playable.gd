@@ -3,6 +3,7 @@ extends Node2D
 ## Launch res://prototypes/stage2_playable.tscn directly in Godot 4.6.
 signal stage_cleared
 signal retry_requested
+const BriefingProgress = preload("res://briefing_progress.gd")
 
 const W := 640.0
 const H := 360.0
@@ -58,6 +59,9 @@ func _input(event: InputEvent) -> void:
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
 	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_Q and state != "playing":
+			get_tree().change_scene_to_file("res://main.tscn")
+			return
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
 
@@ -89,6 +93,7 @@ func _process(delta: float) -> void:
 			enemy_hp -= 1
 			if enemy_hp <= 0:
 				state = "clear"
+				BriefingProgress.new().mark_cleared(2)
 				stage_cleared.emit()
 				break
 		elif shots[i].x > W:
