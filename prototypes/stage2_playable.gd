@@ -1,0 +1,128 @@
+extends Node2D
+## Stage 2 combat prototype. Temporary procedural visuals; approved sprites untouched.
+## Launch res://prototypes/stage2_playable.tscn directly in Godot 4.6.
+signal stage_cleared
+signal retry_requested
+
+const W := 640.0
+const H := 360.0
+var ship := Vector2(90, 180)
+var hp := 5
+var enemy_hp := 30
+var enemy_pos := Vector2(535, 180)
+var enemy_phase := 0.0
+var fire_cooldown := 0.0
+var enemy_cooldown := 0.0
+var elapsed := 0.0
+var shots: Array[Vector2] = []
+var hostile: Array[Vector2] = []
+var state := "playing"
+var touch_move := Vector2.ZERO
+var touch_fire := false
+var touch_id := -1
+
+func _ready() -> void:
+	set_process(true)
+	set_process_input(true)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		var e := event as InputEventScreenTouch
+		if state != "playing" and e.pressed:
+			_restart()
+			return
+		if e.position.x < W * 0.5:
+			if e.pressed:
+				touch_id = e.index
+				touch_move = e.position
+			elif e.index == touch_id:
+				touch_id = -1
+				touch_move = Vector2.ZERO
+		else:
+			touch_fire = e.pressed
+	elif event is InputEventScreenDrag:
+		var d := event as InputEventScreenDrag
+		if d.index == touch_id:
+			touch_move = d.position
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
+			_restart()
+
+func _process(delta: float) -> void:
+	if state != "playing":
+		queue_redraw()
+		return
+	var dt: float = minf(delta, 0.05)
+	elapsed += dt
+	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if touch_id >= 0:
+		direction = (touch_move - ship).limit_length(1.0)
+	ship += direction * 200.0 * dt
+	ship = ship.clamp(Vector2(20, 20), Vector2(300, 340))
+	fire_cooldown -= dt
+	if (Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(0, JOY_BUTTON_A) or touch_fire) and fire_cooldown <= 0.0:
+		shots.append(ship + Vector2(18, 0))
+		fire_cooldown = 0.13
+	enemy_phase += dt * 1.7
+	enemy_pos.y = 180.0 + sin(enemy_phase) * 95.0
+	enemy_cooldown -= dt
+	if enemy_cooldown <= 0.0:
+		hostile.append(enemy_pos + Vector2(-22, 0))
+		enemy_cooldown = 0.8
+	for i in range(shots.size() - 1, -1, -1):
+		shots[i].x += 350.0 * dt
+		if shots[i].distance_to(enemy_pos) < 28.0:
+			shots.remove_at(i)
+			enemy_hp -= 1
+			if enemy_hp <= 0:
+				state = "clear"
+				stage_cleared.emit()
+		elif shots[i].x > W:
+			shots.remove_at(i)
+	for i in range(hostile.size() - 1, -1, -1):
+		hostile[i].x -= 150.0 * dt
+		if hostile[i].distance_to(ship) < 14.0:
+			hostile.remove_at(i)
+			hp -= 1
+			if hp <= 0:
+				state = "gameover"
+		elif hostile[i].x < 0.0:
+			hostile.remove_at(i)
+	queue_redraw()
+
+func _restart() -> void:
+	ship = Vector2(90, 180)
+	hp = 5
+	enemy_hp = 30
+	enemy_phase = 0.0
+	enemy_cooldown = 0.0
+	fire_cooldown = 0.0
+	shots.clear()
+	hostile.clear()
+	touch_id = -1
+	touch_fire = false
+	state = "playing"
+	retry_requested.emit()
+	queue_redraw()
+
+func _draw() -> void:
+	draw_rect(Rect2(Vector2.ZERO, Vector2(W, H)), Color("#071025"))
+	for n in range(24):
+		var x := fposmod(float(n * 83) - elapsed * 22.0, W)
+		var y := float((n * 47) % 350)
+		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
+	draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
+	draw_circle(enemy_pos, 25.0, Color("#8b234c"))
+	draw_circle(enemy_pos, 12.0, Color("#f35c81"))
+	for p in shots:
+		draw_rect(Rect2(p, Vector2(11, 3)), Color("#ffe7a1"))
+	for p in hostile:
+		draw_circle(p, 5.0, Color("#ff7a88"))
+	draw_rect(Rect2(12, 12, float(hp) * 22.0, 7), Color("#5ee2c5"))
+	draw_rect(Rect2(420, 12, maxf(0.0, float(enemy_hp)) * 6.0, 7), Color("#f06088"))
+	if state != "playing":
+		draw_rect(Rect2(150, 132, 340, 90), Color(0.02, 0.04, 0.12, 0.92))
+		var font := ThemeDB.fallback_font
+		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
+		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
+		draw_string(font, Vector2(205, 201), "ENTER / TAP : RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
