@@ -32,24 +32,27 @@ func _input(event: InputEvent) -> void:
 		if state != "playing" and e.pressed:
 			_restart()
 			return
-		if e.position.x < W * 0.5:
-			if e.pressed:
-				touch_id = e.index
-				touch_move = e.position
-			elif e.index == touch_id:
+		# Convert window touch coordinates to the 640x360 game canvas.
+		var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
+		# Always release by finger ID, even when a finger crosses screen halves.
+		if not e.pressed:
+			if e.index == touch_id:
 				touch_id = -1
 				touch_move = Vector2.ZERO
-		else:
-			if e.pressed and fire_touch_id < 0:
-				fire_touch_id = e.index
-				touch_fire = true
-			elif not e.pressed and e.index == fire_touch_id:
+			if e.index == fire_touch_id:
 				fire_touch_id = -1
 				touch_fire = false
+		elif local_pos.x < W * 0.5:
+			if touch_id < 0:
+				touch_id = e.index
+				touch_move = local_pos
+		elif fire_touch_id < 0:
+			fire_touch_id = e.index
+			touch_fire = true
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
-			touch_move = d.position
+			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
