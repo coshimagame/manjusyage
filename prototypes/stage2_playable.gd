@@ -11,6 +11,8 @@ const ArtCatalog = preload("res://art_catalog.gd")
 var artwork = ArtCatalog.new()
 var ship := Vector2(90, 180)
 var hp := 5
+# Prevent overlapping enemy bullets from draining multiple HP in one instant.
+var hit_grace := 0.0
 var enemy_hp := 30
 var enemy_pos := Vector2(535, 180)
 var enemy_phase := 0.0
@@ -67,6 +69,7 @@ func _process(delta: float) -> void:
 		return
 	var dt: float = minf(delta, 0.05)
 	elapsed += dt
+	hit_grace = maxf(0.0, hit_grace - dt)
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if touch_id >= 0:
 		direction = (touch_move - ship).limit_length(1.0)
@@ -100,7 +103,10 @@ func _process(delta: float) -> void:
 		hostile[i].x -= 150.0 * dt
 		if hostile[i].distance_to(ship) < 14.0:
 			hostile.remove_at(i)
+			if hit_grace > 0.0:
+				continue
 			hp -= 1
+			hit_grace = 0.8
 			if hp <= 0:
 				state = "gameover"
 				break
@@ -111,6 +117,7 @@ func _process(delta: float) -> void:
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
+	hit_grace = 0.0
 	enemy_hp = 30
 	enemy_phase = 0.0
 	enemy_cooldown = 0.0
@@ -131,9 +138,9 @@ func _draw() -> void:
 		var y := float((n * 47) % 350)
 		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
 	var player_art: Texture2D = artwork.texture("ship_cormii")
-	if player_art != null:
+	if player_art != null and (hit_grace <= 0.0 or int(elapsed * 12.0) % 2 == 0):
 		draw_texture_rect(player_art, Rect2(ship - Vector2(20, 14), Vector2(40, 28)), false)
-	else:
+	elif player_art == null and (hit_grace <= 0.0 or int(elapsed * 12.0) % 2 == 0):
 		draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
 	var boss_art: Texture2D = artwork.texture("boss_body")
 	if boss_art != null:
