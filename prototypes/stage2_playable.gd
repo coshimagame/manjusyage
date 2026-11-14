@@ -34,6 +34,14 @@ func _ready() -> void:
 	set_process(true)
 	set_process_input(true)
 
+func _notification(what: int) -> void:
+	# Mobile browsers may suspend without delivering touch-up or key-up.
+	# Never resume combat with a stale virtual control held.
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and state == "playing":
+		_clear_touch_controls()
+		paused = true
+		queue_redraw()
+
 func _input(event: InputEvent) -> void:
 	# Pause only live combat; do not mistake pause for a terminal result.
 	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_P or event.keycode == KEY_ESCAPE) and state == "playing":
