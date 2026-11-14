@@ -20,6 +20,7 @@ var state := "playing"
 var touch_move := Vector2.ZERO
 var touch_fire := false
 var touch_id := -1
+var fire_touch_id := -1
 
 func _ready() -> void:
 	set_process(true)
@@ -39,7 +40,12 @@ func _input(event: InputEvent) -> void:
 				touch_id = -1
 				touch_move = Vector2.ZERO
 		else:
-			touch_fire = e.pressed
+			if e.pressed and fire_touch_id < 0:
+				fire_touch_id = e.index
+				touch_fire = true
+			elif not e.pressed and e.index == fire_touch_id:
+				fire_touch_id = -1
+				touch_fire = false
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
@@ -77,8 +83,12 @@ func _process(delta: float) -> void:
 			if enemy_hp <= 0:
 				state = "clear"
 				stage_cleared.emit()
+				break
 		elif shots[i].x > W:
 			shots.remove_at(i)
+	if state != "playing":
+		queue_redraw()
+		return
 	for i in range(hostile.size() - 1, -1, -1):
 		hostile[i].x -= 150.0 * dt
 		if hostile[i].distance_to(ship) < 14.0:
@@ -86,6 +96,7 @@ func _process(delta: float) -> void:
 			hp -= 1
 			if hp <= 0:
 				state = "gameover"
+				break
 		elif hostile[i].x < 0.0:
 			hostile.remove_at(i)
 	queue_redraw()
@@ -100,6 +111,7 @@ func _restart() -> void:
 	shots.clear()
 	hostile.clear()
 	touch_id = -1
+	fire_touch_id = -1
 	touch_fire = false
 	state = "playing"
 	retry_requested.emit()
