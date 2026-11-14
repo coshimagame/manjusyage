@@ -81,6 +81,9 @@ func _unhandled_input(event):
 		elif event.button_index == JOY_BUTTON_A: advance()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		advance()
+	elif event is InputEventScreenTouch and event.pressed:
+		# Android/Web: allow the prologue to advance without a mouse or keyboard.
+		advance()
 
 func advance():
 	if age < 2.5: age = 2.5; return
