@@ -17,6 +17,7 @@ var elapsed := 0.0
 var shots: Array[Vector2] = []
 var hostile: Array[Vector2] = []
 var state := "playing"
+var paused := false
 var touch_move := Vector2.ZERO
 var touch_fire := false
 var touch_id := -1
@@ -29,6 +30,15 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
+		if e.pressed and local_touch_pause(e.position):
+			paused = not paused if state == "playing" else false
+			touch_id = -1
+			fire_touch_id = -1
+			touch_fire = false
+			queue_redraw()
+			return
+		if paused:
+			return
 		if state != "playing" and e.pressed:
 			_restart()
 			return
@@ -54,11 +64,18 @@ func _input(event: InputEvent) -> void:
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
 	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_P and state == "playing":
+			paused = not paused
+			touch_id = -1
+			fire_touch_id = -1
+			touch_fire = false
+			queue_redraw()
+			return
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
 
 func _process(delta: float) -> void:
-	if state != "playing":
+	if state != "playing" or paused:
 		queue_redraw()
 		return
 	var dt: float = minf(delta, 0.05)
@@ -104,6 +121,10 @@ func _process(delta: float) -> void:
 			hostile.remove_at(i)
 	queue_redraw()
 
+func local_touch_pause(screen_pos: Vector2) -> bool:
+	var p: Vector2 = get_global_transform_with_canvas().affine_inverse() * screen_pos
+	return p.x >= W - 72.0 and p.y <= 52.0
+
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
@@ -117,6 +138,7 @@ func _restart() -> void:
 	fire_touch_id = -1
 	touch_fire = false
 	state = "playing"
+	paused = false
 	retry_requested.emit()
 	queue_redraw()
 
@@ -133,8 +155,14 @@ func _draw() -> void:
 		draw_rect(Rect2(p, Vector2(11, 3)), Color("#ffe7a1"))
 	for p in hostile:
 		draw_circle(p, 5.0, Color("#ff7a88"))
+	draw_rect(Rect2(W - 72.0, 0.0, 72.0, 52.0), Color(0.14, 0.2, 0.3, 0.75))
+	draw_string(ThemeDB.fallback_font, Vector2(W - 61.0, 30.0), "PAUSE", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	draw_rect(Rect2(12, 12, float(hp) * 22.0, 7), Color("#5ee2c5"))
 	draw_rect(Rect2(420, 12, maxf(0.0, float(enemy_hp)) * 6.0, 7), Color("#f06088"))
+	if paused:
+		draw_rect(Rect2(180, 132, 280, 90), Color(0.02, 0.04, 0.12, 0.92))
+		draw_string(ThemeDB.fallback_font, Vector2(265, 175), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(205, 201), "P / TOP RIGHT : RESUME", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	if state != "playing":
 		draw_rect(Rect2(150, 132, 340, 90), Color(0.02, 0.04, 0.12, 0.92))
 		var font := ThemeDB.fallback_font
