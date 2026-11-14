@@ -35,7 +35,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
 		if state != "playing" and e.pressed:
-			_restart()
+			_handle_result_pointer(e.position)
 			return
 		# Convert window touch coordinates to the 640x360 game canvas.
 		var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
@@ -54,6 +54,9 @@ func _input(event: InputEvent) -> void:
 		elif fire_touch_id < 0:
 			fire_touch_id = e.index
 			touch_fire = true
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and state != "playing":
+		_handle_result_pointer(event.position)
+		return
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
@@ -64,6 +67,14 @@ func _input(event: InputEvent) -> void:
 			return
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
+
+func _handle_result_pointer(screen_pos: Vector2) -> void:
+	# Touch and mouse share the same result-screen hit targets.
+	var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * screen_pos
+	if Rect2(170, 178, 140, 38).has_point(local_pos):
+		_restart()
+	elif Rect2(330, 178, 140, 38).has_point(local_pos):
+		get_tree().change_scene_to_file("res://main.tscn")
 
 func _process(delta: float) -> void:
 	if state != "playing":
@@ -159,4 +170,7 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
 		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(font, Vector2(205, 201), "ENTER / TAP : RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_rect(Rect2(170, 178, 140, 38), Color("#164b56"))
+		draw_rect(Rect2(330, 178, 140, 38), Color("#45305b"))
+		draw_string(font, Vector2(190, 202), "RETRY / ENTER", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
+		draw_string(font, Vector2(351, 202), "MENU / Q", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
