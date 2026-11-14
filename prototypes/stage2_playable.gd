@@ -28,6 +28,8 @@ var touch_move := Vector2.ZERO
 var touch_fire := false
 var touch_id := -1
 var fire_touch_id := -1
+const PAUSE_TOUCH_RECT := Rect2(550, 16, 76, 40)
+const RESUME_TOUCH_RECT := Rect2(205, 176, 230, 40)
 
 func _ready() -> void:
 	artwork.reload()
@@ -59,6 +61,13 @@ func _input(event: InputEvent) -> void:
 	# Finger-up must be processed even while paused, or touch movement/fire
 	# remains latched after resuming. Do not process new touches in pause.
 	if paused:
+		if event is InputEventScreenTouch and event.pressed:
+			var resume_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * event.position
+			if RESUME_TOUCH_RECT.has_point(resume_pos) and state == "playing":
+				paused = false
+				_clear_touch_controls()
+				queue_redraw()
+				return
 		if event is InputEventScreenTouch and not event.pressed:
 			if event.index == touch_id:
 				touch_id = -1
@@ -74,6 +83,12 @@ func _input(event: InputEvent) -> void:
 			return
 		# Convert window touch coordinates to the 640x360 game canvas.
 		var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
+		# Dedicated mobile pause target must not become movement/fire input.
+		if e.pressed and state == "playing" and PAUSE_TOUCH_RECT.has_point(local_pos):
+			paused = true
+			_clear_touch_controls()
+			queue_redraw()
+			return
 		# Always release by finger ID, even when a finger crosses screen halves.
 		if not e.pressed:
 			if e.index == touch_id:
@@ -224,10 +239,15 @@ func _draw() -> void:
 		draw_circle(p, 5.0, Color("#ff7a88"))
 	draw_rect(Rect2(12, 12, float(hp) * 22.0, 7), Color("#5ee2c5"))
 	draw_rect(Rect2(420, 12, maxf(0.0, float(enemy_hp)) * 6.0, 7), Color("#f06088"))
+	if state == "playing" and not paused:
+		draw_rect(PAUSE_TOUCH_RECT, Color("#233e58"))
+		draw_string(ThemeDB.fallback_font, Vector2(559, 43), "PAUSE", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
 	if paused and state == "playing":
 		draw_rect(Rect2(175, 142, 290, 76), Color(0.02, 0.04, 0.12, 0.92))
 		draw_string(ThemeDB.fallback_font, Vector2(272, 170), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(ThemeDB.fallback_font, Vector2(207, 196), "P / ESC / START : RESUME", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_rect(RESUME_TOUCH_RECT, Color("#164b56"))
+		draw_string(ThemeDB.fallback_font, Vector2(251, 202), "TAP TO RESUME", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(219, 218), "P / ESC / START", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.WHITE)
 	if state != "playing":
 		draw_rect(Rect2(150, 132, 340, 90), Color(0.02, 0.04, 0.12, 0.92))
 		var font := ThemeDB.fallback_font
