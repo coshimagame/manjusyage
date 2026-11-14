@@ -44,7 +44,16 @@ func _input(event: InputEvent) -> void:
 		paused = not paused
 		queue_redraw()
 		return
+	# Finger-up must be processed even while paused, or touch movement/fire
+	# remains latched after resuming. Do not process new touches in pause.
 	if paused:
+		if event is InputEventScreenTouch and not event.pressed:
+			if event.index == touch_id:
+				touch_id = -1
+				touch_move = Vector2.ZERO
+			if event.index == fire_touch_id:
+				fire_touch_id = -1
+				touch_fire = false
 		return
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
