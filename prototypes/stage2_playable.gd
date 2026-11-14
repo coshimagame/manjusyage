@@ -38,10 +38,14 @@ func _input(event: InputEvent) -> void:
 	# Pause only live combat; do not mistake pause for a terminal result.
 	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_P or event.keycode == KEY_ESCAPE) and state == "playing":
 		paused = not paused
+		if paused:
+			_clear_touch_controls()
 		queue_redraw()
 		return
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START and state == "playing":
 		paused = not paused
+		if paused:
+			_clear_touch_controls()
 		queue_redraw()
 		return
 	# Finger-up must be processed even while paused, or touch movement/fire
@@ -97,6 +101,13 @@ func _input(event: InputEvent) -> void:
 			return
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
+
+func _clear_touch_controls() -> void:
+	# Pause must release all virtual controls even if the browser drops finger-up.
+	touch_id = -1
+	touch_move = Vector2.ZERO
+	fire_touch_id = -1
+	touch_fire = false
 
 func _handle_result_pointer(screen_pos: Vector2) -> void:
 	# Touch and mouse share the same result-screen hit targets.
