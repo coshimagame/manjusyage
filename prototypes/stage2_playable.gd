@@ -93,7 +93,9 @@ func _process(delta: float) -> void:
 			enemy_hp -= 1
 			if enemy_hp <= 0:
 				state = "clear"
-				BriefingProgress.new().mark_cleared(2)
+				var progress = BriefingProgress.new()
+				progress.load_data() # Preserve Stage 1 completion and prior unlocks.
+				progress.mark_cleared(2)
 				stage_cleared.emit()
 				break
 		elif shots[i].x > W:
