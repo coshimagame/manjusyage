@@ -6,6 +6,9 @@ signal retry_requested
 
 const W := 640.0
 const H := 360.0
+# Reuse the existing optional PNG registry; missing artwork keeps procedural fallback.
+const ArtCatalog = preload("res://art_catalog.gd")
+var artwork = ArtCatalog.new()
 var ship := Vector2(90, 180)
 var hp := 5
 var enemy_hp := 30
@@ -23,6 +26,7 @@ var touch_id := -1
 var fire_touch_id := -1
 
 func _ready() -> void:
+	artwork.reload()
 	set_process(true)
 	set_process_input(true)
 
@@ -126,9 +130,17 @@ func _draw() -> void:
 		var x := fposmod(float(n * 83) - elapsed * 22.0, W)
 		var y := float((n * 47) % 350)
 		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
-	draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
-	draw_circle(enemy_pos, 25.0, Color("#8b234c"))
-	draw_circle(enemy_pos, 12.0, Color("#f35c81"))
+	var player_art: Texture2D = artwork.texture("ship_cormii")
+	if player_art != null:
+		draw_texture_rect(player_art, Rect2(ship - Vector2(20, 14), Vector2(40, 28)), false)
+	else:
+		draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
+	var boss_art: Texture2D = artwork.texture("boss_body")
+	if boss_art != null:
+		draw_texture_rect(boss_art, Rect2(enemy_pos - Vector2(30, 30), Vector2(60, 60)), false)
+	else:
+		draw_circle(enemy_pos, 25.0, Color("#8b234c"))
+		draw_circle(enemy_pos, 12.0, Color("#f35c81"))
 	for p in shots:
 		draw_rect(Rect2(p, Vector2(11, 3)), Color("#ffe7a1"))
 	for p in hostile:
