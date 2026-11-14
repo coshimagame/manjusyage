@@ -23,6 +23,7 @@ var elapsed := 0.0
 var shots: Array[Vector2] = []
 var hostile: Array[Vector2] = []
 var state := "playing"
+var paused := false
 var touch_move := Vector2.ZERO
 var touch_fire := false
 var touch_id := -1
@@ -34,6 +35,17 @@ func _ready() -> void:
 	set_process_input(true)
 
 func _input(event: InputEvent) -> void:
+	# Pause only live combat; do not mistake pause for a terminal result.
+	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_P or event.keycode == KEY_ESCAPE) and state == "playing":
+		paused = not paused
+		queue_redraw()
+		return
+	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START and state == "playing":
+		paused = not paused
+		queue_redraw()
+		return
+	if paused:
+		return
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
 		if state != "playing" and e.pressed:
@@ -86,7 +98,7 @@ func _handle_result_pointer(screen_pos: Vector2) -> void:
 		get_tree().change_scene_to_file("res://main.tscn")
 
 func _process(delta: float) -> void:
-	if state != "playing":
+	if state != "playing" or paused:
 		queue_redraw()
 		return
 	var dt: float = minf(delta, 0.05)
@@ -155,6 +167,7 @@ func _restart() -> void:
 	touch_move = Vector2.ZERO
 	fire_touch_id = -1
 	touch_fire = false
+	paused = false
 	state = "playing"
 	retry_requested.emit()
 	queue_redraw()
@@ -183,6 +196,10 @@ func _draw() -> void:
 		draw_circle(p, 5.0, Color("#ff7a88"))
 	draw_rect(Rect2(12, 12, float(hp) * 22.0, 7), Color("#5ee2c5"))
 	draw_rect(Rect2(420, 12, maxf(0.0, float(enemy_hp)) * 6.0, 7), Color("#f06088"))
+	if paused and state == "playing":
+		draw_rect(Rect2(175, 142, 290, 76), Color(0.02, 0.04, 0.12, 0.92))
+		draw_string(ThemeDB.fallback_font, Vector2(272, 170), "PAUSED", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
+		draw_string(ThemeDB.fallback_font, Vector2(207, 196), "P / ESC / START : RESUME", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	if state != "playing":
 		draw_rect(Rect2(150, 132, 340, 90), Color(0.02, 0.04, 0.12, 0.92))
 		var font := ThemeDB.fallback_font
