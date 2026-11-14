@@ -145,11 +145,14 @@ func _restart() -> void:
 	hit_grace = 0.0
 	enemy_hp = 30
 	enemy_phase = 0.0
+	enemy_pos = Vector2(535, 180)
+	elapsed = 0.0
 	enemy_cooldown = 0.0
 	fire_cooldown = 0.0
 	shots.clear()
 	hostile.clear()
 	touch_id = -1
+	touch_move = Vector2.ZERO
 	fire_touch_id = -1
 	touch_fire = false
 	state = "playing"
