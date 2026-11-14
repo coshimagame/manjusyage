@@ -57,6 +57,13 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and state != "playing":
 		_handle_result_pointer(event.position)
 		return
+	elif event is InputEventJoypadButton and event.pressed and state != "playing":
+		# A: retry; B: return to main menu. Match result-screen touch buttons.
+		if event.button_index == JOY_BUTTON_A:
+			_restart()
+		elif event.button_index == JOY_BUTTON_B:
+			get_tree().change_scene_to_file("res://main.tscn")
+		return
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
