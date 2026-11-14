@@ -8,6 +8,8 @@ const W := 640.0
 const H := 360.0
 var ship := Vector2(90, 180)
 var hp := 5
+# Brief post-hit protection prevents stacked bullets draining all HP in one frame.
+var invulnerability := 0.0
 var enemy_hp := 30
 var enemy_pos := Vector2(535, 180)
 var enemy_phase := 0.0
@@ -63,6 +65,7 @@ func _process(delta: float) -> void:
 		return
 	var dt: float = minf(delta, 0.05)
 	elapsed += dt
+	invulnerability = maxf(0.0, invulnerability - dt)
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if touch_id >= 0:
 		direction = (touch_move - ship).limit_length(1.0)
@@ -96,7 +99,10 @@ func _process(delta: float) -> void:
 		hostile[i].x -= 150.0 * dt
 		if hostile[i].distance_to(ship) < 14.0:
 			hostile.remove_at(i)
+			if invulnerability > 0.0:
+				continue
 			hp -= 1
+			invulnerability = 0.8
 			if hp <= 0:
 				state = "gameover"
 				break
@@ -107,6 +113,10 @@ func _process(delta: float) -> void:
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
+	invulnerability = 0.0
+	elapsed = 0.0
+	enemy_pos = Vector2(535, 180)
+	touch_move = Vector2.ZERO
 	enemy_hp = 30
 	enemy_phase = 0.0
 	enemy_cooldown = 0.0
@@ -126,7 +136,8 @@ func _draw() -> void:
 		var x := fposmod(float(n * 83) - elapsed * 22.0, W)
 		var y := float((n * 47) % 350)
 		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
-	draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
+	if invulnerability <= 0.0 or int(elapsed * 12.0) % 2 == 0:
+		draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
 	draw_circle(enemy_pos, 25.0, Color("#8b234c"))
 	draw_circle(enemy_pos, 12.0, Color("#f35c81"))
 	for p in shots:
