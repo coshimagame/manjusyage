@@ -346,6 +346,17 @@ func change_briefing_character():
 	sfx("switch")
 
 func launch_from_briefing():
+	# Stage 2 is an optional prototype until its PR is integrated.
+	# Never silently replay stage 1 under a stage 2 label.
+	if briefing_stage == 2:
+		var stage2_scene="res://prototypes/stage2_playable.tscn"
+		if ResourceLoader.exists(stage2_scene):
+			var result=get_tree().change_scene_to_file(stage2_scene)
+			if result != OK:
+				tell("STAGE 02 LOAD FAILED ("+str(result)+")",4.0)
+			return
+		tell("STAGE 02 NOT INSTALLED - CHECK PROTOTYPE PR",4.0)
+		return
 	if not briefing_progress.can_launch(briefing_stage):
 		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
 		return
