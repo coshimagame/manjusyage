@@ -35,7 +35,11 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var e := event as InputEventScreenTouch
 		if state != "playing" and e.pressed:
-			_restart()
+			var result_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
+			if result_pos.x >= W * 0.5:
+				_return_to_title()
+			else:
+				_restart()
 			return
 		# Convert window touch coordinates to the 640x360 game canvas.
 		var local_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * e.position
@@ -59,11 +63,13 @@ func _input(event: InputEvent) -> void:
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
 	elif event is InputEventJoypadButton and event.pressed and state != "playing":
-		if event.button_index == JOY_BUTTON_A or event.button_index == JOY_BUTTON_START:
+		if event.button_index == JOY_BUTTON_B:
+			_return_to_title()
+		elif event.button_index == JOY_BUTTON_A or event.button_index == JOY_BUTTON_START:
 			_restart()
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_Q and state != "playing":
-			get_tree().change_scene_to_file("res://main.tscn")
+			_return_to_title()
 			return
 		if state != "playing" and (event.keycode == KEY_ENTER or event.keycode == KEY_SPACE or event.keycode == KEY_R):
 			_restart()
@@ -116,6 +122,11 @@ func _process(delta: float) -> void:
 			hostile.remove_at(i)
 	queue_redraw()
 
+func _return_to_title() -> void:
+	# Result-only exit. Keep the recorded stage-clear progress intact.
+	if state != "playing" and is_inside_tree():
+		get_tree().change_scene_to_file("res://main.tscn")
+
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
@@ -163,4 +174,4 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
 		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(font, Vector2(205, 201), "ENTER / TAP : RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		draw_string(font, Vector2(205, 201), "A/ENTER/LEFT: RETRY   B/Q/RIGHT: TITLE", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
