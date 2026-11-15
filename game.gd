@@ -755,7 +755,9 @@ func update_game(dt):
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
 				if item.kind==0: p.hp=mini(4,p.hp+1)
 				else: p.charge=minf(100,p.charge+25)
-				score+=50; sfx("pickup"); item.pos.x=-100
+				score+=50; sfx("pickup")
+				if art_v09 and bio_route: visual.collect(item.pos,item.kind)
+				item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0:
 		if slice_mode:

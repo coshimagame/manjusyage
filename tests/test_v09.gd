@@ -30,6 +30,12 @@ func run():
 	assert(g.mode=="menu")
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
+	# Pickup styling is presentation-only: both existing item effects and their
+	# collision radius stay intact while the v0.9 collector bloom is emitted.
+	g.players[0].hp=3
+	g.pickups=[{"pos":g.players[0].pos,"kind":0}]
+	g.update_game(.01)
+	assert(g.players[0].hp==4 and not g.visual.collects.is_empty())
 	g.enemies.clear();g.wave_id=0;g.spawn_wave()
 	var forms={}
 	for enemy in g.enemies: forms[enemy.technique]=true
@@ -42,5 +48,5 @@ func run():
 	var cfg=ConfigFile.new();assert(cfg.load("user://visual.cfg")==OK)
 	assert(cfg.get_value("v","shake",-1)==expected_shake and cfg.get_value("v","flash",-1)==expected_flash)
 	g.queue_free();await process_frame;await process_frame
-	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, retry, accessible effects persisted")
+	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, pickup bloom, retry, accessible effects persisted")
 	quit()

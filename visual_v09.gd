@@ -8,6 +8,7 @@ var creatures=[]
 var blasts=[]
 var hits=[]
 var confirms=[]
+var collects=[]
 var intensity=1.0
 var flash_level=.35
 
@@ -28,6 +29,8 @@ func update(dt):
 	hits=hits.filter(func(h):return h.age<.16)
 	for c in confirms:c.age+=dt
 	confirms=confirms.filter(func(c):return c.age<.62)
+	for c in collects:c.age+=dt
+	collects=collects.filter(func(c):return c.age<.42)
 
 func hit(pos):
 	if hits.size()<45:hits.append({"pos":pos,"age":0.0})
@@ -35,6 +38,11 @@ func hit(pos):
 func confirm(pos,combo):
 	# A compact reward echo distinguishes a destroyed organism from a hit spark.
 	if confirms.size()<18:confirms.append({"pos":pos,"combo":combo,"age":0.0})
+
+func collect(pos,kind):
+	# A pickup is a reward beat, not another projectile: the bloom appears only
+	# after collection and never changes its collision or travel path.
+	if collects.size()<24:collects.append({"pos":pos,"kind":int(kind),"age":0.0})
 
 func explode(pos,amount):
 	var size=2 if amount>=80 else (1 if amount>=28 else 0)
@@ -96,6 +104,25 @@ func ship(g,p,index,rotation=0.0,scale_factor=1.0):
 		g.draw_line(Vector2(-24,side*7),Vector2(-29,side*7),Color("fff3d5"),1)
 	var modulation=Color(.55,.78,1,.7) if p.get("inv",0)>0 and int(g.clock*12)%2==0 else Color.WHITE
 	g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),modulation)
+	# All three use the same core atlas, but their visible equipment silhouette is
+	# now distinct at gameplay scale. These overlays deliberately change fins,
+	# sensors and thrusters rather than merely tinting one identical fighter.
+	if p.character==0: # コルミィ: forward swept flower-canards / burst thrusters.
+		for side in [-1,1]:
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-5,side*6),Vector2(8,side*15),Vector2(17,side*12),Vector2(7,side*4)]),Color("b93f59"))
+			g.draw_line(Vector2(2,side*7),Vector2(15,side*12),Color("ffd4ad"),1)
+		g.draw_arc(Vector2(-12,0),15,PI*.65,PI*1.35,12,Color("ff8498",.75),1)
+	elif p.character==1: # ジヨーザ: long sensor booms / precision lattice.
+		for side in [-1,1]:
+			g.draw_line(Vector2(-2,side*6),Vector2(4,side*15),Color("70dff5"),2)
+			g.draw_line(Vector2(4,side*15),Vector2(11,side*15),Color("bdf7ff"),1)
+		g.draw_line(Vector2(9,-9),Vector2(18,-9),Color("70dff5"),1)
+		g.draw_line(Vector2(14,-13),Vector2(14,-5),Color("70dff5"),1)
+	else: # マフィオ: asymmetric intake pods / absorb-and-rebuild fins.
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-12,-7),Vector2(-3,-15),Vector2(6,-10),Vector2(-2,-4)]),Color("d4a65a"))
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-15,7),Vector2(-5,15),Vector2(7,10),Vector2(-3,4)]),Color("7b5b9a"))
+		g.draw_circle(Vector2(-9,0),4,Color("f3d17b"))
+		g.draw_arc(Vector2(-9,0),7,-PI*.65,PI*.65,9,Color("e8b7ff"),1)
 	# Hand-placed native cockpit, armor seams, nozzles and muzzle stay legible.
 	g.draw_line(Vector2(-6,-4),Vector2(5,-3),Color("90e2df"),1)
 	g.draw_line(Vector2(6,-2),Vector2(17,-1),Color("eee1bf"),1)
@@ -152,10 +179,18 @@ func enemy(g,e):
 func projectile(g,b,hostile=false):
 	g.draw_set_transform(b.pos.round(),b.get("vel",Vector2.RIGHT).angle())
 	if hostile:
-		g.draw_line(Vector2(-b.r-5,0),Vector2(-b.r,0),Color("ae4c55"),2)
-		g.draw_circle(Vector2.ZERO,b.r+1,Color("111026"))
-		g.draw_circle(Vector2.ZERO,b.r,Color("ffbd78"))
-		g.draw_circle(Vector2(1,0),maxf(1,b.r-2),Color("fff8d8"))
+		# Enemy shots have a dark diamond hull, warm core and short ember. They
+		# therefore read differently from long friendly bolts even in dense fire.
+		var radius=float(b.r)
+		g.draw_line(Vector2(-radius-8,0),Vector2(-radius,0),Color("6b354f",.7),3)
+		g.draw_line(Vector2(-radius-7,0),Vector2(-radius,0),Color("f06f72",.55),1)
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,0),Vector2(0,-radius-2),Vector2(radius+2,0),Vector2(0,radius+2)]),Color("171329"))
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,0),Vector2(0,-radius),Vector2(radius,0),Vector2(0,radius)]),Color("e36f71"))
+		g.draw_circle(Vector2(1,0),maxf(1,radius-2),Color("fff0bc"))
+		if radius>=4:
+			for petal in range(4):
+				var d=Vector2.from_angle(petal*TAU/4.0+PI*.25)
+				g.draw_line(d*(radius+2),d*(radius+5),Color("ffb36e",.8),1)
 	else:
 		var col=g.COLORS[b.color]
 		var p=g.players[b.owner]
@@ -164,9 +199,33 @@ func projectile(g,b,hostile=false):
 			g.draw_line(Vector2(-10,0),Vector2(6,0),col,2)
 		elif p.character==2 and p.learned!="none":
 			g.draw_arc(Vector2(-3,0),4,-PI*.7,PI*.7,8,col,2)
-		else:g.draw_colored_polygon(PackedVector2Array([Vector2(-12,0),Vector2(-2,-3),Vector2(7,0),Vector2(-2,3)]),Color(col,.7))
+		else:
+			g.draw_line(Vector2(-15,0),Vector2(-4,0),Color(col,.22),5)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-12,0),Vector2(-2,-3),Vector2(8,0),Vector2(-2,3)]),Color(col,.82))
 		g.draw_line(Vector2(-4,0),Vector2(5,0),Color("fff8d7"),1)
 	g.draw_set_transform(Vector2.ZERO)
+
+func pickup(g,item):
+	var pos=item.pos+Vector2(0,sin(g.clock*5.0+item.pos.x*.03)*2.0)
+	var hull=int(item.kind)==0
+	var col=Color("ff7895") if hull else Color("78e8ff")
+	var glow=Color("ffd9a6") if hull else Color("c6fbff")
+	# Constrained rings make pickups visible against the bio-background. Their
+	# slow bob and shaped cores prevent a heal or cell from reading as a bullet.
+	g.draw_arc(pos,10+sin(g.clock*4.0)*1.5,0,TAU,16,Color(col,.32),1)
+	g.draw_arc(pos,7,0,TAU,16,Color(glow,.82),1)
+	if hull:
+		for petal in range(4):
+			var d=Vector2.from_angle(petal*TAU/4.0)
+			g.draw_colored_polygon(PackedVector2Array([pos+d*2,pos+d.rotated(.45)*7,pos+d*10,pos+d.rotated(-.45)*7]),col)
+		g.draw_circle(pos,3,glow)
+		g.draw_line(pos-Vector2(2,0),pos+Vector2(2,0),Color.WHITE,1)
+		g.draw_line(pos-Vector2(0,2),pos+Vector2(0,2),Color.WHITE,1)
+	else:
+		g.draw_colored_polygon(PackedVector2Array([pos+Vector2(0,-10),pos+Vector2(7,0),pos+Vector2(0,10),pos+Vector2(-7,0)]),Color("18304b"))
+		g.draw_colored_polygon(PackedVector2Array([pos+Vector2(0,-7),pos+Vector2(5,0),pos+Vector2(0,7),pos+Vector2(-5,0)]),col)
+		g.draw_line(pos+Vector2(0,-5),pos+Vector2(0,5),glow,1)
+		g.draw_line(pos+Vector2(-3,0),pos+Vector2(3,0),glow,1)
 
 func boss(g):
 	var p=g.boss.pos
@@ -243,6 +302,14 @@ func effects(g):
 			var d=Vector2.from_angle(i*TAU/4+PI*.25)
 			g.draw_line(pos+d*(3+t*10),pos+d*(7+t*20),Color(1,.82,.52,alpha),1)
 		g.text_at("+"+str(100*c.combo),pos+Vector2(-8,-8),Color(1,.94,.72,alpha))
+	for c in collects:
+		var t=c.age
+		var alpha=maxf(0,1-t/.42)
+		var col=Color("ff8fa4") if c.kind==0 else Color("91edff")
+		for i in range(6):
+			var d=Vector2.from_angle(i*TAU/6.0+t*2.0)
+			g.draw_line(c.pos+d*(3+t*24),c.pos+d*(8+t*44),Color(col,alpha),1)
+		g.draw_arc(c.pos,7+t*34,0,TAU,20,Color("fff3cc",alpha*.8),1)
 
 func draw(g):
 	background(g)
@@ -256,8 +323,7 @@ func draw(g):
 	for b in g.bullets:projectile(g,b)
 	for b in g.shots:projectile(g,b,true)
 	for item in g.pickups:
-		g.draw_arc(item.pos,7,0,TAU,12,g.COLORS[item.kind*2],1)
-		g.text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3))
+		pickup(g,item)
 	if not g.boss.is_empty():boss(g)
 	for i in range(g.players.size()):
 		var p=g.players[i]
@@ -294,6 +360,23 @@ func draw(g):
 		g.japanese("F10 振動調整 / F12 閃光調整 / Q タイトル",Vector2(160,210),12)
 	elif g.mode in ["clear","over"]:g.draw_result()
 
+func pilot_badge(g,pos,character,accent):
+	# Small, shape-coded crests make the pilots readable without relying on color.
+	g.draw_circle(pos,8,Color("091326"))
+	g.draw_arc(pos,8,0,TAU,16,Color(accent,.8),1)
+	if character==0:
+		for i in range(4):
+			var d=Vector2.from_angle(i*TAU/4.0)
+			g.draw_line(pos+d*2,pos+d*5,accent,2)
+		g.draw_circle(pos,2,Color("fff0cf"))
+	elif character==1:
+		g.draw_line(pos-Vector2(5,0),pos+Vector2(5,0),accent,1)
+		g.draw_line(pos-Vector2(0,5),pos+Vector2(0,5),accent,1)
+		g.draw_rect(Rect2(pos-Vector2(2,2),Vector2(4,4)),Color("d6fbff"),false,1)
+	else:
+		g.draw_colored_polygon(PackedVector2Array([pos+Vector2(0,-5),pos+Vector2(5,0),pos+Vector2(0,5),pos+Vector2(-5,0)]),accent)
+		g.draw_circle(pos,1,Color("fff0cf"))
+
 func hud(g):
 	# The play HUD uses the same framed, warm-metal language as the sortie card:
 	# pilots read left-to-right, while score and reserves are deliberately isolated.
@@ -304,20 +387,26 @@ func hud(g):
 	for i in range(g.count):
 		var p=g.players[i]
 		var x=12+i*155
-		g.draw_rect(Rect2(x,7,148,33),Color("111d35"))
+		g.draw_rect(Rect2(x,7,148,33),Color("0b172c"))
 		g.draw_rect(Rect2(x,7,148,33),Color(g.COLORS[i],.72),false,1)
 		g.draw_rect(Rect2(x,7,3,33),g.COLORS[i])
-		g.text_at("P"+str(i+1),Vector2(x+9,12),g.COLORS[i])
-		g.japanese(g.PILOT_NAMES[p.character],Vector2(x+31,19),12,Color("f1e3d2"))
-		g.japanese("HULL",Vector2(x+9,34),8,Color("9f9bb0"))
-		for j in range(4):g.draw_rect(Rect2(x+38+j*8,29,5,4),g.COLORS[i] if j<p.hp else Color("34364c"))
-		g.draw_rect(Rect2(x+75,29,42,4),Color("34364c"))
-		g.draw_rect(Rect2(x+75,29,p.charge*.42,4),g.COLORS[i])
-		g.draw_circle(Vector2(x+126,31),3,g.COLORS[p.color])
+		pilot_badge(g,Vector2(x+17,22),p.character,g.COLORS[i])
+		g.text_at("P"+str(i+1),Vector2(x+29,12),g.COLORS[i])
+		g.japanese(g.PILOT_NAMES[p.character],Vector2(x+47,18),12,Color("f7ebd6"))
+		# Four petal-like hull lamps and a ticked charge channel give HP and
+		# energy their own silhouettes instead of two anonymous rectangles.
+		for j in range(4):
+			var lamp=Color(g.COLORS[i]) if j<p.hp else Color("303a50")
+			g.draw_colored_polygon(PackedVector2Array([Vector2(x+48+j*8,28),Vector2(x+51+j*8,26),Vector2(x+54+j*8,28),Vector2(x+51+j*8,31)]),lamp)
+		g.draw_rect(Rect2(x+83,27,39,6),Color("29384f"))
+		g.draw_rect(Rect2(x+84,28,maxf(0,p.charge*.37),4),g.COLORS[i])
+		for tick in [10,20,30]:g.draw_line(Vector2(x+84+tick,27),Vector2(x+84+tick,33),Color("10172a"),1)
+		g.draw_circle(Vector2(x+132,30),4,Color(g.COLORS[p.color],.28))
+		g.draw_arc(Vector2(x+132,30),4,0,TAU,12,g.COLORS[p.color],1)
 		if p.charge>=100:
-			g.text_at("B",Vector2(x+136,27),Color("fff2cb"))
+			g.text_at("!",Vector2(x+140,26),Color("fff2cb"))
 		else:
-			g.japanese(g.Abilities.label(p,g.elapsed),Vector2(x+75,40),8,Color("b6a9b6"))
+			g.japanese(g.Abilities.label(p,g.elapsed),Vector2(x+84,40),8,Color("b6a9b6"))
 	# Score card stays static even when player cards change between 1–3P.
 	g.draw_rect(Rect2(480,7,148,33),Color("17162a"))
 	g.draw_rect(Rect2(480,7,148,33),Color("8b6971"),false,1)
