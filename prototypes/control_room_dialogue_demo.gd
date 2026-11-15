@@ -113,14 +113,14 @@ func _show_line() -> void:
 func _process(delta: float) -> void:
 	if index >= LINES.size():
 		return
-	if dialogue_label.visible_characters < dialogue_label.get_total_character_count():
+	if dialogue_label.visible_characters >= 0 and dialogue_label.visible_characters < dialogue_label.get_total_character_count():
 		shown_characters += speed * delta
 		dialogue_label.visible_characters = mini(int(shown_characters), dialogue_label.get_total_character_count())
 
 func advance() -> void:
 	if index >= LINES.size():
 		return
-	if dialogue_label.visible_characters < dialogue_label.get_total_character_count():
+	if dialogue_label.visible_characters >= 0 and dialogue_label.visible_characters < dialogue_label.get_total_character_count():
 		dialogue_label.visible_characters = -1
 	else:
 		index += 1
