@@ -20,6 +20,8 @@
 | 画像 | 画像ボード、仮生成絵、ゲームスクリーンショットが混在 | **承認済み人物デザインは最終決定**。しかし原画PNGのGitHubパスは未同定。別人の新規生成は不採用 | ART_ASSETS / ユーザー最新指示 |
 | 画像差し替え | `art/active/*.png` の平置き13スロット | **キャラ別・敵別・背景別の子フォルダ**を優先、旧パスも互換。立ち絵や未実装面のゲーム表示は別途開発 | art_catalog.gd |
 
+| 管制会話の顔配置 | 左右の固定ルールが明文化されていなかった | **ムゥは画面右、会話相手は画面左**。ステージ終了後などの管制会話全般に適用。顔素材は既存承認デザインを保持し差し替え可能にする。**実装・実機検証は別途確認** | `main` の [CONTROL_ROOM_DIALOGUE_DIRECTION.md](https://github.com/coshimagame/manjusyage/blob/main/docs/manjushage/CONTROL_ROOM_DIALOGUE_DIRECTION.md)（2026-11-15） |
+
 ## 正式な読み順と更新場所
 
 1. **決定・変更の正本：** [CANON.md](CANON.md)（決定／方向性／提案／未決を区別）。
