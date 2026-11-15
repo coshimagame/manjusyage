@@ -58,6 +58,9 @@ func _input(event: InputEvent) -> void:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
+	elif event is InputEventJoypadButton and event.pressed and state != "playing":
+		if event.button_index == JOY_BUTTON_A or event.button_index == JOY_BUTTON_START:
+			_restart()
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_Q and state != "playing":
 			get_tree().change_scene_to_file("res://main.tscn")
