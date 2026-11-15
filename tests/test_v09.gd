@@ -30,6 +30,8 @@ func run():
 	assert(g.mode=="menu")
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
+	assert(g.visual.ship_variants.size()==3)
+	assert(g.visual.ship_variants[0]!=null and g.visual.ship_variants[1]!=null and g.visual.ship_variants[2]!=null)
 	# Pickup styling is presentation-only: both existing item effects and their
 	# collision radius stay intact while the v0.9 collector bloom is emitted.
 	g.players[0].hp=3

@@ -3,6 +3,7 @@ extends RefCounted
 # Candidate art, not canon. Native-size detail is redrawn over registered sprites.
 var cosmos: Texture2D
 var atlas: Texture2D
+var ship_variants=[]
 var stage_concepts: Texture2D
 var creatures=[]
 var blasts=[]
@@ -15,6 +16,14 @@ var flash_level=.35
 func setup():
 	cosmos=load("res://art/v09/cosmos.png")
 	atlas=load("res://art/v09/ship-atlas.png")
+	# These three authored combat sprites were already present in art/active, but
+	# the v0.9 renderer had never consumed them. Keep the shared atlas as a
+	# motion underlay and put the individual silhouette on top at gameplay scale.
+	ship_variants=[
+		load("res://art/active/ship_cormii.png"),
+		load("res://art/active/ship_jiyoza.png"),
+		load("res://art/active/ship_mafio.png")
+	]
 	# STG-CONCEPT-001 is a user-supplied eight-stage concept board. Only its
 	# Stage 1 environment strip is used here as a dim, non-colliding backdrop;
 	# the other seven rows remain concept material, not playable stage claims.
@@ -103,16 +112,26 @@ func ship(g,p,index,rotation=0.0,scale_factor=1.0):
 		g.draw_line(Vector2(-24,side*7),Vector2(-24-length*.7,side*7),tint,2)
 		g.draw_line(Vector2(-24,side*7),Vector2(-29,side*7),Color("fff3d5"),1)
 	var modulation=Color(.55,.78,1,.7) if p.get("inv",0)>0 and int(g.clock*12)%2==0 else Color.WHITE
-	g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),modulation)
+	var character=int(p.get("character",index))
+	var variant=ship_variants[clampi(character,0,ship_variants.size()-1)] if not ship_variants.is_empty() else null
+	if variant:
+		# The animated common frame preserves the shared-designer language; the
+		# individual 32x20 base is the visible fighter body rather than a menu-only
+		# asset. It also rotates with vertical passage because this function already
+		# inherits the stage transform.
+		g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),Color(modulation.r,modulation.g,modulation.b,.30))
+		g.draw_texture_rect(variant,Rect2(-24,-15,48,30),false,modulation)
+	else:
+		g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),modulation)
 	# All three use the same core atlas, but their visible equipment silhouette is
 	# now distinct at gameplay scale. These overlays deliberately change fins,
 	# sensors and thrusters rather than merely tinting one identical fighter.
-	if p.character==0: # コルミィ: forward swept flower-canards / burst thrusters.
+	if character==0: # コルミィ: forward swept flower-canards / burst thrusters.
 		for side in [-1,1]:
 			g.draw_colored_polygon(PackedVector2Array([Vector2(-5,side*6),Vector2(8,side*15),Vector2(17,side*12),Vector2(7,side*4)]),Color("b93f59"))
 			g.draw_line(Vector2(2,side*7),Vector2(15,side*12),Color("ffd4ad"),1)
 		g.draw_arc(Vector2(-12,0),15,PI*.65,PI*1.35,12,Color("ff8498",.75),1)
-	elif p.character==1: # ジヨーザ: long sensor booms / precision lattice.
+	elif character==1: # ジヨーザ: long sensor booms / precision lattice.
 		for side in [-1,1]:
 			g.draw_line(Vector2(-2,side*6),Vector2(4,side*15),Color("70dff5"),2)
 			g.draw_line(Vector2(4,side*15),Vector2(11,side*15),Color("bdf7ff"),1)
