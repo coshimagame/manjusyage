@@ -262,4 +262,5 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - `ui/stage_intermission.gd`と`ui/stage_intermission_stage1.gd`を、v0.9の実際のクリア状態へ接続。決定／タップで字送り、Lでログ、Esc/Startでスキップできる。会話はムゥ・クゥ・コルミィ・ジヨーザ・マフィオの**仮稿**であり、正史台詞ではない。
 - クリア後に未検証のStage 2へ遷移する既存ブランチ案は採用せず、幕間終了後はタイトルへ安全に戻る。既存の1〜3人、ソロ、保存、v0.9戦闘状態を変更しない。
 - Godot 4.6.3で`stage_intermission_dialogue_smoke.gd`、`stage_intermission_integration_smoke.gd`、拡張した`test_v09.gd`がPASS。物理パッド、人間操作、実聴、通常レンダラーの連続キャプチャは未検証。
+- **配布更新の保留**：この作業ツリーで`tools/pack.gd`をGodot 4.6.3 headless実行すると、PCKPacker開始時にWindows signal 11でクラッシュした。出力先を変えても再現。ゲーム回帰テストは通っており別問題だが、新Windows ZIPは作成・検証できていない。梱包スクリプトの追加変更はコミットしていない。次回は最小PCKでPCKPackerのクラッシュ対象を切り分けるか、GitHub Actionsのexport成果物を使う。
 

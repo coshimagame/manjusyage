@@ -82,4 +82,5 @@
 1. 通常レンダラーでStage 1ボス撃破→幕間→タイトルを連続キャプチャし、文字サイズ・会話ログ・スキップ導線を確認する。
 2. v0.9の生体ボスと会話幕間を基準に、次はStage 2の実戦ブランチを別途Godot 4.6で検証し、v0.9と競合しない部分だけ統合する。未検証のStage 2をmainから出撃可能にしない。
 3. `Image.load_from_file`のexport警告をTexture2Dベースの読み込みへ置換してから、更新Windows PCK/ZIPを作成する。物理パッド、人間操作、実聴も区別して記録する。
+4. 現在のGodot 4.6.3 headlessでは`tools/pack.gd`がWindows signal 11でクラッシュするため、既存ZIPを最新版と称さない。PCKPackerの最小再現を作るか、Actionsの正式exportを確認してから更新配布物を作成する。
 
