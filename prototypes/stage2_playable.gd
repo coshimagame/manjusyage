@@ -62,6 +62,15 @@ func _input(event: InputEvent) -> void:
 		var d := event as InputEventScreenDrag
 		if d.index == touch_id:
 			touch_move = get_global_transform_with_canvas().affine_inverse() * d.position
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and state != "playing":
+		# Desktop Web builds do not necessarily synthesize touch events for mouse clicks.
+		# A touch-emulated mouse event arriving after a touch retry is ignored once playing.
+		var click_pos: Vector2 = get_global_transform_with_canvas().affine_inverse() * event.position
+		if click_pos.x >= W * 0.5:
+			_return_to_title()
+		else:
+			_restart()
+		return
 	elif event is InputEventJoypadButton and event.pressed and state != "playing":
 		if event.button_index == JOY_BUTTON_B:
 			_return_to_title()
