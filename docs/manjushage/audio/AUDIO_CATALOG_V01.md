@@ -26,6 +26,10 @@
 | **AUD-014** | `assets/audio/music/bgm_stage01_plan_b.wav` | 「赤い残響 〜 緋色の鼓動」<br>第1面道中 BGM (B案) | 152 BPM<br>F#短調 | 50.53秒<br>(32小節) | シームレスループ<br>(0.0s〜50.53s) | -4.5 dB | 試聴待ち<br>(B案) |
 | **AUD-015** | `assets/audio/music/bgm_boss01_plan_a.wav` | 「生体中枢 〜 脈動する境界」<br>第1面ボス戦 BGM (A案) | 168 BPM<br>G短調 / 減音程 | 45.71秒<br>(32小節) | シームレスループ<br>(0.0s〜45.71s) | -3.5 dB | 試聴待ち<br>(A案) |
 | **AUD-016** | `assets/audio/music/bgm_boss01_plan_b.wav` | 「輪廻の狂詩曲 〜 死線突破」<br>第1面ボス戦 BGM (B案) | 174 BPM<br>C短調 | 44.14秒<br>(32小節) | シームレスループ<br>(0.0s〜44.14s) | -3.5 dB | 試聴待ち<br>(B案) |
+| **AUD-023** | `assets/audio/music/bgm_stage02_plan_a.wav` | 「追憶の海 〜 水底の残照」<br>第2面道中 BGM (A案) | 136 BPM<br>F短調 (エオリアン) | 56.47秒<br>(32小節) | シームレスループ<br>(0.0s〜56.47s) | -4.0 dB | 試聴待ち<br>(海 A案) |
+| **AUD-024** | `assets/audio/music/bgm_stage02_plan_b.wav` | 「追憶の海 〜 潮流のセレナーデ」<br>第2面道中 BGM (B案) | 142 BPM<br>Bb短調 (ドリアン) | 54.08秒<br>(32小節) | シームレスループ<br>(0.0s〜54.08s) | -4.0 dB | 試聴待ち<br>(海 B案) |
+| **AUD-025** | `assets/audio/music/bgm_stage03_plan_a.wav` | 「孤独な庭 〜 錆びた歯車と曼珠沙華」<br>第3面道中 BGM (A案) | 144 BPM<br>A短調 (陰旋法) | 53.33秒<br>(32小節) | シームレスループ<br>(0.0s〜53.33s) | -4.0 dB | 試聴待ち<br>(廃墟 A案) |
+| **AUD-026** | `assets/audio/music/bgm_stage03_plan_b.wav` | 「孤独な庭 〜 静寂の回廊」<br>第3面道中 BGM (B案) | 138 BPM<br>E短調 | 55.65秒<br>(32小節) | シームレスループ<br>(0.0s〜55.65s) | -4.0 dB | 試聴待ち<br>(廃墟 B案) |
 
 ### 音楽的解説とチーム内4職による講評
 
