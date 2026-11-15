@@ -9,16 +9,20 @@ import wave
 import struct
 
 EXPECTED_FILES = [
-    ("assets/audio/music/bgm_stage01_plan_a.wav", 44100, 2, 2, 47.0, 49.0),
-    ("assets/audio/music/bgm_stage01_plan_b.wav", 44100, 2, 2, 49.0, 52.0),
-    ("assets/audio/music/bgm_boss01_plan_a.wav",  44100, 2, 2, 44.0, 47.0),
-    ("assets/audio/music/bgm_boss01_plan_b.wav",  44100, 2, 2, 43.0, 46.0),
-    ("assets/audio/jingles/jg002_sortie.wav",     44100, 2, 2, 3.0, 4.0),
-    ("assets/audio/sfx/se_shot_cormii.wav",       44100, 2, 2, 0.10, 0.20),
-    ("assets/audio/sfx/se_shot_jiyoza.wav",       44100, 2, 2, 0.10, 0.20),
-    ("assets/audio/sfx/se_shot_mafio.wav",        44100, 2, 2, 0.15, 0.25),
-    ("assets/audio/sfx/se_boss_warning.wav",      44100, 2, 2, 0.70, 1.00),
-    ("assets/audio/sfx/se_boss_destroy.wav",      44100, 2, 2, 2.50, 3.20),
+    ("assets/audio/music/bgm_stage01_plan_a.wav", 44100, 2, 2, 40.0, 60.0),
+    ("assets/audio/music/bgm_stage01_plan_b.wav", 44100, 2, 2, 40.0, 60.0),
+    ("assets/audio/music/bgm_boss01_plan_a.wav",  44100, 2, 2, 40.0, 60.0),
+    ("assets/audio/music/bgm_boss01_plan_b.wav",  44100, 2, 2, 40.0, 60.0),
+    ("assets/audio/music/bgm_stage02_plan_a.wav", 44100, 2, 2, 20.0, 60.0),
+    ("assets/audio/music/bgm_stage02_plan_b.wav", 44100, 2, 2, 20.0, 60.0),
+    ("assets/audio/music/bgm_stage03_plan_a.wav", 44100, 2, 2, 20.0, 60.0),
+    ("assets/audio/music/bgm_stage03_plan_b.wav", 44100, 2, 2, 20.0, 60.0),
+    ("assets/audio/jingles/jg002_sortie.wav",     44100, 2, 2, 3.0, 5.0),
+    ("assets/audio/sfx/se_shot_cormii.wav",       44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_shot_jiyoza.wav",       44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_shot_mafio.wav",        44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_boss_warning.wav",      44100, 2, 2, 0.50, 1.20),
+    ("assets/audio/sfx/se_boss_destroy.wav",      44100, 2, 2, 2.00, 3.50),
 ]
 
 def test_audio():

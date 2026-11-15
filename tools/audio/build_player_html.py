@@ -50,37 +50,37 @@ TRACKS = [
         "id": "AUD-023",
         "category": "bgm",
         "title": "第2面「追憶の海」A案「水底の残照」",
-        "subtitle": "136 BPM / F minor / 56.5s",
+        "subtitle": "108 BPM / 6/8拍子 潮騒ワルツ / Eb Major / 28.7s",
         "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_a.wav"),
         "loop": True,
-        "desc": "水中の浮遊感、水泡が弾ける音、深海サブベース、透明なアクアストリングスと哀愁のパンフルート旋律。"
+        "desc": "【楽器一新：海ステージ専用】透明なビブラフォン主旋律、暖かなRhodesエレピ和音（トレモロ）、6/8拍子のクラシックギター分散和音、水滴音、ブラシスネアと深海サブベース。"
     },
     {
         "id": "AUD-024",
         "category": "bgm",
         "title": "第2面「追憶の海」B案「潮流のセレナーデ」",
-        "subtitle": "142 BPM / Bb minor (Dorian) / 54.1s",
+        "subtitle": "120 BPM / 水中グルーヴ / G minor / 34.0s",
         "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_b.wav"),
         "loop": True,
-        "desc": "湧き上がる潮流の躍動感。泡のように流れる16分アルペジオと切なく高鳴るリード。"
+        "desc": "【楽器一新：海ステージ専用】木製マリンバの16分アルペジオ水流、ビブラフォン哀愁旋律、裏打ちエレピ、水泡チャープ、深海フレットレスベースと重厚なパッド。"
     },
     {
         "id": "AUD-025",
         "category": "bgm",
-        "title": "第3面「孤独な庭」A案「錆びた歯車と曼珠沙華」",
-        "subtitle": "144 BPM / A minor (Insen Modal) / 53.3s",
+        "title": "第3面「孤独な庭・廃墟」A案「錆びた歯車と曼珠沙華」",
+        "subtitle": "126 BPM / 3/4拍子 からくりワルツ / G minor / 25.4s",
         "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_a.wav"),
         "loop": True,
-        "desc": "機械文明の廃墟。歯車のチクタク音、古びた石壁に咲く曼珠沙華を想わせる陰旋法の箏ハープと孤独な和笛。"
+        "desc": "【楽器一新：廃墟ステージ専用】アンティークオルゴール（鉄櫛歯の結晶音）、古びた時計仕掛けのチクタク音、哀愁のクラシックナイロンギター、バロック調チェンバロとゴシック教会の鐘。"
     },
     {
         "id": "AUD-026",
         "category": "bgm",
-        "title": "第3面「孤独な庭」B案「静寂の回廊」",
-        "subtitle": "138 BPM / E minor / 55.7s",
+        "title": "第3面「孤独な庭・廃墟」B案「静寂の回廊」",
+        "subtitle": "88 BPM / 廃墟のレクイエム / D minor / 35.7s",
         "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_b.wav"),
         "loop": True,
-        "desc": "誰もいない回廊に響く時計仕掛けのリズム。静寂と廃墟の不気味さ、そして胸を締め付ける哀愁の疾走メロディ。"
+        "desc": "【楽器一新：廃墟ステージ専用】むせび泣く孤独なチェロ独奏、爪弾くクラシックギターアルペジオ、哀しみの教会鐘の残響、幽玄なゴシックパイプオルガンと遠い記憶のオルゴール。"
     },
     {
         "id": "AUD-017",
