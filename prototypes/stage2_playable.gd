@@ -183,4 +183,11 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
 		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(font, Vector2(205, 201), "A/ENTER/LEFT: RETRY   B/Q/RIGHT: TITLE", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		# Visible touch targets match the existing left/right result input regions.
+		# Keep the panels inside the result card; hit testing remains screen-half based.
+		draw_rect(Rect2(164, 180, 147, 32), Color("#164d56"))
+		draw_rect(Rect2(329, 180, 147, 32), Color("#56253d"))
+		draw_string(font, Vector2(197, 201), "RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+		draw_string(font, Vector2(370, 201), "TITLE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+		draw_string(font, Vector2(162, 240), "A / ENTER / LEFT", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+		draw_string(font, Vector2(335, 240), "B / Q / RIGHT", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
