@@ -102,3 +102,10 @@
 - PR #50の変更パスは `README.md` のみ。PR #51は分類先PNG7点、docs、art、`art_catalog.gd`、テスト、CI定義を含む73パス。依存関係を崩さずに扱う。
 - 最新mainにはユーザー確定の管制会話演出 `docs/manjushage/CONTROL_ROOM_DIALOGUE_DIRECTION.md`（ムゥの顔を右、会話相手の顔を左）と、Codexが作業開始時に最新指示書を確認する `AGENTS.md` の更新がある。#51統合時に両ファイルを保護し、必要なら `CURRENT_SPEC.md` の参照にも反映する。**指示書の存在はゲームへの実装完了を意味しない**。
 - 既知のmain固有UI画像2点と同名スクリーンショット5点の差分は未解決。原画承認の同定、全リンク、実画面比較、main統合後のGodot検証も未実施。**完了条件未達につきPRのマージは保留**。
+
+## 2026-11-16 01時台 JST PR依存関係と最新差分の再確認
+- GitHub APIでPR #50は `open`、`merged=false`、`main` 向け、head `39f209b71d99ac77ce051aba385c0bbcffdfa774`、`mergeable=true` と確認。
+- PR #51は `open`、`merged=false`、#50の `cleanup/simple-repo-navigation-20261106` 向け、head `ece2867868c1ef2f85b6f2a11024d7771b8c9e9a`、`mergeable=true` と確認。依存PRを飛ばしてmainに直接マージしない。
+- `main...cleanup/canon-and-art-folders-20261106` は `diverged`、整理ブランチ94コミット先行、mainが7コミット先行、差分73パス。比較時main HEAD `d4ab8486dfb2a059d2e1754e742d540f7af46ae4`。
+- 既存監査で特定したmain固有UI画像2点とスクリーンショット5点の差分、原画承認状態、全参照検証、main統合後のGodot動作確認は未解決。`mergeable=true` はこれらの検証完了を意味しない。
+- 本確認はPRメタデータ・GitHub比較・既存監査資料の照合。画像の移動・置換、mainマージ、Godot実行は行っていない。**完了条件未達**。
