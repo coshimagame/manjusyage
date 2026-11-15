@@ -167,3 +167,9 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - main統合済みのWindows試遊ZIPをローカル出力。配布PCKを既存Godot 4.6 Windows実行ファイルでヘッドレス起動し、終了コード0を確認。
 - 通常のWindows export templateはこのPCに未導入。GitHub Actionsの正式書き出しを次に確認する。
 
+# 2026-11-07 — v0.9採用済み描画のmain復元
+
+- 誤ってmainに残った旧コード描画から、検証済みv0.9の生体宇宙・共通設計の3機・敵・段階爆発・画像出撃UIへ復帰。
+- v12スナップショット由来の`visual_v09.gd`、`art/v09`、Stage 1コンセプト背景、v0.9音源、戦闘/ステータス実装を追加。既存のAntigravity PNGとCIは保持。
+- Godot 4.6.3: 戦闘、ステータス、生体ステージ、プロローグの回帰テストPASS。人間操作、物理パッド、実聴は未実施。
+

@@ -1,0 +1,39 @@
+extends SceneTree
+func _initialize():run.call_deferred()
+func run():
+	var g=load("res://main.tscn").instantiate()
+	root.add_child(g)
+	g.set_process(false)
+	assert(g.art_v09 and g.slice_mode)
+	g.count=3;g.start_game()
+	assert(g.music_name=="red_echo_v09" and absf(g.music.stream.get_length()-76.8)<.01)
+	assert(g.music.stream.loop_mode==AudioStreamWAV.LOOP_FORWARD)
+	assert(g.vertical.duration==12)
+	var prior=g.high_scores.duplicate()
+	g.score=999999;g.finish(true)
+	assert(g.high_scores==prior,"Short-slice score must not overwrite original route records")
+	var record=JSON.parse_string(FileAccess.get_file_as_string("user://last_run.json"))
+	assert(record.ruleset=="red-echo-slice-v09")
+	g.start_game();g.elapsed=54.99;g.vertical.done=true
+	g.update_game(.02)
+	assert(not g.boss.is_empty() and g.music_name=="red_echo_boss_v09")
+	g.boss.hp=0;g.update_game(.02)
+	assert(g.aftermath>0 and g.mode=="play" and g.shots.is_empty())
+	g.update_game(3.1)
+	assert(g.mode=="clear")
+	g.start_game()
+	assert(g.aftermath==0 and g.visual.blasts.is_empty())
+	g.enemies.clear();g.wave_id=0;g.spawn_wave()
+	var forms={}
+	for enemy in g.enemies: forms[enemy.technique]=true
+	assert(forms.size()>=3,"0.9 wave needs mixed readable movement forms")
+	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
+	var expected_flash=0.0 if g.visual.flash_level>0 else .35
+	for key in [KEY_F10,KEY_F12]:
+		var event=InputEventKey.new();event.physical_keycode=key;event.pressed=true;g._input(event)
+	assert(g.visual.intensity==expected_shake and g.visual.flash_level==expected_flash)
+	var cfg=ConfigFile.new();assert(cfg.load("user://visual.cfg")==OK)
+	assert(cfg.get_value("v","shake",-1)==expected_shake and cfg.get_value("v","flash",-1)==expected_flash)
+	g.queue_free();await process_frame;await process_frame
+	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, retry, accessible effects persisted")
+	quit()

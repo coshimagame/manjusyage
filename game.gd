@@ -7,28 +7,32 @@ const WHITE = Color("e5f5ff")
 const DIM = Color("617797")
 const SHIP = ["...........11.............", "......11111221............", "..11112222222211..........", "..1333332222222211........", "1112222222444422221111....", "1222222244444422222222111.", "1112222222222222221111....", "..1333332222222211........", "..11112222222211..........", "......11111221............", "...........11............."]
 const FOE = ["..11........11..", ".1221......1221.", "1222211111122221", ".12223333332221.", "..123344443321..", "1112334444332111", ".12223333332221.", "1222211111122221", ".1221......1221.", "..11........11.."]
-# Separate original enemy silhouettes for focused and fan-volley attackers.
-const FOE_LANCE = ["........11......", ".......1221.....", "..11..122221....", ".1221122233321..", "1222222334443221", ".1221122233321..", "..11..122221....", ".......1221.....", "........11......"]
-const FOE_BLOOM = ["..111.......111..", ".12221.....12221.", "1222221...1222221", ".122223333322221.", "..12233444433221.", "...122333333221..", "1222221...1222221", ".12221.....12221.", "..111.......111.."]
 const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
 }
 
+const Visual=preload("res://visual_v09.gd")
+var visual=Visual.new()
+var art_v09=true
+var slice_mode=true
+var aftermath=0.0
+var result_delay=0.0
+var sound_cooldowns={}
 var planet_texture: ImageTexture
-# User-provided protagonist boards are used only as visual portraits.  Their
-# printed stats/dialogue stay reference material; live state remains in Player data.
+var title_logo: Texture2D
+var title_logo_extended: Texture2D
+var launch_button: Texture2D
+# The UI atlas is a user-provided Chat asset.  It is intentionally loaded as a
+# single source image so later revisions can replace it without changing game
+# logic or the saved control/menu state.
+var chat_ui_atlas: Texture2D
+# User-approved protagonist visual boards.  Only their portrait, colour, and
+# interface language are presented at runtime; printed board values remain
+# reference material and never replace live combat/save data.
+var character_hub_ui: Texture2D
 var character_system_ui: Texture2D
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
-const EnemyAnalysis=preload("res://enemy_analysis.gd")
-const BriefingProgress=preload("res://briefing_progress.gd")
-var briefing_progress=BriefingProgress.new()
-var briefing_stage=2
-var briefing_slot=0
-var briefing_chars=[0,1,2]
-var briefing_custom_squad=false
-var enemy_analysis=EnemyAnalysis.new()
-var analysis_flash=0.0
 var mafio_archive=MafioArchive.new()
 var status_slot=0
 var status_return_mode="play"
@@ -38,9 +42,7 @@ const VerticalPassage=preload("res://vertical_passage.gd")
 var vertical=VerticalPassage.new()
 var mixed_scroll=true
 var pilot_offset=0
-var new_music=true
-const ArtCatalog = preload("res://art_catalog.gd")
-var artwork = ArtCatalog.new()
+var new_music=false
 const BioStage = preload("res://biological_stage.gd")
 var bio = BioStage.new()
 var bio_route = true
@@ -76,9 +78,6 @@ var boss = {}
 var notice = ""
 var notice_time = 0.0
 var shake = 0.0
-const JingleCues = preload("res://jingle_cues.gd")
-const AmbientStageMusic = preload("res://ambient_stage_music.gd")
-var jingle_player: AudioStreamPlayer
 var music: AudioStreamPlayer
 var sounds = {}
 var sfx_pool: Array = []
@@ -103,36 +102,38 @@ const CONTROL_ACTIONS = ["up","down","left","right","fire","color","burst","star
 const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色切り替えのボタン","バーストのボタン","決定・ポーズのボタン"]
 
 func _ready():
-	artwork.reload()
-	character_system_ui=load("res://art/ui/character_system_ui_20261106.png")
-	mafio_archive.load_data()
-	enemy_analysis.load_data()
-	briefing_progress.load_data()
-	# Pixel textures stay sharp at integer scaling.
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	randomize()
+	visual.setup()
+	mafio_archive.load_data()
+	# Adopt the GitHub main title art when it is present.  The old drawn mark remains
+	# as a safe fallback for earlier checkouts and incomplete asset packages.
+	# This source tree is deliberately usable without a pre-generated .godot import
+	# cache, so load PNGs as images rather than depending on Texture2D import.
+	title_logo=image_texture_from_file("res://art/active/title_logo.png")
+	title_logo_extended=image_texture_from_file("res://art/ui/title_logo_extended_v01.png")
+	launch_button=image_texture_from_file("res://art/ui/launch_button_v01.png")
+	chat_ui_atlas=image_texture_from_file("res://art/ui/chat_ui_atlas_20261106.png")
+	character_hub_ui=image_texture_from_file("res://art/ui/character_hub_ui_20261106.png")
+	character_system_ui=image_texture_from_file("res://art/ui/character_system_ui_20261106.png")
 	build_planet_texture()
 	for i in range(130):
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
 	pads = Array(Input.get_connected_joypads())
 	Input.joy_connection_changed.connect(_pad_changed)
 	jp_font=SystemFont.new()
-	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
+	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
 	var input_cfg=ConfigFile.new()
 	if input_cfg.load("user://controls.cfg")==OK: pad_profiles=input_cfg.get_value("input","profiles",{})
 	var audio_cfg=ConfigFile.new()
 	if audio_cfg.load("user://audio.cfg")==OK:
 		var output=str(audio_cfg.get_value("audio","output","Default"))
 		if AudioServer.get_output_device_list().has(output): AudioServer.output_device=output
-	jingle_player = AudioStreamPlayer.new()
-	add_child(jingle_player)
-	jingle_player.volume_db = -7.0
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.volume_db = -3
 	music.finished.connect(_repeat_music)
-	for name in ["shot","switch","hit","burst","gate","pickup"]:
+	for name in ["shot","switch","hit","burst","gate","pickup","pulse_v09","lance_v09","spore_v09","impact_v09","break_small_v09","break_medium_v09","break_boss_v09","consume_v09"]:
 		sounds[name] = load("res://audio/"+name+".wav")
 	for i in range(12):
 		var player = AudioStreamPlayer.new()
@@ -143,13 +144,20 @@ func _ready():
 	if cfg.load("user://scores.cfg") == OK:
 		for i in range(3): high_scores[i] = int(cfg.get_value("scores",str(i),0))
 	for arg in OS.get_cmdline_user_args():
-		if arg == "--legacy": bio_route=false
+		if arg == "--legacy": bio_route=false;slice_mode=false
 		if arg == "--bio": bio_route=true
 		if arg.begins_with("--pilot="): pilot_offset=clampi(int(arg.substr(8)),0,2)
 		if arg=="--new-music":new_music=true
-		if arg == "--autotest": auto_test = true
+		if arg == "--autotest": auto_test = true;slice_mode=false
 		if arg.begins_with("--players="): test_count = clampi(int(arg.substr(10)),1,3)
 		if arg.begins_with("--shot="): screenshot_mode = arg.substr(7)
+	if OS.get_cmdline_user_args().has("--slice"):slice_mode=true
+	if OS.get_cmdline_user_args().has("--classic"):slice_mode=false
+	if OS.get_cmdline_user_args().has("--old-art"):art_v09=false
+	var visual_cfg=ConfigFile.new()
+	if visual_cfg.load("user://visual.cfg")==OK:
+		visual.intensity=clampf(visual_cfg.get_value("v","shake",1.0),0,1)
+		visual.flash_level=clampf(visual_cfg.get_value("v","flash",.35),0,1)
 	if not auto_test: track("title")
 	if auto_test:
 		Engine.time_scale = 20.0
@@ -165,23 +173,48 @@ func _ready():
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
-		if screenshot_mode=="briefing":
-			mode="briefing"; briefing_stage=2
-		if screenshot_mode=="status": mode="status"
-		if screenshot_mode=="archive":
-			mode="status"; status_slot=0
-			for j in range(players.size()):
-				if players[j].character==2:
-					status_slot=j
-					break
-			archive_page=players[status_slot].character==2
+		if screenshot_mode == "encounter":
+			# Capture-only encounter: it places the real wave organisms inside the
+			# frame with their normal movement/shot data. No player save is touched.
+			enemies.clear()
+			wave_id=3
+			spawn_wave()
+			for i in range(enemies.size()):
+				enemies[i].pos.x=438+i*34
+				enemies[i].cool=.34+i*.045
+		if screenshot_mode == "status": mode="status"
+		if screenshot_mode == "archive":
+			mode="status"
+			for i in range(players.size()):
+				if players[i].character==2: status_slot=i
+			archive_page=true
+			# Capture-only sample data: never persisted, used to verify the real
+			# archive presentation in a packed Windows build.
+			mafio_archive.captured={"P-002":3,"P-003":1,"P-005":2}
+			archive_cursor=1
 		for pilot in players: pilot.inv=0
 	queue_redraw()
 
-func play_jingle(cue: String):
-	if muted or auto_test: return
-	jingle_player.stream = JingleCues.make_stream(cue)
-	jingle_player.play()
+func image_texture_from_file(path:String)->Texture2D:
+	var image=Image.load_from_file(path)
+	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
+
+func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
+	if chat_ui_atlas:
+		draw_texture_rect_region(chat_ui_atlas,target,source,modulate)
+
+# VIS-021 — Direct user-approved visual basis for the three protagonists.
+# The crop is deliberately portrait-only: board dialogue, exact numbers, and
+# menu wording are not inferred as canon or copied into the live interface.
+func draw_fixed_pilot_visual(char_id:int,accent:Color):
+	if not character_system_ui: return
+	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+	var panel=Rect2(438,55,180,183)
+	draw_rect(panel,Color("080d1c",.92))
+	draw_texture_rect_region(character_system_ui,Rect2(447,59,162,169),sources[char_id])
+	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
+	draw_rect(Rect2(447,211,162,17),Color("101525",.82))
+	japanese("LIVE PROFILE / "+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
 
 func _repeat_music():
 	music.play()
@@ -203,31 +236,36 @@ func _pad_changed(device, connected):
 	if mode == "menu": pads = Array(Input.get_connected_joypads())
 
 func sfx(name):
+	if art_v09 and bio_route:
+		if name=="hit":name="impact_v09"
+		elif name=="shot":name="pulse_v09"
+		if sound_cooldowns.get(name,0)>0:return
+		sound_cooldowns[name]=.045 if name=="impact_v09" else .025
 	if muted or auto_test: return
 	for player in sfx_pool:
 		if not player.playing:
+			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
 			player.stream = sounds[name]
 			player.play()
 			return
 
 func track(name):
-	if str(name) == "ambient_stage":
-		music_name = "ambient_stage"
-		music.stream = AmbientStageMusic.make_stream()
-		if not auto_test: music.play()
-		return
-	# Any absent optional song must fall back before load(), not emit errors
-	# or silently abandon playback after a stage clear.
-	var requested=str(name)
-	var path="res://audio/"+requested+".wav"
-	if not ResourceLoader.exists(path):
+	if music.playing and not auto_test:
+		var tail=AudioStreamPlayer.new()
+		tail.stream=music.stream;tail.volume_db=music.volume_db
+		add_child(tail);tail.play(music.get_playback_position())
+		var fade=create_tween()
+		fade.tween_property(tail,"volume_db",-45,.25)
+		fade.tween_callback(tail.queue_free)
+	if name=="wistful_demo" and not ResourceLoader.exists("res://audio/wistful_demo.wav"):
 		name="ruins" if mode=="play" else "title"
-		if not ResourceLoader.exists("res://audio/"+str(name)+".wav"):
-			push_warning("Neither requested music nor fallback is available")
-			return
-		tell("MUSIC "+requested+" UNAVAILABLE / FALLBACK",3.0)
+		tell("NEW MUSIC NOT BUILT / USING ORIGINAL",5)
+	if art_v09 and bio_route and slice_mode:
+		if name in ["ruins","wistful_demo"]:name="red_echo_v09"
+		elif name=="sentinel":name="red_echo_boss_v09"
 	music_name=name
-	music.stream = load("res://audio/"+str(name)+".wav")
+	music.volume_db=1.5 if name.begins_with("red_echo") else -3
+	music.stream = load("res://audio/"+name+".wav")
 	if music.stream == null:
 		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
 		return
@@ -314,61 +352,22 @@ func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
 
-# BRIEFING v0.1: stage 1 is an immediate launch on first arrival.
-# Finished stage 1 unlocks the preparation room, but no fake stage 2 battle.
-func open_briefing(stage: int=2):
-	briefing_stage=clampi(stage,1,briefing_progress.highest_unlocked)
-	briefing_slot=0
-	# Carry the current pilot choices into the preparation room.
-	var assigned=[]
-	for i in range(count):
-		var selected=int(players[i].character) if i<players.size() else (i+pilot_offset)%3
-		if assigned.has(selected):
-			for choice in range(3):
-				if not assigned.has(choice):
-					selected=choice
-					break
-		briefing_chars[i]=selected
-		assigned.append(selected)
-	mode="briefing"
-	notice_time=0
-	track("title")
-
-func change_briefing_character():
-	if briefing_slot>=count: return
-	var original=int(briefing_chars[briefing_slot])
-	var next=(original+1)%3
-	for i in range(count):
-		if i!=briefing_slot and int(briefing_chars[i])==next:
-			briefing_chars[i]=original
-			break
-	briefing_chars[briefing_slot]=next
-	sfx("switch")
-
-func launch_from_briefing():
-	if not briefing_progress.can_launch(briefing_stage):
-		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
-		return
-	briefing_custom_squad=true
-	start_game()
 func start_game():
 	bio.reset()
 	vertical.reset()
+	vertical.duration=12.0 if slice_mode else 24.0
+	aftermath=0;result_delay=0;visual.blasts.clear()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
-	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 1.5; score = 0
+	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
-	for i in range(count):
-		var character=int(briefing_chars[i]) if briefing_custom_squad else (i+pilot_offset)%3
-		Abilities.initialize(players[i],character)
-	briefing_custom_squad=false
+	for i in range(count): Abilities.initialize(players[i],(i+pilot_offset)%3)
 	mode = "play"
-	play_jingle("launch")
 	show_help = false
-	track("ambient_stage" if new_music else "ruins")
-	tell("STAGE 01 / RED ECHO - EXPERIMENT" if bio_route else "SECTOR 01 / THE SLEEPING RELAY",4)
+	track("wistful_demo" if new_music else "ruins")
+	tell("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",4)
 
 func button_edge(device, button):
 	var key = str(device)+":"+str(button)
@@ -383,42 +382,40 @@ func _input(event):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key = event.physical_keycode
-		if mode=="briefing":
-			if key==KEY_ESCAPE: mode="menu"; track("title")
-			elif key==KEY_LEFT: briefing_stage=maxi(1,briefing_stage-1)
-			elif key==KEY_RIGHT: briefing_stage=mini(briefing_progress.highest_unlocked,briefing_stage+1)
-			elif key==KEY_UP: briefing_slot=(briefing_slot+count-1)%count
-			elif key==KEY_DOWN: briefing_slot=(briefing_slot+1)%count
-			elif key in [KEY_X,KEY_C]: change_briefing_character()
-			elif key in [KEY_ENTER,KEY_SPACE]: launch_from_briefing()
-			return
 		if mode=="status":
-			if key in [KEY_ESCAPE,KEY_TAB,KEY_ENTER]:
+			if key in [KEY_ESCAPE,KEY_TAB,KEY_ENTER,KEY_SPACE]:
 				mode=status_return_mode
 			elif key in [KEY_LEFT,KEY_A]:
 				status_slot=(status_slot+players.size()-1)%maxi(1,players.size()); archive_page=false
 			elif key in [KEY_RIGHT,KEY_D]:
 				status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
-			elif key==KEY_E and players[status_slot].character==2 and briefing_progress.feature_available("mafio"):
+			elif key==KEY_E and players[status_slot].character==2:
 				archive_page=not archive_page
-			elif key==KEY_UP:
+			elif key==KEY_UP and archive_page:
 				archive_cursor=maxi(0,archive_cursor-1)
-			elif key==KEY_DOWN:
+			elif key==KEY_DOWN and archive_page:
 				archive_cursor=mini(MafioArchive.ENTRIES.size()-1,archive_cursor+1)
 			return
 		if key==KEY_TAB and mode in ["play","pause"]:
 			status_return_mode=mode; mode="status"; status_slot=0; archive_page=false
 			return
-		if key==KEY_L and mode=="menu" and briefing_progress.highest_unlocked>=2:
-			open_briefing(briefing_progress.next_briefing_stage()); return
+		if key==KEY_F9 and mode=="menu":slice_mode=not slice_mode;return
+		if key in [KEY_F10,KEY_F12]:
+			if key==KEY_F10:visual.intensity=0.0 if visual.intensity>0 else 1.0
+			else:visual.flash_level=0.0 if visual.flash_level>0 else .35
+			var cfg=ConfigFile.new()
+			cfg.set_value("v","shake",visual.intensity);cfg.set_value("v","flash",visual.flash_level)
+			cfg.save("user://visual.cfg")
+			return
 		if key==KEY_F4 and mode=="menu": pilot_offset=(pilot_offset+1)%3; return
 		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
 		if key==KEY_F8 and mode=="menu":
 			new_music=not new_music
-			track("ambient_stage" if new_music else "title")
+			track("wistful_demo" if new_music else "title")
 			return
 		if key==KEY_F3 and mode=="menu":
 			bio_route=not bio_route
+			if not bio_route:slice_mode=false
 			return
 		if key==KEY_F2 and mode in ["menu","pause"]:
 			open_calibration()
@@ -455,26 +452,9 @@ func _input(event):
 		elif mode == "pause":
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
-		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "briefing":
-		var click_pos=get_global_mouse_position()
-		for number in range(1,9):
-			var x=22+int((number-1)/4)*134
-			var y=77+((number-1)%4)*29
-			if Rect2(x,y,126,26).has_point(click_pos) and briefing_progress.can_select(number):
-				briefing_stage=number
-				return
-		for slot in range(count):
-			if Rect2(313,89+slot*38,297,35).has_point(click_pos):
-				briefing_slot=slot
-				change_briefing_character()
-				return
-		if Rect2(383,294,225,38).has_point(click_pos): launch_from_briefing()
-		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
 		if Rect2(220,236,200,32).has_point(p): start_game()
@@ -492,9 +472,6 @@ func burst(i):
 	var p = players[i]
 	if p.down>0: return
 	if bio_route and p.character==2 and Abilities.eat(self,p): return
-	if p.character==1:
-		special_analysis(p)
-		return
 	if p.charge<100: return
 	p.charge = 0; p.burst = .55; p.inv = 1
 	shots.clear()
@@ -506,36 +483,12 @@ func burst(i):
 	shake = 4
 	sfx("burst")
 
-
-# SPECIAL ANALYSIS: only previously observed normal enemies, never bosses.
-# Enemy-bullet tags travel from the source and are checked independently.
-func special_analysis(p):
-	# Never spend ordinary, time-regenerated burst energy.
-	if p.analysis_charge<100 or p.analysis_uses>=2: return
-	var affected=0
-	for e in enemies:
-		if e.get("analysis_eligible",false) and float(e.get("hp",0.0))>0: affected+=1
-	for shot in shots:
-		if shot.get("analysis_eligible",false): affected+=1
-	if affected==0:
-		tell("UNKNOWN ENEMY / BOSS IMMUNE",2.2)
-		return
-	p.analysis_charge=0
-	p.analysis_uses+=1
-	p.burst=.48
-	p.inv=maxf(float(p.inv),.65)
-	analysis_flash=.56
-	for e in enemies:
-		if e.get("analysis_eligible",false) and float(e.get("hp",0.0))>0:
-			explode(e.pos,Color("a8eaff"),11)
-			e.hp=0
-			e.flash=.2
-	shots=shots.filter(func(shot):return not bool(shot.get("analysis_eligible",false)))
-	tell("ANALYSIS / KNOWN PATTERNS PURGED",2.2)
-	sfx("burst")
 func _process(dt):
 	clock += dt
-	analysis_flash=maxf(0.0,analysis_flash-dt)
+	position=Vector2(sin(clock*71),cos(clock*83))*minf(2,shake)*visual.intensity if art_v09 and bio_route and mode=="play" else Vector2.ZERO
+	if mode!="pause":visual.update(dt)
+	for sound in sound_cooldowns:sound_cooldowns[sound]=maxf(0,sound_cooldowns[sound]-dt)
+	if result_delay>0:result_delay=maxf(0,result_delay-dt)
 	music.stream_paused = mode in ["pause","status"]
 	frame_count += 1
 	if mode=="controls":
@@ -550,13 +503,11 @@ func _process(dt):
 		var b = pad_action_edge(device,"burst",JOY_BUTTON_B)
 		var left = pad_action_edge(device,"left",JOY_BUTTON_DPAD_LEFT)
 		var right = pad_action_edge(device,"right",JOY_BUTTON_DPAD_RIGHT)
-		var up = pad_action_edge(device,"up",JOY_BUTTON_DPAD_UP)
-		var down = pad_action_edge(device,"down",JOY_BUTTON_DPAD_DOWN)
 		if mode == "menu":
 			if left: count=maxi(1,count-1)
 			if right: count=mini(3,count+1)
 			if x: pilot_offset=(pilot_offset+1)%3
-			if b: bio_route=not bio_route
+			if b: bio_route=not bio_route;slice_mode=bio_route
 			if start or a: start_game()
 		elif mode == "play":
 			if start: mode="pause"; notice="FLIGHT PAUSED"
@@ -565,34 +516,19 @@ func _process(dt):
 				if x: change_color(slot)
 				if b: burst(slot)
 		elif mode == "pause":
-			if x:
-				status_return_mode="pause"; status_slot=0; archive_page=false; mode="status"
+			if x: status_return_mode="pause"; status_slot=0; archive_page=false; mode="status"
 			elif start or a: mode="play"
-		elif mode == "briefing":
-			if b: mode="menu"; track("title")
-			elif left: briefing_stage=maxi(1,briefing_stage-1)
-			elif right: briefing_stage=mini(briefing_progress.highest_unlocked,briefing_stage+1)
-			elif up: briefing_slot=(briefing_slot+count-1)%count
-			elif down: briefing_slot=(briefing_slot+1)%count
-			elif x: change_briefing_character()
-			elif start or a: launch_from_briefing()
 		elif mode == "status":
 			if start or b: mode=status_return_mode
-			elif left:
-				status_slot=(status_slot+players.size()-1)%maxi(1,players.size());archive_page=false
-			elif right:
-				status_slot=(status_slot+1)%maxi(1,players.size());archive_page=false
-			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
+			elif left: status_slot=(status_slot+players.size()-1)%maxi(1,players.size()); archive_page=false
+			elif right: status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
+			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
-		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
 		travel += dt*14
-		notice_time=maxf(0,notice_time-dt)
-	elif mode=="briefing":
 		notice_time=maxf(0,notice_time-dt)
 	for part in particles:
 		part.pos += part.vel*dt
@@ -621,6 +557,16 @@ func movement(i):
 
 func update_game(dt):
 	elapsed += dt
+	if slice_mode and aftermath>0:
+		aftermath+=dt
+		shots.clear();bullets.clear()
+		if aftermath>=3.0:finish(true)
+		return
+	if slice_mode:
+		if elapsed<34:travel=elapsed*55
+		elif mixed_scroll and not vertical.done:travel=3100
+		elif elapsed<55:travel=3700+(elapsed-46)*95
+		if elapsed>=55 and boss.is_empty():begin_boss()
 	if bio_route and mixed_scroll and not vertical.done and travel>=3100 and gate==0 and boss.is_empty():
 		if not vertical.active: vertical.begin(self)
 		vertical.update(self,dt)
@@ -633,22 +579,9 @@ func update_game(dt):
 	if bio_route: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
-		p.fusion_flash=maxf(0.0,float(p.get("fusion_flash",0.0))-dt)
 		Abilities.digest(p,dt)
 		p.cool-=dt; p.inv-=dt; p.burst=maxf(0,p.burst-dt)
 		p.charge=minf(100,p.charge+dt*2)
-		# Cor mii continues normal fire while storing a variable-power release shot.
-		if p.character==0:
-			if movement(i)[1] and p.down<=0:
-				p.shot_hold=minf(1.7,float(p.shot_hold)+dt)
-			elif p.shot_hold>=.70 and p.down<=0:
-				var charged=Abilities.damage(p,elapsed,randf())*(3.0+maxf(0,p.shot_hold-.7)*1.5)
-				bullets.append({"pos":p.pos+Vector2(19,0),"color":p.color,"owner":i,"vel":Vector2(430,0),"damage":charged,"grade":"charged_"+str(p.last_power_grade)})
-				Abilities.consume_charged_luck(p) # After firing, never before the damage roll.
-				p.shot_hold=0.0
-				sfx("shot")
-			else:
-				p.shot_hold=0.0
 		if p.down>0:
 			p.down=maxf(.01,p.down-dt)
 			var near=false
@@ -682,33 +615,29 @@ func update_game(dt):
 							target=Vector2(350,bio.part_pos(self,part).y)
 							break
 			input[0]=(target-p.pos).limit_length()
+		p.motion=input[0]
 		p.pos+=input[0]*155*dt
 		p.pos.x=clampf(p.pos.x,18,440 if gate>0 else 605)
 		p.pos.y=clampf(p.pos.y,48,320)
 		if input[1] and p.cool<=0:
 			p.cool=.13
 			var velocities=Abilities.velocities(p,Vector2.RIGHT,enemies) if bio_route else [Vector2(390,0)]
-			# One chance roll per volley, shared by all projectiles. Works in both routes.
-			var power=1.0
-			if p.character==0:
-				power=Abilities.damage(p,elapsed,randf())
-			elif bio_route:
-				power=Abilities.damage(p,elapsed)
 			for velocity in velocities:
-				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":power,"grade":p.last_power_grade if p.character==0 else "normal"})
-			if i==0: sfx("shot")
+				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":Abilities.damage(p,elapsed) if bio_route else 1.0})
+			if art_v09 and bio_route:sfx(["pulse_v09","lance_v09","spore_v09"][p.character])
+			elif i==0:sfx("shot")
 	var alive=players.any(func(p): return p.down==0)
 	if not alive and reserves==0:
 		finish(false)
 		return
 	if gate==0 and boss.is_empty():
-		if travel>=1400 and gates_done==0: begin_gate(1)
-		elif travel>=3000 and gates_done==1: begin_gate(2)
-		elif travel>=4800: begin_boss()
+		if not slice_mode and travel>=1400 and gates_done==0: begin_gate(1)
+		elif not slice_mode and travel>=3000 and gates_done==1: begin_gate(2)
+		elif not slice_mode and travel>=4800: begin_boss()
 		else:
 			wave_timer-=dt
 			if wave_timer<=0:
-				spawn_wave(); wave_timer=2.5
+				spawn_wave(); wave_timer=3.2 if slice_mode else 2.5
 	if gate>0:
 		for i in range(3): gate_lights[i]=maxf(0,gate_lights[i]-dt) if gate==2 else gate_lights[i]
 		if gate==2 and gate_lights.all(func(t): return t>0): open_gate()
@@ -727,41 +656,57 @@ func update_game(dt):
 			if gate==1 and gate_step>=3: open_gate()
 		for e in enemies:
 			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
+				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
 		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
 		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
+			visual.hit(bullet.pos)
 			if bullet.color==boss.color and (not bio_route or bio.exposed()):
 				boss.hp-=bullet.get("damage",1.0); boss.flash=.07; sfx("hit")
 			bullet.pos.x=800
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
-		e.pos.x-=e.speed*dt
-		e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
+		var motion=e.get("technique","aimed")
+		# Each organism has a readable, repeatable route before its shot telegraph.
+		if motion=="fan":
+			e.pos.x-=e.speed*dt
+			e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
+		elif motion=="weave":
+			e.pos.x-=e.speed*.82*dt
+			e.pos.y=e.base+sin(e.age*3.4+e.phase)*e.amplitude*1.35
+		elif motion=="dive":
+			e.pos.x-=e.speed*.92*dt
+			var plunge=sin(e.age*1.35+e.phase)*.5+.5
+			e.pos.y=e.base+sin(e.age*4.1+e.phase)*12+(plunge-.5)*e.amplitude*2.1
+		else: # orbit: a slow looping sidestep with a tight inner pulse.
+			e.pos.x-=e.speed*.72*dt+sin(e.age*2.0+e.phase)*17*dt
+			e.pos.y=e.base+sin(e.age*2.0+e.phase)*e.amplitude+sin(e.age*6.0+e.phase)*9
+		# This slice teaches bullets and routes, not surprise contact damage.
+		# Holding the living hull beyond the player lane preserves a clear rescue space.
+		if bio_route:e.pos.x=maxf(420,e.pos.x)
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
-			e.cool=2.5
+			e.cool=2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)
 			var target=players[wave_id%count].pos
-			for angle in ([-.2,0,.2] if bio_route and e.get("technique","")=="fan" else [0]):
-				shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*85,"r":3,"analysis_eligible":e.get("analysis_eligible",false),"source_id":e.get("analysis_id","")})
+			var angles=[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11])
+			for angle in angles:
+				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*(78 if motion=="orbit" else 88),"r":4 if motion=="dive" else 3}
+				if motion=="weave":shot.turn=.46 if angle<0 else -.46
+				if motion=="orbit":shot.turn=.22 if angle<0 else -.22
+				shots.append(shot)
 		for p in players:
 			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
 		if e.hp<=0:
-			# Jiyoza: only dedicated marked enemies drop analysis shards.
-			if e.get("scan_crystal",false) and players.any(func(p):return p.character==1 and p.analysis_uses<2):
-				pickups.append({"pos":e.pos,"kind":3})
 			for p in players:
 				if p.down==0:p.experience+=1
 			explode(e.pos,COLORS[1],14)
+			if art_v09 and bio_route: visual.confirm(e.pos,combo)
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
-			if randi()%4==0:
-				var kind=0 if randi()%4==0 else 1
-				# Rare omikuji may LOWER luck; even at 100%, let players choose to dodge it.
-				var has_cormii=players.any(func(p): return p.character==0)
-				if has_cormii and kind==1 and randi()%3==0: kind=2
-				pickups.append({"pos":e.pos,"kind":kind})
+			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
 	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
 	for shot in shots:
+		shot.vel=shot.vel.rotated(shot.get("turn",0.0)*dt)
 		shot.pos+=shot.vel*dt
 		for p in players:
 			if p.down==0 and p.pos.distance_to(shot.pos)<8+shot.r:
@@ -771,35 +716,22 @@ func update_game(dt):
 		item.pos.x-=dt*40
 		for p in players:
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
-				# Omikuji belongs to Cormii; other pilots must not consume it.
-				if item.kind==2 and p.character!=0: continue
-				if item.kind==3 and (p.character!=1 or p.analysis_uses>=2 or p.analysis_charge>=100): continue
-				if item.kind==0:
-					p.hp=mini(4,p.hp+1)
-				elif item.kind==1:
-					p.charge=minf(100,p.charge+25)
-				elif item.kind==3:
-					p.analysis_charge=mini(100,int(p.analysis_charge)+25)
-					if p.analysis_charge>=100: tell("SPECIAL ANALYSIS / READY",2.0)
-				else:
-					# Reroll replaces current fortune instantly, not an upgrade.
-					var new_roll=randi_range(5,100)
-					var omen=Abilities.draw_omikuji(p,new_roll)
-					tell("CORMII LUCK "+str(omen.before)+"% > "+str(omen.after)+"%",2.2)
-				explode(item.pos,Color("96faff") if item.kind==3 else (Color("ffe5a0") if item.kind==2 else (Color("ffb7a2") if item.kind==0 else Color("9ee8ff"))),11 if item.kind in [2,3] else 8)
+				if item.kind==0: p.hp=mini(4,p.hp+1)
+				else: p.charge=minf(100,p.charge+25)
 				score+=50; sfx("pickup"); item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
-	if not boss.is_empty() and boss.hp<=0: finish(true)
+	if not boss.is_empty() and boss.hp<=0:
+		if slice_mode:
+			explode(boss.pos,COLORS[2],90);boss={};aftermath=.01;shots.clear();enemies.clear()
+		else:finish(true)
 
 func spawn_wave():
 	wave_id+=1
 	var base=85+(wave_id*61)%190
-	var pattern="fan" if wave_id%2==0 else "aimed"
-	var group: Array=[]
 	for j in range(3+count):
-		group.append({"pos":Vector2(670+j*34,base),"base":base,"age":0.0,"phase":j*.65,"speed":55.0+wave_id%4*9,"amplitude":23.0,"hp":2+int(count>1),"cool":1.5+j*.35,"flash":0.0,"technique":pattern,"scan_crystal":wave_id in [4,8,12,16,24,32,40,48] and j==0})
-	enemy_analysis.mark_new_group(group,"prototype/"+pattern)
-	enemies.append_array(group)
+		var technique=["fan","weave","dive","orbit"][(wave_id+j)%4] if bio_route else "aimed"
+		var lane=base+(j-(count+1)*.5)*18
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":55.0+wave_id%4*9,"amplitude":23.0+int(technique=="dive")*8,"hp":2+int(count>1),"cool":1.3+j*.27,"flash":0.0,"technique":technique})
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
@@ -818,8 +750,10 @@ func begin_boss():
 	enemies.clear(); shots.clear(); bullets.clear()
 	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
 	if bio_route: bio.begin_boss(count)
+	if slice_mode:
+		boss.hp=40.0+count*18;boss.max=boss.hp
+		bio.armor=[10+count*3,10+count*3]
 	track("sentinel")
-	play_jingle("boss")
 	tell("WARNING / LIVING CORE - EXPERIMENT" if bio_route else "WARNING / PRISM SENTINEL",4)
 
 func update_boss(dt):
@@ -851,33 +785,33 @@ func hurt(p):
 			for id in pads:
 				Input.start_joy_vibration(id,.2,.4,.2)
 
-# Spark/petal bursts have a strict limit so heavy 3P bullet screens stay clear.
 func explode(pos,color,amount):
-	for i in range(mini(amount,maxi(0,210-particles.size()))):
-		var lifetime=randf_range(.22,.62)
-		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(26,102),"life":lifetime,"max_life":lifetime,"color":color,"petal":i%3==0})
+	if art_v09 and bio_route:
+		visual.explode(pos,amount)
+		sfx("break_boss_v09" if amount>=80 else ("break_medium_v09" if amount>=28 else "break_small_v09"))
+	for i in range(amount):
+		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(20,115),"life":randf_range(.2,.8),"color":color})
 
 func finish(won):
 	mode="clear" if won else "over"
+	result_delay=1.2 if won and art_v09 else 0.0
 	music.stop(); sfx("gate" if won else "burst")
-	play_jingle("clear" if won else "fail")
 	if won: track("ending")
 	if won:
-		if not auto_test: briefing_progress.mark_cleared(1)
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
 	if not auto_test:
-		high_scores[count-1]=maxi(high_scores[count-1],score)
+		if not slice_mode:high_scores[count-1]=maxi(high_scores[count-1],score)
 		var cfg=ConfigFile.new()
 		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
 		cfg.save("user://scores.cfg")
-		var record={"version":"0.2.0","ruleset":"red-echo-bio-v1" if bio_route else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
+		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
 		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
 	else:
 		tests_done=true
-		if won and gates_done==2:
-			print("AUTOTEST PASS: ",count," pilots, both relay puzzles, boss defeat, stage clear. Score=",score," elapsed=",elapsed)
+		if won and (gates_done==2 or slice_mode):
+			print("AUTOTEST PASS: ",count," pilots, ","short slice" if slice_mode else "both relay puzzles",", boss defeat, stage clear. Score=",score," elapsed=",elapsed)
 			get_tree().quit(0)
 		else:
 			push_error("AUTOTEST FAIL")
@@ -939,16 +873,9 @@ func sprite(rows,pos,palette,size=1):
 					if above!=ch: draw_rect(Rect2(floor(pos.x+x*size),floor(pos.y+y*size),size,1),base.lightened(.28))
 					if x==rows[y].length()-1 or rows[y][x+1]==".": draw_rect(Rect2(floor(pos.x+(x+1)*size-1),floor(pos.y+y*size),1,size),base.darkened(.32))
 
-func ship(pos,color,size=1,character=-1):
-	var pilot_slot=""
-	if character>=0 and character<3:
-		pilot_slot=["ship_cormii","ship_jiyoza","ship_mafio"][character]
-	var art=artwork.texture(pilot_slot) if pilot_slot!="" else null
-	if art!=null:
-		draw_texture_rect(art,Rect2(pos-Vector2(16,10)*size,Vector2(32,20)*size),false)
-	else:
-		var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
-		sprite(SHIP,pos-Vector2(12,5)*size,pal,size)
+func ship(pos,color,size=1):
+	var pal=[Color("263e67"),WHITE,color,Color("7b94be")]
+	sprite(SHIP,pos-Vector2(12,5)*size,pal,size)
 	draw_rect(Rect2(pos.x-18*size,pos.y-2*size,(6+int(clock*20)%4)*size,4*size),Color("ff8b4e"))
 	draw_rect(Rect2(pos.x-14*size,pos.y-size,5*size,2*size),Color("ffedb0"))
 
@@ -964,12 +891,6 @@ func build_planet_texture():
 	planet_texture=ImageTexture.create_from_image(img)
 
 func background():
-	if mode=="menu":
-		var cover=artwork.texture("title_backdrop")
-		if cover!=null:
-			draw_texture_rect(cover,Rect2(0,0,W,H),false)
-			draw_rect(Rect2(0,0,W,H),Color(0,0,0,.25))
-			return
 	if bio_route:
 		bio.draw_background(self)
 		return
@@ -1008,84 +929,14 @@ func background():
 		draw_rect(Rect2(x+27,top+9,10,30),Color("0b1d30"))
 		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
 
-# HP and energy have distinct silhouettes, not tiny lettered boxes.
-func draw_collectible(item):
-	var p: Vector2=item.pos+Vector2(0,sin(clock*3.0+item.pos.x*.02)*1.2)
-	var image=artwork.texture("item_analysis" if item.kind==3 else ("item_omikuji" if item.kind==2 else ("item_hp" if item.kind==0 else "item_energy")))
-	if image!=null:
-		draw_texture_rect(image,Rect2(p-Vector2(10,10),Vector2(20,20)),false)
-		return
-	if item.kind==3:
-		# Pale cyan eight-facet crystal. Unlike ordinary energy it never refills over time.
-		draw_circle(p,12,Color(.30,.94,1.0,.15))
-		draw_arc(p,10,clock*.7,clock*.7+TAU,20,Color(.38,.8,1.0,.6),1.2)
-		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-10),p+Vector2(5,-5),p+Vector2(8,0),p+Vector2(5,6),p+Vector2(0,9),p+Vector2(-6,4),p+Vector2(-8,0),p+Vector2(-4,-6)]),Color("234a73"))
-		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-8),p+Vector2(5,-4),p+Vector2(6,0),p+Vector2(1,6),p+Vector2(-4,3),p+Vector2(-5,0)]),Color("5bdbef"))
-		draw_rect(Rect2(p+Vector2(-1,-5),Vector2(2,10)),Color("e1ffff"))
-		draw_rect(Rect2(p+Vector2(-5,-1),Vector2(10,2)),Color("e1ffff"))
-		return
-	if item.kind==2:
-		# A tiny omikuji: ivory folded paper, vermilion seal and golden cord.
-		draw_circle(p,12,Color(.98,.7,.27,.12))
-		draw_arc(p,11,clock*.35,clock*.35+PI*1.3,12,Color("ffe3a1"),1.1)
-		draw_rect(Rect2(p+Vector2(-5,-9),Vector2(10,18)),Color("795038"))
-		draw_rect(Rect2(p+Vector2(-4,-8),Vector2(8,16)),Color("fff3d6"))
-		draw_rect(Rect2(p+Vector2(-3,-7),Vector2(6,3)),Color("d34758"))
-		draw_rect(Rect2(p+Vector2(-1,-6),Vector2(2,2)),Color("fff3d6"))
-		draw_rect(Rect2(p+Vector2(-2,-1),Vector2(4,1)),Color("a47b57"))
-		draw_rect(Rect2(p+Vector2(-2,2),Vector2(4,1)),Color("a47b57"))
-		draw_line(p+Vector2(-6,-9),p+Vector2(6,-9),Color("fbd37b"),2)
-		draw_line(p+Vector2(0,-10),p+Vector2(0,-13),Color("fbd37b"),1)
-		return
-	var heart=item.kind==0
-	var outline=Color("3c152f") if heart else Color("112b4e")
-	var glow=Color(.98,.32,.52,.13) if heart else Color(.25,.79,1.0,.15)
-	draw_circle(p,11,glow)
-	if heart:
-		var shape=PackedVector2Array([p+Vector2(0,7),p+Vector2(-7,-1),p+Vector2(-7,-5),p+Vector2(-4,-8),p+Vector2(-1,-7),p,p+Vector2(1,-7),p+Vector2(4,-8),p+Vector2(7,-5),p+Vector2(7,-1)])
-		draw_colored_polygon(shape,outline)
-		draw_colored_polygon(PackedVector2Array([p+Vector2(0,5),p+Vector2(-5,-2),p+Vector2(-4,-5),p+Vector2(-1,-4),p,p+Vector2(1,-4),p+Vector2(4,-5),p+Vector2(5,-2)]),Color("ff6788"))
-		draw_rect(Rect2(p+Vector2(-4,-5),Vector2(3,2)),Color("fff4d7"))
-		draw_rect(Rect2(p+Vector2(-1,-2),Vector2(2,5)),Color("fff2df"))
-		draw_rect(Rect2(p+Vector2(-3,0),Vector2(6,2)),Color("fff2df"))
-	else:
-		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-10),p+Vector2(8,0),p+Vector2(0,10),p+Vector2(-8,0)]),outline)
-		draw_colored_polygon(PackedVector2Array([p+Vector2(0,-7),p+Vector2(6,0),p+Vector2(0,7),p+Vector2(-6,0)]),Color("5ce5ff"))
-		draw_colored_polygon(PackedVector2Array([p+Vector2(-1,-6),p+Vector2(4,-1),p+Vector2(0,1),p+Vector2(2,6),p+Vector2(-4,0),p+Vector2(0,-2)]),Color("fff1b9"))
-	draw_rect(Rect2(p+Vector2(-1,-13),Vector2(2,2)),Color("fff9e8"))
-	draw_rect(Rect2(p+Vector2(11,0),Vector2(2,1)),Color("fff1d0"))
-
-# A small two-tone halo follows Mafio's absorption/digestion state.
-# Inspired by the split-dye fringe in the character design: self vs other.
-# Visual only, behind no enemy bullets, with four small lights at most.
-func draw_mafio_fusion(p):
-	if p.character!=2 or p.down>0: return
-	var digesting=clampf(float(p.digest)/maxf(.1,float(p.digest_total)),0.0,1.0)
-	var flash=clampf(float(p.get("fusion_flash",0.0)),0.0,1.0)
-	if digesting<=0.0 and flash<=0.0: return
-	var opacity=minf(.75,.20+digesting*.23+flash*.38)
-	var center: Vector2=p.pos
-	var left=Color(.99,.83,.66,opacity)
-	var right=Color(.65,.45,.95,opacity)
-	draw_arc(center,16.0,PI*.5,PI*1.5,15,left,1.5)
-	draw_arc(center,16.0,-PI*.5,PI*.5,15,right,1.5)
-	# The moving seam carries swallowed technique energy through the cockpit.
-	var progress=1.0-digesting if digesting>0 else 1.0-flash
-	var offset=lerpf(-12.0,12.0,progress)
-	draw_line(center+Vector2(offset,-9),center+Vector2(offset+3,8),Color(1.0,.96,.84,opacity),1.0)
-	for n in range(4):
-		var a=clock*3.0+float(n)*TAU/4.0
-		var glint=center+Vector2(cos(a)*19.0,sin(a)*11.0)
-		draw_rect(Rect2(glint,Vector2(2,2)),left if n%2==0 else right)
-
 func _draw():
-	background()
-	if mode=="briefing":
-		draw_briefing_screen()
-		return
 	if mode=="status":
 		draw_status_screen()
 		return
+	if art_v09 and bio_route:
+		visual.draw(self)
+		return
+	background()
 	if mode=="controls":
 		draw_controls()
 		return
@@ -1094,7 +945,6 @@ func _draw():
 		return
 	if vertical.active and mode in ["play","pause","over"]:
 		vertical.draw(self)
-		if analysis_flash>0: draw_analysis_scan()
 		draw_hud()
 		if mode=="pause": centered("PAUSED / START TO RESUME",185,WHITE,2)
 		if mode=="over": draw_result()
@@ -1104,86 +954,48 @@ func _draw():
 	if gate>0: draw_gate()
 	for e in enemies:
 		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)
-		var is_fan=e.get("technique","aimed")=="fan"
-		# A pointed lance and a wide flowering interceptor read differently.
-		if is_fan:
-			draw_line(e.pos+Vector2(-19,0),e.pos+Vector2(-31,0),Color("ab5178"),2)
-			draw_rect(Rect2(e.pos+Vector2(-27,-2),Vector2(3,3)),Color("ffd5a0"))
-		else:
-			draw_line(e.pos+Vector2(11,0),e.pos+Vector2(23,0),Color("7194b6"),2)
-		var enemy_art=artwork.texture("enemy_bloom" if is_fan else "enemy_lance")
-		if enemy_art!=null:
-			draw_texture_rect(enemy_art,Rect2(e.pos-Vector2(17,11),Vector2(34,22)),false)
-			if e.flash>0: draw_circle(e.pos,5,Color(1,1,1,.6))
-		else:
-			sprite(FOE_BLOOM if is_fan else FOE_LANCE,e.pos-Vector2(16,9),[Color("22213d"),Color("5e7390") if not is_fan else Color("8f456c"),Color("c9a5b3"),WHITE if e.flash>0 else Color("ffc37d")],2)
+		sprite(FOE,e.pos-Vector2(16,10),[Color("3c2c59"),Color("9379b8"),Color("d871a4"),WHITE if e.flash>0 else Color("ffce63")],2)
 	for b in bullets:
-		var tier=b.get("grade","normal")
-		if str(tier).begins_with("charged_"):
-			var bright=Color("ffeb9b") if tier=="charged_jackpot" else (Color("fcb0b8") if tier=="charged_normal" else Color("95889f"))
-			draw_circle(b.pos,10,Color(bright.r,bright.g,bright.b,.2))
-			draw_colored_polygon(PackedVector2Array([b.pos+Vector2(-16,0),b.pos+Vector2(-4,-6),b.pos+Vector2(13,0),b.pos+Vector2(-4,6)]),bright)
-			draw_rect(Rect2(b.pos+Vector2(-8,-1),Vector2(13,2)),WHITE)
-		elif tier=="jackpot":
-			# The reward remains unmistakable, even at 640x360.
-			draw_rect(Rect2(b.pos.x-16,b.pos.y-4,25,8),Color("ea4778"))
-			draw_rect(Rect2(b.pos.x-12,b.pos.y-2,23,4),Color("ffe59b"))
-			draw_rect(Rect2(b.pos.x+3,b.pos.y-1,7,2),WHITE)
-			draw_rect(Rect2(b.pos.x-7,b.pos.y-7,3,2),Color("ffb6be"))
-			draw_rect(Rect2(b.pos.x-3,b.pos.y+5,3,2),Color("ffb6be"))
-		elif tier=="low":
-			draw_rect(Rect2(b.pos.x-4,b.pos.y-1,7,2),COLORS[b.color])
-			draw_rect(Rect2(b.pos.x+1,b.pos.y,3,1),WHITE)
-		else:
-			draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
-			draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
+		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
+		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
 	for s in shots:
-		# Dangerous projectile: angular silhouette and bright core;
-		# harmless petals are thinner, dimmer and fade.
-		var q=s.pos
-		var size=s.r+2
-		draw_colored_polygon(PackedVector2Array([q+Vector2(-size,0),q+Vector2(0,-size),q+Vector2(size,0),q+Vector2(0,size)]),Color("542342"))
-		draw_colored_polygon(PackedVector2Array([q+Vector2(-size+2,0),q+Vector2(0,-size+2),q+Vector2(size-2,0),q+Vector2(0,size-2)]),Color("ff7194"))
-		draw_rect(Rect2(q-Vector2.ONE*1.5,Vector2(3,3)),Color("fff5d7"))
+		draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
+		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
+		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
 	for item in pickups:
-		draw_collectible(item)
+		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
+		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
 	if not boss.is_empty(): draw_boss()
 	for i in range(players.size()):
 		var p=players[i]
 		if p.down>0:
+			# A pod must remain easy to find in dense fire.  The pulse is purely
+			# informational: the actual rescue range and timer stay in update_game.
+			draw_arc(p.pos,20+sin(clock*6.0)*2,0,TAU,16,Color(COLORS[i].r,COLORS[i].g,COLORS[i].b,.42),1)
 			draw_rect(Rect2(p.pos-Vector2(7,5),Vector2(14,10)),COLORS[i],false,2)
 			text_at("SOS",p.pos+Vector2(-8,-15),COLORS[i])
-			draw_rect(Rect2(p.pos+Vector2(-12,11),Vector2(24*p.rescue/1.5,2)),WHITE)
+			var rescue_ratio=clampf(p.rescue/1.5,0.0,1.0)
+			draw_rect(Rect2(p.pos+Vector2(-12,11),Vector2(24,2)),Color("18233c"))
+			draw_rect(Rect2(p.pos+Vector2(-12,11),Vector2(24*rescue_ratio,2)),WHITE)
+			if rescue_ratio>0:
+				for rescuer in players:
+					if rescuer.down==0 and rescuer.pos.distance_to(p.pos)<55:
+						draw_line(rescuer.pos,p.pos,Color(COLORS[rescuer.color].r,COLORS[rescuer.color].g,COLORS[rescuer.color].b,.72),1.5,true)
+					draw_arc(p.pos,15+rescue_ratio*12,0,TAU,16,Color(WHITE.r,WHITE.g,WHITE.b,.7),1)
 		elif p.inv<=0 or int(clock*14)%2==0:
-			ship(p.pos,COLORS[p.color],1,p.character)
+			ship(p.pos,COLORS[p.color])
 			text_at(str(i+1),p.pos+Vector2(-5,-17),COLORS[i])
 			# A small diamond marks the precise player hitbox.
 			draw_rect(Rect2(p.pos-Vector2(1,1),Vector2(2,2)),COLORS[p.color])
-		# During absorption and digestion, the two halves briefly converge.
-		# Even if the invulnerability sprite blinks, its harmless halo remains.
-		if bio_route: draw_mafio_fusion(p)
 		if p.burst>0:
 			draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,COLORS[p.color],2)
 	for part in particles:
-		var fade=clampf(float(part.life)/maxf(.05,float(part.get("max_life",.6))),0.0,1.0)
-		var tint: Color=part.color
-		tint.a=fade*.9
-		if part.get("petal",false):
-			draw_line(part.pos+Vector2(-3,2),part.pos+Vector2(2,-2),tint,2)
-			draw_rect(Rect2(part.pos+Vector2(-1,-2),Vector2(2,2)),Color(1.0,.85,.73,fade*.8))
-		else:
-			draw_rect(Rect2(part.pos,Vector2(2,2)),tint)
+		draw_rect(Rect2(part.pos,Vector2(3,2)),part.color)
 	draw_set_transform(Vector2.ZERO)
-	if analysis_flash>0: draw_analysis_scan()
 	draw_hud()
 	if notice_time>0:
-		if notice.begins_with("SHIP DOWN"):
-			draw_rect(Rect2(411,44,221,16),Color(.06,.08,.17,.88))
-			draw_rect(Rect2(411,44,2,16),Color("ffb573"))
-			text_at("ALLY DOWN / FIND SOS",Vector2(420,49),Color("ffe6bf"))
-		else:
-			draw_rect(Rect2(116,44,408,17),Color(.02,.04,.1,.88))
-			centered(notice,49,COLORS[2])
+		draw_rect(Rect2(0,43,640,20),Color(0.02,.04,.1,.85))
+		centered(notice,50,COLORS[2])
 	if mode=="pause":
 		draw_rect(Rect2(0,0,W,H),Color(0,0,.04,.8))
 		centered("PAUSED",125,WHITE,3)
@@ -1191,80 +1003,163 @@ func _draw():
 		centered("START / ENTER : RESUME",194)
 		centered("Q : RETURN TO TITLE",213,DIM)
 		centered("M : SOUND   F11 : FULLSCREEN",245,DIM)
-		centered("TAB / X : PILOT STATUS",259,Color("eacb9c"))
 		japanese("F2：コントローラー設定 / F6：音声テスト",Vector2(179,272))
 	elif mode in ["clear","over"]: draw_result()
 
-# Compact multi-pilot avionics. No Japanese names intrude into the battle area.
-# A non-obscuring blue-white scanner overlay. Keep hostile bullets visible.
-func draw_analysis_scan():
-	var alpha=clampf(analysis_flash/.56,0.0,1.0)
-	for n in range(11):
-		var py=43+n*26.0
-		draw_line(Vector2(0,py),Vector2(640,py),Color(.55,.91,1.0,.23*alpha),1)
-	for n in range(17):
-		var px=17+n*38.0
-		draw_line(Vector2(px,44),Vector2(px,333),Color(.35,.82,1.0,.11*alpha),1)
-	draw_rect(Rect2(4,42,632,292),Color(.72,.97,1.0,.45*alpha),false,2)
-	text_at("ANALYSIS COMPLETE",Vector2(259,49),Color(.75,.96,1.0,alpha))
+# STATUS-001 — battle pauses behind this screen.  HP and energy retain the same
+# shape for all pilots; each page only explains the already-playable mechanism.
+func draw_status_screen():
+	if players.is_empty(): return
+	status_slot=clampi(status_slot,0,players.size()-1)
+	var p=players[status_slot]
+	var char_id=int(p.character)
+	var accents=[Color("ff668e"),Color("67ecff"),Color("ffce63")]
+	var backgrounds=[Color("21111f"),Color("071b31"),Color("211a26")]
+	var accent=accents[char_id]
+	draw_rect(Rect2(0,0,W,H),backgrounds[char_id])
+	draw_rect(Rect2(0,0,W,4),accent)
+	for i in range(21):
+		draw_line(Vector2(i*32,48),Vector2(i*32,326),Color(accent.r,accent.g,accent.b,.07),1)
+	for i in range(8):
+		draw_line(Vector2(20,68+i*32),Vector2(620,68+i*32),Color(accent.r,accent.g,accent.b,.035),1)
+	japanese(PILOT_NAMES[char_id],Vector2(23,33),23,WHITE)
+	text_at("P"+str(status_slot+1),Vector2(184,21),accent,2)
+	japanese("ライフ",Vector2(292,28),12,WHITE)
+	for h in range(4):
+		var heart=Color("ff8fa7") if h<int(p.hp) else Color("364055")
+		draw_colored_polygon(PackedVector2Array([Vector2(350+h*19,18),Vector2(354+h*19,14),Vector2(358+h*19,18),Vector2(362+h*19,14),Vector2(366+h*19,18),Vector2(358+h*19,29)]),heart)
+	japanese("エネルギー",Vector2(447,28),12,DIM)
+	draw_rect(Rect2(519,19,96,8),Color("26324a"))
+	draw_rect(Rect2(519,19,96*clampf(float(p.charge)/100.0,0,1),8),accent)
+	draw_line(Vector2(22,49),Vector2(618,49),accent,2)
+	if archive_page and char_id==2:
+		draw_mafio_archive()
+	elif char_id==0:
+		draw_cormii_status(p,accent)
+	elif char_id==1:
+		draw_jiyoza_status(p,accent)
+	else:
+		draw_mafio_status(p,accent)
+	# Draw after each live page so the supplied, fixed protagonist appearance is
+	# visible rather than becoming a barely-readable watermark. The underlying
+	# mechanic cards remain active game data; this panel is display-only.
+	if not archive_page:
+		draw_fixed_pilot_visual(char_id,accent)
+	text_at("TAB / START : BACK   LEFT / RIGHT : PILOT",Vector2(28,341),accent)
+
+func draw_cormii_status(p,accent):
+	japanese("出力変動盤 / 瞬間最大火力",Vector2(29,78),20,Color("ffdbe5"))
+	var phase=fposmod(elapsed,8.0)
+	var labels=["最大出力","反動","安定","増幅予告"]
+	var active=0 if phase<1.5 else (1 if phase<3.0 else (3 if phase>6.5 else 2))
+	for i in range(4):
+		# Reserve the far-right column for the fixed portrait without dropping the
+		# live fourth phase card.
+		var x=30+i*99
+		var tint=accent if i==active else Color("593447")
+		draw_rect(Rect2(x,120,88,105),Color("321a2b"))
+		draw_rect(Rect2(x,120,88,105),tint,false,2)
+		draw_rect(Rect2(x+12,173,64,13),Color("3b2638"))
+		draw_rect(Rect2(x+12,173,64*(1.0 if i==active else .22),13),tint)
+		japanese(labels[i],Vector2(x+10,150),12,WHITE)
+		text_at("NOW" if i==active else "WAIT",Vector2(x+21,198),tint,1)
+	japanese("現在："+Abilities.label(p,elapsed)+"   成長 Lv "+str(Abilities.level(p)+1),Vector2(38,263),17,Color("ffe9be"))
+	japanese("大きく開花し、反動を越えて次の波を待つ。数値は試作調整中。",Vector2(38,302),14,WHITE)
+
+func draw_jiyoza_status(p,accent):
+	japanese("解析端末 / 精密・漸進成長",Vector2(29,78),20,Color("b9efff"))
+	for i in range(8):
+		draw_line(Vector2(42+i*53,110),Vector2(42+i*53,284),Color("1b5b79"),1)
+	for i in range(7):
+		draw_line(Vector2(42,110+i*25),Vector2(418,110+i*25),Color("1b5b79"),1)
+	text_at("ANALYSIS LV "+str(Abilities.level(p)+1),Vector2(57,126),accent,2)
+	for i in range(12):
+		draw_rect(Rect2(57+i*29,164,22,16),accent if i<mini(12,int(p.experience)) else Color("173b58"))
+	draw_arc(Vector2(360,224),57,0,TAU,40,Color("397b9b"),1)
+	draw_arc(Vector2(360,224),45,-PI/2,-PI/2+TAU*float(Abilities.level(p)+1)/4.0,40,Color("d3f6ff"),3)
+	draw_line(Vector2(302,224),Vector2(418,224),Color("85e7f4"),1)
+	draw_line(Vector2(360,166),Vector2(360,282),Color("85e7f4"),1)
+	japanese("取得経験 "+str(p.experience)+" / 次の解析 "+str((Abilities.level(p)+1)*8),Vector2(57,257),16,WHITE)
+	japanese("敵の軌道を読み、撃破ごとに確実に出力を高める。",Vector2(57,303),14,Color("c8f2ff"))
+
+func status_technique_name(technique:String)->String:
+	var names={"none":"基本弾","fan":"散華三連","weave":"蛇行弾","dive":"急降下弾","orbit":"環状弾","petal":"散華扇","seed":"種子分裂","halo":"放射光","beam":"細光レーザー","pierce":"貫通ニードル"}
+	return str(names.get(technique,"解析中"))
+
+func draw_mafio_status(p,accent):
+	japanese("融合器官 / 捕食・消化・変異",Vector2(29,78),20,Color("ffe6bd"))
+	# Keep all actionable digestion data left of the dedicated character panel.
+	draw_rect(Rect2(31,101,391,184),Color("352733"))
+	draw_rect(Rect2(31,101,391,184),Color("dfba6a",.48),false,1)
+	draw_line(Vector2(220,112),Vector2(220,274),Color("fff0d0"),2)
+	var total=maxf(.1,float(p.get("digest_total",1.2)))
+	var progress=1.0-clampf(float(p.digest)/total,0,1)
+	draw_arc(Vector2(220,191),67,0,TAU,40,Color("e5d1af"),2)
+	draw_arc(Vector2(220,191),65,-PI/2,-PI/2+progress*TAU,40,Color("9adeff"),4)
+	japanese("消化中の技",Vector2(56,135),14,WHITE)
+	japanese(status_technique_name(str(p.get("pending_technique","none"))) if p.digest>0 else status_technique_name(str(p.learned)),Vector2(56,173),20,Color("ffe5b4"))
+	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(250,145),17,WHITE)
+	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(250,205),15,WHITE)
+	text_at("E / X : ENEMY ARCHIVE",Vector2(250,255),Color("dfbdf7"))
+	japanese("弱った敵へ近づき、バーストで捕食。消化後に敵技を再現。",Vector2(72,309),14,WHITE)
+
+func draw_mafio_archive():
+	japanese("マフィオの捕食図鑑",Vector2(23,78),20,Color("fff0d4"))
+	text_at("E / X : STATUS",Vector2(476,67),Color("e0b8fc"))
+	var index=clampi(archive_cursor,0,MafioArchive.ENTRIES.size()-1)
+	archive_cursor=index
+	var first=clampi(index-3,0,maxi(0,MafioArchive.ENTRIES.size()-8))
+	for i in range(8):
+		var j=first+i
+		if j>=MafioArchive.ENTRIES.size(): break
+		var item=MafioArchive.ENTRIES[j]
+		var unlocked=mafio_archive.unlocked(str(item["id"]))
+		var row_y=103+i*27
+		if j==index:
+			draw_rect(Rect2(18,row_y-16,298,25),Color("5b3e59"))
+			draw_rect(Rect2(18,row_y-16,3,25),Color("f5c979"))
+		japanese(str(item["id"])+"  "+(str(item["name"]) if unlocked else "？？？？？"),Vector2(28,row_y),13,WHITE if unlocked else Color("76849c"))
+		if unlocked: text_at("x"+str(mafio_archive.captured.get(str(item["id"]),0)),Vector2(259,row_y-8),Color("aee7ec"))
+	draw_rect(Rect2(326,86,295,231),Color("1b233b"))
+	draw_rect(Rect2(326,86,295,231),Color("c8a8ce"),false,1)
+	var chosen=MafioArchive.ENTRIES[index]
+	if mafio_archive.unlocked(str(chosen["id"])):
+		japanese(str(chosen["name"]),Vector2(348,116),20,Color("ffe4bd"))
+		draw_circle(Vector2(473,173),35,Color("544066"))
+		draw_arc(Vector2(473,173),30,0,TAU,24,Color("edc785"),2)
+		draw_colored_polygon(PackedVector2Array([Vector2(473,148),Vector2(490,179),Vector2(457,179)]),Color("9fbcf5"))
+		japanese("敵の攻撃："+str(chosen["attack"]),Vector2(343,242),13,WHITE)
+		japanese("習得技："+str(chosen["ability"]),Vector2(343,268),13,Color("d8b4fc"))
+	else:
+		text_at("UNKNOWN",Vector2(372,135),Color("72809d"),2)
+		draw_circle(Vector2(473,184),43,Color("30344a"))
+		japanese("未捕食・詳細不明",Vector2(380,277),16,Color("91a1b7"))
+	text_at("UP / DOWN : SELECT",Vector2(355,301),Color("a5aac0"))
+
 func draw_hud():
-	draw_rect(Rect2(0,0,640,40),Color("08101e"))
-	draw_rect(Rect2(0,39,640,1),Color("803951"))
+	draw_rect(Rect2(0,0,640,43),Color("080f22"))
+	draw_rect(Rect2(0,32,640,1),Color("2d4a62"))
 	for i in range(count):
 		var p=players[i]
-		var x=7+i*143
-		var accent=COLORS[i]
-		draw_rect(Rect2(x,3,136,33),Color("111c30"))
-		draw_rect(Rect2(x,3,136,33),Color("5a4054"),false,1)
-		draw_rect(Rect2(x,3,28,2),accent)
-		text_at("P"+str(i+1),Vector2(x+5,10),accent)
-		japanese(PILOT_NAMES[p.character],Vector2(x+31,16),11,WHITE)
-		if p.character==1 and p.down<=0:
-			text_at("A"+str(enemy_analysis.count_observed()),Vector2(x+94,10),Color("c0f7ff"))
-		if p.character==0 and p.down<=0:
-			draw_rect(Rect2(x+94,34,29,2),Color("392c48"))
-			draw_rect(Rect2(x+94,34,29.0*clampf(p.shot_hold/1.0,0,1),2),Color("ffcf77"))
-		if p.character==0 and p.down<=0:
-			text_at(str(int(p.luck))+"%",Vector2(x+96,10),Color("ffe8af"))
-		if p.character==2 and p.down<=0:
-			# Hair motif / tech digestion marker: left self, right other.
-			draw_rect(Rect2(x+100,7,5,3),Color("ffe1b2"))
-			draw_rect(Rect2(x+105,7,5,3),Color("9a6ed8"))
-			if p.digest>0:
-				draw_rect(Rect2(x+100,12,10*(1.0-clampf(p.digest/maxf(.1,p.digest_total),0,1)),2),Color("d9faff"))
-		if p.down>0:
-			text_at("SOS",Vector2(x+103,10),Color("ffb77c"))
-		else:
-			draw_rect(Rect2(x+121,10,8,7),COLORS[p.color])
-			draw_rect(Rect2(x+123,12,4,3),WHITE)
-		for h in range(4):
-			draw_rect(Rect2(x+6+h*15,21,12,6),Color("ff9ab2") if h<p.hp else Color("28334b"))
-			if h<p.hp: draw_rect(Rect2(x+7+h*15,21,9,2),Color("ffe5dd"))
-		var active_gauge=float(p.analysis_charge) if p.character==1 else float(p.charge)
-		draw_rect(Rect2(x+6,31,87,3),Color("26364a"))
-		draw_rect(Rect2(x+6,31,87*clampf(active_gauge/100.0,0,1),3),Color("89eeff") if p.character==1 else accent)
-		if p.down>0:
-			text_at("RESCUE",Vector2(x+98,27),Color("ffaf82"))
-		elif p.character==1:
-			if p.analysis_uses>=2: text_at("MAX 2",Vector2(x+98,27),DIM)
-			elif p.analysis_charge>=100: text_at("READY",Vector2(x+98,27),Color("b4faff"))
-			else: text_at(str(int(p.analysis_charge))+"%",Vector2(x+102,27),Color("b4d9e4"))
-		elif p.charge>=100: text_at("READY",Vector2(x+98,27),Color("ffe3a4"))
-		else: text_at(str(int(p.charge))+"%",Vector2(x+103,27),DIM)
-	draw_rect(Rect2(444,3,190,33),Color("111a2c"))
-	draw_rect(Rect2(444,3,190,33),Color("5a4054"),false,1)
-	text_at("SCORE",Vector2(451,9),DIM)
-	text_at("%07d"%score,Vector2(496,9),WHITE)
-	text_at("STOCK "+str(reserves),Vector2(452,24),Color("ffce63"))
-	text_at("COMBO X"+str(combo),Vector2(547,24),COLORS[0])
-	draw_rect(Rect2(0,336,640,24),Color("08101e"))
-	draw_rect(Rect2(0,336,640,1),Color("803951"))
-	text_at("01 / RED ECHO" if bio_route else "01 / RUINS",Vector2(12,346),WHITE)
-	if bio_route and count==1: japanese(Abilities.label(players[0],elapsed),Vector2(156,355),10,COLORS[0])
-	text_at("M MUSIC "+("OFF" if muted else "ON"),Vector2(365,346),DIM)
-	draw_rect(Rect2(502,347,124,4),Color("28374e"))
-	draw_rect(Rect2(502,347,minf(124.0,travel/4800.0*124.0),4),Color("ef8c95"))
-	text_at("STAGE",Vector2(554,354),DIM)
+		var x=12+i*138
+		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
+		japanese(PILOT_NAMES[p.character],Vector2(x,39),10,WHITE)
+		if bio_route: japanese(Abilities.label(p,elapsed),Vector2(x+48,39),9,COLORS[i])
+		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
+		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
+		draw_rect(Rect2(x,22,110,3),Color("26314b"))
+		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[i])
+		if p.charge>=100: text_at("B",Vector2(x+115,19),WHITE)
+	text_at("SCORE",Vector2(460,7),DIM)
+	text_at("%07d"%score,Vector2(515,7),WHITE)
+	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
+	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
+	draw_rect(Rect2(0,337,640,23),Color("080f22"))
+	japanese("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",Vector2(12,354),11,DIM)
+	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
+	text_at("START PAUSE",Vector2(405,345),DIM)
+	draw_rect(Rect2(500,347,125,2),Color("28374e"))
+	draw_rect(Rect2(500,347,minf(125,travel/4800*125),2),COLORS[0])
 
 func draw_gate():
 	var col=COLORS[1] if gate_flash>0 else Color("365878")
@@ -1318,49 +1213,81 @@ func draw_boss():
 	draw_rect(Rect2(193,82,360*maxf(0,boss.hp)/boss.max,4),col)
 
 func draw_menu():
-	text_at("AN ORIGINAL CO-OP ARCADE SHOOTER",Vector2(22,20),DIM)
-	text_at("LOCAL 1-3P",Vector2(552,20),COLORS[0])
-	japanese("F3：ルート切替 / "+("赤い残響・生体試作" if bio_route else "共鳴遺跡・従来試作"),Vector2(22,43),12,COLORS[2])
-	# A user-supplied or original PNG logo overrides the procedural plate.
-	# Keep the fallback if the asset has not been imported into Godot yet.
-	var logo=artwork.texture("title_logo")
-	if logo!=null:
-		draw_texture_rect(logo,Rect2(122,64,396,82),false)
+	# Read top-to-bottom: mission -> ships -> launch. Keep the landing screen a title
+	# card, but give the actionable parameters the same visual weight as the art.
+	draw_rect(Rect2(12,10,616,42),Color("071122",.9))
+	draw_rect(Rect2(12,10,616,42),Color("527e9c"),false,1)
+	draw_rect(Rect2(18,16,4,30),COLORS[0])
+	japanese("MISSION  //  RED ECHO",Vector2(30,27),12,Color("d9e8ec"))
+	japanese("第1境界・生体宙域",Vector2(30,44),10,COLORS[2])
+	draw_rect(Rect2(506,18,108,25),Color("10283e"))
+	draw_rect(Rect2(506,18,108,25),Color(COLORS[0],.7),false,1)
+	japanese("LOCAL  1 - 3P",Vector2(518,34),10,COLORS[0])
+	# Chat UI-013 supplies a longer, uncut floral rule around the title.  It is
+	# a presentation layer only: older builds retain the existing title assets.
+	if chat_ui_atlas:
+		draw_chat_ui_region(Rect2(48,0,1346,160),Rect2(16,51,608,72))
+	elif title_logo_extended:
+		draw_texture_rect(title_logo_extended,Rect2(50,42,540,180),false)
+	elif title_logo:
+		draw_texture_rect(title_logo,Rect2(121,57,396,90),false)
+		centered("M  A  N  J  U  S  H  A  G  E",147,COLORS[0],2)
 	else:
-		draw_rect(Rect2(125,66,390,80),Color("0d1227"))
-		draw_rect(Rect2(125,66,390,80),Color("946b66"),false,2)
-		draw_rect(Rect2(131,72,378,2),Color("e39b7b"))
-		draw_rect(Rect2(132,139,376,2),Color("63253e"))
-		for j in range(10):
-			var ray_x=147+j*37
-			draw_line(Vector2(ray_x,78),Vector2(ray_x+17,94),Color(.89,.24,.35,.25),1)
-		japanese("曼珠沙華",Vector2(227,107),48,Color("45142e"))
-		japanese("曼珠沙華",Vector2(222,103),48,Color("e7455f"))
-		japanese("曼珠沙華",Vector2(219,99),48,Color("f1f0e6"))
-		centered("MANJUSHAGE",122,Color("f2bfa3"),2)
-	japanese("F4 / X：先頭 "+PILOT_NAMES[pilot_offset],Vector2(207,155),13,COLORS[2])
-	japanese("F5：縦区間 "+("ON" if mixed_scroll else "OFF")+"   F8：新曲 "+("ON" if new_music else "OFF"),Vector2(185,202),11,WHITE)
-	ship(Vector2(319,181),COLORS[0],2,pilot_offset)
-	ship(Vector2(240,180),COLORS[1],1,(pilot_offset+1)%3)
-	ship(Vector2(397,180),COLORS[2],1,(pilot_offset+2)%3)
-	centered("<   "+str(count)+" PILOT"+("S" if count>1 else " ")+"   >",216,WHITE,2)
-	draw_rect(Rect2(220,239,200,28),COLORS[0])
-	centered("LAUNCH SQUAD",249,Color("0a1830"),1)
-	japanese("左右で人数選択 / A または Enter で出撃",Vector2(189,282),13,WHITE)
-	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+" / BGM "+("OFF" if muted else ("ON" if music.playing else "ERROR"))+" / F6 AUDIO TEST",294,COLORS[2])
-	japanese("F2：十字キー・ボタン設定（クリック可）",Vector2(193,321),12,COLORS[0])
-	text_at("Z SHOT  X COLOR  C BURST",Vector2(22,328),DIM)
-	text_at("H HOW TO PLAY",Vector2(282,328),WHITE)
-	if briefing_progress.highest_unlocked>=2:
-		japanese("L：ブリーフィング・過去のステージへ",Vector2(179,315),12,Color("ffe0a6"))
-	text_at("HI %07d"%high_scores[count-1],Vector2(510,328),COLORS[0])
-	text_at("PROTOTYPE 0.8 / ART PASS 01",Vector2(22,345),Color("71849b"))
+		japanese("曼珠沙華",Vector2(224,103),48,Color("203b59"))
+		japanese("曼珠沙華",Vector2(221,100),48,WHITE)
+		centered("MANJUSHAGE",116,COLORS[0],3)
+	# Compact parameter strip: it names every setting that can change on this screen.
+	draw_rect(Rect2(164,156,312,29),Color("08162b",.9))
+	draw_rect(Rect2(164,156,312,29),Color("527e9c"),false,1)
+	draw_line(Vector2(267,160),Vector2(267,181),Color("35536d"),1)
+	draw_line(Vector2(373,160),Vector2(373,181),Color("35536d"),1)
+	japanese("人数",Vector2(176,168),9,DIM)
+	japanese(str(count)+" PILOTS",Vector2(176,180),11,WHITE)
+	japanese("先導機",Vector2(280,168),9,DIM)
+	japanese(PILOT_NAMES[pilot_offset],Vector2(280,180),11,COLORS[2])
+	japanese("航路",Vector2(386,168),9,DIM)
+	japanese("赤い残響" if bio_route else "共鳴遺跡",Vector2(386,180),11,COLORS[0])
+	if art_v09 and bio_route:
+		for i in range(3):
+			visual.ship(self,{"pos":Vector2(240+i*80,202),"color":i,"character":i,"experience":0},i,0,1.15)
+	else:
+		ship(Vector2(319,202),COLORS[0],2)
+		ship(Vector2(240,201),COLORS[1])
+		ship(Vector2(397,201),COLORS[2])
+	draw_rect(Rect2(183,219,274,25),Color("08162b",.94))
+	draw_rect(Rect2(183,219,274,25),Color("35536d"),false,1)
+	japanese("◀",Vector2(198,237),13,COLORS[0])
+	japanese("▶",Vector2(438,237),13,COLORS[0])
+	centered(str(count)+" 名編成",238,WHITE,2)
+	# The launch control is deliberately the largest, brightest interactive surface.
+	if chat_ui_atlas:
+		# Crop the red selected button frame from the supplied four-state UI atlas.
+		# Mask its source label, then place the live action label over it so this
+		# remains an actual sortie control rather than a static mockup.
+		draw_chat_ui_region(Rect2(123,224,188,49),Rect2(190,250,260,44))
+		draw_rect(Rect2(202,258,236,27),Color("32152b",.88))
+		draw_rect(Rect2(202,258,236,27),Color("ffc4cf",.48),false,1)
+	elif launch_button:
+		draw_texture_rect(launch_button,Rect2(175,230,290,82),false)
+	else:
+		draw_rect(Rect2(194,251,252,44),Color(COLORS[0],.16))
+		draw_rect(Rect2(198,255,244,36),Color("0d3150"))
+		draw_rect(Rect2(198,255,244,36),COLORS[0],false,2)
+		draw_rect(Rect2(204,261,232,3),Color("f0fff6",.55))
+	japanese("出　撃",Vector2(289,281),19,WHITE)
+	japanese("A / ENTER",Vector2(373,281),10,COLORS[2])
+	centered("左右：人数選択　　F4 / X：先導機　　F8 / B：航路",309,DIM)
+	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+"  //  BGM "+("OFF" if muted else "ON"),323,COLORS[2])
+	japanese("F2：コントローラー設定",Vector2(22,341),10,COLORS[0])
+	japanese("H：遊び方",Vector2(282,341),10,WHITE)
+	japanese("最高 %07d"%high_scores[count-1],Vector2(510,341),10,COLORS[0])
+	japanese("曼珠沙華 0.9 / 生体宇宙 試作",Vector2(22,354),10,Color("3e536f"))
 	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
-	text_at("F11 FULLSCREEN",Vector2(540,345),Color("3e536f"))
+	japanese("F11：全画面",Vector2(540,345),10,Color("3e536f"))
 	if show_help:
 		draw_rect(Rect2(45,42,550,270),Color("0c162c"))
 		draw_rect(Rect2(45,42,550,270),COLORS[0],false,1)
-		centered("FLIGHT MANUAL",60,COLORS[0],2)
+		japanese("操縦説明",Vector2(278,61),18,COLORS[0])
 		var lines=["GAMEPAD : STICK / D-PAD MOVE", "A / RT : SHOT   X : COLOR   B : BURST", "START : PAUSE   LEFT / RIGHT : PLAYER COUNT", "", "P1 : ARROWS    Z SHOT / X COLOR / C BURST", "P2 : W A S D   R SHOT / F COLOR / G BURST", "P3 : I J K L   U SHOT / O COLOR / N BURST", "", "MATCH THE RELAY COLOR AND SHOOT ITS CORE.", "APPROACH A DOWNED ALLY FOR 1.5S TO RESCUE.", "BURST CLEARS BULLETS. ENERGY REFILLS OVER TIME.", "1 HIT = 1 HULL. SOLO RESPAWNS USE RESERVES."]
 		for i in range(lines.size()): text_at(lines[i],Vector2(69,92+i*15),WHITE if i<7 else DIM)
 		centered("H : CLOSE / ENTER : LAUNCH",290,COLORS[2])
@@ -1380,221 +1307,14 @@ func draw_controls():
 	japanese("登録完了後は、決定ボタンを一度離してください",Vector2(167,318),12,DIM)
 
 func draw_result():
+	if result_delay>0:return
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
-	centered("SECTOR CLEAR" if mode=="clear" else "SIGNAL LOST",83,COLORS[0] if mode=="clear" else COLORS[1],3)
+	japanese("境界を越えた" if mode=="clear" else "通信が途切れた",Vector2(232 if mode=="clear" else 205,92),24,COLORS[0] if mode=="clear" else COLORS[1])
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
-	else: centered("THE RELAY SINGS AGAIN" if mode=="clear" else "REGROUP. RELOAD. RETURN.",119,DIM)
+	else: japanese("記憶の門が、もう一度ひらく。" if mode=="clear" else "態勢を整えて、もう一度。",Vector2(210,126),13,DIM)
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
-
-
-# STATUS-001: All pilots share identical HP/heart language, while the rest
-# of the page is entirely separate avionics. TAB or pause-pad X opens.
-func draw_status_screen():
-	if players.is_empty(): return
-	status_slot=clampi(status_slot,0,players.size()-1)
-	var p=players[status_slot]
-	var char_id=int(p.character)
-	var accents=[Color("ee618c"),Color("68c8f4"),Color("f4c974")]
-	var bg=[Color("221322"),Color("071c32"),Color("211a25")][char_id]
-	var accent=accents[char_id]
-	draw_rect(Rect2(0,0,640,360),bg)
-	draw_rect(Rect2(0,0,640,4),accent)
-	for j in range(21):
-		draw_line(Vector2(j*32,42),Vector2(j*32,320),Color(accent.r,accent.g,accent.b,.045),1.0)
-	japanese(PILOT_NAMES[char_id],Vector2(24,32),23,WHITE)
-	text_at("P"+str(status_slot+1),Vector2(218,21),accent,2)
-	# Invariant shared HP interface: same icon sizes, colors, layout across pilots.
-	japanese("ライフ",Vector2(306,24),12,WHITE)
-	for h in range(4):
-		var c=Color("ff8fa7") if h<int(p.hp) else Color("3c425a")
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(370+h*18,14),Vector2(374+h*18,10),
-			Vector2(378+h*18,14),Vector2(382+h*18,10),
-			Vector2(386+h*18,14),Vector2(378+h*18,23)
-		]),c)
-	draw_line(Vector2(22,41),Vector2(617,41),accent,2)
-	if archive_page and char_id==2 and briefing_progress.feature_available("mafio"):
-		draw_mafio_archive()
-	elif char_id==0:
-		draw_cormii_status(p)
-	elif char_id==1:
-		draw_jiyoza_status(p)
-	else:
-		draw_mafio_status(p)
-	if not archive_page:
-		draw_fixed_pilot_visual(char_id,accent)
-	text_at("TAB / START : BACK     LEFT / RIGHT : PILOT",Vector2(27,342),accent)
-
-# The crop is portrait-only. It intentionally does not make the source board's
-# example values, menu labels, or dialogue into game data or confirmed canon.
-func draw_fixed_pilot_visual(char_id:int,accent:Color):
-	if not character_system_ui: return
-	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
-	var panel=Rect2(447,51,166,166)
-	draw_rect(panel,Color("080d1c",.93))
-	draw_texture_rect_region(character_system_ui,Rect2(454,55,152,143),sources[char_id])
-	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
-	draw_rect(Rect2(454,198,152,12),Color("101525",.88))
-	text_at("LIVE PROFILE",Vector2(468,201),accent,1)
-
-func draw_cormii_status(p):
-	japanese("開運盤・おみくじ",Vector2(29,71),20,Color("ffd7d9"))
-	var luck=clampi(int(p.get("luck",50)),0,100)
-	var low_chance=int(round(lerpf(36.0,6.0,float(luck)/100.0)))
-	var jackpot_chance=int(round(lerpf(8.0,46.0,float(luck)/100.0)))
-	var normal_chance=100-low_chance-jackpot_chance
-	japanese("現在の運気  "+str(luck)+"%   "+Abilities.luck_title(p),Vector2(29,104),18,Color("ffe6aa"))
-	draw_rect(Rect2(326,86,269,10),Color("40293c"))
-	draw_rect(Rect2(326,86,269.0*float(luck)/100.0,10),Color("ffca7b"))
-	for i in range(3):
-		var x=42+i*185
-		var tint=[Color("5f3e57"),Color("bd5374"),Color("ffbb70")][i]
-		draw_rect(Rect2(x,124,167,148),Color("3f2436"))
-		draw_rect(Rect2(x,124,167,148),tint,false,2)
-		text_at(["LOW","NORMAL","JACKPOT"][i],Vector2(x+17,143),tint,2)
-		draw_circle(Vector2(x+80,201),28,tint.darkened(.35))
-		draw_arc(Vector2(x+80,201),26,-PI*.6,PI*.6,20,tint,3)
-		japanese(["弱威力","通常威力","大当たり！"][i],Vector2(x+45,249),14,WHITE)
-		var chance=[low_chance,normal_chance,jackpot_chance][i]
-		text_at(str(chance)+"%",Vector2(x+63,169),Color("fff2de"),2)
-	japanese("おみくじは再抽選！ 運気が下がることもある",Vector2(33,293),14,WHITE)
-	var log: Array=p.get("fortune_history",[])
-	if not briefing_progress.feature_available("cormii"):
-		japanese("ツイてる日記：6面からムゥの発明で解放",Vector2(33,316),14,Color("ffe6aa"))
-	elif log.size()>0:
-		var last: Dictionary=log[log.size()-1]
-		japanese("最新："+str(last.event)+"  "+str(last.before)+"% → "+str(last.after)+"%",Vector2(33,316),14,Color("ffe6aa"))
-	else:
-		japanese("運試し履歴：まだありません",Vector2(33,316),14,Color("ffe6aa"))
-
-func draw_jiyoza_status(p):
-	japanese("解析端末 / 精密・漸進成長",Vector2(29,71),19,Color("b6efff"))
-	for n in range(11):
-		draw_line(Vector2(40+n*54,100),Vector2(40+n*54,298),Color("1c5673"),1)
-	for n in range(8):
-		draw_line(Vector2(40,100+n*27),Vector2(603,100+n*27),Color("1c5673"),1)
-	var level_now=Abilities.level(p)+1
-	text_at("ANALYSIS LV "+str(level_now),Vector2(55,119),Color("a4e8ff"),2)
-	for n in range(12):
-		draw_rect(Rect2(55+n*42,162,32,15),Color("50d8ed") if n<mini(12,int(p.experience)) else Color("183e60"))
-	for m in range(4):
-		draw_line(Vector2(80+m*55,234),Vector2(245+m*55,210),Color(.40,.79,.96,.45),2)
-	draw_arc(Vector2(505,227),57,0,TAU,40,Color("3f81ad"),1)
-	draw_arc(Vector2(505,227),45,0,TAU*float(level_now)/4.0,40,Color("c6f5ff"),3)
-	draw_line(Vector2(449,227),Vector2(561,227),Color("7ddfeb"),1)
-	draw_line(Vector2(505,168),Vector2(505,286),Color("7ddfeb"),1)
-	japanese("取得経験 "+str(p.experience),Vector2(56,283),15,WHITE)
-	if briefing_progress.feature_available("jiyoza"):
-		japanese("記録した敵種 "+str(enemy_analysis.count_observed()),Vector2(298,299),12,Color("b0e8f5"))
-	else:
-		japanese("解析履歴：5面から解放",Vector2(298,299),12,Color("b0e8f5"))
-	japanese("解析ゲージ "+str(p.analysis_charge)+"%   使用 "+str(p.analysis_uses)+"/2",Vector2(57,326),13,Color("b9f4ff"))
-	japanese("解析精度と出力が着実に上がる",Vector2(58,306),14,Color("a9d8e7"))
-
-func draw_mafio_status(p):
-	japanese("融合器官 / 捕食・消化・変異",Vector2(29,71),19,Color("ffe3b6"))
-	draw_rect(Rect2(32,90,286,203),Color("34262f"))
-	draw_rect(Rect2(318,90,284,203),Color("2c2448"))
-	draw_line(Vector2(318,90),Vector2(318,293),Color("fff0d0"),2)
-	for n in range(6):
-		var y=111+n*25
-		draw_arc(Vector2(321,y),16,-PI/2,PI/2,12,Color("e9b7ff"),1)
-	var progress=1.0-clampf(float(p.digest)/maxf(.1,float(p.digest_total)),0,1)
-	draw_arc(Vector2(319,182),66,0,TAU,40,Color("e1cfaf"),2)
-	draw_arc(Vector2(319,182),65,-PI/2,-PI/2+progress*TAU,40,Color("9addff"),4)
-	japanese("現在の技",Vector2(61,127),15,WHITE)
-	japanese("基本弾" if str(p.learned)=="none" else ("拡散弾" if str(p.learned)=="fan" else "狙い撃ち"),Vector2(61,170),20,Color("ffe5b4"))
-	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(382,150),17,WHITE)
-	if briefing_progress.feature_available("mafio"):
-		japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(365,213),15,WHITE)
-		text_at("E / X : ENEMY ARCHIVE",Vector2(344,262),Color("d5baf6"))
-	else:
-		japanese("ごちそうさま図鑑：4面から解放",Vector2(365,213),12,WHITE)
-	japanese("敵の技を食べて、自分の力へ変える",Vector2(150,316),14,WHITE)
-
-func draw_mafio_archive():
-	japanese("マフィオの捕食図鑑",Vector2(23,72),20,Color("fff0d4"))
-	text_at("E / X : STATUS",Vector2(474,64),Color("e0b8fc"))
-	var entries=MafioArchive.ENTRIES
-	var index=clampi(archive_cursor,0,entries.size()-1)
-	archive_cursor=index
-	var first=clampi(index-3,0,maxi(0,entries.size()-8))
-	for i in range(8):
-		var j=first+i
-		if j>=entries.size(): break
-		var item=entries[j]
-		var unlocked=mafio_archive.unlocked(str(item.id))
-		var row_y=91+i*28
-		if j==index:
-			draw_rect(Rect2(18,row_y-15,298,26),Color("5b3e59"))
-			draw_rect(Rect2(18,row_y-15,3,26),Color("f5c979"))
-		japanese(str(item.id)+"  "+(str(item.name) if unlocked else "？？？？？"),Vector2(28,row_y),14,WHITE if unlocked else Color("76849c"))
-		if unlocked:
-			text_at("x"+str(mafio_archive.captured.get(str(item.id),0)),Vector2(259,row_y-7),Color("aee7ec"))
-	draw_rect(Rect2(326,77,295,245),Color("1b233b"))
-	draw_rect(Rect2(326,77,295,245),Color("c8a8ce"),false,1)
-	var chosen=entries[index]
-	if mafio_archive.unlocked(str(chosen.id)):
-		japanese(str(chosen.name),Vector2(349,107),21,Color("ffe4bd"))
-		draw_circle(Vector2(472,168),35,Color("544066"))
-		draw_arc(Vector2(472,168),30,0,TAU,24,Color("edc785"),2)
-		draw_colored_polygon(PackedVector2Array([Vector2(472,143),Vector2(489,174),Vector2(456,174)]),Color("9fbcf5"))
-		japanese("敵の攻撃："+str(chosen.attack),Vector2(343,239),13,WHITE)
-		japanese("習得技："+str(chosen.ability),Vector2(343,266),13,Color("d8b4fc"))
-		japanese("捕食："+str(mafio_archive.captured.get(str(chosen.id),0))+" 回",Vector2(343,295),12,WHITE)
-	else:
-		text_at("UNKNOWN",Vector2(371,128),Color("72809d"),2)
-		draw_circle(Vector2(472,185),43,Color("30344a"))
-		japanese("未捕食・詳細不明",Vector2(380,277),16,Color("91a1b7"))
-	text_at("UP / DOWN : SELECT",Vector2(355,310),Color("a5aac0"))
-
-# Preparation-room prototype; only stage 1 can actually launch today.
-func draw_briefing_screen():
-	draw_rect(Rect2(0,0,640,360),Color("0b1424"))
-	for i in range(12):
-		draw_line(Vector2(i*62,49),Vector2(i*62-80,337),Color(.3,.5,.65,.11),1)
-	draw_rect(Rect2(0,0,640,48),Color("1d2036"))
-	draw_rect(Rect2(0,46,640,2),Color("bc6384"))
-	japanese("出撃ブリーフィング",Vector2(24,30),23,Color("fff1d8"))
-	text_at("STAGE "+str(briefing_stage).pad_zeros(2),Vector2(488,17),Color("ffddab"),2)
-	japanese("ステージ選択／以前のステージも再挑戦できる",Vector2(23,69),13,WHITE)
-	for number in range(1,9):
-		var column=int((number-1)/4)
-		var row=(number-1)%4
-		var x=22+column*134
-		var y=77+row*29
-		var unlocked=briefing_progress.can_select(number)
-		var selected=number==briefing_stage
-		var shade=Color("70435e") if selected else Color("21354a")
-		draw_rect(Rect2(x,y,126,26),shade if unlocked else Color("18202f"))
-		draw_rect(Rect2(x,y,126,26),Color("ffe2a4") if selected else Color("45617a"),false,1)
-		text_at(str(number).pad_zeros(2)+" "+("REPLAY" if briefing_progress.cleared.get(number,false) else ("OPEN" if unlocked else "LOCK")),Vector2(x+9,y+9),WHITE if unlocked else DIM)
-	japanese("任務： "+briefing_progress.stage_name(briefing_stage),Vector2(24,227),16,Color("fff0d9"))
-	var launchable=briefing_progress.can_launch(briefing_stage)
-	japanese("戦闘エリア：出撃可能" if launchable else "戦闘エリア：制作中",Vector2(25,251),13,Color("b9e5d9") if launchable else Color("f2bca3"))
-	japanese("未完成ステージでは出撃できません",Vector2(25,273),12,DIM)
-	draw_rect(Rect2(305,65,312,154),Color("1a233b"))
-	draw_rect(Rect2(305,65,312,154),Color("836b8e"),false,1)
-	japanese("出撃メンバー",Vector2(322,85),16,Color("ffe4b3"))
-	for slot in range(count):
-		var character=int(briefing_chars[slot])
-		var y=99+slot*38
-		if slot==briefing_slot:
-			draw_rect(Rect2(313,y-10,297,35),Color("433650"))
-			draw_rect(Rect2(313,y-10,297,35),Color("ffda94"),false,1)
-		ship(Vector2(341,y+7),COLORS[slot],1,character)
-		japanese(str(slot+1)+"P  "+PILOT_NAMES[character],Vector2(373,y+15),14,WHITE)
-		japanese(["運試し","解析","捕食"][character],Vector2(525,y+15),12,Color("e5c6af"))
-	draw_rect(Rect2(307,225,307,61),Color("1b2537"))
-	japanese("ムゥの発明／記録装置",Vector2(322,245),14,Color("eacdbb"))
-	japanese("4面：捕食図鑑　5面：解析　6面：運試し",Vector2(321,266),11,DIM)
-	draw_rect(Rect2(383,294,225,38),Color("67acb7") if launchable else Color("5a5d6e"))
-	japanese("出撃する" if launchable else "まだ出撃できません",Vector2(425,320),18,Color("102033") if launchable else WHITE)
-	text_at("LEFT/RIGHT STAGE   UP/DOWN PILOT   X CHANGE   ENTER/A LAUNCH",Vector2(24,347),Color("b7d5d7"))
-	if notice_time>0:
-		japanese(notice,Vector2(26,304),12,Color("ffe2a2"))

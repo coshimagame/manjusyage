@@ -250,3 +250,10 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - 配布物を `--headless --main-pack ... --scene res://main.tscn -- --autotest --players=1` で起動し、終了コード0を確認。物理コントローラー、人間操作、音楽の実聴、画面キャプチャは未検証。
 - Godot標準Windows export templateはローカル未導入のため、通常`export-release`は使えない。GitHub Actionsの正式Windows書き出しは別途確認する。
 
+# 2026-11-07 v0.9の採用済み描画をmainへ復元
+
+- main統合後に旧コード描画へ戻ったことを確認。原因はGitHub mainの古い描画系を基準にしたことで、実プレビューで確認済みだったv0.9描画アダプタがmainに入っていなかったため。
+- `snapshot/v12-local-20261107`から、`visual_v09.gd`、生体ステージ描画、3人の戦闘/ステータス実装、画像出撃UI、`art/v09`、Stage 1背景コンセプト、v0.9音源を復元する。main既存のAntigravity機体PNG・タイトルPNG・Actions設定は削除しない。
+- Godot 4.6.3で `test_v09.gd`、`test_status_v09.gd`、`test_biological_stage.gd`、`test_prologue.gd` を実行しPASS。終了時のObjectDB/Resource解放警告は既知。画像読み込みのexport警告はPCK方式で原本PNGも同梱するため、通常export template向けの注意として記録する。
+- 現行ヘッドレス環境ではViewport画像readbackがnullとなり新規の連続キャプチャは失敗。これは実ゲーム描画の失敗ではなく、キャプチャAPIの制約。物理パッド、人間操作、実聴は未検証。
+

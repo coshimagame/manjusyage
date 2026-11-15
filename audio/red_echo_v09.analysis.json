@@ -1,0 +1,32 @@
+{
+  "version": "AUD-014-v0.9",
+  "bpm": 150,
+  "bars": 48,
+  "seconds": 76.8,
+  "peak": 0.35590253918660736,
+  "rms": 0.08312442609616076,
+  "boundary_jump": 0.01441443464213138,
+  "sections": {
+    "intro": [
+      0,
+      4
+    ],
+    "A": [
+      4,
+      20
+    ],
+    "bridge": [
+      20,
+      28
+    ],
+    "B": [
+      28,
+      44
+    ],
+    "return": [
+      44,
+      48
+    ]
+  },
+  "listening": "not auditioned by human; mathematical checks only"
+}

@@ -152,3 +152,10 @@ AUD-013-GAME：audio/wistful_demo.wav（生成物、ZIP同梱）、tools/build_w
 - **UI-016**：`art/ui/character_hub_ui_20261106.png`。原本: ユーザー添付「曼珠沙華：ネオン図鑑ハブ UI.png」。制作方法: ユーザー提供PNGを無加工で配置。状態: 参照原本／UI方向性、ゲーム内の全内容を採用したものではない。
 - **UI-017**：`art/ui/character_system_ui_20261106.png`。原本: ユーザー添付「曼珠沙華 キャラクター別UI図鑑.png」。制作方法: ユーザー提供PNGを無加工で配置。状態: 肖像クロップを`game.gd`のライブステータス表示に試験統合。画像内のサンプル数値・台詞・固有名は未採用。Godot 4.6.3インポートおよび回帰テスト済、実プレイ画面レビューは未完了。
 
+## 2026-11-15 v0.9 描画・音響復元素材
+
+- **V09-VIS-001**：`visual_v09.gd` と `art/v09/cosmos.png`、`ship-atlas.png`、`enemy-0.png`〜`enemy-3.png`。原本と制作記録: `art/v09/originals/`、`art/v09/PROVENANCE.md`、`art/v09/PROMPTS.md`。ローカルでGodot 4.6.3回帰を通したv12スナップショットから復元した、赤い生体宇宙・共通設計の3機・敵用の試作採用素材。正式人物外見やアートブック原画とは主張しない。外部ゲーム素材の流用なし。ゲーム内読み込みは`Image.load_from_file`を使うため、通常のGodot export向けには後続でTexture2D化を要確認。
+- **V09-AUD-001**：`audio/red_echo_v09.wav`、`red_echo_boss_v09.wav`、`ending.wav`、`wistful_demo.wav`、および`break_*_v09.wav`、`consume_v09.wav`、`impact_v09.wav`、`lance_v09.wav`、`pulse_v09.wav`、`spore_v09.wav`。原本・分析記録: `audio/red_echo_v09.analysis.json` とv12スナップショット。v0.9の戦闘／段階爆発／終幕用に試作採用。ユーザーの実聴・物理コントローラー・人間操作によるミックス検収は未実施。
+- **UI-018**：`art/ui/chat_ui_atlas_20261106.png`、`title_logo_extended_v01.png`、`launch_button_v01.png`。原本来歴・取り込み方法: `art/ui/README_CHAT_IMPORT.md`。ユーザー提供チャット素材を無加工で保管した参照／試作用UI画像。正式ロゴ・人物設定・画像内の文言の正史化はしない。
+- **STG-CONCEPT-001**：`art/concept/eight_stage_retro_pixel_concepts_20261106.png`。原本: ユーザー提供の8ステージ・レトロピクセル構成画像。制作方法: 無加工で保管。状態: 8面背景・敵・ボスの視覚的検討用参考。描かれた未承認人物、名称、物語設定を正史として採用しない。
+
