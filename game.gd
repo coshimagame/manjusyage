@@ -373,8 +373,16 @@ func open_stage1_intermission():
 	overlay.skipped.connect(_on_stage1_intermission_end.bind(overlay))
 
 func _on_stage1_intermission_end(next_stage: int, overlay: Control):
-	overlay.queue_free()
-	open_briefing(next_stage)
+	# Both completed and skipped can arrive during the same input frame.
+	# Only the first transition may advance the stage or release the overlay.
+	if mode != "intermission":
+		return
+	mode = "intermission_transition"
+	if is_instance_valid(overlay):
+		overlay.queue_free()
+	# The stage-1 intermission may only unlock the next preparation room.
+	# Never trust a malformed dialogue payload to jump to later stages.
+	open_briefing(2 if next_stage != 2 else next_stage)
 
 func start_game():
 	bio.reset()
