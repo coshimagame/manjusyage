@@ -358,13 +358,15 @@ func open_stage1_intermission():
 		return
 	var intermission_script = load("res://ui/stage_intermission_stage1.gd")
 	if intermission_script == null:
-		open_briefing(briefing_progress.next_briefing_stage())
+		push_error("Stage 1 intermission resource is missing; keep the clear result visible.")
+		tell("INTERMISSION UNAVAILABLE - RETRY", 4.0)
 		return
 	var overlay = intermission_script.new()
 	add_child(overlay)
 	if not overlay.setup_after_stage(1, 1, count):
 		overlay.queue_free()
-		open_briefing(briefing_progress.next_briefing_stage())
+		push_error("Stage 1 intermission dialogue is empty; keep the clear result visible.")
+		tell("INTERMISSION UNAVAILABLE - RETRY", 4.0)
 		return
 	mode = "intermission"
 	overlay.completed.connect(_on_stage1_intermission_end.bind(overlay))
@@ -1419,7 +1421,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : BRIEFING" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : INTERMISSION" if mode=="clear" else "ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
 
 
