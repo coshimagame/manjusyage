@@ -47,6 +47,42 @@ TRACKS = [
         "desc": "BPM 174の超高速テクノSTGバトル。第1面の主題動機を極限まで加速・尖鋭化させたクライマックスラプソディ。"
     },
     {
+        "id": "AUD-023",
+        "category": "bgm",
+        "title": "第2面「追憶の海」A案「水底の残照」",
+        "subtitle": "136 BPM / F minor / 56.5s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_a.wav"),
+        "loop": True,
+        "desc": "水中の浮遊感、水泡が弾ける音、深海サブベース、透明なアクアストリングスと哀愁のパンフルート旋律。"
+    },
+    {
+        "id": "AUD-024",
+        "category": "bgm",
+        "title": "第2面「追憶の海」B案「潮流のセレナーデ」",
+        "subtitle": "142 BPM / Bb minor (Dorian) / 54.1s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_b.wav"),
+        "loop": True,
+        "desc": "湧き上がる潮流の躍動感。泡のように流れる16分アルペジオと切なく高鳴るリード。"
+    },
+    {
+        "id": "AUD-025",
+        "category": "bgm",
+        "title": "第3面「孤独な庭」A案「錆びた歯車と曼珠沙華」",
+        "subtitle": "144 BPM / A minor (Insen Modal) / 53.3s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_a.wav"),
+        "loop": True,
+        "desc": "機械文明の廃墟。歯車のチクタク音、古びた石壁に咲く曼珠沙華を想わせる陰旋法の箏ハープと孤独な和笛。"
+    },
+    {
+        "id": "AUD-026",
+        "category": "bgm",
+        "title": "第3面「孤独な庭」B案「静寂の回廊」",
+        "subtitle": "138 BPM / E minor / 55.7s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_b.wav"),
+        "loop": True,
+        "desc": "誰もいない回廊に響く時計仕掛けのリズム。静寂と廃墟の不気味さ、そして胸を締め付ける哀愁の疾走メロディ。"
+    },
+    {
         "id": "AUD-017",
         "category": "jingle",
         "title": "JG-002: 出撃決定ファンファーレ",
@@ -140,8 +176,8 @@ html_content = f"""<!DOCTYPE html>
         <p class="text-xs text-[var(--muted-foreground)]">第1期 制作音響素材（全10曲・効果音）/ 44.1kHz 16-bit PCM 原本プレビュー</p>
       </div>
       <div class="flex gap-2 mt-2 sm:mt-0">
-        <button onclick="filterCategory('all')" id="btn-all" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm">すべて (10)</button>
-        <button onclick="filterCategory('bgm')" id="btn-bgm" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--border)]">BGM (4)</button>
+        <button onclick="filterCategory('all')" id="btn-all" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm">すべて (14)</button>
+        <button onclick="filterCategory('bgm')" id="btn-bgm" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--border)]">BGM (8)</button>
         <button onclick="filterCategory('jingle')" id="btn-jingle" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--border)]">ジングル (1)</button>
         <button onclick="filterCategory('sfx')" id="btn-sfx" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--border)]">SE (5)</button>
       </div>
