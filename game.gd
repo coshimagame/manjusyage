@@ -349,6 +349,10 @@ func launch_from_briefing():
 	if not briefing_progress.can_launch(briefing_stage):
 		tell("STAGE "+str(briefing_stage)+" UNDER CONSTRUCTION",3.0)
 		return
+	if briefing_stage == 2:
+		# Stage 2 currently uses a single-ship prototype; never pretend it supports 3P.
+		get_tree().change_scene_to_file("res://prototypes/stage2_playable.tscn")
+		return
 	briefing_custom_squad=true
 	start_game()
 # Stage-1 clear -> provisional intermission -> existing preparation room.
