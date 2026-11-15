@@ -13,6 +13,9 @@ var phase := 0
 var health := 5
 var invulnerable := 0.0
 var score := 0
+var score_fraction := 0.0
+var touch_target := Vector2.ZERO
+var touch_active := false
 var running := true
 
 func _ready() -> void:
@@ -20,6 +23,19 @@ func _ready() -> void:
 	set_process_unhandled_input(true)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		touch_active = event.pressed
+		if touch_active:
+			touch_target = event.position
+			if not running:
+				_restart()
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventScreenDrag:
+		touch_active = true
+		touch_target = event.position
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_R:
 			_restart()
@@ -42,6 +58,8 @@ func _restart() -> void:
 	health = 5
 	invulnerable = 0.0
 	score = 0
+	score_fraction = 0.0
+	touch_active = false
 	running = true
 
 func _physics_process(delta: float) -> void:
@@ -56,6 +74,12 @@ func _physics_process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_W): direction.y -= 1.0
 	if Input.is_key_pressed(KEY_S): direction.y += 1.0
 	if direction.length_squared() > 1.0: direction = direction.normalized()
+	if touch_active:
+		# Touch position is viewport-space; scene is authored at 640x360.
+		var local_target := get_global_transform_with_canvas().affine_inverse() * touch_target
+		var offset := local_target - player
+		if offset.length() > 8.0:
+			direction = offset.normalized()
 	player += direction * 165.0 * delta
 	player = player.clamp(Vector2(12, 20), Vector2(628, 338))
 	if elapsed >= next_fire:
@@ -75,7 +99,11 @@ func _physics_process(delta: float) -> void:
 			invulnerable = 1.2
 			shots.remove_at(i)
 			if health <= 0: running = false
-	score += int(delta * 100.0)
+	# Accumulate fractional score; int(delta * 100) loses points at high FPS.
+	score_fraction += delta * 100.0
+	var earned := int(score_fraction)
+	score += earned
+	score_fraction -= float(earned)
 	queue_redraw()
 
 func _add_bullet(origin: Vector2, angle: float, speed: float, radius: float = 3.0) -> void:
@@ -134,7 +162,7 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font, Vector2(12, 22), "STAGE 1 / BULLET LAB - PROVISIONAL", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("f0e9dc"))
 	draw_string(ThemeDB.fallback_font, Vector2(12, 43), "PATTERN %d/6: %s" % [phase + 1, PATTERNS[phase]], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffb9ad"))
 	draw_string(ThemeDB.fallback_font, Vector2(12, 62), "HP %d   SCORE %d   BULLETS %d" % [health, score, shots.size()], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("a8e4ef"))
-	draw_string(ThemeDB.fallback_font, Vector2(12, 347), "ARROWS/WASD MOVE   1-6 PATTERN   R RESTART   ESC TITLE", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("c5d2e3"))
+	draw_string(ThemeDB.fallback_font, Vector2(12, 347), "ARROWS/WASD/TOUCH MOVE   1-6 PATTERN   R RESTART", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("c5d2e3"))
 	if not running:
 		draw_rect(Rect2(145, 134, 350, 82), Color("10182d"))
 		draw_string(ThemeDB.fallback_font, Vector2(222, 168), "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color("ffacb1"))
