@@ -81,6 +81,11 @@ func _unhandled_input(event):
 		elif event.button_index == JOY_BUTTON_A: advance()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		advance()
+	elif event is InputEventScreenTouch and event.pressed:
+		# Handle direct Android touch; releases must never advance pages.
+		# Godot may emulate mouse from touch: accept only one path per press.
+		if not Input.is_emulating_mouse_from_touch():
+			advance()
 
 func advance():
 	if age < 2.5: age = 2.5; return
@@ -159,7 +164,7 @@ func _draw():
 	for i in range(lines.size()):
 		var text=lines[i].substr(0,int(age*22))
 		draw_string(font,Vector2(30,307+i*21),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("d8e5ee"))
-	draw_string(font,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
+	draw_string(font,Vector2(30,350),"Enter / A / タップ：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
 	draw_string(font,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
 
 
