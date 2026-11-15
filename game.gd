@@ -351,6 +351,29 @@ func launch_from_briefing():
 		return
 	briefing_custom_squad=true
 	start_game()
+# Stage-1 clear -> provisional intermission -> existing preparation room.
+# The result screen remains visible until the player confirms.
+func open_stage1_intermission():
+	if mode != "clear":
+		return
+	var intermission_script = load("res://ui/stage_intermission_stage1.gd")
+	if intermission_script == null:
+		open_briefing(briefing_progress.next_briefing_stage())
+		return
+	var overlay = intermission_script.new()
+	add_child(overlay)
+	if not overlay.setup_after_stage(1, 1, count):
+		overlay.queue_free()
+		open_briefing(briefing_progress.next_briefing_stage())
+		return
+	mode = "intermission"
+	overlay.completed.connect(_on_stage1_intermission_end.bind(overlay))
+	overlay.skipped.connect(_on_stage1_intermission_end.bind(overlay))
+
+func _on_stage1_intermission_end(next_stage: int, overlay: Control):
+	overlay.queue_free()
+	open_briefing(next_stage)
+
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -456,7 +479,7 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
-			if key in [KEY_ENTER,KEY_SPACE]: open_briefing(briefing_progress.next_briefing_stage())
+			if key in [KEY_ENTER,KEY_SPACE]: open_stage1_intermission()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -585,7 +608,7 @@ func _process(dt):
 			elif x and players[status_slot].character==2 and briefing_progress.feature_available("mafio"): archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
-			if start or a: open_briefing(briefing_progress.next_briefing_stage())
+			if start or a: open_stage1_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
