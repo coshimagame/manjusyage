@@ -352,6 +352,35 @@ func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
 
+# Stage 1 clear -> short, skippable story intermission -> title.
+# The Stage 2 route is deliberately not opened here: this v0.9 slice has no
+# verified Stage 2 combat scene yet.  Keep the intermission playable without
+# pretending an unfinished stage is available.
+func open_stage1_intermission():
+	if mode != "clear":
+		return
+	var intermission_script = load("res://ui/stage_intermission_stage1.gd")
+	if intermission_script == null:
+		mode = "menu"
+		track("title")
+		return
+	var overlay = intermission_script.new()
+	add_child(overlay)
+	if not overlay.setup_after_stage(1, 1, count):
+		overlay.queue_free()
+		mode = "menu"
+		track("title")
+		return
+	mode = "intermission"
+	overlay.completed.connect(_on_stage1_intermission_end.bind(overlay))
+	overlay.skipped.connect(_on_stage1_intermission_end.bind(overlay))
+
+func _on_stage1_intermission_end(_next_stage: int, overlay: Control):
+	overlay.queue_free()
+	mode = "menu"
+	track("title")
+	tell("STAGE 02 は制作中です。次の境界を準備しています。", 4.0)
+
 func start_game():
 	bio.reset()
 	vertical.reset()
@@ -377,6 +406,8 @@ func button_edge(device, button):
 	return down and not previous
 
 func _input(event):
+	if mode=="intermission":
+		return # The overlay owns its confirm, log, touch, and skip input.
 	if mode=="controls":
 		capture_binding(event)
 		return
@@ -452,6 +483,8 @@ func _input(event):
 		elif mode == "pause":
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
+		elif mode == "clear":
+			if key in [KEY_ENTER,KEY_SPACE]: open_stage1_intermission()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -497,6 +530,8 @@ func _process(dt):
 		queue_redraw()
 		return
 	for device in Input.get_connected_joypads():
+		if mode=="intermission":
+			continue # Do not start a new run behind the dialogue overlay.
 		var start = pad_action_edge(device,"start",JOY_BUTTON_START)
 		var a = pad_action_edge(device,"fire",JOY_BUTTON_A)
 		var x = pad_action_edge(device,"color",JOY_BUTTON_X)
@@ -524,6 +559,8 @@ func _process(dt):
 			elif right: status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
+		elif mode == "clear":
+			if start or a: open_stage1_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))

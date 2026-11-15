@@ -257,3 +257,9 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - Godot 4.6.3で `test_v09.gd`、`test_status_v09.gd`、`test_biological_stage.gd`、`test_prologue.gd` を実行しPASS。終了時のObjectDB/Resource解放警告は既知。画像読み込みのexport警告はPCK方式で原本PNGも同梱するため、通常export template向けの注意として記録する。
 - 現行ヘッドレス環境ではViewport画像readbackがnullとなり新規の連続キャプチャは失敗。これは実ゲーム描画の失敗ではなく、キャプチャAPIの制約。物理パッド、人間操作、実聴は未検証。
 
+# 2026-11-15 Stage 1クリア後の会話幕間を統合
+
+- `ui/stage_intermission.gd`と`ui/stage_intermission_stage1.gd`を、v0.9の実際のクリア状態へ接続。決定／タップで字送り、Lでログ、Esc/Startでスキップできる。会話はムゥ・クゥ・コルミィ・ジヨーザ・マフィオの**仮稿**であり、正史台詞ではない。
+- クリア後に未検証のStage 2へ遷移する既存ブランチ案は採用せず、幕間終了後はタイトルへ安全に戻る。既存の1〜3人、ソロ、保存、v0.9戦闘状態を変更しない。
+- Godot 4.6.3で`stage_intermission_dialogue_smoke.gd`、`stage_intermission_integration_smoke.gd`、拡張した`test_v09.gd`がPASS。物理パッド、人間操作、実聴、通常レンダラーの連続キャプチャは未検証。
+

@@ -21,6 +21,13 @@ func run():
 	assert(g.aftermath>0 and g.mode=="play" and g.shots.is_empty())
 	g.update_game(3.1)
 	assert(g.mode=="clear")
+	# Stage clear must open the provisional story overlay without starting a
+	# second run; completing or skipping it returns to the verified title flow.
+	g.open_stage1_intermission()
+	assert(g.mode=="intermission")
+	var overlay: Control = g.get_child(g.get_child_count()-1)
+	overlay._complete(true)
+	assert(g.mode=="menu")
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
 	g.enemies.clear();g.wave_id=0;g.spawn_wave()
@@ -35,5 +42,5 @@ func run():
 	var cfg=ConfigFile.new();assert(cfg.load("user://visual.cfg")==OK)
 	assert(cfg.get_value("v","shake",-1)==expected_shake and cfg.get_value("v","flash",-1)==expected_flash)
 	g.queue_free();await process_frame;await process_frame
-	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, retry, accessible effects persisted")
+	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, retry, accessible effects persisted")
 	quit()

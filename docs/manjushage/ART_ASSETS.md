@@ -158,4 +158,5 @@ AUD-013-GAME：audio/wistful_demo.wav（生成物、ZIP同梱）、tools/build_w
 - **V09-AUD-001**：`audio/red_echo_v09.wav`、`red_echo_boss_v09.wav`、`ending.wav`、`wistful_demo.wav`、および`break_*_v09.wav`、`consume_v09.wav`、`impact_v09.wav`、`lance_v09.wav`、`pulse_v09.wav`、`spore_v09.wav`。原本・分析記録: `audio/red_echo_v09.analysis.json` とv12スナップショット。v0.9の戦闘／段階爆発／終幕用に試作採用。ユーザーの実聴・物理コントローラー・人間操作によるミックス検収は未実施。
 - **UI-018**：`art/ui/chat_ui_atlas_20261106.png`、`title_logo_extended_v01.png`、`launch_button_v01.png`。原本来歴・取り込み方法: `art/ui/README_CHAT_IMPORT.md`。ユーザー提供チャット素材を無加工で保管した参照／試作用UI画像。正式ロゴ・人物設定・画像内の文言の正史化はしない。
 - **STG-CONCEPT-001**：`art/concept/eight_stage_retro_pixel_concepts_20261106.png`。原本: ユーザー提供の8ステージ・レトロピクセル構成画像。制作方法: 無加工で保管。状態: 8面背景・敵・ボスの視覚的検討用参考。描かれた未承認人物、名称、物語設定を正史として採用しない。
+- **TXT-004**：`ui/stage_intermission_dialogue.gd`。Stage 1クリア後のムゥ、クゥ、コルミィ、ジヨーザ、マフィオの短い通信会話。GitHubの会話幕間ブランチをv0.9へ選別統合、2026-11-15、仮稿・ゲーム内試作採用。正確な公式台詞ではなく、ユーザーの物語骨格を壊さないための短い伏線。外部台詞・音声素材なし。
 
