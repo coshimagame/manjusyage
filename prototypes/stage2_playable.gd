@@ -12,6 +12,8 @@ const ArtCatalog = preload("res://art_catalog.gd")
 var artwork = ArtCatalog.new()
 var ship := Vector2(90, 180)
 var hp := 5
+# Brief post-hit protection prevents stacked bullets from consuming several lives at once.
+var hit_invulnerability := 0.0
 var enemy_hp := 30
 var enemy_pos := Vector2(535, 180)
 var enemy_phase := 0.0
@@ -89,6 +91,7 @@ func _process(delta: float) -> void:
 		return
 	var dt: float = minf(delta, 0.05)
 	elapsed += dt
+	hit_invulnerability = maxf(0.0, hit_invulnerability - dt)
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if touch_id >= 0:
 		direction = (touch_move - ship).limit_length(1.0)
@@ -123,10 +126,12 @@ func _process(delta: float) -> void:
 		hostile[i].x -= 150.0 * dt
 		if hostile[i].distance_to(ship) < 14.0:
 			hostile.remove_at(i)
-			hp -= 1
-			if hp <= 0:
-				state = "gameover"
-				break
+			if hit_invulnerability <= 0.0:
+				hp -= 1
+				hit_invulnerability = 0.75
+				if hp <= 0:
+					state = "gameover"
+					break
 		elif hostile[i].x < 0.0:
 			hostile.remove_at(i)
 	queue_redraw()
@@ -139,6 +144,7 @@ func _return_to_title() -> void:
 func _restart() -> void:
 	ship = Vector2(90, 180)
 	hp = 5
+	hit_invulnerability = 0.0
 	enemy_hp = 30
 	enemy_phase = 0.0
 	elapsed = 0.0
@@ -162,7 +168,11 @@ func _draw() -> void:
 		var y := float((n * 47) % 350)
 		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
 	var player_art: Texture2D = artwork.texture("ship_cormii")
-	if player_art != null:
+	# Blink the ship after a hit; never alter approved sprite textures.
+	var ship_visible := hit_invulnerability <= 0.0 or int(elapsed * 12.0) % 2 == 0
+	if not ship_visible:
+		pass
+	elif player_art != null:
 		draw_texture_rect(player_art, Rect2(ship - Vector2(20, 14), Vector2(40, 28)), false)
 	else:
 		draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
