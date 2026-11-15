@@ -8,6 +8,9 @@ func run():
 	root.add_child(scene)
 	scene.count=2
 	scene.bio_route=true
+	# This test verifies the persistent high-score route.  v0.9 defaults to the
+	# short slice, whose results deliberately do not replace the legacy best score.
+	scene.slice_mode=false
 	scene.start_game()
 	scene.score=4321
 	scene.gates_done=2
@@ -16,7 +19,7 @@ func run():
 	assert(cfg.load("user://scores.cfg")==OK)
 	assert(int(cfg.get_value("scores","1",0))>=10321)
 	var record=JSON.parse_string(FileAccess.get_file_as_string("user://last_run.json"))
-	assert(record.players==2 and record.cleared and record.gates==2 and record.ruleset=="red-echo-bio-v1")
+	assert(record.players==2 and record.cleared and record.gates==2 and record.ruleset=="ruins-v1")
 	scene.start_game()
 	scene.reserves=0
 	for p in scene.players: p.down=1

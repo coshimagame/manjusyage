@@ -767,10 +767,21 @@ func update_game(dt):
 func spawn_wave():
 	wave_id+=1
 	var base=85+(wave_id*61)%190
+	var art_cycle=["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009"]
 	for j in range(3+count):
 		var technique=["fan","weave","dive","orbit"][(wave_id+j)%4] if bio_route else "aimed"
 		var lane=base+(j-(count+1)*.5)*18
-		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":55.0+wave_id%4*9,"amplitude":23.0+int(technique=="dive")*8,"hp":2+int(count>1),"cool":1.3+j*.27,"flash":0.0,"technique":technique})
+		var art_id=art_cycle[(wave_id*2+j)%art_cycle.size()] if bio_route else ""
+		var hp=2+int(count>1)
+		var speed=55.0+wave_id%4*9
+		# MB/SB are intentionally infrequent visual-and-health accents. They reuse
+		# the established readable motion and firing rules, so new art cannot make
+		# a solo lane suddenly require an undocumented mechanic.
+		if bio_route and j==0 and wave_id%6==0:
+			art_id="MB01"; technique="orbit"; hp+=4; speed*=.72
+		elif bio_route and j==0 and wave_id%4==0:
+			art_id="SB01"; technique="dive"; hp+=3; speed*=.82
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":23.0+int(technique=="dive")*8,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"art_id":art_id})
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]

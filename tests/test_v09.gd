@@ -32,6 +32,10 @@ func run():
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
 	assert(g.visual.ship_variants.size()==3)
 	assert(g.visual.ship_variants[0]!=null and g.visual.ship_variants[1]!=null and g.visual.ship_variants[2]!=null)
+	assert(g.visual.stage1_enemy_h.size()==12 and g.visual.stage1_enemy_v.size()==12)
+	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01","BB01"]:
+		assert(g.visual.stage1_enemy_texture(art_id,false)!=null)
+		assert(g.visual.stage1_enemy_texture(art_id,true)!=null)
 	# Pickup styling is presentation-only: both existing item effects and their
 	# collision radius stay intact while the v0.9 collector bloom is emitted.
 	g.players[0].hp=3
@@ -42,6 +46,12 @@ func run():
 	var forms={}
 	for enemy in g.enemies: forms[enemy.technique]=true
 	assert(forms.size()>=3,"0.9 wave needs mixed readable movement forms")
+	var stage1_art={}
+	for wave in range(6):
+		g.enemies.clear();g.spawn_wave()
+		for enemy in g.enemies: stage1_art[enemy.art_id]=true
+	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01"]:
+		assert(stage1_art.has(art_id),"Stage 1 should schedule user-provided "+art_id+" art")
 	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
 	var expected_flash=0.0 if g.visual.flash_level>0 else .35
 	for key in [KEY_F10,KEY_F12]:
@@ -50,5 +60,5 @@ func run():
 	var cfg=ConfigFile.new();assert(cfg.load("user://visual.cfg")==OK)
 	assert(cfg.get_value("v","shake",-1)==expected_shake and cfg.get_value("v","flash",-1)==expected_flash)
 	g.queue_free();await process_frame;await process_frame
-	print("V09 PASS: default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, pickup bloom, retry, accessible effects persisted")
+	print("V09 PASS: Stage 1 enemy H/V sheets, default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, pickup bloom, retry, accessible effects persisted")
 	quit()

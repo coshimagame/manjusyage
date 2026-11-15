@@ -6,6 +6,8 @@ var atlas: Texture2D
 var ship_variants=[]
 var stage_concepts: Texture2D
 var creatures=[]
+var stage1_enemy_h={}
+var stage1_enemy_v={}
 var blasts=[]
 var hits=[]
 var confirms=[]
@@ -24,12 +26,25 @@ func setup():
 		load("res://art/active/ship_jiyoza.png"),
 		load("res://art/active/ship_mafio.png")
 	]
+	# User-provided Stage 1 enemy sheets stay as byte-preserved draft assets.
+	# H/V are deliberately loaded as separate layouts rather than rotating an
+	# illustration; each route gets the composition authored for it.
+	for id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01","BB01"]:
+		stage1_enemy_h[id]=load("res://art/stage1/enemies/"+id+"_h_draft.png")
+		stage1_enemy_v[id]=load("res://art/stage1/enemies/"+id+"_v_draft.png")
 	# STG-CONCEPT-001 is a user-supplied eight-stage concept board. Only its
 	# Stage 1 environment strip is used here as a dim, non-colliding backdrop;
 	# the other seven rows remain concept material, not playable stage claims.
 	var concept_image=Image.load_from_file("res://art/concept/eight_stage_retro_pixel_concepts_20261106.png")
 	stage_concepts=ImageTexture.create_from_image(concept_image) if concept_image and not concept_image.is_empty() else null
 	for i in range(4):creatures.append(load("res://art/v09/enemy-"+str(i)+".png"))
+
+func stage1_enemy_texture(id:String,vertical:bool):
+	return (stage1_enemy_v if vertical else stage1_enemy_h).get(id,null)
+
+func fitted_texture_size(tex:Texture2D,bounds:Vector2)->Vector2:
+	var native=tex.get_size()
+	return native*minf(bounds.x/native.x,bounds.y/native.y)
 
 func update(dt):
 	for e in blasts:e.age+=dt
@@ -168,7 +183,11 @@ func ship(g,p,index,rotation=0.0,scale_factor=1.0):
 
 func enemy(g,e):
 	var technique=e.get("technique","")
-	var tex=creatures[1 if technique=="fan" or technique=="orbit" else 0]
+	var art_id=str(e.get("art_id",""))
+	var tex=stage1_enemy_texture(art_id,g.vertical.active)
+	if tex==null:tex=creatures[1 if technique=="fan" or technique=="orbit" else 0]
+	var elite=art_id in ["MB01","SB01"]
+	var display_size=fitted_texture_size(tex,Vector2(78,58) if elite else Vector2(48,42)) if art_id!="" else tex.get_size()
 	var opening=clampf((.65-e.cool)/.65,0,1)
 	# A short, exact firing lane tells the player where this organism's next
 	# pattern will travel. It uses the same target and angle rules as game.gd,
@@ -187,8 +206,9 @@ func enemy(g,e):
 	if technique=="dive":tilt+=sin(e.age*1.35+e.phase)*.16
 	elif technique=="orbit":tilt+=sin(e.age*2.0+e.phase)*.1
 	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,1+sin(g.clock*5+e.pos.x)*.035))
-	g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
-	if opening>0:g.draw_arc(Vector2(-tex.get_width()*.31,0),4+opening*7,PI*.55,PI*1.45,12,Color("fff0b7"),1)
+	if art_id!="":g.draw_texture_rect(tex,Rect2(-display_size*.5,display_size),false,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
+	else:g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
+	if opening>0:g.draw_arc(Vector2(-display_size.x*.31,0),4+opening*7,PI*.55,PI*1.45,12,Color("fff0b7"),1)
 	if technique=="weave":g.draw_arc(Vector2(3,0),12,-PI*.6,PI*.6,10,Color("e6b6a0"),1)
 	elif technique=="orbit":g.draw_arc(Vector2.ZERO,15,0,TAU,12,Color("b8d7dd"),1)
 	g.draw_set_transform(Vector2.ZERO)
@@ -269,7 +289,11 @@ func boss(g):
 		g.draw_polyline(pts,Color("301d34"),9)
 		g.draw_polyline(pts,Color("a65a70"),3)
 		g.draw_polyline(pts,Color("ecc2a2"),1)
-	g.draw_texture_rect(creatures[2],Rect2(p+Vector2(-40,-77),Vector2(164,154+sin(g.clock*2.8)*3)),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
+	var boss_tex=stage1_enemy_texture("BB01",g.vertical.active)
+	if boss_tex:
+		var boss_size=fitted_texture_size(boss_tex,Vector2(210,122) if not g.vertical.active else Vector2(158,120))
+		g.draw_texture_rect(boss_tex,Rect2(p-boss_size*.5,boss_size),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
+	else:g.draw_texture_rect(creatures[2],Rect2(p+Vector2(-40,-77),Vector2(164,154+sin(g.clock*2.8)*3)),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
 	var core=g.COLORS[g.boss.color] if g.bio.exposed() else Color("542d48")
 	g.draw_circle(p,18,Color("0b1023"))
 	g.draw_arc(p,18,0,TAU,28,Color("c28d78"),2)
@@ -278,7 +302,11 @@ func boss(g):
 	for i in range(g.bio.armor.size()):
 		var a=g.bio.part_pos(g,i)
 		if g.bio.armor[i]>0:
-			g.draw_texture(creatures[3],a-Vector2(27,27))
+			var armor_tex=stage1_enemy_texture("EN009",g.vertical.active)
+			if armor_tex:
+				var armor_size=fitted_texture_size(armor_tex,Vector2(48,48))
+				g.draw_texture_rect(armor_tex,Rect2(a-armor_size*.5,armor_size),false,Color.WHITE)
+			else:g.draw_texture(creatures[3],a-Vector2(27,27))
 			if anticipation>0:g.draw_arc(a,24,0,TAU,24,Color("ffca83"),1)
 		else:g.draw_line(a+Vector2(-14,-9),a+Vector2(13,8),Color("a44257"),4)
 	# The encounter objective is a readable foreground card, not a floating label
