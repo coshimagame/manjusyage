@@ -96,3 +96,9 @@
 - `main...cleanup/canon-and-art-folders-20261106` 比較は `diverged`、整理ブランチ90コミット先行、mainが3コミット先行。main側の最新比較基点 `5adcf719334b9fe3886f02f6256e7d0df1b792f3`。main固有のUI画像2点と同名スクリーンショット5点の差異は既存監査のとおり保護・精査が必要。
 - #51 head `122977314ecb56938ca5b5f44bb89680bee9b1ca` に対するGitHub Actions `Art catalog and reference validation` run `43032336535` は `completed/success`。これはそのコミットの限定的なCI成功であり、Windows実画面比較、承認済み原画同定、全Markdownリンク・画像SHA検証、main統合後テストを証明しない。
 - 今回はGitHub APIでのPR状態・差分・CI確認。未確認の原画を移動・置換せず、PR #50→#51の順序を維持する。**main反映・全参照検証の完了条件は未達。**
+
+## 2026-11-15 21時台 JST main差分・新指示書の追跡
+- GitHub比較 `main...6e6026ea677af350f459768cce85eb811ac894ed` は `diverged`、整理ブランチが92コミット先行、mainが7コミット先行。比較時のmain HEADは `d4ab8486dfb2a059d2e1754e742d540f7af46ae4`。この差分は古い監査の「3 behind」から増えているため、統合前に必ず再ベース差分を確認する。
+- PR #50の変更パスは `README.md` のみ。PR #51は分類先PNG7点、docs、art、`art_catalog.gd`、テスト、CI定義を含む73パス。依存関係を崩さずに扱う。
+- 最新mainにはユーザー確定の管制会話演出 `docs/manjushage/CONTROL_ROOM_DIALOGUE_DIRECTION.md`（ムゥの顔を右、会話相手の顔を左）と、Codexが作業開始時に最新指示書を確認する `AGENTS.md` の更新がある。#51統合時に両ファイルを保護し、必要なら `CURRENT_SPEC.md` の参照にも反映する。**指示書の存在はゲームへの実装完了を意味しない**。
+- 既知のmain固有UI画像2点と同名スクリーンショット5点の差分は未解決。原画承認の同定、全リンク、実画面比較、main統合後のGodot検証も未実施。**完了条件未達につきPRのマージは保留**。
