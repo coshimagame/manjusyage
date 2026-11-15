@@ -85,3 +85,29 @@ func skip_dialogue() -> void:
 	visible = false
 	set_process(false)
 	dialogue_finished.emit()
+
+# Input is handled only while the subtitle is visible; normal combat keeps its controls.
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			skip_dialogue()
+		elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]:
+			advance_or_reveal()
+		else:
+			return
+	elif event is InputEventJoypadButton and event.pressed:
+		if event.button_index == JOY_BUTTON_START:
+			skip_dialogue()
+		elif event.button_index == JOY_BUTTON_A:
+			advance_or_reveal()
+		else:
+			return
+	elif event is InputEventScreenTouch and event.pressed:
+		advance_or_reveal()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		advance_or_reveal()
+	else:
+		return
+	get_viewport().set_input_as_handled()
