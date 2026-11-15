@@ -401,6 +401,8 @@ func button_edge(device, button):
 	return down and not previous
 
 func _input(event):
+	if mode=="intermission":
+		return # Overlay handles input via _unhandled_input.
 	if mode=="controls":
 		capture_binding(event)
 		return
@@ -567,6 +569,8 @@ func _process(dt):
 		queue_redraw()
 		return
 	for device in Input.get_connected_joypads():
+		if mode=="intermission":
+			continue # Do not launch a new run behind the dialogue overlay.
 		var start = pad_action_edge(device,"start",JOY_BUTTON_START)
 		var a = pad_action_edge(device,"fire",JOY_BUTTON_A)
 		var x = pad_action_edge(device,"color",JOY_BUTTON_X)
