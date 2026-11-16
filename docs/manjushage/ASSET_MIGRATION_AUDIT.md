@@ -109,3 +109,10 @@
 - `main...cleanup/canon-and-art-folders-20261106` は `diverged`、整理ブランチ94コミット先行、mainが7コミット先行、差分73パス。比較時main HEAD `d4ab8486dfb2a059d2e1754e742d540f7af46ae4`。
 - 既存監査で特定したmain固有UI画像2点とスクリーンショット5点の差分、原画承認状態、全参照検証、main統合後のGodot動作確認は未解決。`mergeable=true` はこれらの検証完了を意味しない。
 - 本確認はPRメタデータ・GitHub比較・既存監査資料の照合。画像の移動・置換、mainマージ、Godot実行は行っていない。**完了条件未達**。
+
+
+## 2026-11-16 11時台 JST 再照合（main統合前）
+- GitHub APIでPR #50はopen/未マージ、base `main`、head `39f209b71d99ac77ce051aba385c0bbcffdfa774`。PR #51はopen/未マージ、base `cleanup/simple-repo-navigation-20261106`、head `b0ba43d3c4702718be32716b65be7a5c402796e4`。両PRのmergeable=trueは静的競合判定のみ。
+- 比較 `main...cleanup/canon-and-art-folders-20261106` はdiverged、95 ahead / 7 behind、73変更パス。main head `d4ab8486dfb2a059d2e1754e742d540f7af46ae4`。この比較では新たな画像保護・参照検証の完了を示す根拠は得られていない。
+- 従来の未解決事項（承認済み原画の同定、main固有UI PNG 2点、同名スクリーンショット5点の比較、全Markdown/画像参照、統合後Godot 4.6テスト、Windows実画面比較）を引き継ぐ。未承認の画像を正式採用せず、既存原画を上書きしない。
+- 今回の作業はGitHub PR・差分・監査記録の照合であり、Godotの実行やmainへの統合ではない。**完了条件未達。**
