@@ -17,6 +17,13 @@ var art_v09=true
 var slice_mode=true
 var aftermath=0.0
 var result_delay=0.0
+# Provisional stage-clear radio transcript; not canonical dialogue.
+var clear_comms_page=0
+const CLEAR_COMMS=[
+	["クゥ", "通信を確認。みんな、無事？"],
+	["コルミィ", "うん！ でも、あの光は何だったの？"],
+	["ムゥ", "機体を調べよう。次の出撃前に整備が必要だ。"]
+]
 var sound_cooldowns={}
 var planet_texture: ImageTexture
 var title_logo: Texture2D
@@ -356,7 +363,7 @@ func start_game():
 	bio.reset()
 	vertical.reset()
 	vertical.duration=12.0 if slice_mode else 24.0
-	aftermath=0;result_delay=0;visual.blasts.clear()
+	aftermath=0;result_delay=0;clear_comms_page=0;visual.blasts.clear()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
 	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
@@ -452,6 +459,8 @@ func _input(event):
 		elif mode == "pause":
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
+		elif mode=="clear" and key==KEY_D:
+			clear_comms_page=(clear_comms_page+1)%CLEAR_COMMS.size()
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -793,6 +802,7 @@ func explode(pos,color,amount):
 		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(20,115),"life":randf_range(.2,.8),"color":color})
 
 func finish(won):
+	clear_comms_page=0
 	mode="clear" if won else "over"
 	result_delay=1.2 if won and art_v09 else 0.0
 	music.stop(); sfx("gate" if won else "burst")
@@ -1313,7 +1323,17 @@ func draw_result():
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
 	else: japanese("記憶の門が、もう一度ひらく。" if mode=="clear" else "態勢を整えて、もう一度。",Vector2(210,126),13,DIM)
-	centered("%07d"%score,153,WHITE,4)
+	if mode=="clear":
+		# Portrait slots deliberately remain blank until approved images are located.
+		draw_rect(Rect2(20,132,66,76),Color(0.07,0.12,0.19,0.95))
+		draw_rect(Rect2(554,132,66,76),Color(0.07,0.12,0.19,0.95))
+		japanese("相手",Vector2(32,175),13,DIM)
+		japanese("ムゥ",Vector2(568,175),13,DIM)
+		var line=CLEAR_COMMS[clear_comms_page]
+		japanese(line[0]+"："+line[1],Vector2(94,178),13,WHITE)
+		centered("D : RADIO NEXT (DRAFT)",210,DIM)
+	else:
+		centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : FLY AGAIN",269,WHITE)
