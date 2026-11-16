@@ -177,3 +177,16 @@
 - 逆差分でmain固有の**追加38パス**と**変更17パス**を検出。追加には `art/v09/originals/{bio-cosmos.png,enemies.png,ship-states.png}`、v09派生画像、UI画像、音声、`visual_v09.gd`、テスト、背景ギミック64案、グロウフィアSVG等がある。変更には `game.gd`、`biological_stage.gd`、`pilot_abilities.gd`、`vertical_passage.gd`、`tools/pack.gd`、`AGENTS.md`、スクリーンショット5点等がある。
 - 統合前の必須条件：①main固有追加38パスの欠落0、②main変更17パスの内容を誤上書きしない、③整理先画像と原画のハッシュ照合、④docs/シーン/スクリプト内の画像参照とリンク検証、⑤Godot 4.6ヘッドレスおよび主要画面テスト。現時点ではいずれも完了認定しない。
 - **mainへのマージを保留。整理・参照検証の完了通知は禁止。**
+
+
+## 2026-11-17 GitHub Actions実行結果（実測・未完了）
+- [Art catalog and reference validation run #79](https://github.com/coshimagame/manjusyage/actions/runs/43967419948) は **failure**。Godot 4.6のダウンロード・導入、フォルダ構成の確認、コピーした7点のPNGのバイト一致検査は成功。
+- `python3 tools/validate_asset_migration.py --base origin/main --strict` はexit 1。現時点の整理ブランチに **mainの原画3点** `art/v09/originals/bio-cosmos.png`、`enemies.png`、`ship-states.png` が存在しない。**mainの原画を消したと断定するのではなく、分岐後にmainで追加された原画が整理ブランチに未統合という意味。** 統合時に必ず保存し、同一ハッシュを確認する。
+- 参照検査は `art_catalog.gd` 等の差し替え予定の任意パス（ファイル未存在でもフォールバックする）を未解決として報告。さらに `prologue.gd` の `story-preview.png`、テストの音声2件、書籍の `PROLOGUE_DRAFT_01.md` リンク、READMEの説明用 `NAME.png` も検出。これらは実際の必須参照切れ、任意スロット、アーカイブ、文書例示を個別分類してから修正する。**検査を黙って緩めて合格扱いしない。**
+- 上記監査工程で停止したためGodotのインポートとスロットテストは **skipped**。動作確認済みとは記録しない。
+- PR [#50](https://github.com/coshimagame/manjusyage/pull/50) はmain向け、[#51](https://github.com/coshimagame/manjusyage/pull/51) は#50のブランチ向けでともにopen。整理ブランチはmainに対し111コミット先行・11コミット遅れ（確認時点）。無検証のままマージしない。
+
+### 次の作業順
+1. mainの11コミットの変更内容をファイル単位で照合し、v09原画・現行ゲームコード・音声を欠損なく取り込む。承認済みデザインを上書きしない。
+2. 監査スクリプトで「必須の実参照」と「存在しなくてもフォールバックする任意スロット」と「説明文・アーカイブ」を分け、必須参照の未解決は引き続き失敗扱いとする。
+3. 同じActionsで原画ハッシュ、全必須参照、Godot 4.6インポートとテストの成功を確認した後、PRの統合順を調整する。mainへ反映された事実を確認するまで完了としない。
