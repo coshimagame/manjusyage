@@ -463,6 +463,17 @@ func _input(event):
 			if p.x < 320: count=maxi(1,count-1)
 			else: count=mini(3,count+1)
 
+	# Result screen uses the same visible action positions as draw_result().
+	# Touch and mouse clicks are deliberately ignored while the clear animation
+	# is running, preventing accidental restarts on Android/Web.
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode in ["clear","over"] and result_delay<=0:
+		var result_point = get_global_mouse_position()
+		if Rect2(160,250,320,27).has_point(result_point):
+			start_game()
+		elif Rect2(160,280,320,25).has_point(result_point):
+			mode = "menu"
+			track("title")
+
 func change_color(i):
 	if players[i].down > 0: return
 	players[i].color = (players[i].color+1)%3
