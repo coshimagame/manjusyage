@@ -9,7 +9,8 @@ import subprocess
 from pathlib import Path
 
 ASSET_EXT={".png",".webp",".jpg",".jpeg",".svg",".wav",".ogg",".tscn",".tres"}
-REF_RE=re.compile(r'(?:res://|\]\()([^"\'\)\s]+\.(?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))(?:["\'\)])',re.I)
+GODOT_RE = re.compile(r'res://([^"\\'\\s)]+\\.(?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))', re.I)
+MARKDOWN_RE = re.compile(r'!?(?:\\[[^\\]]*\\])\\((?!https?://|data:|#)([^)\\s]+\\.(?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))\\)', re.I)
 def git(*args):
     return subprocess.check_output(["git",*args],text=True).strip()
 def sha(path):
