@@ -10,7 +10,7 @@ from pathlib import Path
 
 ASSET_EXT={".png",".webp",".jpg",".jpeg",".svg",".wav",".ogg",".tscn",".tres"}
 GODOT_RE = re.compile(r"res://([^\s\"')]+[.](?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))", re.I)
-MARKDOWN_RE = re.compile(r"\!?\[[^\]]*\]\((?!https?://|data:|#)([^)\s]+[.](?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))\)", re.I)
+MARKDOWN_RE = re.compile(r"\!?\[[^\]]*\]\((?!https?://|data:|#)([^)\s]+[.](?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres|md))\)", re.I)
 def git(*args):
     return subprocess.check_output(["git",*args],text=True).strip()
 def sha(path):
@@ -50,6 +50,14 @@ def main():
             originals.append({"path":rel,"unchanged":hashlib.sha256(old).hexdigest()==sha(f)})
         except subprocess.CalledProcessError:
             originals.append({"path":rel,"unchanged":None})
+    # Detect original assets removed from the working tree.
+    try:
+        base_paths = git("ls-tree", "-r", "--name-only", a.base).splitlines()
+        for rel in base_paths:
+            if "/originals/" in "/" + rel and not (root / rel).is_file():
+                originals.append({"path": rel, "unchanged": False, "reason": "missing from working tree"})
+    except subprocess.CalledProcessError:
+        pass
     duplicates=[paths for paths in by_hash.values() if len(paths)>1]
     report={"missing_references":missing,"duplicate_image_groups":duplicates,"originals":originals,
             "note":"Only literal local paths are checked. Dynamic load paths, .import UID resolution, visual correctness and Godot runtime require separate tests."}
