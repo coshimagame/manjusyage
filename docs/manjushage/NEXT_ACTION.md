@@ -104,4 +104,5 @@
 2. 横版の撮影用遭遇画面は`docs/screenshots/latest/stage1_enemy_profiles_20261116.png`に保存済み。次は通常レンダラーで縦版・SB01・MB01・BB01を連続撮影し、各弾の予告、敵の輪郭、味方弾、HUD、背景が重なっても読めるかを**人間のキーボード操作**で確認する。物理パッド、実聴、性能測定は独立して記録する。
 3. Windowsの通常Godot実行ファイルはheadless時signal 11を再現し、console版のみテストが通る。PCKPackerのsignal 11と合わせて最小再現を切り分けるか、GitHub Actionsの正式Windows exportを確認するまで、既存ZIPを今回の最新版とは案内しない。
 4. GitHub同期前にWindows Git credential-managerの`NtCreateDirectoryObject ... 0xC0000022`を解消し、`origin/main`を再取得する。ローカルは既知の`origin/main`参照より20コミット先行しており、内容確認なしの非強制push／force pushは行わない。
+5. 長胴MB01は横版の実画面を`stage1_long_body_20261116.png`へ保存済み。次は縦版で尾節がプレイ領域を塞がないこと、人間のキーボード操作で尾部への攻撃と接触が公平に読めることを検収する。追加の長胴敵は、原本と来歴を受け取ってから別IDとして試作する。
 

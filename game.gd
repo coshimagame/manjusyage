@@ -22,7 +22,7 @@ const STAGE1_ENEMY_PROFILES = {
 	"EN008":{"motion":"wasp","technique":"dive","shot_form":"needle","scale":0.84,"hp_bonus":0,"speed":96.0,"amplitude":26.0,"hit_radius":17.0,"fire_delay":2.20,"shot_offsets":[-0.10,0.10],"shot_speed":104.0,"shot_radius":2,"shot_turn":0.18},
 	"EN009":{"motion":"rotor","technique":"fan","shot_form":"ring","scale":0.98,"hp_bonus":1,"speed":61.0,"amplitude":21.0,"hit_radius":21.0,"fire_delay":2.90,"shot_offsets":[-0.34,-0.11,0.11,0.34],"shot_speed":64.0,"shot_radius":3,"shot_turn":0.12},
 	"SB01":{"motion":"crab","technique":"dive","shot_form":"claw","scale":1.16,"hp_bonus":3,"speed":54.0,"amplitude":26.0,"hit_radius":29.0,"fire_delay":3.15,"shot_offsets":[-0.17,0.17],"shot_speed":90.0,"shot_radius":5,"shot_turn":0.20},
-	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.26,0.0,0.26],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10}
+	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.26,0.0,0.26],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10,"body_segments":4,"body_spacing":28.0,"body_radius":15.0,"body_span":164.0}
 }
 const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
@@ -190,11 +190,12 @@ func _ready():
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
-		if screenshot_mode == "encounter":
+		if screenshot_mode in ["encounter","long-body"]:
 			# Capture-only encounter: it places the real wave organisms inside the
-			# frame with their normal movement/shot data. No player save is touched.
+			# frame with their normal movement/shot data. `long-body` selects the
+			# authored MB01 wave. No player save is touched.
 			enemies.clear()
-			wave_id=3
+			wave_id=5 if screenshot_mode=="long-body" else 3
 			spawn_wave()
 			for i in range(enemies.size()):
 				enemies[i].pos.x=438+i*34
@@ -709,7 +710,7 @@ func update_game(dt):
 			bullet.pos.x=800
 			if gate==1 and gate_step>=3: open_gate()
 		for e in enemies:
-			if e.hp>0 and bullet.pos.distance_to(e.pos)<float(e.get("hit_radius",19.0)):
+			if e.hp>0 and enemy_body_contains(e,bullet.pos,float(e.get("hit_radius",19.0))):
 				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
 		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
@@ -785,7 +786,7 @@ func update_game(dt):
 				elif motion=="orbit":shot.turn=.22 if float(angle)<0 else -.22
 				shots.append(shot)
 		for p in players:
-			if p.down==0 and p.pos.distance_to(e.pos)<float(e.get("contact_radius",e.get("hit_radius",20.0)*.82)): hurt(p)
+			if p.down==0 and enemy_body_contains(e,p.pos,float(e.get("contact_radius",e.get("hit_radius",20.0)*.82))): hurt(p)
 		if e.hp<=0:
 			for p in players:
 				if p.down==0:p.experience+=1
@@ -838,7 +839,22 @@ func spawn_wave():
 		elif bio_route and j==0 and wave_id%4==0:
 			art_id="SB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
 		var amplitude=float(profile.get("amplitude",23.0+int(technique=="dive")*8))
-		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn"))})
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn")),"body_segments":int(profile.get("body_segments",0)),"body_spacing":float(profile.get("body_spacing",0.0)),"body_radius":float(profile.get("body_radius",0.0)),"body_span":float(profile.get("body_span",0.0))})
+
+func enemy_body_point(e,segment:int)->Vector2:
+	if segment<=0:return e.pos
+	var spacing=float(e.get("body_spacing",0.0))
+	var phase=float(e.get("phase",0.0))
+	var wave=sin(float(e.get("age",0.0))*3.2+phase+segment*.82)*5.5
+	if vertical.active:return e.pos+Vector2(wave,segment*spacing)
+	return e.pos+Vector2(segment*spacing,wave)
+
+func enemy_body_contains(e,point:Vector2,head_radius:float)->bool:
+	if point.distance_to(e.pos)<head_radius:return true
+	var body_radius=float(e.get("body_radius",0.0))
+	for segment in range(1,int(e.get("body_segments",0))+1):
+		if point.distance_to(enemy_body_point(e,segment))<body_radius:return true
+	return false
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]

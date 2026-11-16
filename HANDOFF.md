@@ -290,3 +290,9 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - 通常レンダラーのゲーム本体シーンを`--shot=encounter`で起動し、640×360の実ゲーム画像`docs/screenshots/latest/stage1_enemy_profiles_20261116.png`を保存した。3P HUD、ユーザー提供draft由来の敵、個別の大きさ／予告線／弾形状が同一フレームで見える。これは合成入力なしの撮影用配置であり、人間操作・難易度・実聴の検収ではない。
 - ローカルコミットは`441fcd5`（遭遇プロファイルと生成依頼仕様）と`2225d6a`（実ゲーム画像と台帳）。`git fetch origin main`はWindowsのGit credential-manager起動時に`NtCreateDirectoryObject ... 0xC0000022`で失敗し、リモートの最新再取得／pushは行っていない。既知の`origin/main`参照は`e13bd51`でローカルは20コミット先行しているため、認証を直して再取得・レビューするまで非強制pushしない。
 
+# 2026-11-16 長胴の連節敵を強調
+
+- ユーザーの「長い敵」要望に合わせ、提供draftのMB01をStage 1の**長胴遭遇**として拡張した。横画面では本体を大きく表示し、4つの装甲尾節がうねって追従する。尾節もショット／接触の当たり判定を共有するため、見た目だけの飾りではない。敵名・物語上の正体はdraftのままである。
+- `--shot=long-body`はセーブを触らない撮影用配置としてMB01の実ウェーブを出す。通常レンダラーの記録は`docs/screenshots/latest/stage1_long_body_20261116.png`。これは表示確認であり、人間操作、難易度、物理パッド、実聴、性能測定の検収ではない。
+- Godot 4.6.3 console＋隔離`APPDATA`で拡張`test_v09.gd`と1P自動攻略がPASS。既知の`Image.load_from_file` export警告と終了時Resource解放警告は継続。
+

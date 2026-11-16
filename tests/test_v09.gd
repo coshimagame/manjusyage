@@ -68,6 +68,10 @@ func run():
 	assert(motions.size()>=10,"Stage 1 draft enemies need distinct movement routes")
 	assert(shot_forms.size()>=8,"Stage 1 draft enemies need distinct readable projectile forms")
 	assert(display_scales.size()>=10,"Stage 1 draft enemies need distinct display scales")
+	var long_body=stage1_variants["MB01"]
+	assert(long_body.body_segments>=4 and long_body.body_span>=160 and long_body.body_radius>0,"MB01 must remain a readable long-body encounter")
+	var tail_point=g.enemy_body_point(long_body,long_body.body_segments)
+	assert(tail_point.distance_to(long_body.pos)>80 and g.enemy_body_contains(long_body,tail_point,long_body.hit_radius),"Long-body collision must match the visible tail")
 	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
 	var expected_flash=0.0 if g.visual.flash_level>0 else .35
 	for key in [KEY_F10,KEY_F12]:

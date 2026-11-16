@@ -188,7 +188,8 @@ func enemy(g,e):
 	if tex==null:tex=creatures[1 if technique=="fan" or technique=="orbit" else 0]
 	var elite=art_id in ["MB01","SB01"]
 	var display_scale=float(e.get("scale",1.0))
-	var display_size=(fitted_texture_size(tex,Vector2(78,58) if elite else Vector2(48,42))*display_scale) if art_id!="" else tex.get_size()
+	var body_span=float(e.get("body_span",0.0))
+	var display_size=(fitted_texture_size(tex,Vector2(body_span,74) if body_span>0 and not g.vertical.active else (Vector2(78,58) if elite else Vector2(48,42)))*display_scale) if art_id!="" else tex.get_size()
 	var opening=clampf((.65-e.cool)/.65,0,1)
 	# A short, exact firing lane tells the player where this organism's next
 	# pattern will travel. It uses the same target and angle rules as game.gd,
@@ -213,6 +214,21 @@ func enemy(g,e):
 	elif motion in ["turtle","mushroom","centipede"]:tilt+=sin(e.age*1.15+phase)*.07
 	elif motion in ["rotor","flower"]:tilt+=sin(e.age*2.0+phase)*.1
 	var pulse=1.0+sin(g.clock*(6.2 if motion=="jelly" else 4.0)+phase)*(.055 if motion in ["jelly","flower","mushroom"] else .025)
+	# MB01 is the long-body encounter: the supplied sprite is kept intact, while
+	# four armored tail sections make its full connected length readable before
+	# it crosses the player lane. The same body points drive hit/contact checks.
+	var body_segments=int(e.get("body_segments",0))
+	if body_segments>0:
+		var tail_radius=float(e.get("body_radius",12.0))
+		var previous=e.pos
+		for segment in range(1,body_segments+1):
+			var node=g.enemy_body_point(e,segment)
+			g.draw_line(previous,node,Color("201c40",.86),tail_radius*1.55)
+			g.draw_circle(node,tail_radius+2,Color("171329"))
+			g.draw_circle(node,tail_radius,Color("78649b"))
+			g.draw_circle(node+Vector2(-tail_radius*.25,-tail_radius*.18),tail_radius*.42,Color("c49aca"))
+			g.draw_circle(node,2.5,Color("ff7d98"))
+			previous=node
 	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,pulse))
 	if art_id!="":g.draw_texture_rect(tex,Rect2(-display_size*.5,display_size),false,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
 	else:g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
