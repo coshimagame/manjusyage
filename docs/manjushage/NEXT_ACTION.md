@@ -103,4 +103,5 @@
 1. `docs/manjushage/STAGE1_ENEMY_IMAGE_REQUEST_V01.md`の順で、まずEN001〜EN009の横/縦v02を受け取る。受領後は原本を`art/incoming/`へ版付きで保管し、来歴・生成方法・権利・採否を`ART_ASSETS.md`へ記録してから、既存draftを上書きせず個別に接続する。
 2. 横版の撮影用遭遇画面は`docs/screenshots/latest/stage1_enemy_profiles_20261116.png`に保存済み。次は通常レンダラーで縦版・SB01・MB01・BB01を連続撮影し、各弾の予告、敵の輪郭、味方弾、HUD、背景が重なっても読めるかを**人間のキーボード操作**で確認する。物理パッド、実聴、性能測定は独立して記録する。
 3. Windowsの通常Godot実行ファイルはheadless時signal 11を再現し、console版のみテストが通る。PCKPackerのsignal 11と合わせて最小再現を切り分けるか、GitHub Actionsの正式Windows exportを確認するまで、既存ZIPを今回の最新版とは案内しない。
+4. GitHub同期前にWindows Git credential-managerの`NtCreateDirectoryObject ... 0xC0000022`を解消し、`origin/main`を再取得する。ローカルは既知の`origin/main`参照より20コミット先行しており、内容確認なしの非強制push／force pushは行わない。
 
