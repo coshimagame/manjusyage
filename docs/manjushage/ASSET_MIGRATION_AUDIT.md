@@ -121,3 +121,9 @@
 - 最新GitHub PR取得で **#50 はopen、mergeable=false**、#51はopen、mergeable=true。#50の判定は以前のtrueから変化したため、原因（mainの新規変更との衝突かGitHub判定中か）を解消するまで両PRともマージしない。
 - `main...cleanup/canon-and-art-folders-20261106` は **diverged、96 ahead / 10 behind、73変更パス**。前回の95 ahead / 7 behindからmain側も進行。main側変更を上書きしないよう、差分・衝突箇所を改めて照合する。
 - この時点で承認済み原画の同定、main固有UI画像2点・スクリーンショット5点の保護比較、全リンク・参照、統合後Godotテストは未完了。**mainへの統合・完了通知は行わない**。
+
+## 2026-11-16 17時台 JST PR判定の再取得と新規ラフ画の保護
+- GitHub APIでPR #50・#51はともにopenで、今回の`mergeable=true`を確認。15時台に記録した#50の`false`から変化したが、GitHub側の一時判定か競合解消かは未確定。`mergeable=true`のみを根拠に統合しない。
+- `main...cleanup/canon-and-art-folders-20261106`は97 ahead / 10 behind、73変更パス。mainの新規変更を取り込む前に再比較する。
+- mainに追加された成長型敵の企画書 `docs/manjushage/GROWING_ENEMY_VISUAL_PROPOSAL.md` とSVGラフ `docs/manjushage/GROWING_ENEMY_VISUAL_ROUGH.svg` は提案段階の参考資料であり、承認済みゲーム素材ではない。統合時に保持し、透過PNGや実装済み素材と誤認しない。
+- 原画承認・main固有UI画像2点・スクリーンショット5点・全参照・main統合後Godot動作検証は引き続き未完了。画像や既存参照は変更せず、mainへのマージは保留。
