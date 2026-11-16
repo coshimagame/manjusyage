@@ -28,6 +28,7 @@ var finished := false
 var font: SystemFont
 var planet_tex: ImageTexture
 var music: AudioStreamPlayer
+var pilot_dialogue_portraits: Dictionary = {}
 var test_shot := false
 var frames := 0
 
@@ -35,6 +36,11 @@ func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
+	pilot_dialogue_portraits = {
+		"コルミィ": pilot_texture_from_file("res://art/active/pilots/cormii_dialogue_pixel_v01.png"),
+		"ジヨーザ": pilot_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
+		"マフィオ": pilot_texture_from_file("res://art/active/pilots/mafio_dialogue_pixel_v01.png")
+	}
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
@@ -49,7 +55,13 @@ func _ready():
 		if arg == "--story-shot": test_shot = true; page = 1; age = 4.0
 		if arg == "--training-shot": test_shot=true;page=2;age=4.0
 		if arg == "--workshop-shot": test_shot=true;page=4;age=4.0
+		# Capture the Cormii dialogue beat without changing the normal prologue.
+		if arg == "--pilot-story-shot": test_shot=true;page=2;age=5.0
 	queue_redraw()
+
+func pilot_texture_from_file(path:String)->Texture2D:
+	var image=Image.load_from_file(path)
+	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
 
 # Cache the static 163x163 planet once, instead of drawing ~20,000 tiny
 # rectangles every frame. All original lighting/detail values are retained.
@@ -105,7 +117,7 @@ func _process(dt):
 	if test_shot and frames == 5:
 		await RenderingServer.frame_post_draw
 		var image = get_viewport().get_texture().get_image()
-		image.save_png("res://story-preview.png")
+		image.save_png("res://pilot-story-preview.png" if page==2 and age>=4.25 else "res://story-preview.png")
 		get_tree().quit()
 
 func _draw():
@@ -229,10 +241,25 @@ func draw_story_dialogue():
 	var letters=maxi(0,int((local_age-.35)*23))
 	var dialogue=entry[1].substr(0,letters)
 	var reveal=clampf(local_age*2.0,0,1)
+	draw_story_pilot_portrait(str(entry[0]),reveal)
 	draw_rect(Rect2(62,209,518,37),Color(.025,.055,.115,.83*reveal))
 	draw_rect(Rect2(62,209,3,37),Color(.95,.48,.51,.87*reveal))
 	draw_string(font,Vector2(77,224),entry[0],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.95,.68,.54,reveal))
 	draw_string(font,Vector2(143,232),dialogue,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color(.95,.94,.87,reveal))
 	if int(clock*2)%2==0 and letters>=entry[1].length():
 		draw_rect(Rect2(555,232,7,2),Color(.91,.76,.54,reveal))
+
+# STORY-VIS-001 — show the same active pixel portraits during the relevant
+# dialogue beats without assigning a portrait to Mu or Kuu.
+func draw_story_pilot_portrait(speaker:String,reveal:float):
+	var portrait: Texture2D = pilot_dialogue_portraits.get(speaker)
+	if portrait == null: return
+	var panel=Rect2(468,49,139,144)
+	draw_rect(panel,Color(.025,.055,.115,.72*reveal))
+	draw_rect(panel,Color(.75,.83,1,.58*reveal),false,1)
+	var source_size=portrait.get_size()
+	var scale=minf(130.0/source_size.x,136.0/source_size.y)
+	var portrait_size=source_size*scale
+	var target=Rect2(panel.get_center()-portrait_size*.5,portrait_size)
+	draw_texture_rect(portrait,target,false,Color(1,1,1,reveal))
 

@@ -216,3 +216,10 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - マフィオは実際の消化残量から、%表示、保持技、捕食→分解→同化の3工程を表示する。3機は共通フレームを維持しながら、花弁型放熱翼／長い解析センサー／非対称捕食ポッドをゲーム描画にも反映して見分けやすくした。判定・能力値・セーブ・協力人数は不変。
 - Godot 4.6.3 console＋隔離APPDATAで`test_status_v09.gd`（3枚の透過素材の読込検査を含む）と`test_v09.gd`がPASS。通常レンダラーの[コルミィ](screenshots/latest/stage1_status-cormii_loadout_20261116.png)・[ジヨーザ](screenshots/latest/stage1_status-jiyoza_loadout_20261116.png)・[マフィオ](screenshots/latest/stage1_status-mafio_loadout_20261116.png)の実ステータス画面を透過スプライト版に更新した。撮影用サンプル消化値は保存しない。人間操作、物理パッド、実聴、性能測定は未検証。
 
+# 2026-11-17 — ユーザー指定の3人をドット絵会話肖像として採用
+
+- ユーザー指定の透明背景コルミィ／ジヨーザ／マフィオを原寸で`art/originals/pilots/`へ保管し、各人物のポーズ・表情・識別色を保った透明背景16bit風ドット絵を`art/active/pilots/`へ追加。来歴、ハッシュ、ImageGen変換方法、v0.9採用範囲は[パイロット肖像台帳](../art/active/pilots/README.md)と`ART_ASSETS.md`に登録した。これはv0.9での基本肖像の採用であり、外見の全詳細を新たな長期正史に決定する変更ではない。
+- ステータス、プロローグの発話者枠、Stage 1クリア後の通信幕間を同じ3枚に接続。ライブHP、搭載系、マフィオの消化度、能力・当たり判定・保存・1〜3人協力・横縦切替は変えていない。コルミィ／ジヨーザ（男の子）／マフィオ（ボーイッシュな女の子）の既存設定を維持した。
+- Godot 4.6.3 console＋隔離APPDATAで`test_status_v09.gd`、`test_prologue.gd`、`stage_intermission_smoke.gd`、`test_v09.gd`がPASS。通常レンダラーで保存済みの[コルミィ会話画面](screenshots/latest/prologue_cormii_pixel_dialogue_20261117.png)は実ゲームのプロローグ表示記録である。人間操作、物理パッド、実聴、性能は未検証。
+- 今回の通常Godot再起動はWindows signal 11で失敗したため、幕間の新規連続キャプチャと更新Windows配布版は未作成。`Image.load_from_file`のexport警告と終了時Resource解放警告も継続する。
+

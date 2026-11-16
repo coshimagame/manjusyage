@@ -311,3 +311,11 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - Godot 4.6.3 console＋隔離`APPDATA`で`test_status_v09.gd`（透過3人素材の全読み込みを含む）と`test_v09.gd`がPASS。通常レンダラーでコルミィ／ジヨーザ／マフィオの640×360実画面を透過スプライト版に更新保存した。人間のキーボード操作、物理コントローラー、実聴、性能測定は未検証。`Image.load_from_file`の既知export警告と終了時Resource警告は継続。
 - 次：人間操作で3機の通常・縦区間の識別を確認する。ブリーフィング／幕間、開始ジングル、ボス時の曲変化、生体背景の動きは、同じ0.9区間の次の演出パスとして、他実行が置いた未追跡の幕間・ジングル系ファイルとは重複編集せず実装・検証する。Antigravity生成曲は原本ファイル未受領のため、現時点で統合・実聴済みとは扱わない。
 
+# 2026-11-17 ユーザー指定の3人肖像を会話・ステータスへ統一
+
+- ユーザーが「基本」として指定した透明背景のコルミィ／ジヨーザ／マフィオを、まず`art/originals/pilots/`へ原寸で保存し、`art/active/pilots/`へ透明背景を保った16bit風ドット絵v01を追加した。元ソースは別Codex作業のreference-based generated derivativeであり、失われた公式原画の復元や、衣装の長期正史化とは扱わない。素材のコピー元・版・ハッシュ・ImageGenによる変換方法・採否は`art/active/pilots/README.md`と`ART_ASSETS.md`へ記録した。
+- `game.gd`のライブステータス、`prologue.gd`の発話者肖像、`ui/stage_intermission.gd`のStage 1通信幕間を同じ3枚へ接続した。ジヨーザを男の子、マフィオをボーイッシュな女の子、コルミィをハツラツとした女の子として扱う既存設定・能力値・保存・1〜3人協力・横縦切替には変更がない。旧24×32素材は削除せず保管のみへ下げた。
+- Godot 4.6.3 console＋隔離`APPDATA`で`test_status_v09.gd`、`test_prologue.gd`、`stage_intermission_smoke.gd`、`test_v09.gd`がPASS。プロローグの通常レンダラー実画面は`docs/screenshots/latest/prologue_cormii_pixel_dialogue_20261117.png`に保存済みで、コルミィの発話と右上肖像を確認した。ステータス3枚も同じ素材へ更新済み。自動テストは人間の操作感・難易度・物理コントローラー・実聴・性能の検収ではない。
+- この環境では今回、通常Godotをシェルから再起動して幕間を撮る際にWindows signal 11を再現したため、更新Windows PCK/ZIPを作成せず、幕間の新規通常レンダー連続キャプチャは未完了として残す。既知の`Image.load_from_file` export警告と終了時Resource解放警告も継続。GitHub同期はcredential-manager権限問題のため未実施。
+- 次：通常レンダラーが起動できる環境で、Stage 1クリア→コルミィ／ジヨーザ／マフィオの各幕間行を640×360で撮り、肖像の縮尺・文字との距離・人間のキーボードでの送り／スキップを確認する。Texture2D参照化とPCK起動試験を通してから配布版を更新する。
+

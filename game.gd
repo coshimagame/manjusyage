@@ -48,9 +48,9 @@ var chat_ui_atlas: Texture2D
 # reference material and never replace live combat/save data.
 var character_hub_ui: Texture2D
 var character_system_ui: Texture2D
-# Transparent full-body pilot sprites created in the earlier v0.9 art pass.
-# They are display references only; the supplied UI boards remain a fallback
-# for incomplete checkouts and do not determine live stats or story data.
+# User-selected transparent pilot art, translated into the active 16-bit pixel
+# portrait set. These three visuals are the v0.9 baseline for status and story
+# presentation; they do not change live stats, saves, or canon text.
 var pilot_portraits: Array[Texture2D] = []
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
@@ -139,9 +139,9 @@ func _ready():
 	character_hub_ui=image_texture_from_file("res://art/ui/character_hub_ui_20261106.png")
 	character_system_ui=image_texture_from_file("res://art/ui/character_system_ui_20261106.png")
 	pilot_portraits=[
-		image_texture_from_file("res://art/concepts/pilot_cormii_slim_v01.png"),
-		image_texture_from_file("res://art/concepts/pilot_jiyoza_slim_v01.png"),
-		image_texture_from_file("res://art/concepts/pilot_mafio_slim_v01.png")
+		image_texture_from_file("res://art/active/pilots/cormii_dialogue_pixel_v01.png"),
+		image_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
+		image_texture_from_file("res://art/active/pilots/mafio_dialogue_pixel_v01.png")
 	]
 	build_planet_texture()
 	for i in range(130):
@@ -237,6 +237,17 @@ func _ready():
 			# archive presentation in a packed Windows build.
 			mafio_archive.captured={"P-002":3,"P-003":1,"P-005":2}
 			archive_cursor=1
+		if screenshot_mode in ["intermission-cormii","intermission-jiyoza","intermission-mafio"]:
+			# Capture-only route through the real Stage 1 intermission.  It selects a
+			# pilot line without completing a run or writing a save.
+			mode="clear"
+			open_stage1_intermission()
+			var overlay=get_child(get_child_count()-1)
+			var line_index={"intermission-cormii":2,"intermission-jiyoza":3,"intermission-mafio":4}[screenshot_mode]
+			overlay.index=line_index
+			overlay.reveal=999.0
+			overlay._refresh()
+			screenshot_capture_frame=16
 		for pilot in players: pilot.inv=0
 	queue_redraw()
 
@@ -248,10 +259,9 @@ func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 	if chat_ui_atlas:
 		draw_texture_rect_region(chat_ui_atlas,target,source,modulate)
 
-# VIS-021 — compact, transparent pilot sprites replace the profile-board crop
-# in the live status page.  They are scaled with nearest-neighbour pixel art
-# presentation and remain visual trial material, not a formal character-design
-# decision.  The former board crop only keeps older asset packs usable.
+# VIS-021 — user-selected transparent portraits, now rendered as an active
+# pixel-art set, replace the profile-board crop in the live status page.  The
+# former board crop only keeps older/incomplete asset packs usable.
 func draw_fixed_pilot_visual(char_id:int,accent:Color):
 	var panel=Rect2(438,55,180,183)
 	draw_rect(panel,Color("080d1c",.92))

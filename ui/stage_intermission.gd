@@ -7,6 +7,11 @@ signal skipped(next_stage: int)
 const W := 640.0
 const H := 360.0
 const CHARS_PER_SECOND := 28.0
+const PILOT_PORTRAIT_PATHS := {
+	"コルミィ": "res://art/active/pilots/cormii_dialogue_pixel_v01.png",
+	"ジヨーザ": "res://art/active/pilots/jiyoza_dialogue_pixel_v01.png",
+	"マフィオ": "res://art/active/pilots/mafio_dialogue_pixel_v01.png"
+}
 
 var next_stage := 2
 var lines: Array[Dictionary] = []
@@ -20,6 +25,9 @@ var _speaker: Label
 var _dialogue: Label
 var _hint: Label
 var _log: Label
+var _portrait_panel: ColorRect
+var _portrait: TextureRect
+var _pilot_portraits: Dictionary = {}
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -29,6 +37,26 @@ func _ready() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
+	for speaker in PILOT_PORTRAIT_PATHS:
+		var texture := _load_pilot_portrait(PILOT_PORTRAIT_PATHS[speaker])
+		if texture != null:
+			_pilot_portraits[speaker] = texture
+	_portrait_panel = ColorRect.new()
+	_portrait_panel.color = Color(0.03, 0.07, 0.13, 0.86)
+	_portrait_panel.position = Vector2(30, 72)
+	_portrait_panel.size = Vector2(138, 177)
+	_portrait_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_panel.visible = false
+	add_child(_portrait_panel)
+	_portrait = TextureRect.new()
+	_portrait.position = Vector2(34, 76)
+	_portrait.size = Vector2(130, 169)
+	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait.visible = false
+	add_child(_portrait)
 	_title = _make_label(Vector2(30, 20), Vector2(580, 42), 24)
 	_speaker = _make_label(Vector2(34, 166), Vector2(570, 32), 21)
 	_dialogue = _make_label(Vector2(34, 205), Vector2(570, 92), 19)
@@ -38,6 +66,10 @@ func _ready() -> void:
 	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.visible = false
 	_refresh()
+
+func _load_pilot_portrait(path: String) -> Texture2D:
+	var image := Image.load_from_file(path)
+	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
 
 func _make_label(pos: Vector2, dimensions: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -76,16 +108,40 @@ func _refresh() -> void:
 	_speaker.visible = not show_log
 	_dialogue.visible = not show_log
 	if show_log:
+		_portrait_panel.visible = false
+		_portrait.visible = false
 		_log.text = "\n".join(history.slice(maxi(0, history.size() - 7)))
 		return
 	if index < lines.size():
 		var current := lines[index]
 		var content := str(current.get("text", ""))
-		_speaker.text = str(current.get("speaker", "通信"))
+		var speaker := str(current.get("speaker", "通信"))
+		_set_portrait(speaker)
+		_speaker.text = speaker
 		_dialogue.text = content.substr(0, int(reveal))
 	else:
+		_set_portrait("")
 		_speaker.text = "通信終了"
 		_dialogue.text = "次のステージへ出撃します。"
+
+# STORY-VIS-001 — the selected pilot portraits appear only on their own lines.
+# Mu and Kuu retain a text-only channel because no portrait is defined here.
+func _set_portrait(speaker: String) -> void:
+	var texture: Texture2D = _pilot_portraits.get(speaker)
+	var visible := texture != null
+	_portrait_panel.visible = visible
+	_portrait.visible = visible
+	if visible:
+		_portrait.texture = texture
+		_speaker.position = Vector2(190, 166)
+		_speaker.size = Vector2(384, 32)
+		_dialogue.position = Vector2(190, 205)
+		_dialogue.size = Vector2(384, 92)
+	else:
+		_speaker.position = Vector2(34, 166)
+		_speaker.size = Vector2(570, 32)
+		_dialogue.position = Vector2(34, 205)
+		_dialogue.size = Vector2(570, 92)
 
 func advance() -> void:
 	if done:

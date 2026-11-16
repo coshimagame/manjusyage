@@ -14,11 +14,14 @@ func _run() -> void:
 		{"speaker": "コルミィ", "text": "出撃準備、できたよ！"}
 	]
 	scene.configure(2, lines)
+	assert(scene._pilot_portraits.size() == 3, "All three active pixel portraits must load for intermission dialogue")
 	assert(scene.index == 0)
 	scene.advance()
 	assert(scene.index == 0) # First press reveals text.
 	scene.advance()
 	assert(scene.index == 1)
+	await process_frame
+	assert(scene._portrait.visible and scene._portrait.texture == scene._pilot_portraits["コルミィ"], "A pilot line must show its matching portrait")
 	scene.toggle_log()
 	assert(scene.show_log and scene.history.size() == 1)
 	scene.advance()
