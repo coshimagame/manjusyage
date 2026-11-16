@@ -127,3 +127,9 @@
 - `main...cleanup/canon-and-art-folders-20261106`は97 ahead / 10 behind、73変更パス。mainの新規変更を取り込む前に再比較する。
 - mainに追加された成長型敵の企画書 `docs/manjushage/GROWING_ENEMY_VISUAL_PROPOSAL.md` とSVGラフ `docs/manjushage/GROWING_ENEMY_VISUAL_ROUGH.svg` は提案段階の参考資料であり、承認済みゲーム素材ではない。統合時に保持し、透過PNGや実装済み素材と誤認しない。
 - 原画承認・main固有UI画像2点・スクリーンショット5点・全参照・main統合後Godot動作検証は引き続き未完了。画像や既存参照は変更せず、mainへのマージは保留。
+
+## 2026-11-16 18時台 JST 再監査
+- GitHubでPR #50（READMEのみ）・PR #51（73ファイルの設定・art分類）を再取得。両PRはopen、未マージ、mergeable=true。#51のbaseは`cleanup/simple-repo-navigation-20261106`であり、mainに直接統合しない。静的mergeable判定は内容検証・Godot動作保証ではない。
+- `main...cleanup/canon-and-art-folders-20261106`比較は98 ahead / 10 behind、73ファイル差分。分類先のPNGは7点（title logo 1、主人公3人のpilotとship各1）。これは新規デザイン7点の制作証拠ではなく、移行先パスに存在する画像数の確認に限る。
+- main側のグロウフィア企画書とSVGラフを保護対象として維持。既存の承認済み原画と同一性を確認するまで画像の置換・削除はしない。
+- 承認済み原画の同定、main固有UI PNG 2点、スクリーンショット5点の比較、Markdown/画像/コード参照の網羅検証、Godot 4.6実行、Windows表示比較は未完了。今回の変更は監査記録のみ。mainマージなし。**完了条件未達。**
