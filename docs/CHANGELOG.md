@@ -210,3 +210,9 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - `test_v09.gd`は累計89発の編成、8種以上の段階連射プロファイル、実際の即時弾と待機弾の生成を検査する。Godot 4.6.3 console＋隔離APPDATAで`test_v09.gd`、`test_status_v09.gd`、1P自動攻略がPASS。2P/3Pの全区間自動攻略は実行環境の30秒上限で再検証を完走できず未記録。人間操作、物理パッド、実聴、性能測定は未実施。
 - 通常レンダラーの実ゲームから[Stage 1弾幕画面](screenshots/latest/stage1_bullet_curtain_20261116.png)を追加。撮影専用配置であり、人間の難易度検収・正式原画・音声検収を意味しない。
 
+# 2026-11-16 — ステータスを人物・機体・消化工程へ接続（試作）
+
+- ステータスの顔プロファイルを、先行制作した背景透過の全身ピクセル素材`pilot_cormii_slim_v01.png`、`pilot_jiyoza_slim_v01.png`、`pilot_mafio_slim_v01.png`（各24×32）へ置換。元のユーザー提供UIボードの肖像切り抜きは欠損時のフォールバックに限定し、ボードの数値・台詞・設定は取り込まない。下部には実ゲーム機体プレビューと3枠の搭載系表示を追加。搭載系は既存挙動を説明する試作UIで、装備品の取得／保存／正式名称を追加していない。
+- マフィオは実際の消化残量から、%表示、保持技、捕食→分解→同化の3工程を表示する。3機は共通フレームを維持しながら、花弁型放熱翼／長い解析センサー／非対称捕食ポッドをゲーム描画にも反映して見分けやすくした。判定・能力値・セーブ・協力人数は不変。
+- Godot 4.6.3 console＋隔離APPDATAで`test_status_v09.gd`（3枚の透過素材の読込検査を含む）と`test_v09.gd`がPASS。通常レンダラーの[コルミィ](screenshots/latest/stage1_status-cormii_loadout_20261116.png)・[ジヨーザ](screenshots/latest/stage1_status-jiyoza_loadout_20261116.png)・[マフィオ](screenshots/latest/stage1_status-mafio_loadout_20261116.png)の実ステータス画面を透過スプライト版に更新した。撮影用サンプル消化値は保存しない。人間操作、物理パッド、実聴、性能測定は未検証。
+

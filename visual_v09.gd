@@ -141,22 +141,29 @@ func ship(g,p,index,rotation=0.0,scale_factor=1.0):
 	# All three use the same core atlas, but their visible equipment silhouette is
 	# now distinct at gameplay scale. These overlays deliberately change fins,
 	# sensors and thrusters rather than merely tinting one identical fighter.
-	if character==0: # コルミィ: forward swept flower-canards / burst thrusters.
+	if character==0: # コルミィ: broad heat-petal vanes / burst thrusters.
 		for side in [-1,1]:
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-5,side*6),Vector2(8,side*15),Vector2(17,side*12),Vector2(7,side*4)]),Color("b93f59"))
-			g.draw_line(Vector2(2,side*7),Vector2(15,side*12),Color("ffd4ad"),1)
-		g.draw_arc(Vector2(-12,0),15,PI*.65,PI*1.35,12,Color("ff8498",.75),1)
-	elif character==1: # ジヨーザ: long sensor booms / precision lattice.
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-8,side*5),Vector2(9,side*20),Vector2(24,side*14),Vector2(9,side*2)]),Color("b93f59"))
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-3,side*6),Vector2(9,side*16),Vector2(18,side*11),Vector2(7,side*4)]),Color("ff7790"))
+			g.draw_line(Vector2(-1,side*7),Vector2(20,side*13),Color("ffe2b2"),1)
+			g.draw_circle(Vector2(-18,side*7),2,Color("ff8f9e"))
+		g.draw_arc(Vector2(-12,0),18,PI*.62,PI*1.38,14,Color("ff9bab",.82),2)
+	elif character==1: # ジヨーザ: long sensor booms / precise symmetric lattice.
 		for side in [-1,1]:
-			g.draw_line(Vector2(-2,side*6),Vector2(4,side*15),Color("70dff5"),2)
-			g.draw_line(Vector2(4,side*15),Vector2(11,side*15),Color("bdf7ff"),1)
-		g.draw_line(Vector2(9,-9),Vector2(18,-9),Color("70dff5"),1)
-		g.draw_line(Vector2(14,-13),Vector2(14,-5),Color("70dff5"),1)
+			g.draw_line(Vector2(-4,side*6),Vector2(7,side*19),Color("70dff5"),2)
+			g.draw_line(Vector2(7,side*19),Vector2(22,side*14),Color("bdf7ff"),1)
+			g.draw_circle(Vector2(22,side*14),2,Color("d6fbff"))
+		g.draw_line(Vector2(8,-11),Vector2(25,-15),Color("70dff5"),1)
+		g.draw_line(Vector2(8,11),Vector2(25,15),Color("70dff5"),1)
+		g.draw_line(Vector2(20,-18),Vector2(20,18),Color("bdf7ff"),1)
+		g.draw_circle(Vector2(20,0),4,Color("1a5578"),false,1)
 	else: # マフィオ: asymmetric intake pods / absorb-and-rebuild fins.
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-12,-7),Vector2(-3,-15),Vector2(6,-10),Vector2(-2,-4)]),Color("d4a65a"))
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-15,7),Vector2(-5,15),Vector2(7,10),Vector2(-3,4)]),Color("7b5b9a"))
-		g.draw_circle(Vector2(-9,0),4,Color("f3d17b"))
-		g.draw_arc(Vector2(-9,0),7,-PI*.65,PI*.65,9,Color("e8b7ff"),1)
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-16,-7),Vector2(-4,-18),Vector2(12,-11),Vector2(1,-3)]),Color("d4a65a"))
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-21,7),Vector2(-8,19),Vector2(13,11),Vector2(-3,3)]),Color("7b5b9a"))
+		g.draw_colored_polygon(PackedVector2Array([Vector2(-14,4),Vector2(-2,14),Vector2(7,10),Vector2(-4,1)]),Color("b782c8"))
+		g.draw_circle(Vector2(-11,0),7,Color("6d4f72"))
+		g.draw_circle(Vector2(-11,0),4,Color("f3d17b"))
+		g.draw_arc(Vector2(-11,0),10,-PI*.65,PI*.65,10,Color("e8b7ff"),2)
 	# Hand-placed native cockpit, armor seams, nozzles and muzzle stay legible.
 	g.draw_line(Vector2(-6,-4),Vector2(5,-3),Color("90e2df"),1)
 	g.draw_line(Vector2(6,-2),Vector2(17,-1),Color("eee1bf"),1)

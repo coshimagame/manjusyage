@@ -48,6 +48,10 @@ var chat_ui_atlas: Texture2D
 # reference material and never replace live combat/save data.
 var character_hub_ui: Texture2D
 var character_system_ui: Texture2D
+# Transparent full-body pilot sprites created in the earlier v0.9 art pass.
+# They are display references only; the supplied UI boards remain a fallback
+# for incomplete checkouts and do not determine live stats or story data.
+var pilot_portraits: Array[Texture2D] = []
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 var mafio_archive=MafioArchive.new()
@@ -134,6 +138,11 @@ func _ready():
 	chat_ui_atlas=image_texture_from_file("res://art/ui/chat_ui_atlas_20261106.png")
 	character_hub_ui=image_texture_from_file("res://art/ui/character_hub_ui_20261106.png")
 	character_system_ui=image_texture_from_file("res://art/ui/character_system_ui_20261106.png")
+	pilot_portraits=[
+		image_texture_from_file("res://art/concepts/pilot_cormii_slim_v01.png"),
+		image_texture_from_file("res://art/concepts/pilot_jiyoza_slim_v01.png"),
+		image_texture_from_file("res://art/concepts/pilot_mafio_slim_v01.png")
+	]
 	build_planet_texture()
 	for i in range(130):
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
@@ -203,7 +212,22 @@ func _ready():
 				enemies[i].pos.x=438+i*34
 				enemies[i].cool=0.0 if screenshot_mode=="bullet-curtain" else .34+i*.045
 			if screenshot_mode=="bullet-curtain": screenshot_capture_frame=42
-		if screenshot_mode == "status": mode="status"
+		if screenshot_mode in ["status","status-cormii","status-jiyoza","status-mafio"]:
+			mode="status"
+			var status_character=0 if screenshot_mode in ["status","status-cormii"] else (1 if screenshot_mode=="status-jiyoza" else 2)
+			for i in range(players.size()):
+				if players[i].character==status_character: status_slot=i
+			# Capture-only live sample values make the real status instruments legible
+			# without changing a player's save or combat run.
+			var status_pilot=players[status_slot]
+			if status_character==0: status_pilot.experience=8
+			elif status_character==1: status_pilot.experience=15
+			else:
+				status_pilot.experience=8
+				status_pilot.learned="weave"
+				status_pilot.pending_technique="petal"
+				status_pilot.digest_total=1.2
+				status_pilot.digest=.58
 		if screenshot_mode == "archive":
 			mode="status"
 			for i in range(players.size()):
@@ -224,18 +248,29 @@ func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 	if chat_ui_atlas:
 		draw_texture_rect_region(chat_ui_atlas,target,source,modulate)
 
-# VIS-021 — Direct user-approved visual basis for the three protagonists.
-# The crop is deliberately portrait-only: board dialogue, exact numbers, and
-# menu wording are not inferred as canon or copied into the live interface.
+# VIS-021 — compact, transparent pilot sprites replace the profile-board crop
+# in the live status page.  They are scaled with nearest-neighbour pixel art
+# presentation and remain visual trial material, not a formal character-design
+# decision.  The former board crop only keeps older asset packs usable.
 func draw_fixed_pilot_visual(char_id:int,accent:Color):
-	if not character_system_ui: return
-	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
 	var panel=Rect2(438,55,180,183)
 	draw_rect(panel,Color("080d1c",.92))
-	draw_texture_rect_region(character_system_ui,Rect2(447,59,162,169),sources[char_id])
+	var portrait=pilot_portraits[clampi(char_id,0,pilot_portraits.size()-1)] if not pilot_portraits.is_empty() else null
+	if portrait:
+		var source_size=portrait.get_size()
+		var scale=minf(112.0/source_size.x,152.0/source_size.y)
+		var portrait_size=source_size*scale
+		var portrait_rect=Rect2(panel.get_center()-portrait_size*.5,portrait_size)
+		# A very quiet silhouette halo keeps a transparent sprite legible without
+		# rebuilding a background behind it.
+		draw_circle(panel.get_center()+Vector2(0,5),59,Color(accent.r,accent.g,accent.b,.09))
+		draw_texture_rect(portrait,portrait_rect,false)
+	elif character_system_ui:
+		var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+		draw_texture_rect_region(character_system_ui,Rect2(447,59,162,169),sources[clampi(char_id,0,2)])
 	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
 	draw_rect(Rect2(447,211,162,17),Color("101525",.82))
-	japanese("LIVE PROFILE / "+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
+	japanese("顔プロファイル / "+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
 
 func _repeat_music():
 	music.play()
@@ -1179,7 +1214,50 @@ func draw_status_screen():
 	# mechanic cards remain active game data; this panel is display-only.
 	if not archive_page:
 		draw_fixed_pilot_visual(char_id,accent)
+		draw_status_frame_loadout(p,char_id,accent)
 	text_at("TAB / START : BACK   LEFT / RIGHT : PILOT",Vector2(28,341),accent)
+
+func status_frame_modules(char_id:int)->Array:
+	# These are visible components of the existing prototype abilities, not a new
+	# saved inventory or a formal equipment name decision.
+	return [
+		["放熱翼","出力コア","花弁推進"],
+		["解析光学器","収束レール","安定翼"],
+		["捕食ポッド","融合槽","変換薄翼"]
+	][clampi(char_id,0,2)]
+
+func draw_status_frame_loadout(p,char_id:int,accent:Color):
+	var panel=Rect2(438,242,180,84)
+	draw_rect(panel,Color("080d1c",.94))
+	draw_rect(panel,Color(accent.r,accent.g,accent.b,.72),false,1)
+	text_at("FRAME / LIVE LOADOUT",Vector2(445,253),accent)
+	var preview=p.duplicate()
+	preview.pos=Vector2(475,286)
+	preview.color=char_id
+	preview.motion=Vector2.ZERO
+	preview.cool=0.0
+	preview.inv=0.0
+	visual.ship(self,preview,char_id,0,.82)
+	var modules=status_frame_modules(char_id)
+	for i in range(modules.size()):
+		var y=263+i*19
+		var active=Color(accent.r,accent.g,accent.b,.18+.08*i)
+		draw_rect(Rect2(506,y,105,15),Color("101b2e"))
+		draw_rect(Rect2(506,y,105,15),active,false,1)
+		if char_id==0:
+			draw_circle(Vector2(514,y+7),3,accent)
+			for petal in range(4):
+				draw_line(Vector2(514,y+7),Vector2(514,y+7)+Vector2.from_angle(petal*TAU/4.0)*5,Color("ffe1bd"),1)
+		elif char_id==1:
+			draw_line(Vector2(510,y+7),Vector2(518,y+7),accent,1)
+			draw_line(Vector2(514,y+3),Vector2(514,y+11),accent,1)
+			draw_rect(Rect2(512,y+5,4,4),Color("d7f9ff"),false,1)
+		else:
+			draw_circle(Vector2(514,y+7),4,Color("e8c270"),false,1)
+			draw_arc(Vector2(514,y+7),6,-PI*.6,PI*.6,8,Color("e5a6ec"),1)
+		japanese(str(modules[i]),Vector2(524,y+11),10,Color("f5efe3"))
+	var live_state=Abilities.label(p,elapsed)
+	japanese("現象："+live_state,Vector2(445,322),9,accent)
 
 func draw_cormii_status(p,accent):
 	japanese("出力変動盤 / 瞬間最大火力",Vector2(29,78),20,Color("ffdbe5"))
@@ -1230,11 +1308,22 @@ func draw_mafio_status(p,accent):
 	var progress=1.0-clampf(float(p.digest)/total,0,1)
 	draw_arc(Vector2(220,191),67,0,TAU,40,Color("e5d1af"),2)
 	draw_arc(Vector2(220,191),65,-PI/2,-PI/2+progress*TAU,40,Color("9adeff"),4)
+	text_at(str(int(round(progress*100)))+"%",Vector2(194,184),accent,2)
+	japanese("消化度",Vector2(195,207),12,Color("fff0cf"))
 	japanese("消化中の技",Vector2(56,135),14,WHITE)
 	japanese(status_technique_name(str(p.get("pending_technique","none"))) if p.digest>0 else status_technique_name(str(p.learned)),Vector2(56,173),20,Color("ffe5b4"))
 	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(250,145),17,WHITE)
-	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(250,205),15,WHITE)
-	text_at("E / X : ENEMY ARCHIVE",Vector2(250,255),Color("dfbdf7"))
+	japanese("保持技  "+status_technique_name(str(p.learned)),Vector2(250,183),15,Color("fff0cf"))
+	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(250,219),15,WHITE)
+	japanese("E / X : 図鑑",Vector2(304,240),9,Color("dfbdf7"))
+	var stages=["捕食","分解","同化"]
+	for i in range(3):
+		var amount=clampf(progress*3.0-i,0,1)
+		var x=55+i*112
+		draw_rect(Rect2(x,263,96,8),Color("4d3a4d"))
+		draw_rect(Rect2(x,263,96*amount,8),accent)
+		draw_rect(Rect2(x,263,96,8),Color("f8ddb4",.72),false,1)
+		japanese(stages[i],Vector2(x+32,282),10,Color("fff0cf") if amount>.01 else Color("917c91"))
 	japanese("弱った敵へ近づき、バーストで捕食。消化後に敵技を再現。",Vector2(72,309),14,WHITE)
 
 func draw_mafio_archive():
