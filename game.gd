@@ -943,11 +943,11 @@ func _draw():
 	if mode=="menu":
 		draw_menu()
 		return
-	if vertical.active and mode in ["play","pause","over"]:
+	if vertical.active and mode in ["play","pause","over","clear"]:
 		vertical.draw(self)
 		draw_hud()
 		if mode=="pause": centered("PAUSED / START TO RESUME",185,WHITE,2)
-		if mode=="over": draw_result()
+		if mode in ["over","clear"]: draw_result()
 		return
 	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
 	if bio_route: bio.draw_organs(self)
