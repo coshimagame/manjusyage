@@ -9,6 +9,8 @@ import wave
 import struct
 
 EXPECTED_FILES = [
+    ("assets/audio/music/bgm_opening_plan_a.wav", 44100, 2, 2, 30.0, 60.0),
+    ("assets/audio/music/bgm_opening_plan_b.wav", 44100, 2, 2, 30.0, 60.0),
     ("assets/audio/music/bgm_stage01_plan_a.wav", 44100, 2, 2, 40.0, 60.0),
     ("assets/audio/music/bgm_stage01_plan_b.wav", 44100, 2, 2, 40.0, 60.0),
     ("assets/audio/music/bgm_boss01_plan_a.wav",  44100, 2, 2, 40.0, 60.0),
@@ -17,12 +19,28 @@ EXPECTED_FILES = [
     ("assets/audio/music/bgm_stage02_plan_b.wav", 44100, 2, 2, 20.0, 60.0),
     ("assets/audio/music/bgm_stage03_plan_a.wav", 44100, 2, 2, 20.0, 60.0),
     ("assets/audio/music/bgm_stage03_plan_b.wav", 44100, 2, 2, 20.0, 60.0),
-    ("assets/audio/jingles/jg002_sortie.wav",     44100, 2, 2, 3.0, 5.0),
-    ("assets/audio/sfx/se_shot_cormii.wav",       44100, 2, 2, 0.10, 0.25),
-    ("assets/audio/sfx/se_shot_jiyoza.wav",       44100, 2, 2, 0.10, 0.25),
-    ("assets/audio/sfx/se_shot_mafio.wav",        44100, 2, 2, 0.10, 0.25),
-    ("assets/audio/sfx/se_boss_warning.wav",      44100, 2, 2, 0.50, 1.20),
-    ("assets/audio/sfx/se_boss_destroy.wav",      44100, 2, 2, 2.00, 3.50),
+    ("assets/audio/jingles/jg001_title.wav",       44100, 2, 2, 2.0, 4.0),
+    ("assets/audio/jingles/jg002_sortie.wav",      44100, 2, 2, 3.0, 5.0),
+    ("assets/audio/jingles/jg003_stage_start.wav", 44100, 2, 2, 2.0, 4.0),
+    ("assets/audio/jingles/jg007_stage_clear.wav", 44100, 2, 2, 2.5, 5.0),
+    ("assets/audio/sfx/se_shot_cormii.wav",        44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_shot_jiyoza.wav",        44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_shot_mafio.wav",         44100, 2, 2, 0.10, 0.25),
+    ("assets/audio/sfx/se_cormii_charge.wav",      44100, 2, 2, 0.30, 0.60),
+    ("assets/audio/sfx/se_cormii_omikuji.wav",     44100, 2, 2, 0.25, 0.50),
+    ("assets/audio/sfx/se_jiyoza_analyze.wav",     44100, 2, 2, 0.20, 0.45),
+    ("assets/audio/sfx/se_jiyoza_barrier.wav",     44100, 2, 2, 0.25, 0.55),
+    ("assets/audio/sfx/se_mafio_predation.wav",    44100, 2, 2, 0.20, 0.45),
+    ("assets/audio/sfx/se_mafio_absorb.wav",       44100, 2, 2, 0.25, 0.50),
+    ("assets/audio/sfx/se_player_hit.wav",         44100, 2, 2, 0.15, 0.40),
+    ("assets/audio/sfx/se_enemy_shot.wav",         44100, 2, 2, 0.08, 0.20),
+    ("assets/audio/sfx/se_enemy_destroy_small.wav",44100, 2, 2, 0.20, 0.50),
+    ("assets/audio/sfx/se_item_get.wav",           44100, 2, 2, 0.15, 0.35),
+    ("assets/audio/sfx/se_menu_cursor.wav",        44100, 2, 2, 0.02, 0.10),
+    ("assets/audio/sfx/se_menu_select.wav",        44100, 2, 2, 0.08, 0.20),
+    ("assets/audio/sfx/se_menu_cancel.wav",        44100, 2, 2, 0.06, 0.18),
+    ("assets/audio/sfx/se_boss_warning.wav",       44100, 2, 2, 0.50, 1.20),
+    ("assets/audio/sfx/se_boss_destroy.wav",       44100, 2, 2, 2.00, 3.50),
 ]
 
 def test_audio():
