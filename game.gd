@@ -1309,6 +1309,17 @@ func draw_controls():
 func draw_result():
 	if result_delay>0:return
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
+	# Original procedural red-spider-lily petals; decorative only, never a hitbox.
+	# Deterministic positions avoid flicker when _draw() is called repeatedly.
+	if mode=="clear":
+		for i in range(14):
+			var px=32.0+fposmod(float(i*83),576.0)
+			var py=32.0+fposmod(float(i*47),296.0)
+			var sway=sin(clock*0.65+float(i)*1.7)*5.0
+			var tip=Vector2(px+sway,py)
+			var stem=tip+Vector2(6.0,-11.0)
+			draw_line(tip,stem,Color(0.76,0.17,0.23,0.46),1.0)
+			draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-3.0,-5.0),stem,tip+Vector2(4.0,-4.0)]),Color(0.9,0.24,0.31,0.62))
 	japanese("境界を越えた" if mode=="clear" else "通信が途切れた",Vector2(232 if mode=="clear" else 205,92),24,COLORS[0] if mode=="clear" else COLORS[1])
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
