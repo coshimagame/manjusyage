@@ -935,6 +935,7 @@ func _draw():
 		return
 	if art_v09 and bio_route:
 		visual.draw(self)
+		draw_boss_volley_warning()
 		return
 	background()
 	if mode=="controls":
@@ -965,7 +966,9 @@ func _draw():
 	for item in pickups:
 		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
 		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
-	if not boss.is_empty(): draw_boss()
+	if not boss.is_empty():
+		draw_boss()
+		draw_boss_volley_warning()
 	for i in range(players.size()):
 		var p=players[i]
 		if p.down>0:
@@ -1178,6 +1181,22 @@ func draw_gate():
 	text_at("X : CHANGE COLOR",Vector2(330,303),WHITE)
 	if gate==1: text_at("ROSE > CYAN > GOLD",Vector2(330,316),COLORS[2])
 	else: text_at("KEEP ALL RELAYS LIT",Vector2(330,316),COLORS[2])
+
+# Purely visual warning for the next boss volley. Does not alter projectile timing,
+# hitboxes, damage, or save state. Visible in both legacy and biological rendering.
+func draw_boss_volley_warning():
+	if boss.is_empty() or mode != "play": return
+	var remaining: float = float(boss.get("cool", 9.0))
+	if remaining <= 0.0 or remaining > 0.65: return
+	var center: Vector2 = boss.pos + Vector2(-35, 0)
+	var intensity: float = 1.0 - remaining / 0.65
+	var warning_color := Color(1.0, 0.35, 0.32, 0.35 + 0.55 * intensity)
+	var radius: float = 19.0 + 11.0 * intensity
+	draw_arc(center, radius, 0.0, TAU, 24, warning_color, 2.0)
+	for i in range(4):
+		var angle: float = float(i) * PI / 2.0
+		var direction := Vector2.from_angle(angle)
+		draw_line(center + direction * (radius + 2.0), center + direction * (radius + 7.0), warning_color, 2.0)
 
 func draw_boss():
 	if bio_route:
