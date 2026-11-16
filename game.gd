@@ -689,7 +689,11 @@ func update_game(dt):
 		if e.cool<=0 and e.pos.x<610:
 			e.cool=2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)
 			var target=players[wave_id%count].pos
+			# Flower volleys alternate between open and closed petals. The wider
+			# formation deliberately leaves a readable escape lane for 1-3 pilots.
 			var angles=[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11])
+			if bio_route and motion=="fan" and int(e.age / 2.5) % 2 == 1:
+				angles=[-.42,-.21,.21,.42]
 			for angle in angles:
 				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*(78 if motion=="orbit" else 88),"r":4 if motion=="dive" else 3}
 				if motion=="weave":shot.turn=.46 if angle<0 else -.46
