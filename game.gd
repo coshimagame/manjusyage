@@ -959,9 +959,19 @@ func _draw():
 		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
 		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
 	for s in shots:
-		draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
-		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
-		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
+		# Enemy bullets: a directional five-point petal, rather than an ambiguous square.
+		# Keep the center/hitbox conspicuous on both bright and dark backgrounds.
+		var heading: Vector2 = s.vel.normalized() if s.vel.length_squared() > 0.001 else Vector2.LEFT
+		var side: Vector2 = Vector2(-heading.y, heading.x)
+		var radius: float = maxf(3.0, float(s.r))
+		var tip: Vector2 = s.pos + heading * (radius + 3.0)
+		var tail: Vector2 = s.pos - heading * (radius + 2.0)
+		var wing_a: Vector2 = s.pos + side * (radius + 1.0)
+		var wing_b: Vector2 = s.pos - side * (radius + 1.0)
+		var petals := PackedVector2Array([tip, wing_a, tail, wing_b])
+		draw_colored_polygon(petals, Color("42142d"))
+		draw_colored_polygon(PackedVector2Array([tip - heading * 1.5, s.pos + side * radius * 0.7, tail + heading * 1.5, s.pos - side * radius * 0.7]), Color("ff769f"))
+		draw_circle(s.pos, 1.5, WHITE)
 	for item in pickups:
 		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
 		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
