@@ -768,6 +768,17 @@ func update_boss(dt):
 		for j in range(fan):
 			var angle=PI+(j-(fan-1)*.5)*.24+sin(boss.age)*.15
 			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4})
+		# Every third volley blooms into a readable rotating ring. Keep one
+		# broad escape lane, including when all three pilots are present.
+		if boss.volleys%3==0:
+			var petals=12 if phase==3 else 10
+			var gap_center=PI + sin(boss.age*.47)*.45
+			var spin=boss.volleys*.19
+			for petal in range(petals):
+				var angle=spin+TAU*float(petal)/float(petals)
+				if absf(wrapf(angle-gap_center,-PI,PI))<.48:
+					continue
+				shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(66+(phase-1)*6),"r":3})
 		if boss.hp<boss.max*.5 and boss.volleys%3==0:
 			for p in players:
 				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})
