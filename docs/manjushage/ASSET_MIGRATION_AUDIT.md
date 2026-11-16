@@ -116,3 +116,8 @@
 - 比較 `main...cleanup/canon-and-art-folders-20261106` はdiverged、95 ahead / 7 behind、73変更パス。main head `d4ab8486dfb2a059d2e1754e742d540f7af46ae4`。この比較では新たな画像保護・参照検証の完了を示す根拠は得られていない。
 - 従来の未解決事項（承認済み原画の同定、main固有UI PNG 2点、同名スクリーンショット5点の比較、全Markdown/画像参照、統合後Godot 4.6テスト、Windows実画面比較）を引き継ぐ。未承認の画像を正式採用せず、既存原画を上書きしない。
 - 今回の作業はGitHub PR・差分・監査記録の照合であり、Godotの実行やmainへの統合ではない。**完了条件未達。**
+
+## 2026-11-16 15時台 JST PR競合判定の変化
+- 最新GitHub PR取得で **#50 はopen、mergeable=false**、#51はopen、mergeable=true。#50の判定は以前のtrueから変化したため、原因（mainの新規変更との衝突かGitHub判定中か）を解消するまで両PRともマージしない。
+- `main...cleanup/canon-and-art-folders-20261106` は **diverged、96 ahead / 10 behind、73変更パス**。前回の95 ahead / 7 behindからmain側も進行。main側変更を上書きしないよう、差分・衝突箇所を改めて照合する。
+- この時点で承認済み原画の同定、main固有UI画像2点・スクリーンショット5点の保護比較、全リンク・参照、統合後Godotテストは未完了。**mainへの統合・完了通知は行わない**。
