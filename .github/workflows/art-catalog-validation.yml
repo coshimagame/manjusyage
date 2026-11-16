@@ -64,6 +64,12 @@ jobs:
             cmp "$original" "$copy"
             echo "MATCH: $original -> $copy"
           done
+      - name: Audit asset references and preserved originals
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          python3 tools/validate_asset_migration.py --base origin/main --strict
       - name: Import Godot resources
         run: godot --headless --path . --editor --import
       - name: Test catalog slots and fallbacks
