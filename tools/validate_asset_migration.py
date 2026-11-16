@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Read-only pre-merge audit: compare asset bytes and resolve local references."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+from pathlib import Path
+
+ASSET_EXT={".png",".webp",".jpg",".jpeg",".svg",".wav",".ogg",".tscn",".tres"}
+REF_RE=re.compile(r'(?:res://|\]\()([^"\'\)\s]+\.(?:png|webp|jpg|jpeg|svg|wav|ogg|tscn|tres))(?:["\'\)])',re.I)
+def git(*args):
+    return subprocess.check_output(["git",*args],text=True).strip()
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--base",default="main")
+    p.add_argument("--strict",action="store_true",help="exit nonzero on missing references or modified originals")
+    a=p.parse_args()
+    root=Path(__file__).resolve().parents[1]
+    files=[x for x in root.rglob("*") if x.is_file() and ".git" not in x.parts]
+    by_hash={}
+    for f in files:
+        if f.suffix.lower() in ASSET_EXT and f.suffix.lower() in {".png",".webp",".jpg",".jpeg",".svg"}:
+            by_hash.setdefault(sha(f),[]).append(f.relative_to(root).as_posix())
+    missing=[]
+    for f in files:
+        if f.suffix.lower() not in {".md",".gd",".tscn",".tres",".cfg",".json"}:continue
+        try: txt=f.read_text(encoding="utf-8")
+        except UnicodeError:continue
+        for m in REF_RE.finditer(txt):
+            raw=m.group(1).split("#")[0]
+            target=(root/raw if "res://" in txt[max(0,m.start()-6):m.start()+6] else f.parent/raw).resolve()
+            if not target.is_relative_to(root) or not target.is_file():
+                # Godot res:// references are repository-root-relative
+                if raw.startswith("/") or (root/raw).is_file():continue
+                missing.append({"source":f.relative_to(root).as_posix(),"reference":raw})
+    originals=[]
+    for f in files:
+        rel=f.relative_to(root).as_posix()
+        if "/originals/" not in "/"+rel:continue
+        try:
+            old=subprocess.check_output(["git","show",f"{a.base}:{rel}"],stderr=subprocess.DEVNULL)
+            originals.append({"path":rel,"unchanged":hashlib.sha256(old).hexdigest()==sha(f)})
+        except subprocess.CalledProcessError:
+            originals.append({"path":rel,"unchanged":None})
+    duplicates=[paths for paths in by_hash.values() if len(paths)>1]
+    report={"missing_references":missing,"duplicate_image_groups":duplicates,"originals":originals,
+            "note":"Only literal local paths are checked. Dynamic load paths, .import UID resolution, visual correctness and Godot runtime require separate tests."}
+    print(json.dumps(report,ensure_ascii=False,indent=2))
+    failed=bool(missing) or any(x["unchanged"] is False for x in originals)
+    if a.strict and failed:raise SystemExit(1)
+if __name__=="__main__":main()
