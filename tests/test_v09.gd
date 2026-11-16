@@ -47,11 +47,27 @@ func run():
 	for enemy in g.enemies: forms[enemy.technique]=true
 	assert(forms.size()>=3,"0.9 wave needs mixed readable movement forms")
 	var stage1_art={}
+	var stage1_variants={}
 	for wave in range(6):
 		g.enemies.clear();g.spawn_wave()
-		for enemy in g.enemies: stage1_art[enemy.art_id]=true
+		for enemy in g.enemies:
+			stage1_art[enemy.art_id]=true
+			if str(enemy.art_id)!="": stage1_variants[enemy.art_id]=enemy
 	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01"]:
 		assert(stage1_art.has(art_id),"Stage 1 should schedule user-provided "+art_id+" art")
+	var motions={}
+	var shot_forms={}
+	var display_scales={}
+	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01"]:
+		var variant=stage1_variants[art_id]
+		assert(variant.has("motion") and variant.has("shot_form") and variant.has("shot_offsets"))
+		assert(variant.shot_offsets.size()>0 and variant.shot_speed>0 and variant.hit_radius>0)
+		motions[variant.motion]=true
+		shot_forms[variant.shot_form]=true
+		display_scales[str(variant.scale)]=true
+	assert(motions.size()>=10,"Stage 1 draft enemies need distinct movement routes")
+	assert(shot_forms.size()>=8,"Stage 1 draft enemies need distinct readable projectile forms")
+	assert(display_scales.size()>=10,"Stage 1 draft enemies need distinct display scales")
 	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
 	var expected_flash=0.0 if g.visual.flash_level>0 else .35
 	for key in [KEY_F10,KEY_F12]:

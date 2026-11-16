@@ -187,7 +187,8 @@ func enemy(g,e):
 	var tex=stage1_enemy_texture(art_id,g.vertical.active)
 	if tex==null:tex=creatures[1 if technique=="fan" or technique=="orbit" else 0]
 	var elite=art_id in ["MB01","SB01"]
-	var display_size=fitted_texture_size(tex,Vector2(78,58) if elite else Vector2(48,42)) if art_id!="" else tex.get_size()
+	var display_scale=float(e.get("scale",1.0))
+	var display_size=(fitted_texture_size(tex,Vector2(78,58) if elite else Vector2(48,42))*display_scale) if art_id!="" else tex.get_size()
 	var opening=clampf((.65-e.cool)/.65,0,1)
 	# A short, exact firing lane tells the player where this organism's next
 	# pattern will travel. It uses the same target and angle rules as game.gd,
@@ -195,22 +196,30 @@ func enemy(g,e):
 	# an extra attack or a damage change.
 	if opening>.08 and not g.players.is_empty():
 		var target=g.players[g.wave_id%g.players.size()].pos
-		var offsets=[-.2,0,.2] if technique=="fan" else ([0] if technique=="dive" else [-.11,.11])
-		var telegraph_color={"fan":Color("ffbd78"),"weave":Color("cfa2ff"),"dive":Color("ff8f88"),"orbit":Color("9ee7ef")}.get(technique,Color("ffe2a3"))
+		var offsets=e.get("shot_offsets",[-.2,0,.2] if technique=="fan" else ([0] if technique=="dive" else [-.11,.11]))
+		var shot_form=str(e.get("shot_form","thorn"))
+		var telegraph_color={"petal":Color("ffbd78"),"needle":Color("cfa2ff"),"bubble":Color("91dcff"),"orb":Color("9ee7ef"),"drip":Color("b3a6ff"),"spore":Color("ffd77d"),"ring":Color("ff8fbb"),"claw":Color("ff8f88")}.get(shot_form,Color("ffe2a3"))
 		var lane_length=18+opening*48
 		for offset in offsets:
 			var lane=(target-e.pos).normalized().rotated(offset)
 			g.draw_line(e.pos+lane*8,e.pos+lane*lane_length,Color(telegraph_color,.13+opening*.48),1)
 		if opening>.54:g.draw_arc(e.pos,10+opening*7,0,TAU,18,Color(telegraph_color,.35+opening*.4),1)
+	var motion=str(e.get("motion",technique))
+	# Mechanics tests can inject a minimal legacy enemy dictionary. Presentation
+	# must keep drawing that fixture even when it has no authored phase value.
+	var phase=float(e.get("phase",0.0))
 	var tilt=PI/2 if g.vertical.active else sin(g.clock*4+e.pos.x)*.035
-	if technique=="dive":tilt+=sin(e.age*1.35+e.phase)*.16
-	elif technique=="orbit":tilt+=sin(e.age*2.0+e.phase)*.1
-	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,1+sin(g.clock*5+e.pos.x)*.035))
+	if motion in ["bird","wasp","crab"]:tilt+=sin(e.age*1.35+phase)*.16
+	elif motion in ["turtle","mushroom","centipede"]:tilt+=sin(e.age*1.15+phase)*.07
+	elif motion in ["rotor","flower"]:tilt+=sin(e.age*2.0+phase)*.1
+	var pulse=1.0+sin(g.clock*(6.2 if motion=="jelly" else 4.0)+phase)*(.055 if motion in ["jelly","flower","mushroom"] else .025)
+	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,pulse))
 	if art_id!="":g.draw_texture_rect(tex,Rect2(-display_size*.5,display_size),false,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
 	else:g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
 	if opening>0:g.draw_arc(Vector2(-display_size.x*.31,0),4+opening*7,PI*.55,PI*1.45,12,Color("fff0b7"),1)
-	if technique=="weave":g.draw_arc(Vector2(3,0),12,-PI*.6,PI*.6,10,Color("e6b6a0"),1)
-	elif technique=="orbit":g.draw_arc(Vector2.ZERO,15,0,TAU,12,Color("b8d7dd"),1)
+	if motion in ["moth","flower","rotor"]:g.draw_arc(Vector2.ZERO,maxf(10,display_size.x*.27),0,TAU,12,Color("ffc9bb",.58),1)
+	elif motion in ["jelly","mushroom"]:g.draw_arc(Vector2(0,display_size.y*.18),maxf(9,display_size.x*.23),0,TAU,12,Color("b8d7dd",.58),1)
+	elif motion in ["turtle","centipede"]:g.draw_line(Vector2(-display_size.x*.42,0),Vector2(display_size.x*.42,0),Color("b8d7dd",.52),1)
 	g.draw_set_transform(Vector2.ZERO)
 	if e.hp<=3 and g.players.any(func(p):return p.character==2 and p.down==0 and p.pos.distance_to(e.pos)<85):
 		g.draw_arc(e.pos,27,PI*.65,PI*1.35,10,Color("d4b576"),1)
@@ -221,15 +230,42 @@ func projectile(g,b,hostile=false):
 		# Enemy shots have a dark diamond hull, warm core and short ember. They
 		# therefore read differently from long friendly bolts even in dense fire.
 		var radius=float(b.r)
-		g.draw_line(Vector2(-radius-8,0),Vector2(-radius,0),Color("6b354f",.7),3)
-		g.draw_line(Vector2(-radius-7,0),Vector2(-radius,0),Color("f06f72",.55),1)
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,0),Vector2(0,-radius-2),Vector2(radius+2,0),Vector2(0,radius+2)]),Color("171329"))
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,0),Vector2(0,-radius),Vector2(radius,0),Vector2(0,radius)]),Color("e36f71"))
-		g.draw_circle(Vector2(1,0),maxf(1,radius-2),Color("fff0bc"))
-		if radius>=4:
+		var form=str(b.get("form","thorn"))
+		var dark=Color("171329")
+		var hot=Color("e36f71")
+		if form=="needle":
+			g.draw_line(Vector2(-radius-11,0),Vector2(radius+5,0),Color("6b354f",.75),3)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,-radius),Vector2(radius+6,0),Vector2(-radius-1,radius)]),dark)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,-1),Vector2(radius+3,0),Vector2(-radius+1,1)]),Color("f7b4b9"))
+		elif form in ["bubble","orb"]:
+			g.draw_circle(Vector2.ZERO,radius+3,dark)
+			g.draw_circle(Vector2.ZERO,radius+1,Color("72d9eb") if form=="bubble" else hot)
+			g.draw_circle(Vector2(-radius*.3,-radius*.35),maxf(1,radius*.34),Color("fff5d1"))
+		elif form=="spore":
+			g.draw_circle(Vector2.ZERO,radius+3,dark)
+			g.draw_circle(Vector2.ZERO,radius+1,Color("f0a76e"))
 			for petal in range(4):
 				var d=Vector2.from_angle(petal*TAU/4.0+PI*.25)
-				g.draw_line(d*(radius+2),d*(radius+5),Color("ffb36e",.8),1)
+				g.draw_circle(d*(radius+4),1.5,Color("ffd784"))
+		elif form=="ring":
+			g.draw_circle(Vector2.ZERO,radius+3,dark)
+			g.draw_arc(Vector2.ZERO,radius+1,0,TAU,12,Color("ff9ac2"),2)
+			g.draw_circle(Vector2.ZERO,1,Color("fff0bc"))
+		elif form=="claw":
+			g.draw_line(Vector2(-radius-7,-radius*.8),Vector2(radius+3,-radius*.25),dark,3)
+			g.draw_line(Vector2(-radius-7,radius*.8),Vector2(radius+3,radius*.25),dark,3)
+			g.draw_line(Vector2(-radius-6,-radius*.8),Vector2(radius+2,-radius*.25),Color("ff9d8a"),1)
+			g.draw_line(Vector2(-radius-6,radius*.8),Vector2(radius+2,radius*.25),Color("ff9d8a"),1)
+		else:
+			g.draw_line(Vector2(-radius-8,0),Vector2(-radius,0),Color("6b354f",.7),3)
+			g.draw_line(Vector2(-radius-7,0),Vector2(-radius,0),Color("f06f72",.55),1)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,0),Vector2(0,-radius-2),Vector2(radius+2,0),Vector2(0,radius+2)]),dark)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,0),Vector2(0,-radius),Vector2(radius,0),Vector2(0,radius)]),hot)
+			g.draw_circle(Vector2(1,0),maxf(1,radius-2),Color("fff0bc"))
+		if form=="petal" or form=="drip":
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-2,0),Vector2(0,-radius-3),Vector2(radius+3,0),Vector2(0,radius+3)]),dark)
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius,0),Vector2(0,-radius-1),Vector2(radius+1,0),Vector2(0,radius+1)]),Color("ff9aac") if form=="petal" else Color("b9a6ff"))
+			g.draw_circle(Vector2.ZERO,maxf(1,radius-2),Color("fff0bc"))
 	else:
 		var col=g.COLORS[b.color]
 		var p=g.players[b.owner]

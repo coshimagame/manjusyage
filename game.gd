@@ -7,6 +7,23 @@ const WHITE = Color("e5f5ff")
 const DIM = Color("617797")
 const SHIP = ["...........11.............", "......11111221............", "..11112222222211..........", "..1333332222222211........", "1112222222444422221111....", "1222222244444422222222111.", "1112222222222222221111....", "..1333332222222211........", "..11112222222211..........", "......11111221............", "...........11............."]
 const FOE = ["..11........11..", ".1221......1221.", "1222211111122221", ".12223333332221.", "..123344443321..", "1112334444332111", ".12223333332221.", "1222211111122221", ".1221......1221.", "..11........11.."]
+# Stage 1 supplied draft art is deliberately paired with readable mechanical
+# profiles. IDs remain file IDs only: this does not name the creatures or make
+# a lore decision. `technique` remains one of the established digestible moves,
+# while motion/shot_form make the on-screen encounter distinctive.
+const STAGE1_ENEMY_PROFILES = {
+	"EN001":{"motion":"moth","technique":"weave","shot_form":"petal","scale":0.72,"hp_bonus":0,"speed":74.0,"amplitude":18.0,"hit_radius":15.0,"fire_delay":2.35,"shot_offsets":[-0.14,0.14],"shot_speed":82.0,"shot_radius":3,"shot_turn":0.30},
+	"EN002":{"motion":"bird","technique":"dive","shot_form":"needle","scale":0.76,"hp_bonus":0,"speed":88.0,"amplitude":22.0,"hit_radius":16.0,"fire_delay":2.15,"shot_offsets":[0.0],"shot_speed":112.0,"shot_radius":2,"shot_turn":0.0},
+	"EN003":{"motion":"fish","technique":"fan","shot_form":"bubble","scale":0.88,"hp_bonus":0,"speed":62.0,"amplitude":17.0,"hit_radius":18.0,"fire_delay":2.65,"shot_offsets":[-0.22,0.0,0.22],"shot_speed":72.0,"shot_radius":3,"shot_turn":0.0},
+	"EN004":{"motion":"turtle","technique":"orbit","shot_form":"orb","scale":1.10,"hp_bonus":2,"speed":50.0,"amplitude":14.0,"hit_radius":24.0,"fire_delay":3.00,"shot_offsets":[-0.11,0.11],"shot_speed":68.0,"shot_radius":4,"shot_turn":0.16},
+	"EN005":{"motion":"flower","technique":"fan","shot_form":"petal","scale":0.96,"hp_bonus":1,"speed":58.0,"amplitude":25.0,"hit_radius":20.0,"fire_delay":2.70,"shot_offsets":[-0.24,0.0,0.24],"shot_speed":76.0,"shot_radius":3,"shot_turn":0.08},
+	"EN006":{"motion":"jelly","technique":"weave","shot_form":"drip","scale":1.04,"hp_bonus":1,"speed":48.0,"amplitude":23.0,"hit_radius":22.0,"fire_delay":2.85,"shot_offsets":[-0.18,0.18],"shot_speed":74.0,"shot_radius":3,"shot_turn":0.22},
+	"EN007":{"motion":"mushroom","technique":"orbit","shot_form":"spore","scale":1.18,"hp_bonus":2,"speed":42.0,"amplitude":16.0,"hit_radius":26.0,"fire_delay":3.10,"shot_offsets":[-0.30,0.0,0.30],"shot_speed":66.0,"shot_radius":4,"shot_turn":0.10},
+	"EN008":{"motion":"wasp","technique":"dive","shot_form":"needle","scale":0.84,"hp_bonus":0,"speed":96.0,"amplitude":26.0,"hit_radius":17.0,"fire_delay":2.20,"shot_offsets":[-0.10,0.10],"shot_speed":104.0,"shot_radius":2,"shot_turn":0.18},
+	"EN009":{"motion":"rotor","technique":"fan","shot_form":"ring","scale":0.98,"hp_bonus":1,"speed":61.0,"amplitude":21.0,"hit_radius":21.0,"fire_delay":2.90,"shot_offsets":[-0.34,-0.11,0.11,0.34],"shot_speed":64.0,"shot_radius":3,"shot_turn":0.12},
+	"SB01":{"motion":"crab","technique":"dive","shot_form":"claw","scale":1.16,"hp_bonus":3,"speed":54.0,"amplitude":26.0,"hit_radius":29.0,"fire_delay":3.15,"shot_offsets":[-0.17,0.17],"shot_speed":90.0,"shot_radius":5,"shot_turn":0.20},
+	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.26,0.0,0.26],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10}
+}
 const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
 }
@@ -692,7 +709,7 @@ func update_game(dt):
 			bullet.pos.x=800
 			if gate==1 and gate_step>=3: open_gate()
 		for e in enemies:
-			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
+			if e.hp>0 and bullet.pos.distance_to(e.pos)<float(e.get("hit_radius",19.0)):
 				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
 		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
@@ -704,9 +721,42 @@ func update_game(dt):
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
-		var motion=e.get("technique","aimed")
+		var motion=str(e.get("motion",e.get("technique","aimed")))
 		# Each organism has a readable, repeatable route before its shot telegraph.
-		if motion=="fan":
+		if motion=="moth":
+			e.pos.x-=e.speed*dt
+			e.pos.y=e.base+sin(e.age*2.55+e.phase)*e.amplitude
+		elif motion=="bird":
+			e.pos.x-=e.speed*.94*dt
+			e.pos.y=e.base+sin(e.age*1.35+e.phase)*e.amplitude*1.25+sin(e.age*5.4+e.phase)*6
+		elif motion=="fish":
+			e.pos.x-=e.speed*.66*dt+cos(e.age*1.1+e.phase)*7*dt
+			e.pos.y=e.base+sin(e.age*1.5+e.phase)*e.amplitude*.78
+		elif motion=="turtle":
+			e.pos.x-=e.speed*.42*dt
+			e.pos.y=e.base+sin(e.age*.82+e.phase)*e.amplitude*.5
+		elif motion=="flower":
+			e.pos.x-=e.speed*.55*dt
+			e.pos.y=e.base+sin(e.age*2.75+e.phase)*e.amplitude
+		elif motion=="jelly":
+			e.pos.x-=e.speed*.48*dt
+			e.pos.y=e.base+sin(e.age*1.7+e.phase)*e.amplitude+sin(e.age*5.2+e.phase)*5
+		elif motion=="mushroom":
+			e.pos.x-=e.speed*.36*dt
+			e.pos.y=e.base+sin(e.age*1.05+e.phase)*e.amplitude*.55
+		elif motion=="wasp":
+			e.pos.x-=e.speed*dt
+			e.pos.y=e.base+sin(e.age*4.45+e.phase)*e.amplitude*1.08
+		elif motion=="rotor":
+			e.pos.x-=e.speed*.62*dt
+			e.pos.y=e.base+sin(e.age*2.9+e.phase)*e.amplitude*.74
+		elif motion=="crab":
+			e.pos.x-=e.speed*.48*dt
+			e.pos.y=e.base+sin(e.age*1.95+e.phase)*e.amplitude*.7
+		elif motion=="centipede":
+			e.pos.x-=e.speed*.34*dt+sin(e.age*1.8+e.phase)*9*dt
+			e.pos.y=e.base+sin(e.age*1.45+e.phase)*e.amplitude*.68+sin(e.age*4.2+e.phase)*6
+		elif motion=="fan":
 			e.pos.x-=e.speed*dt
 			e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
 		elif motion=="weave":
@@ -716,7 +766,7 @@ func update_game(dt):
 			e.pos.x-=e.speed*.92*dt
 			var plunge=sin(e.age*1.35+e.phase)*.5+.5
 			e.pos.y=e.base+sin(e.age*4.1+e.phase)*12+(plunge-.5)*e.amplitude*2.1
-		else: # orbit: a slow looping sidestep with a tight inner pulse.
+		else: # legacy orbit: a slow looping sidestep with a tight inner pulse.
 			e.pos.x-=e.speed*.72*dt+sin(e.age*2.0+e.phase)*17*dt
 			e.pos.y=e.base+sin(e.age*2.0+e.phase)*e.amplitude+sin(e.age*6.0+e.phase)*9
 		# This slice teaches bullets and routes, not surprise contact damage.
@@ -724,16 +774,18 @@ func update_game(dt):
 		if bio_route:e.pos.x=maxf(420,e.pos.x)
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
-			e.cool=2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)
+			e.cool=float(e.get("fire_delay",2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)))
 			var target=players[wave_id%count].pos
-			var angles=[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11])
+			var angles=e.get("shot_offsets",[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11]))
 			for angle in angles:
-				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*(78 if motion=="orbit" else 88),"r":4 if motion=="dive" else 3}
-				if motion=="weave":shot.turn=.46 if angle<0 else -.46
-				if motion=="orbit":shot.turn=.22 if angle<0 else -.22
+				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(float(angle))*float(e.get("shot_speed",78 if motion=="orbit" else 88)),"r":int(e.get("shot_radius",4 if motion=="dive" else 3)),"form":str(e.get("shot_form","thorn"))}
+				var turn=float(e.get("shot_turn",0.0))
+				if absf(turn)>.001:shot.turn=turn*(-1.0 if float(angle)<0 else 1.0)
+				elif motion=="weave":shot.turn=.46 if float(angle)<0 else -.46
+				elif motion=="orbit":shot.turn=.22 if float(angle)<0 else -.22
 				shots.append(shot)
 		for p in players:
-			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
+			if p.down==0 and p.pos.distance_to(e.pos)<float(e.get("contact_radius",e.get("hit_radius",20.0)*.82)): hurt(p)
 		if e.hp<=0:
 			for p in players:
 				if p.down==0:p.experience+=1
@@ -774,14 +826,19 @@ func spawn_wave():
 		var art_id=art_cycle[(wave_id*2+j)%art_cycle.size()] if bio_route else ""
 		var hp=2+int(count>1)
 		var speed=55.0+wave_id%4*9
+		var profile=STAGE1_ENEMY_PROFILES.get(art_id,{})
+		if not profile.is_empty():
+			technique=str(profile["technique"])
+			hp+=int(profile["hp_bonus"])
+			speed=float(profile["speed"])
 		# MB/SB are intentionally infrequent visual-and-health accents. They reuse
-		# the established readable motion and firing rules, so new art cannot make
-		# a solo lane suddenly require an undocumented mechanic.
+		# the authored profile's visible wind-up and familiar digestible moves.
 		if bio_route and j==0 and wave_id%6==0:
-			art_id="MB01"; technique="orbit"; hp+=4; speed*=.72
+			art_id="MB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
 		elif bio_route and j==0 and wave_id%4==0:
-			art_id="SB01"; technique="dive"; hp+=3; speed*=.82
-		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":23.0+int(technique=="dive")*8,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"art_id":art_id})
+			art_id="SB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
+		var amplitude=float(profile.get("amplitude",23.0+int(technique=="dive")*8))
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn"))})
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
