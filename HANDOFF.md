@@ -287,4 +287,5 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - Godot 4.6.3 consoleを隔離`APPDATA`で実行し、`test_v09.gd`、`test_status_v09.gd`、1/2/3P自動攻略がPASS。自動攻略は無敵・合成操作を使うため、操作感・難易度の人間検収ではない。通常レンダラーでは出撃メニューの3機表示を再確認した。縦版、SB01/MB01/BB01の連続実画面、人間のキーボード操作、物理コントローラー、実聴、性能測定は未検証。
 - 通常の`Godot_v4.6-stable_win64.exe`は、この環境でheadlessテスト時にWindows signal 11を再現した。一方`Godot_v4.6-stable_win64_console.exe`では上記テストが完走しており、今回のGDScriptのSCRIPT ERRORではない。既知の`Image.load_from_file` export警告と終了時Resource解放警告は継続。Windows配布ZIPの更新は行っていない。
 - 画像生成依頼の受け渡し仕様を`docs/manjushage/STAGE1_ENEMY_IMAGE_REQUEST_V01.md`へ追加。これは生成の依頼書であり、画像生成・採用・正史化はまだ行っていない。
+- 通常レンダラーのゲーム本体シーンを`--shot=encounter`で起動し、640×360の実ゲーム画像`docs/screenshots/latest/stage1_enemy_profiles_20261116.png`を保存した。3P HUD、ユーザー提供draft由来の敵、個別の大きさ／予告線／弾形状が同一フレームで見える。これは合成入力なしの撮影用配置であり、人間操作・難易度・実聴の検収ではない。
 

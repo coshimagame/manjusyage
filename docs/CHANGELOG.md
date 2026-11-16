@@ -197,4 +197,5 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - `visual_v09.gd`で敵の脈動・傾き・表示比率と、敵弾の花弁／針／泡／核／滴／胞子／環／爪を描き分け。予告線は発射データから描画するため、見た目だけで別の攻撃を追加していない。
 - 拡張`test_v09.gd`は11IDの動き・弾形状・縮尺の多様性を検査する。Godot 4.6.3 console＋隔離APPDATAで`test_v09.gd`、`test_status_v09.gd`、1/2/3P自動攻略がPASS。人間の操作感、物理パッド、実聴、性能、縦版と強敵・ボスの通常画面確認は未実施。
 - 画像生成前の受け渡し仕様`STAGE1_ENEMY_IMAGE_REQUEST_V01.md`を追加。新しいPNG・音声・台詞はこの変更では追加していない。
+- 通常レンダラーで実ゲーム本体を撮影した[Stage 1遭遇画面](screenshots/latest/stage1_enemy_profiles_20261116.png)を追加。これは撮影用配置の表示記録で、操作感・難易度・音声・性能の人間検収を意味しない。
 
