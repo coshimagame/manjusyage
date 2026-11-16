@@ -768,6 +768,15 @@ func update_boss(dt):
 		for j in range(fan):
 			var angle=PI+(j-(fan-1)*.5)*.24+sin(boss.age)*.15
 			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4})
+		# Every third volley adds a readable petal ring with two safe lanes.
+		# Preserve the existing fan and aimed shots; this is an additive boss phase.
+		if boss.volleys%3==0:
+			var ring_count=12
+			var gap_start=int(boss.volleys/3)%ring_count
+			for j in range(ring_count):
+				if j in [gap_start,(gap_start+1)%ring_count,(gap_start+6)%ring_count,(gap_start+7)%ring_count]: continue
+				var angle=TAU*float(j)/float(ring_count)+boss.age*.12
+				shots.append({"pos":boss.pos+Vector2(-25,0),"vel":Vector2.from_angle(angle)*76.0,"r":3})
 		if boss.hp<boss.max*.5 and boss.volleys%3==0:
 			for p in players:
 				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})
