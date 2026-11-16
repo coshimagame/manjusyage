@@ -144,3 +144,13 @@
 - `main...cleanup/canon-and-art-folders-20261106` は **100 ahead / 11 behind、73ファイル差分**。main先端は `f0e5f92a2bc5919532851a8e862af48334cd3e72`。前回記録から整理側1コミット増加。
 - mainの背景ギミック64案・グロウフィアSVGラフ・企画書は移行対象に保持し、承認済み原画や透過PNGと誤認しない。
 - 未解決：承認済み原画の同定、main固有UI PNG 2点・スクリーンショット5点の同一性確認、全リンク/コード/画像参照の網羅検証、Godot 4.6の実行・表示確認。安全性が未証明のため、既存画像は移動/削除/上書きせず、mainへのマージは保留。**完了条件未達。**
+
+
+## 2026-11-16 21時台 JST main→整理ブランチ逆方向差分の具体的保護対象
+- GitHubでPR #50・#51がopen、mergeable=trueを再確認。ただし#51は#50ブランチをbaseとしており、mainへの直接マージはしない。
+- 比較 main→整理ブランチは **101 ahead / 11 behind、73ファイル**。逆方向（整理ブランチ→main）では、mainにしかない追加・変更ファイルを具体的に確認した。これらを移行時に**削除・上書きしてはいけない**。
+- 新規の画像実体：`art/concept/eight_stage_retro_pixel_concepts_20261106.png`、`art/ui/character_hub_ui_20261106.png`、`art/ui/character_system_ui_20261106.png`、`art/ui/chat_ui_atlas_20261106.png`、`art/ui/launch_button_v01.png`、`art/ui/title_logo_extended_v01.png`、`art/v09/{cosmos.png,enemy-0.png,enemy-1.png,enemy-2.png,enemy-3.png,ship-atlas.png}`、`art/v09/originals/{bio-cosmos.png,enemies.png,ship-states.png}`。承認済みかどうかは未確定。原画を含む`art/v09/originals/`は特に保護する。
+- main側に追加された資料：`art/v09/PROMPTS.md`、`art/v09/PROVENANCE.md`、`art/ui/README_CHAT_IMPORT.md`、`docs/manjushage/{BACKGROUND_GIMMICKS_64_CONCEPTS.md,CONTROL_ROOM_DIALOGUE_DIRECTION.md,GROWING_ENEMY_VISUAL_PROPOSAL.md,GROWING_ENEMY_VISUAL_ROUGH.svg}`。背景ギミックとグロウフィアは提案・ラフ段階として扱う。
+- main側に追加されたコード・音声：`visual_v09.gd`、`tests/test_v09.gd`、`tests/test_status_v09.gd`、`audio/*v09*.wav`等。main側で`game.gd`、`biological_stage.gd`、`pilot_abilities.gd`、`vertical_passage.gd`、`mafio_archive.gd`、`tools/pack.gd`も変更されている。整理ブランチの旧実装で上書きしない。
+- `docs/screenshots/latest/{boss,briefing,menu,status,vertical}.png` はmain側で変更済み。比較・保護前に移行しない。
+- 今回はGitHub差分でパスの存在と変更種別を確認したのみ。バイナリ同一性、承認状態、全参照の整合性、Godot 4.6動作は未検証。**main統合・完了通知は保留。**
