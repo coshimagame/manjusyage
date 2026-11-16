@@ -154,3 +154,10 @@
 - main側に追加されたコード・音声：`visual_v09.gd`、`tests/test_v09.gd`、`tests/test_status_v09.gd`、`audio/*v09*.wav`等。main側で`game.gd`、`biological_stage.gd`、`pilot_abilities.gd`、`vertical_passage.gd`、`mafio_archive.gd`、`tools/pack.gd`も変更されている。整理ブランチの旧実装で上書きしない。
 - `docs/screenshots/latest/{boss,briefing,menu,status,vertical}.png` はmain側で変更済み。比較・保護前に移行しない。
 - 今回はGitHub差分でパスの存在と変更種別を確認したのみ。バイナリ同一性、承認状態、全参照の整合性、Godot 4.6動作は未検証。**main統合・完了通知は保留。**
+
+
+## 2026-11-16 23時台 JST 安全統合判定
+- PR #50（base: main）とPR #51（base: cleanup/simple-repo-navigation-20261106）は両方open、mergeable=true。#51を直接mainへマージしない。
+- mainとの比較は **102 ahead / 11 behind、73ファイル差分**。先行コミット増加だけではmainへの統合安全性を証明しない。
+- main固有の `art/v09/originals/`、UI画像、スクリーンショット、ゲームコード、グロウフィアSVG、背景ギミック64案は引き続き保護。原画承認・バイナリ照合・全参照検証・Godot 4.6テストが済むまで削除・上書き禁止。
+- **今回もmainへの統合を保留**。資料の整理がmainに反映され、docs/artの移行と参照の検証が完了するまで、完了とは報告しない。
