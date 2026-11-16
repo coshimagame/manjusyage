@@ -30,12 +30,15 @@ def main():
         if f.suffix.lower() not in {".md",".gd",".tscn",".tres",".cfg",".json"}:continue
         try: txt=f.read_text(encoding="utf-8")
         except UnicodeError:continue
-        for m in REF_RE.finditer(txt):
+        for m in GODOT_RE.finditer(txt):
             raw=m.group(1).split("#")[0]
-            target=(root/raw if "res://" in txt[max(0,m.start()-6):m.start()+6] else f.parent/raw).resolve()
+            target=(root/raw).resolve()
             if not target.is_relative_to(root) or not target.is_file():
-                # Godot res:// references are repository-root-relative
-                if raw.startswith("/") or (root/raw).is_file():continue
+                missing.append({"source":f.relative_to(root).as_posix(),"reference":"res://"+raw})
+        for m in MARKDOWN_RE.finditer(txt):
+            raw=m.group(1).split("#")[0]
+            target=(f.parent/raw).resolve()
+            if not target.is_relative_to(root) or not target.is_file():
                 missing.append({"source":f.relative_to(root).as_posix(),"reference":raw})
     originals=[]
     for f in files:
