@@ -115,7 +115,7 @@ func _draw() -> void:
 	var speaker := str(current.get("speaker", ""))
 	var message := str(current.get("text", "")).substr(0, int(revealed))
 	draw_string(font, Vector2(42, 265), speaker, HORIZONTAL_ALIGNMENT_LEFT, 555, 18, Color(0.95, 0.72, 0.72))
-	draw_multiline_string(font, Vector2(42, 292), message, HORIZONTAL_ALIGNMENT_LEFT, 555, 17, -1, 24, Color(0.93, 0.96, 1.0))
+	draw_multiline_string(font, Vector2(42, 292), message, HORIZONTAL_ALIGNMENT_LEFT, 555, 17, -1, Color(0.93, 0.96, 1.0))
 	draw_string(font, Vector2(450, 331), "ENTER / TAP  •  ESC SKIP", HORIZONTAL_ALIGNMENT_LEFT, 160, 10, Color(0.63, 0.76, 0.84))
 	draw_set_transform(Vector2.ZERO)
 
