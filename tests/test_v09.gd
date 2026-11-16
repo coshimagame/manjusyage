@@ -58,20 +58,40 @@ func run():
 	var motions={}
 	var shot_forms={}
 	var display_scales={}
+	var scheduled_volley_total=0
+	var cascade_profiles=0
 	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01"]:
 		var variant=stage1_variants[art_id]
 		assert(variant.has("motion") and variant.has("shot_form") and variant.has("shot_offsets"))
-		assert(variant.shot_offsets.size()>0 and variant.shot_speed>0 and variant.hit_radius>0)
+		assert(variant.shot_offsets.size()>0 and variant.shot_speed>0 and variant.hit_radius>0 and variant.volley_count>0)
 		motions[variant.motion]=true
 		shot_forms[variant.shot_form]=true
 		display_scales[str(variant.scale)]=true
+		scheduled_volley_total+=variant.shot_offsets.size()*variant.volley_count
+		if variant.volley_count>1 and variant.volley_gap>0:cascade_profiles+=1
 	assert(motions.size()>=10,"Stage 1 draft enemies need distinct movement routes")
 	assert(shot_forms.size()>=8,"Stage 1 draft enemies need distinct readable projectile forms")
 	assert(display_scales.size()>=10,"Stage 1 draft enemies need distinct display scales")
+	assert(scheduled_volley_total>=80 and cascade_profiles>=8,"Stage 1 needs substantial but staged projectile patterns")
 	var long_body=stage1_variants["MB01"]
 	assert(long_body.body_segments>=4 and long_body.body_span>=160 and long_body.body_radius>0,"MB01 must remain a readable long-body encounter")
 	var tail_point=g.enemy_body_point(long_body,long_body.body_segments)
 	assert(tail_point.distance_to(long_body.pos)>80 and g.enemy_body_contains(long_body,tail_point,long_body.hit_radius),"Long-body collision must match the visible tail")
+	# A dense pattern is staged rather than appearing as an unreadable solid
+	# wall: every authored volley is created, while the second beat remains
+	# dormant until its short visible wind-up has elapsed.
+	g.enemies.clear();g.shots.clear();g.wave_id=5;g.spawn_wave()
+	var expected_shots=0
+	for enemy_index in range(g.enemies.size()):
+		var enemy=g.enemies[enemy_index]
+		g.enemies[enemy_index]["cool"]=0.0
+		g.enemies[enemy_index]["pos"].x=500.0+enemy_index*14.0
+		expected_shots+=enemy.shot_offsets.size()*enemy.volley_count
+	g.update_game(.01)
+	var delayed_shots=0
+	for shot in g.shots:
+		if shot.delay>0:delayed_shots+=1
+	assert(g.shots.size()==expected_shots and delayed_shots>0,"Staged Stage 1 volleys must create both immediate and delayed shots (expected=%d actual=%d delayed=%d)" % [expected_shots,g.shots.size(),delayed_shots])
 	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
 	var expected_flash=0.0 if g.visual.flash_level>0 else .35
 	for key in [KEY_F10,KEY_F12]:

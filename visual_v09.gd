@@ -205,6 +205,10 @@ func enemy(g,e):
 			var lane=(target-e.pos).normalized().rotated(offset)
 			g.draw_line(e.pos+lane*8,e.pos+lane*lane_length,Color(telegraph_color,.13+opening*.48),1)
 		if opening>.54:g.draw_arc(e.pos,10+opening*7,0,TAU,18,Color(telegraph_color,.35+opening*.4),1)
+		var volley_count=int(e.get("volley_count",1))
+		if volley_count>1:
+			for volley in range(volley_count):
+				g.draw_arc(e.pos,14+volley*4+opening*5,PI*.55,PI*1.45,12,Color(telegraph_color,.2+opening*.38),1)
 	var motion=str(e.get("motion",technique))
 	# Mechanics tests can inject a minimal legacy enemy dictionary. Presentation
 	# must keep drawing that fixture even when it has no authored phase value.
@@ -420,7 +424,8 @@ func draw(g):
 		if o.cool<.6:g.draw_arc(o.pos,25,0,TAU,24,Color("ffd0a0"),1)
 	for e in g.enemies:enemy(g,e)
 	for b in g.bullets:projectile(g,b)
-	for b in g.shots:projectile(g,b,true)
+	for b in g.shots:
+		if float(b.get("delay",0.0))<=0:projectile(g,b,true)
 	for item in g.pickups:
 		pickup(g,item)
 	if not g.boss.is_empty():boss(g)

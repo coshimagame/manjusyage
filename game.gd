@@ -12,17 +12,17 @@ const FOE = ["..11........11..", ".1221......1221.", "1222211111122221", ".12223
 # a lore decision. `technique` remains one of the established digestible moves,
 # while motion/shot_form make the on-screen encounter distinctive.
 const STAGE1_ENEMY_PROFILES = {
-	"EN001":{"motion":"moth","technique":"weave","shot_form":"petal","scale":0.72,"hp_bonus":0,"speed":74.0,"amplitude":18.0,"hit_radius":15.0,"fire_delay":2.35,"shot_offsets":[-0.14,0.14],"shot_speed":82.0,"shot_radius":3,"shot_turn":0.30},
-	"EN002":{"motion":"bird","technique":"dive","shot_form":"needle","scale":0.76,"hp_bonus":0,"speed":88.0,"amplitude":22.0,"hit_radius":16.0,"fire_delay":2.15,"shot_offsets":[0.0],"shot_speed":112.0,"shot_radius":2,"shot_turn":0.0},
-	"EN003":{"motion":"fish","technique":"fan","shot_form":"bubble","scale":0.88,"hp_bonus":0,"speed":62.0,"amplitude":17.0,"hit_radius":18.0,"fire_delay":2.65,"shot_offsets":[-0.22,0.0,0.22],"shot_speed":72.0,"shot_radius":3,"shot_turn":0.0},
-	"EN004":{"motion":"turtle","technique":"orbit","shot_form":"orb","scale":1.10,"hp_bonus":2,"speed":50.0,"amplitude":14.0,"hit_radius":24.0,"fire_delay":3.00,"shot_offsets":[-0.11,0.11],"shot_speed":68.0,"shot_radius":4,"shot_turn":0.16},
-	"EN005":{"motion":"flower","technique":"fan","shot_form":"petal","scale":0.96,"hp_bonus":1,"speed":58.0,"amplitude":25.0,"hit_radius":20.0,"fire_delay":2.70,"shot_offsets":[-0.24,0.0,0.24],"shot_speed":76.0,"shot_radius":3,"shot_turn":0.08},
-	"EN006":{"motion":"jelly","technique":"weave","shot_form":"drip","scale":1.04,"hp_bonus":1,"speed":48.0,"amplitude":23.0,"hit_radius":22.0,"fire_delay":2.85,"shot_offsets":[-0.18,0.18],"shot_speed":74.0,"shot_radius":3,"shot_turn":0.22},
-	"EN007":{"motion":"mushroom","technique":"orbit","shot_form":"spore","scale":1.18,"hp_bonus":2,"speed":42.0,"amplitude":16.0,"hit_radius":26.0,"fire_delay":3.10,"shot_offsets":[-0.30,0.0,0.30],"shot_speed":66.0,"shot_radius":4,"shot_turn":0.10},
-	"EN008":{"motion":"wasp","technique":"dive","shot_form":"needle","scale":0.84,"hp_bonus":0,"speed":96.0,"amplitude":26.0,"hit_radius":17.0,"fire_delay":2.20,"shot_offsets":[-0.10,0.10],"shot_speed":104.0,"shot_radius":2,"shot_turn":0.18},
-	"EN009":{"motion":"rotor","technique":"fan","shot_form":"ring","scale":0.98,"hp_bonus":1,"speed":61.0,"amplitude":21.0,"hit_radius":21.0,"fire_delay":2.90,"shot_offsets":[-0.34,-0.11,0.11,0.34],"shot_speed":64.0,"shot_radius":3,"shot_turn":0.12},
-	"SB01":{"motion":"crab","technique":"dive","shot_form":"claw","scale":1.16,"hp_bonus":3,"speed":54.0,"amplitude":26.0,"hit_radius":29.0,"fire_delay":3.15,"shot_offsets":[-0.17,0.17],"shot_speed":90.0,"shot_radius":5,"shot_turn":0.20},
-	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.26,0.0,0.26],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10,"body_segments":4,"body_spacing":28.0,"body_radius":15.0,"body_span":164.0}
+	"EN001":{"motion":"moth","technique":"weave","shot_form":"petal","scale":0.72,"hp_bonus":0,"speed":74.0,"amplitude":18.0,"hit_radius":15.0,"fire_delay":2.35,"shot_offsets":[-0.32,-0.11,0.11,0.32],"shot_speed":82.0,"shot_radius":3,"shot_turn":0.30,"volley_count":1,"volley_gap":0.0,"volley_twist":0.0},
+	"EN002":{"motion":"bird","technique":"dive","shot_form":"needle","scale":0.76,"hp_bonus":0,"speed":88.0,"amplitude":22.0,"hit_radius":16.0,"fire_delay":2.15,"shot_offsets":[-0.18,0.0,0.18],"shot_speed":112.0,"shot_radius":2,"shot_turn":0.0,"volley_count":2,"volley_gap":0.12,"volley_twist":0.09},
+	"EN003":{"motion":"fish","technique":"fan","shot_form":"bubble","scale":0.88,"hp_bonus":0,"speed":62.0,"amplitude":17.0,"hit_radius":18.0,"fire_delay":2.65,"shot_offsets":[-0.42,-0.21,0.0,0.21,0.42],"shot_speed":72.0,"shot_radius":3,"shot_turn":0.0,"volley_count":1,"volley_gap":0.0,"volley_twist":0.0},
+	"EN004":{"motion":"turtle","technique":"orbit","shot_form":"orb","scale":1.10,"hp_bonus":2,"speed":50.0,"amplitude":14.0,"hit_radius":24.0,"fire_delay":3.00,"shot_offsets":[-0.28,-0.09,0.09,0.28],"shot_speed":68.0,"shot_radius":4,"shot_turn":0.16,"volley_count":2,"volley_gap":0.16,"volley_twist":0.14},
+	"EN005":{"motion":"flower","technique":"fan","shot_form":"petal","scale":0.96,"hp_bonus":1,"speed":58.0,"amplitude":25.0,"hit_radius":20.0,"fire_delay":2.70,"shot_offsets":[-0.40,-0.20,0.0,0.20,0.40],"shot_speed":76.0,"shot_radius":3,"shot_turn":0.08,"volley_count":2,"volley_gap":0.14,"volley_twist":0.08},
+	"EN006":{"motion":"jelly","technique":"weave","shot_form":"drip","scale":1.04,"hp_bonus":1,"speed":48.0,"amplitude":23.0,"hit_radius":22.0,"fire_delay":2.85,"shot_offsets":[-0.28,-0.09,0.09,0.28],"shot_speed":74.0,"shot_radius":3,"shot_turn":0.22,"volley_count":2,"volley_gap":0.18,"volley_twist":0.16},
+	"EN007":{"motion":"mushroom","technique":"orbit","shot_form":"spore","scale":1.18,"hp_bonus":2,"speed":42.0,"amplitude":16.0,"hit_radius":26.0,"fire_delay":3.10,"shot_offsets":[-0.42,-0.21,0.0,0.21,0.42],"shot_speed":66.0,"shot_radius":4,"shot_turn":0.10,"volley_count":2,"volley_gap":0.18,"volley_twist":0.12},
+	"EN008":{"motion":"wasp","technique":"dive","shot_form":"needle","scale":0.84,"hp_bonus":0,"speed":96.0,"amplitude":26.0,"hit_radius":17.0,"fire_delay":2.20,"shot_offsets":[-0.18,0.0,0.18],"shot_speed":104.0,"shot_radius":2,"shot_turn":0.18,"volley_count":2,"volley_gap":0.11,"volley_twist":0.10},
+	"EN009":{"motion":"rotor","technique":"fan","shot_form":"ring","scale":0.98,"hp_bonus":1,"speed":61.0,"amplitude":21.0,"hit_radius":21.0,"fire_delay":2.90,"shot_offsets":[-0.48,-0.32,-0.16,0.0,0.16,0.32,0.48],"shot_speed":64.0,"shot_radius":3,"shot_turn":0.12,"volley_count":2,"volley_gap":0.16,"volley_twist":0.10},
+	"SB01":{"motion":"crab","technique":"dive","shot_form":"claw","scale":1.16,"hp_bonus":3,"speed":54.0,"amplitude":26.0,"hit_radius":29.0,"fire_delay":3.15,"shot_offsets":[-0.34,-0.12,0.12,0.34],"shot_speed":90.0,"shot_radius":5,"shot_turn":0.20,"volley_count":2,"volley_gap":0.16,"volley_twist":0.12},
+	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.36,-0.18,0.0,0.18,0.36],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10,"volley_count":2,"volley_gap":0.18,"volley_twist":0.08,"body_segments":4,"body_spacing":28.0,"body_radius":15.0,"body_span":164.0}
 }
 const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
@@ -102,6 +102,7 @@ var muted = false
 var show_help = false
 var auto_test = false
 var screenshot_mode = ""
+var screenshot_capture_frame = 12
 var frame_count = 0
 var tests_done = false
 var test_count = 3
@@ -190,16 +191,18 @@ func _ready():
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
-		if screenshot_mode in ["encounter","long-body"]:
+		if screenshot_mode in ["encounter","long-body","bullet-curtain"]:
 			# Capture-only encounter: it places the real wave organisms inside the
-			# frame with their normal movement/shot data. `long-body` selects the
-			# authored MB01 wave. No player save is touched.
+			# frame with their normal movement/shot data. `long-body` and
+			# `bullet-curtain` select the authored MB01 wave. No player save is
+			# touched; the latter waits long enough for both staged volleys to read.
 			enemies.clear()
-			wave_id=5 if screenshot_mode=="long-body" else 3
+			wave_id=5 if screenshot_mode in ["long-body","bullet-curtain"] else 3
 			spawn_wave()
 			for i in range(enemies.size()):
 				enemies[i].pos.x=438+i*34
-				enemies[i].cool=.34+i*.045
+				enemies[i].cool=0.0 if screenshot_mode=="bullet-curtain" else .34+i*.045
+			if screenshot_mode=="bullet-curtain": screenshot_capture_frame=42
 		if screenshot_mode == "status": mode="status"
 		if screenshot_mode == "archive":
 			mode="status"
@@ -591,7 +594,7 @@ func _process(dt):
 	particles = particles.filter(func(p): return p.life>0)
 	shake = maxf(0,shake-dt*20)
 	queue_redraw()
-	if screenshot_mode != "" and frame_count == 12:
+	if screenshot_mode != "" and frame_count == screenshot_capture_frame:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://"+screenshot_mode+".png")
 		get_tree().quit()
@@ -778,13 +781,18 @@ func update_game(dt):
 			e.cool=float(e.get("fire_delay",2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)))
 			var target=players[wave_id%count].pos
 			var angles=e.get("shot_offsets",[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11]))
-			for angle in angles:
-				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(float(angle))*float(e.get("shot_speed",78 if motion=="orbit" else 88)),"r":int(e.get("shot_radius",4 if motion=="dive" else 3)),"form":str(e.get("shot_form","thorn"))}
-				var turn=float(e.get("shot_turn",0.0))
-				if absf(turn)>.001:shot.turn=turn*(-1.0 if float(angle)<0 else 1.0)
-				elif motion=="weave":shot.turn=.46 if float(angle)<0 else -.46
-				elif motion=="orbit":shot.turn=.22 if float(angle)<0 else -.22
-				shots.append(shot)
+			var volley_count=int(e.get("volley_count",1))
+			var volley_gap=float(e.get("volley_gap",0.0))
+			var volley_twist=float(e.get("volley_twist",0.0))
+			for volley in range(volley_count):
+				for angle in angles:
+					var fired_angle=float(angle)+(volley-(volley_count-1)*.5)*volley_twist
+					var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(fired_angle)*float(e.get("shot_speed",78 if motion=="orbit" else 88)),"r":int(e.get("shot_radius",4 if motion=="dive" else 3)),"form":str(e.get("shot_form","thorn")),"delay":volley*volley_gap,"burst":volley}
+					var turn=float(e.get("shot_turn",0.0))
+					if absf(turn)>.001:shot.turn=turn*(-1.0 if fired_angle<0 else 1.0)
+					elif motion=="weave":shot.turn=.46 if fired_angle<0 else -.46
+					elif motion=="orbit":shot.turn=.22 if fired_angle<0 else -.22
+					shots.append(shot)
 		for p in players:
 			if p.down==0 and enemy_body_contains(e,p.pos,float(e.get("contact_radius",e.get("hit_radius",20.0)*.82))): hurt(p)
 		if e.hp<=0:
@@ -796,12 +804,15 @@ func update_game(dt):
 			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
 	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
 	for shot in shots:
+		if float(shot.get("delay",0.0))>0:
+			shot.delay-=dt
+			continue
 		shot.vel=shot.vel.rotated(shot.get("turn",0.0)*dt)
 		shot.pos+=shot.vel*dt
 		for p in players:
 			if p.down==0 and p.pos.distance_to(shot.pos)<8+shot.r:
 				hurt(p); shot.pos.x=-100
-	shots=shots.filter(func(s):return s.pos.x>-30 and s.pos.x<680 and s.pos.y>30 and s.pos.y<340)
+	shots=shots.filter(func(s):return float(s.get("delay",0.0))>0 or (s.pos.x>-30 and s.pos.x<680 and s.pos.y>30 and s.pos.y<340))
 	for item in pickups:
 		item.pos.x-=dt*40
 		for p in players:
@@ -839,7 +850,7 @@ func spawn_wave():
 		elif bio_route and j==0 and wave_id%4==0:
 			art_id="SB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
 		var amplitude=float(profile.get("amplitude",23.0+int(technique=="dive")*8))
-		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn")),"body_segments":int(profile.get("body_segments",0)),"body_spacing":float(profile.get("body_spacing",0.0)),"body_radius":float(profile.get("body_radius",0.0)),"body_span":float(profile.get("body_span",0.0))})
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn")),"volley_count":int(profile.get("volley_count",1)),"volley_gap":float(profile.get("volley_gap",0.0)),"volley_twist":float(profile.get("volley_twist",0.0)),"body_segments":int(profile.get("body_segments",0)),"body_spacing":float(profile.get("body_spacing",0.0)),"body_radius":float(profile.get("body_radius",0.0)),"body_span":float(profile.get("body_span",0.0))})
 
 func enemy_body_point(e,segment:int)->Vector2:
 	if segment<=0:return e.pos
