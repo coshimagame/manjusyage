@@ -89,6 +89,7 @@ func advance() -> void:
 	if completed or log_open:
 		return
 	if dialogue_label.visible_characters < dialogue_label.get_total_character_count():
+		visible_characters = float(dialogue_label.get_total_character_count())
 		dialogue_label.visible_characters = -1
 		return
 	if index + 1 < characters_lines.size():
@@ -103,6 +104,8 @@ func toggle_log() -> void:
 	log_label.visible = log_open
 	if log_open:
 		log_label.clear()
+		if characters_lines.is_empty():
+			return
 		for i in range(index + 1):
 			var line: Dictionary = characters_lines[i]
 			log_label.add_text(str(line.get("speaker", "")) + ": " + str(line.get("text", "")) + "\n")
