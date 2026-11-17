@@ -104,8 +104,8 @@ func _show_phase() -> void:
 		action.text = "会話を進める"
 	else:
 		heading.text = "STAGE %d READY" % stage
-		message.text = "全8面の試作進行終了。実戦シーンへの接続は未実装。" if final_clear else "次ステージ出撃の接続確認。実戦シーンへの接続は未実装。"
-		action.text = "試作終了" if final_clear else "結果へ戻る"
+		message.text = "全8面の試作進行終了。実戦シーンへの接続は未実装。" if final_clear else "次ステージ出撃準備（試作）。実戦せず次のクリアを模擬できます。"
+		action.text = "試作終了" if final_clear else "次のクリアを模擬"
 		action.disabled = final_clear
 
 func _advance() -> void:
@@ -146,9 +146,11 @@ func _cycle_count() -> void:
 func _reset() -> void:
 	phase = 0
 	stage = 1
+	pilot_index = 0
 	player_count = 1
 	final_clear = false
 	line_index = 0
+	lines.clear()
 	_show_phase()
 
 func _save_progress() -> void:
@@ -180,6 +182,8 @@ func _load_progress() -> void:
 	if restored_count < 1 or restored_count > 3 or restored_stage < 1 or restored_stage > 8 or restored_pilot < 0 or restored_pilot >= PILOTS.size() or restored_phase < 0 or restored_phase > 2:
 		return
 	if restored_final and (restored_stage != 8 or restored_phase != 2):
+		return
+	if restored_phase == 2 and restored_stage == 8 and not restored_final and version >= 2:
 		return
 	if restored_phase == 1 and (restored_line < 0 or restored_line >= 3):
 		return
