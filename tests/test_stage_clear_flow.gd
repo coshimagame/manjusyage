@@ -25,6 +25,10 @@ func _initialize() -> void:
 		assert(not restored.restore({"version": 1, "stage": 9}))
 		restored.retry()
 		assert(restored.stage == 2 and restored.phase == "playing")
+		# Starting a fresh campaign on the same instance clears old progress.
+		assert(restored.configure(1, count))
+		assert(restored.cleared_stages.is_empty())
+		assert(restored.phase == "playing" and restored.stage == 1)
 	var final_stage = Flow.new()
 	assert(final_stage.configure(8, 1))
 	assert(final_stage.boss_defeated(0))
