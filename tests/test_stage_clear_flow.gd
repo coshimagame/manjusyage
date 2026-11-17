@@ -1,0 +1,33 @@
+extends SceneTree
+
+const Flow = preload("res://stage_clear_flow.gd")
+
+func _initialize() -> void:
+	for count in range(1, 4):
+		var flow = Flow.new()
+		assert(flow.configure(1, count))
+		assert(flow.boss_defeated(3))
+		assert(not flow.boss_defeated(3))
+		assert(flow.phase == "dialogue")
+		assert(flow.advance_dialogue())
+		var saved = flow.snapshot()
+		var restored = Flow.new()
+		assert(restored.restore(saved))
+		assert(restored.player_count == count)
+		assert(restored.dialogue_index == 1)
+		assert(restored.advance_dialogue())
+		assert(restored.advance_dialogue())
+		assert(restored.phase == "result")
+		assert(restored.next_stage())
+		assert(restored.stage == 2)
+		assert(restored.player_count == count)
+		assert(restored.cleared_stages == [1])
+		assert(not restored.restore({"version": 1, "stage": 9}))
+		restored.retry()
+		assert(restored.stage == 2 and restored.phase == "playing")
+	var final_stage = Flow.new()
+	assert(final_stage.configure(8, 1))
+	assert(final_stage.boss_defeated(0))
+	assert(not final_stage.next_stage())
+	print("stage_clear_flow: checks complete (1P/2P/3P)")
+	quit()
