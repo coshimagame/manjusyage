@@ -21,6 +21,8 @@ func configure(stage_number: int, participants: int) -> bool:
 	dialogue_index = 0
 	dialogue_total = 0
 	phase = "playing"
+	# A new run must not inherit completion flags from the previous run.
+	cleared_stages.clear()
 	return true
 
 func boss_defeated(lines: int) -> bool:
