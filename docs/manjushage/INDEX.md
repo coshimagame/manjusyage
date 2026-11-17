@@ -72,3 +72,9 @@
 
 ## 2026-10-31 実装済みビジュアル改修・第1弾
 - [VISUAL_PASS_01.md](VISUAL_PASS_01.md) — 実ユーザープレイ画面を受けて、`game.gd`・`biological_stage.gd` のコードを改修した記録。**GitHubソース反映済み、Godot実機テスト・画像比較待ち**。アートブック最終稿の完成ではない。
+
+## 2026-11-17 弾幕・アイテム・エフェクトの実制作パック
+- [VFX_ASSET_DESIGN_PACK_V01.md](VFX_ASSET_DESIGN_PACK_V01.md) — 弾16／アイテム16／エフェクト16＋弾幕パターン12。見た目、動き、用途、P0〜P2を分類。
+- [CODEX_VFX_TASK_V01.md](CODEX_VFX_TASK_V01.md) — 現物監査、透過PNG、Godot組込、回帰テストを行うCodex作業手順。
+- [VFX_ASSET_MANIFEST_V01.csv](VFX_ASSET_MANIFEST_V01.csv) — 60行（48種＋12パターン）の機械可読カタログ。
+- [弾幕ラフ](visuals/vfx_bullets_v01.svg) ／ [アイテムラフ](visuals/vfx_items_v01.svg) ／ [エフェクトラフ](visuals/vfx_effects_v01.svg) — ID対応のSVG見本。ラフでありゲーム内実装PNGではない。
