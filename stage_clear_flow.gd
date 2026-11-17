@@ -90,8 +90,12 @@ func restore(data: Dictionary) -> bool:
 	if not completed is Array:
 		return false
 	for value in completed:
-		if not value is int or value < 1 or value > MAX_STAGE:
+		if not value is int or value < 1 or value > s:
 			return false
+	# A cleared stage must not be restored as active gameplay, and an
+	# unfinished boss cannot resume in the dialogue/result phases.
+	if (p == "playing" and completed.has(s)) or (p != "playing" and not completed.has(s)):
+		return false
 	stage = s
 	player_count = n
 	phase = p
