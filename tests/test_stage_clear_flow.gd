@@ -25,6 +25,16 @@ func _initialize() -> void:
 		assert(not restored.restore({"version": 1, "stage": 9}))
 		restored.retry()
 		assert(restored.stage == 2 and restored.phase == "playing")
+		assert(restored.boss_defeated(0))
+		assert(restored.cleared_stages == [1, 2])
+		restored.retry()
+		assert(restored.cleared_stages == [1])
+		assert(restored.boss_defeated(0))
+		assert(restored.cleared_stages == [1, 2])
+		var invalid = restored.snapshot()
+		invalid["phase"] = "playing"
+		assert(not restored.restore(invalid))
+		assert(restored.phase == "result")
 		# Starting a fresh campaign on the same instance clears old progress.
 		assert(restored.configure(1, count))
 		assert(restored.cleared_stages.is_empty())
