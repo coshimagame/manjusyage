@@ -18,6 +18,14 @@ func _initialize() -> void:
 		assert(restored.advance_dialogue())
 		assert(restored.advance_dialogue())
 		assert(restored.phase == "result")
+		# Reject inconsistent snapshots without mutating live progression.
+		var inconsistent = restored.snapshot()
+		inconsistent["cleared_stages"] = []
+		assert(not restored.restore(inconsistent))
+		assert(restored.phase == "result")
+		inconsistent = restored.snapshot()
+		inconsistent["cleared_stages"] = [1, 2, 8]
+		assert(not restored.restore(inconsistent))
 		assert(restored.next_stage())
 		assert(restored.stage == 2)
 		assert(restored.player_count == count)
