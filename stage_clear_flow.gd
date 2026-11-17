@@ -53,6 +53,8 @@ func next_stage() -> bool:
 	return true
 
 func retry() -> void:
+	# Replaying a stage must not count its previous clear as completed.
+	cleared_stages.erase(stage)
 	dialogue_index = 0
 	dialogue_total = 0
 	phase = "playing"
@@ -79,6 +81,10 @@ func restore(data: Dictionary) -> bool:
 	if total < 0 or index < 0 or index > total:
 		return false
 	if p == "dialogue" and (total == 0 or index >= total):
+		return false
+	if p == "playing" and (index != 0 or total != 0):
+		return false
+	if p == "result" and index < total:
 		return false
 	var completed = data.get("cleared_stages", [])
 	if not completed is Array:
