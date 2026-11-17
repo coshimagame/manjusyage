@@ -453,7 +453,8 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			# Do not skip the result reveal before it becomes visible.
+			if key in [KEY_ENTER,KEY_SPACE] and result_delay <= 0.0: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
@@ -524,7 +525,7 @@ func _process(dt):
 			elif right: status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
-		elif start or a: start_game()
+		elif (start or a) and result_delay <= 0.0: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
