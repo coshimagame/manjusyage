@@ -15,6 +15,7 @@ var right_name: Label
 var message: Label
 var action: Button
 var back: Button
+var change_pilot: Button
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -30,6 +31,8 @@ func _ready() -> void:
 	message = _label(Vector2(35, 230), Vector2(570, 65), 17)
 	action = _button(Vector2(400, 310), "次へ", _advance)
 	back = _button(Vector2(40, 310), "タイトル相当へ", _reset)
+	change_pilot = _button(Vector2(240, 310), "操縦者変更", _cycle_pilot)
+	change_pilot.size = Vector2(150, 38)
 	_show_phase()
 
 func _label(pos: Vector2, dims: Vector2, font_size: int) -> Label:
@@ -68,6 +71,7 @@ func _try_portrait(paths: Array[String]) -> Texture2D:
 	return null
 
 func _show_phase() -> void:
+	change_pilot.visible = phase == 0
 	left_name.text = PILOTS[pilot_index]
 	right_name.text = "ムゥ"
 	# These are optional slots. Never substitute unapproved character designs.
@@ -85,7 +89,7 @@ func _show_phase() -> void:
 		action.text = "会話を進める"
 	else:
 		heading.text = "STAGE %d READY" % stage
-		message.text = "次ステージ出撃の接続確認。実戦シーンへの接続は未実装。"
+		message.text = "全8面の試作進行終了。実戦シーンへの接続は未実装。" if stage >= 8 else "次ステージ出撃の接続確認。実戦シーンへの接続は未実装。"
 		action.text = "結果へ戻る"
 
 func _advance() -> void:
@@ -104,6 +108,12 @@ func _advance() -> void:
 			stage = mini(stage + 1, 8)
 	else:
 		phase = 0
+	_show_phase()
+
+func _cycle_pilot() -> void:
+	if phase != 0:
+		return
+	pilot_index = (pilot_index + 1) % PILOTS.size()
 	_show_phase()
 
 func _reset() -> void:
