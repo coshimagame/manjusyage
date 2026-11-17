@@ -107,3 +107,7 @@ The user explicitly requests **coherent provisional implementations even for und
 
 ## 2026-11-05 / 8ステージ背景・断面・敵配置：並行制作ブリーフ（提案）
 ユーザーは、いま見られる1面だけでなく **全8面について背景、レベル断面、敵の登場、スクロール、ボス、周回ごとの変化を同時に検討し、ステージ別PDFで見たい**と希望。CodexとAntigravityは視覚・レベル設計に着手する前に、`docs/manjushage/STAGE_BACKGROUND_CONCEPTS_V01.md` を読み、現行 `STAGES.md`・`ENEMIES.md`・`CANON.md`と照合する。未決のボスやスクロール案は**未承認の試作用**であり勝手に正史にしない。古典STGはゲームデザインの参考に限定し、元の絵・音・ステージを改造流用しない。実装・Godot実走・画像採用は別状態として記録する。文書を読むことはCodex/Antigravityの自動起動を意味しない。
+
+## 2026-11-17 / 最新追加：弾幕・アイテム・ビジュアルエフェクト48案（Codex読込必須）
+ユーザー指示で**弾16種、アイテム16種、エフェクト16種、弾幕組合せ12種**の名称・ビジュアルラフ・用途・実装優先度を整理済。**この分野の作業時、および次のCodex視覚改善セッション開始時**に、`docs/manjushage/VFX_ASSET_DESIGN_PACK_V01.md`、`docs/manjushage/CODEX_VFX_TASK_V01.md`、`docs/manjushage/VFX_ASSET_MANIFEST_V01.csv`、`docs/manjushage/visuals/vfx_bullets_v01.svg`、`vfx_items_v01.svg`、`vfx_effects_v01.svg` を読むこと。
+まず既存1面へ P0（危険弾・既存HP/エネルギー・散華/被弾/取得FX）を**実PNG制作→Godot組込み→スクリーンショット比較→回帰テスト**で反映する。**SVGは造形ラフであってゲーム用の透明PNGではない**。提案アイテムを取得機能として無断実装しない。正式採用・アセット存在・動作検証はそれぞれ区別。GitHubへ指示書が保存されていても、Codexが自動起動した／すでに読んだ／実装したとは扱わない。
