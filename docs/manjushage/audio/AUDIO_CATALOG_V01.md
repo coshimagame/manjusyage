@@ -24,18 +24,20 @@
 
 ## 2. 音楽素材一覧 (BGM - 全10曲)
 
-| 素材ID | ファイルパス | 曲名 / 場面 | 調性 / BPM | 尺 | ループ | 採用ステータス |
+各楽曲はWAV音源に加えて、DAWでの編集・音色差し替えが可能な**SMF Format 1 標準MIDIファイル（.mid）**を原本として完全納品しています。
+
+| 素材ID | WAVファイル | MIDI原本ファイル | 曲名 / 場面 | 調性 / BPM | 尺 | 採用ステータス |
 |---|---|---|---|---|---|---|
-| **AUD-001** | `assets/audio/music/bgm_opening_plan_a.wav` | **曼珠沙華 〜 記憶の深淵**<br>(タイトル / オープニング A案) | D短調<br>82 BPM | 43.98s | シームレス | **【本採用】タイトルBGM** |
-| **AUD-002** | `assets/audio/music/bgm_opening_plan_b.wav` | 曼珠沙華 〜 輪廻のプロローグ<br>(タイトル / オープニング B案) | A短調<br>96 BPM | 37.50s | シームレス | **【採用】2周目以降変奏** |
-| **AUD-013** | `assets/audio/music/bgm_stage01_plan_a.wav` | **赤い残響 〜 幽玄の飛翔**<br>(第1面道中 A案) | D短調<br>156 BPM | 49.23s | シームレス | **【本採用】1面道中BGM** |
-| **AUD-014** | `assets/audio/music/bgm_stage01_plan_b.wav` | 赤い残響 〜 緋色の鼓動<br>(第1面道中 B案) | F#短調<br>162 BPM | 51.20s | シームレス | **【採用】2周目変奏** |
-| **AUD-015** | `assets/audio/music/bgm_boss01_plan_a.wav` | **生体中枢 〜 脈動する境界**<br>(第1面ボス戦 A案) | G短調<br>168 BPM | 46.83s | シームレス | **【本採用】1面ボスBGM** |
-| **AUD-016** | `assets/audio/music/bgm_boss01_plan_b.wav` | 輪廻の狂詩曲 〜 死線突破<br>(第1面ボス戦 B案) | E短調<br>174 BPM | 45.18s | シームレス | **【採用】高難度変奏** |
-| **AUD-023** | `assets/audio/music/bgm_stage02_plan_a.wav` | **追憶の海 〜 水底の残照**<br>(第2面道中 A案) | Eb長調<br>108 BPM (6/8) | 28.67s | シームレス | **【本採用】2面道中BGM** |
-| **AUD-024** | `assets/audio/music/bgm_stage02_plan_b.wav` | 追憶の海 〜 潮流のセレナーデ<br>(第2面道中 B案) | G短調<br>120 BPM | 34.00s | シームレス | **【採用】2周目変奏** |
-| **AUD-025** | `assets/audio/music/bgm_stage03_plan_a.wav` | **孤独な庭 〜 錆びた歯車と曼珠沙華**<br>(第3面道中 A案) | G短調<br>126 BPM (3/4) | 25.36s | シームレス | **【本採用】3面道中BGM** |
-| **AUD-026** | `assets/audio/music/bgm_stage03_plan_b.wav` | 孤独な庭 〜 静寂の回廊<br>(第3面道中 B案) | D短調<br>88 BPM | 35.73s | シームレス | **【採用】2周目変奏** |
+| **AUD-001** | `assets/audio/music/bgm_opening_plan_a.wav` | `assets/audio/midi/bgm_opening_plan_a.mid` | **曼珠沙華 〜 記憶の深淵**<br>(タイトル / オープニング A案) | D短調<br>82 BPM | 43.98s | **【本採用】タイトルBGM** |
+| **AUD-002** | `assets/audio/music/bgm_opening_plan_b.wav` | `assets/audio/midi/bgm_opening_plan_b.mid` | 曼珠沙華 〜 輪廻のプロローグ<br>(タイトル / オープニング B案) | A短調<br>96 BPM | 37.50s | **【採用】2周目以降変奏** |
+| **AUD-013** | `assets/audio/music/bgm_stage01_plan_a.wav` | `assets/audio/midi/bgm_stage01_plan_a.mid` | **赤い残響 〜 幽玄の飛翔**<br>(第1面道中 A案) | D短調<br>156 BPM | 49.23s | **【本採用】1面道中BGM** |
+| **AUD-014** | `assets/audio/music/bgm_stage01_plan_b.wav` | `assets/audio/midi/bgm_stage01_plan_b.mid` | 赤い残響 〜 緋色の鼓動<br>(第1面道中 B案) | F#短調<br>162 BPM | 51.20s | **【採用】2周目変奏** |
+| **AUD-015** | `assets/audio/music/bgm_boss01_plan_a.wav` | `assets/audio/midi/bgm_boss01_plan_a.mid` | **生体中枢 〜 脈動する境界**<br>(第1面ボス戦 A案) | G短調<br>168 BPM | 46.83s | **【本採用】1面ボスBGM** |
+| **AUD-016** | `assets/audio/music/bgm_boss01_plan_b.wav` | `assets/audio/midi/bgm_boss01_plan_b.mid` | 輪廻の狂詩曲 〜 死線突破<br>(第1面ボス戦 B案) | E短調<br>174 BPM | 45.18s | **【採用】高難度変奏** |
+| **AUD-023** | `assets/audio/music/bgm_stage02_plan_a.wav` | `assets/audio/midi/bgm_stage02_plan_a.mid` | **追憶の海 〜 水底の残照**<br>(第2面道中 A案) | Eb長調<br>108 BPM (6/8) | 28.67s | **【本採用】2面道中BGM** |
+| **AUD-024** | `assets/audio/music/bgm_stage02_plan_b.wav` | `assets/audio/midi/bgm_stage02_plan_b.mid` | 追憶の海 〜 潮流のセレナーデ<br>(第2面道中 B案) | G短調<br>120 BPM | 34.00s | **【採用】2周目変奏** |
+| **AUD-025** | `assets/audio/music/bgm_stage03_plan_a.wav` | `assets/audio/midi/bgm_stage03_plan_a.mid` | **孤独な庭 〜 錆びた歯車と曼珠沙華**<br>(第3面道中 A案) | G短調<br>126 BPM (3/4) | 25.36s | **【本採用】3面道中BGM** |
+| **AUD-026** | `assets/audio/music/bgm_stage03_plan_b.wav` | `assets/audio/midi/bgm_stage03_plan_b.mid` | 孤独な庭 〜 静寂の回廊<br>(第3面道中 B案) | D短調<br>88 BPM | 35.73s | **【採用】2周目変奏** |
 
 ---
 
