@@ -3,6 +3,7 @@ extends Control
 ## Instantiate above the game scene; connect completed and return to gameplay.
 signal completed(next_stage: int)
 signal replay_requested
+signal campaign_completed
 
 const PILOTS := ["コルミィ", "ジヨーザ", "マフィオ"]
 const PORTRAITS := [
@@ -18,6 +19,7 @@ var line_index := 0
 var dialogue: Array[Dictionary] = []
 var history: Array[String] = []
 var log_open := false
+var finished := false
 var label: Label
 var left_portrait: TextureRect
 var right_portrait: TextureRect
@@ -72,6 +74,7 @@ func configure(cleared_stage: int, active_pilot: int, participants: int) -> void
     pilot = clampi(active_pilot, 0, 2)
     party_size = clampi(participants, 1, 3)
     line_index = 0
+    finished = false
     log_open = false
     history.clear()
     # Placeholder text is intentionally not entered into canon or save data.
@@ -87,8 +90,14 @@ func configure(cleared_stage: int, active_pilot: int, participants: int) -> void
 
 func _show_line() -> void:
     if line_index >= dialogue.size():
-        completed.emit(mini(stage + 1, 8))
+        if finished:
+            return
+        finished = true
         hide()
+        if stage >= 8:
+            campaign_completed.emit()
+        else:
+            completed.emit(stage + 1)
         return
     var entry: Dictionary = dialogue[line_index]
     label.text = "%s  /  第%d面クリア  /  %d人参加\n\n%s\n\n[Enter] 次へ   [L] ログ   [S] スキップ" % [
@@ -97,7 +106,7 @@ func _show_line() -> void:
         history.append("%s: %s" % [entry["speaker"], entry["text"]])
 
 func _unhandled_key_input(event: InputEvent) -> void:
-    if not visible or not (event is InputEventKey) or not event.pressed or event.echo:
+    if finished or not visible or not (event is InputEventKey) or not event.pressed or event.echo:
         return
     if event.keycode == KEY_L:
         log_open = not log_open
