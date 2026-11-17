@@ -452,9 +452,19 @@ func _input(event):
 		elif mode == "pause":
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
-		else:
+		elif mode in ["clear","over"]:
+			# The result screen is not visible during the clear animation.
+			# Ignore restart/title until the player has actually seen it.
+			if result_delay > 0.0: return
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
-			if key == KEY_ESCAPE: mode = "menu"; track("title")
+			elif key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode in ["clear","over"]:
+		if result_delay > 0.0: return
+		var result_point = get_global_mouse_position()
+		# Match the two result actions drawn at y=269 and y=289.
+		if Rect2(170,250,300,28).has_point(result_point): start_game()
+		elif Rect2(170,279,300,28).has_point(result_point): mode = "menu"; track("title")
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
 		if Rect2(220,236,200,32).has_point(p): start_game()
