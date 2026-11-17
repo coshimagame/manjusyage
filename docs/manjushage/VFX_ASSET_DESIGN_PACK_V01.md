@@ -115,3 +115,7 @@
 
 ## ラフ／正式版について
 ここで添付したSVGは**16種×3カテゴリの識別可能なベクトルラフ**。ユーザーが見て決めるための形・雰囲気見本であり、生成画像の細部やSVGの簡易線画を最終採用とはみなさない。独立PNGを生成してGitHubに置くまでは「PNGあり」と報告しない。
+
+## 2026-11-17追加：アイテムの対象者・効果説明が必要
+ユーザーの追加依頼で、既存I01〜I16の実際の「誰向け・どう効くか」と、専用4案I17〜I20を詳細化した。**[CHARACTER_ITEM_EFFECTS_V01.md](CHARACTER_ITEM_EFFECTS_V01.md) をアイテム説明の最新版**とする。対応CSV：[CHARACTER_ITEM_EFFECTS_V01.csv](CHARACTER_ITEM_EFFECTS_V01.csv)。新4案の形のラフ：[visuals/vfx_character_items_additions_v01.svg](visuals/vfx_character_items_additions_v01.svg)。
+旧48点のビジュアルカタログは維持し、**新4案の造形を加えた素材候補は計52点（弾16・アイテム20・VFX16）、弾幕パターン12点**。この文書内の元の「アイテム16」は**当初のSVGラフ数**であり新仕様のアイテム総数ではない。追加効果の数値は仮であり、Godot実装・正式採用とは別。
