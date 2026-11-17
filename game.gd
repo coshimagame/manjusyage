@@ -17,6 +17,9 @@ var art_v09=true
 var slice_mode=true
 var aftermath=0.0
 var result_delay=0.0
+# Provisional stage-clear comms; no portrait asset or canon dialogue is overwritten.
+var clear_dialogue_index=0
+const CLEAR_COMMS=[["クゥ","第一境界の通信を確認。全員、応答して。"],["コルミィ","聞こえるよ！　でも、まだ先があるみたい。"],["ムゥ","機体を点検する。次の出撃まで無理はするな。"]]
 var sound_cooldowns={}
 var planet_texture: ImageTexture
 var title_logo: Texture2D
@@ -356,7 +359,7 @@ func start_game():
 	bio.reset()
 	vertical.reset()
 	vertical.duration=12.0 if slice_mode else 24.0
-	aftermath=0;result_delay=0;visual.blasts.clear()
+	aftermath=0;result_delay=0;clear_dialogue_index=0;visual.blasts.clear()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
 	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
@@ -453,7 +456,9 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if mode=="clear" and key==KEY_D:
+				clear_dialogue_index=(clear_dialogue_index+1)%CLEAR_COMMS.size()
+			elif key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
@@ -524,6 +529,8 @@ func _process(dt):
 			elif right: status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
+		elif mode=="clear" and right:
+			clear_dialogue_index=(clear_dialogue_index+1)%CLEAR_COMMS.size()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
@@ -1316,5 +1323,12 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : FLY AGAIN",269,WHITE)
+	if mode=="clear":
+		var line=CLEAR_COMMS[clear_dialogue_index]
+		draw_rect(Rect2(40,236,560,48),Color(0.035,0.07,0.13,0.94))
+		draw_rect(Rect2(40,236,560,48),COLORS[0],false,1)
+		japanese(str(line[0])+"： "+str(line[1]),Vector2(54,263),13,WHITE)
+		centered("D / RIGHT : COMMS    ENTER / A : FLY AGAIN",302,DIM)
+	else:
+		centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
