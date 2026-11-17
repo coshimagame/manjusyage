@@ -34,7 +34,7 @@ def main():
         if f.suffix.lower() not in {".md",".gd",".tscn",".tres",".cfg",".json"}:continue
         try: txt=f.read_text(encoding="utf-8")
         except UnicodeError:continue
-        for m in GODOT_RE.finditer(txt):
+        # Screenshot destinations are outputs, not required input assets.\n        # Exclude only literal save_png destinations; keep other res:// checks strict.\n        screenshot_outputs = set(re.findall(r'\\.save_png\\(\\s*[\\\"\\\']res://([^\\\"\\\']+\\.png)[\\\"\\\']\\s*\\)', txt)) if f.suffix.lower() == ".gd" else set()\n        for m in GODOT_RE.finditer(txt):\n            if m.group(1) in screenshot_outputs:\n                continue
             raw=m.group(1).split("#")[0]
             target=(root/raw).resolve()
             if not target.is_relative_to(root) or not target.is_file():
