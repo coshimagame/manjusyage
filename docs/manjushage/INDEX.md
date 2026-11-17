@@ -78,3 +78,8 @@
 - [CODEX_VFX_TASK_V01.md](CODEX_VFX_TASK_V01.md) — 現物監査、透過PNG、Godot組込、回帰テストを行うCodex作業手順。
 - [VFX_ASSET_MANIFEST_V01.csv](VFX_ASSET_MANIFEST_V01.csv) — 60行（48種＋12パターン）の機械可読カタログ。
 - [弾幕ラフ](visuals/vfx_bullets_v01.svg) ／ [アイテムラフ](visuals/vfx_items_v01.svg) ／ [エフェクトラフ](visuals/vfx_effects_v01.svg) — ID対応のSVG見本。ラフでありゲーム内実装PNGではない。
+
+## 2026-11-17追補：キャラクター別アイテムと効果
+- [CHARACTER_ITEM_EFFECTS_V01.md](CHARACTER_ITEM_EFFECTS_V01.md) — **各キャラ専用4案ずつ＋共通8案（計20枠）**。効果量・持続・制約・正式仕様／試作案／UI専用を分けて記録。I01〜I16の外観を維持し、I17〜I20を追加。
+- [CHARACTER_ITEM_EFFECTS_V01.csv](CHARACTER_ITEM_EFFECTS_V01.csv) — IDと対象、説明、試作状態の機械可読表。
+- [追加4案のラフ](visuals/vfx_character_items_additions_v01.svg) — 完成PNGではない。次のCodex実装時、既存`visuals/vfx_items_v01.svg`と併読。
