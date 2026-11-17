@@ -16,6 +16,9 @@ var message: Label
 var action: Button
 var back: Button
 var change_pilot: Button
+var save_button: Button
+var load_button: Button
+const SAVE_PATH := "user://stage_bridge_smoke.cfg"
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -33,6 +36,10 @@ func _ready() -> void:
 	back = _button(Vector2(40, 310), "タイトル相当へ", _reset)
 	change_pilot = _button(Vector2(240, 310), "操縦者変更", _cycle_pilot)
 	change_pilot.size = Vector2(150, 38)
+	save_button = _button(Vector2(40, 270), "試作状態を保存", _save_progress)
+	save_button.size = Vector2(175, 34)
+	load_button = _button(Vector2(230, 270), "試作状態を復元", _load_progress)
+	load_button.size = Vector2(175, 34)
 	_show_phase()
 
 func _label(pos: Vector2, dims: Vector2, font_size: int) -> Label:
@@ -72,6 +79,7 @@ func _try_portrait(paths: Array[String]) -> Texture2D:
 
 func _show_phase() -> void:
 	change_pilot.visible = phase == 0
+	action.disabled = false
 	left_name.text = PILOTS[pilot_index]
 	right_name.text = "ムゥ"
 	# These are optional slots. Never substitute unapproved character designs.
@@ -90,9 +98,12 @@ func _show_phase() -> void:
 	else:
 		heading.text = "STAGE %d READY" % stage
 		message.text = "全8面の試作進行終了。実戦シーンへの接続は未実装。" if stage >= 8 else "次ステージ出撃の接続確認。実戦シーンへの接続は未実装。"
-		action.text = "結果へ戻る"
+		action.text = "試作終了" if stage >= 8 else "結果へ戻る"
+		action.disabled = stage >= 8
 
 func _advance() -> void:
+	if phase == 2 and stage >= 8:
+		return
 	if phase == 0:
 		phase = 1
 		line_index = 0
@@ -120,6 +131,42 @@ func _reset() -> void:
 	phase = 0
 	stage = 1
 	line_index = 0
+	_show_phase()
+
+func _save_progress() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("bridge", "version", 1)
+	cfg.set_value("bridge", "stage", stage)
+	cfg.set_value("bridge", "pilot", pilot_index)
+	cfg.set_value("bridge", "phase", phase)
+	cfg.set_value("bridge", "line", line_index)
+	var err := cfg.save(SAVE_PATH)
+	if err != OK:
+		push_warning("Bridge smoke save failed: %d" % err)
+
+func _load_progress() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SAVE_PATH) != OK:
+		return
+	if cfg.get_value("bridge", "version", 0) != 1:
+		return
+	var restored_stage := int(cfg.get_value("bridge", "stage", -1))
+	var restored_pilot := int(cfg.get_value("bridge", "pilot", -1))
+	var restored_phase := int(cfg.get_value("bridge", "phase", -1))
+	var restored_line := int(cfg.get_value("bridge", "line", -1))
+	if restored_stage < 1 or restored_stage > 8 or restored_pilot < 0 or restored_pilot >= PILOTS.size() or restored_phase < 0 or restored_phase > 2:
+		return
+	if restored_phase == 1 and (restored_line < 0 or restored_line >= 3):
+		return
+	stage = restored_stage
+	pilot_index = restored_pilot
+	phase = restored_phase
+	line_index = restored_line if restored_phase == 1 else 0
+	lines = [
+		"ムゥ：帰還を確認した。機体の状態を見せてくれ。",
+		"%s：了解。次の出撃までに準備を整える。" % PILOTS[pilot_index],
+		"ムゥ：次の領域へ進む前に、記録を保存しておこう。"
+	] if phase == 1 else []
 	_show_phase()
 
 func _unhandled_key_input(event: InputEvent) -> void:
