@@ -1309,6 +1309,14 @@ func draw_controls():
 func draw_result():
 	if result_delay>0:return
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
+	# Stage-clear communications layout: left pilot, right Mu. Approved face PNGs
+	# are not assumed to exist; these are intentionally neutral empty slots.
+	if mode=="clear":
+		for slot_x in [16.0, 534.0]:
+			draw_rect(Rect2(slot_x,104,90,102),Color("0c1628"))
+			draw_rect(Rect2(slot_x,104,90,102),Color("67738a"),false,1.0)
+		japanese(PILOT_NAMES[players[0].character] if not players.is_empty() else "搭乗者",Vector2(20,221),12,WHITE)
+		japanese("ムゥ",Vector2(553,221),12,WHITE)
 	japanese("境界を越えた" if mode=="clear" else "通信が途切れた",Vector2(232 if mode=="clear" else 205,92),24,COLORS[0] if mode=="clear" else COLORS[1])
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
