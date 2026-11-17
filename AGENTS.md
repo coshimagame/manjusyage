@@ -111,3 +111,6 @@ The user explicitly requests **coherent provisional implementations even for und
 ## 2026-11-17 / 最新追加：弾幕・アイテム・ビジュアルエフェクト48案（Codex読込必須）
 ユーザー指示で**弾16種、アイテム16種、エフェクト16種、弾幕組合せ12種**の名称・ビジュアルラフ・用途・実装優先度を整理済。**この分野の作業時、および次のCodex視覚改善セッション開始時**に、`docs/manjushage/VFX_ASSET_DESIGN_PACK_V01.md`、`docs/manjushage/CODEX_VFX_TASK_V01.md`、`docs/manjushage/VFX_ASSET_MANIFEST_V01.csv`、`docs/manjushage/visuals/vfx_bullets_v01.svg`、`vfx_items_v01.svg`、`vfx_effects_v01.svg` を読むこと。
 まず既存1面へ P0（危険弾・既存HP/エネルギー・散華/被弾/取得FX）を**実PNG制作→Godot組込み→スクリーンショット比較→回帰テスト**で反映する。**SVGは造形ラフであってゲーム用の透明PNGではない**。提案アイテムを取得機能として無断実装しない。正式採用・アセット存在・動作検証はそれぞれ区別。GitHubへ指示書が保存されていても、Codexが自動起動した／すでに読んだ／実装したとは扱わない。
+
+## 2026-11-17追補 / キャラクター専用アイテムと効果説明（次の視覚作業で必読）
+ユーザーはアイテムが**コルミィ／ジヨーザ／マフィオの固有能力に対応**し、取得効果が分かることを希望。既存I01〜I16に4種追加した詳細台帳 `docs/manjushage/CHARACTER_ITEM_EFFECTS_V01.md`、機械可読 `docs/manjushage/CHARACTER_ITEM_EFFECTS_V01.csv`、追加ラフ `docs/manjushage/visuals/vfx_character_items_additions_v01.svg` を読む。共通8＋各キャラ専用4ずつ、計20枠。I05等はUI・イベントのみで**実際に取得するアイテムとして扱わない**。効果値のうちP2は仮案・未実装。**現行mainのgame.gdで確認済みの取得アイテムはHP+1（最大4）／charge+25（最大100）の2種のみ**。古い仕様書の運気・解析・消化と現行ソースの齟齬を先に監査し、コード状態と採用状態を分ける。新取得効果をユーザー承認済みとして実装しない。
