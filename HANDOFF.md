@@ -319,3 +319,10 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - この環境では今回、通常Godotをシェルから再起動して幕間を撮る際にWindows signal 11を再現したため、更新Windows PCK/ZIPを作成せず、幕間の新規通常レンダー連続キャプチャは未完了として残す。既知の`Image.load_from_file` export警告と終了時Resource解放警告も継続。GitHub同期はcredential-manager権限問題のため未実施。
 - 次：通常レンダラーが起動できる環境で、Stage 1クリア→コルミィ／ジヨーザ／マフィオの各幕間行を640×360で撮り、肖像の縮尺・文字との距離・人間のキーボードでの送り／スキップを確認する。Texture2D参照化とPCK起動試験を通してから配布版を更新する。
 
+# 2026-11-17 生きた生体背景とオープニング裂け目を追加
+
+- **実装**：Stage 1の生体壁から根状触手が交互に伸び、約1.28秒の可読な明滅予告の後、一発だけ低速胞子をプレイヤーへ放つ。`visual_v09.gd`では背景と敵の間、従来描画では器官の後ろに描くため、敵弾・味方弾・HUDを覆わない。全滅時にも対象探索で落ちないよう安全化し、ボス／ゲート／リトライで触手配列を破棄する。天井床、救出、被弾無敵、保存、1〜3人、横縦切替、既存機体性能は変更していない。生物の正体や敵名の正式設定は追加していない。
+- **オープニング**：新規オリジナル背景`OPEN-VIS-001`を`art/originals/cinematics/`に原本、`art/active/cinematics/`に実装版として版付き保存し、プロローグ第1ページに実接続した。nearest表示の上へ星屑、流れる花弁、裂け目の脈動をコード描画するため、単なる静止画の差し替えではない。来歴・生成手段・SHA-256・試作採用状態は`art/active/cinematics/README.md`と`docs/manjushage/ART_ASSETS.md`に登録済み。原画資料は今回未参照であり、アートブック準拠とは呼ばない。
+- **検証**：Godot 4.6.3 console＋隔離`APPDATA`で`test_prologue.gd`、`test_biological_stage.gd`（全員ダウン時の触手安全化を含む）、`test_v09.gd`、`test_status_v09.gd`がPASS。`--opening-shot`はheadlessのViewportに読み取り可能テクスチャがないため、安全に`CAPTURE SKIP`して終了するよう修正した。これは画面検収ではない。通常レンダラーはこの環境でWindows signal 11を再現しているため、更新後のプロローグ実画面キャプチャ、手操作、物理コントローラー、音楽実聴、性能測定、Windows PCK/ZIPは未検証・未更新。
+- **次**：通常レンダラーが起動できる環境で、起動→オープニング→ページ送りを640×360で撮り、下部文章の可読性を人間のキーボード操作で確認する。次に触手の予告色・胞子速度・1P/3Pの退避経路を手操作で調整する。PNG読み込みを静的Texture2D参照へ置換し、PCK起動試験後にのみWindows配布版を更新する。GitHub取得／pushはcredential-managerの`NtCreateDirectoryObject ... 0xC0000022`を解消し、リモートの他者更新を再確認してから非強制で行う。
+

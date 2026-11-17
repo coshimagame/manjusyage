@@ -10,6 +10,7 @@ func run():
 	scene.set_process(false)
 	assert(scene.PAGES.size()==8, "Prologue now contains eight story beats")
 	assert(scene.pilot_dialogue_portraits.size()==3 and scene.pilot_dialogue_portraits["コルミィ"] != null and scene.pilot_dialogue_portraits["ジヨーザ"] != null and scene.pilot_dialogue_portraits["マフィオ"] != null, "All three active pixel portraits must be available for story dialogue")
+	assert(scene.opening_backdrop != null, "The opening must load its active rift backdrop")
 	assert(scene.page==0)
 	scene.age=0
 	scene.advance()

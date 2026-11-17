@@ -29,7 +29,9 @@ var font: SystemFont
 var planet_tex: ImageTexture
 var music: AudioStreamPlayer
 var pilot_dialogue_portraits: Dictionary = {}
+var opening_backdrop: Texture2D
 var test_shot := false
+var opening_shot := false
 var frames := 0
 
 func _ready():
@@ -41,6 +43,10 @@ func _ready():
 		"ジヨーザ": pilot_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
 		"マフィオ": pilot_texture_from_file("res://art/active/pilots/mafio_dialogue_pixel_v01.png")
 	}
+	# OPEN-VIS-001: a user-requested opening illustration. It is retained as a
+	# separately versioned source asset and only replaces page 01's backdrop;
+	# text, input, music and the later animated prologue pages remain live.
+	opening_backdrop = pilot_texture_from_file("res://art/active/cinematics/prologue_rift_pixel_v01.png")
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
@@ -55,6 +61,7 @@ func _ready():
 		if arg == "--story-shot": test_shot = true; page = 1; age = 4.0
 		if arg == "--training-shot": test_shot=true;page=2;age=4.0
 		if arg == "--workshop-shot": test_shot=true;page=4;age=4.0
+		if arg == "--opening-shot": test_shot=true;opening_shot=true;page=0;age=4.0
 		# Capture the Cormii dialogue beat without changing the normal prologue.
 		if arg == "--pilot-story-shot": test_shot=true;page=2;age=5.0
 	queue_redraw()
@@ -115,42 +122,26 @@ func _process(dt):
 	queue_redraw()
 	frames += 1
 	if test_shot and frames == 5:
-		await RenderingServer.frame_post_draw
-		var image = get_viewport().get_texture().get_image()
-		image.save_png("res://pilot-story-preview.png" if page==2 and age>=4.25 else "res://story-preview.png")
+		# A direct readback keeps the scripted capture from waiting indefinitely on
+		# headless render backends that never emit frame_post_draw.
+		if DisplayServer.get_name().to_lower() == "headless":
+			print("PROLOGUE CAPTURE SKIP: headless viewport has no readable texture; use a normal renderer capture")
+			get_tree().quit()
+			return
+		var texture = get_viewport().get_texture()
+		var image = texture.get_image() if texture != null else null
+		if image != null:
+			var preview_path="opening-preview.png" if opening_shot else ("pilot-story-preview.png" if page==2 and age>=4.25 else "story-preview.png")
+			image.save_png("res://"+preview_path)
 		get_tree().quit()
 
 func _draw():
 	if finished or font == null: return
-	# 16-bit-inspired palette ramps and multilayer pixel scenery, no external art.
-	for y in range(360):
-		var color = Color("090d24").lerp(Color("323354"), float(y)/360.0)
-		draw_line(Vector2(0,y),Vector2(640,y),color)
-	for layer in range(3):
-		for i in range(65):
-			var x = fposmod(i*137.0-layer*clock*4.0,640)
-			var y = fposmod(i*73.0+layer*39.0,260)
-			var glow = 0.4+0.3*sin(clock+i)
-			draw_rect(Rect2(x,y,1+int(layer==2),1),Color(.65,.8,1,glow))
-	# Cloud bands separated by palette and parallax.
-	for band in range(9):
-		for i in range(24):
-			var x = fposmod(i*31.0+band*19-clock*(2+band*.4),740)-50
-			var y = 90+band*9+sin(i*.9+band)*13
-			draw_rect(Rect2(x,y,34,3),Color(.24,.25+band*.008,.46,.20))
-	# Planet is now drawn as one cached texture instead of thousands of rects.
-	if planet_tex!=null: draw_texture(planet_tex,Vector2(357,51))
-	# Fracture through the horizon.
-	var crack = PackedVector2Array([Vector2(175,0),Vector2(210,55),Vector2(194,92),Vector2(239,132),Vector2(220,177),Vector2(265,226)])
-	draw_polyline(crack,Color(.52,.36,.9,.15),13)
-	draw_polyline(crack,Color(.65,.55,1,.7),3)
-	draw_polyline(crack,Color("e0d9ff"),1)
-	for layer in range(3):
-		var points = PackedVector2Array([Vector2(0,270)])
-		for i in range(34):
-			points.append(Vector2(i*20,220+layer*13-sin(i*.8+layer)*15-sin(i*1.9)*8))
-		points.append(Vector2(640,360)); points.append(Vector2(0,360))
-		draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
+	var has_opening_backdrop := page == 0 and opening_backdrop != null
+	if has_opening_backdrop:
+		draw_opening_backdrop()
+	else:
+		draw_legacy_backdrop()
 	if page in [2,3]: draw_training()
 	if page in [4,5]: draw_workshop()
 	if page>=6:
@@ -173,6 +164,55 @@ func _draw():
 		draw_string(font,Vector2(30,307+i*21),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("d8e5ee"))
 	draw_string(font,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
 	draw_string(font,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
+
+func draw_opening_backdrop():
+	# Preserve the generated pixel clusters with nearest sampling and add only
+	# lightweight, live parallax so the opening remains a game scene, not a
+	# frozen slide. The lower narrative panel remains deliberately unobstructed.
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var drift = Vector2(sin(clock*.23)*1.5, cos(clock*.17)*1.0)
+	draw_texture_rect(opening_backdrop,Rect2(Vector2(-3,-2)+drift,Vector2(646,364)),false,Color.WHITE)
+	draw_rect(Rect2(0,0,640,252),Color("050817",.14))
+	for i in range(12):
+		var t=fposmod(clock*.055+i*.137,1.0)
+		var pos=Vector2(612-t*505,42+fposmod(i*47+sin(clock+i)*9,174))
+		draw_rect(Rect2(pos,Vector2(2 if i%3==0 else 1,1)),Color("f6d89b",.22+.44*(1.0-t)))
+	for i in range(6):
+		var phase=fposmod(clock*.12+i*.19,1.0)
+		var pos=Vector2(548-phase*260,186+sin(clock*1.5+i)*22+i*5)
+		var petal=PackedVector2Array([pos+Vector2(-5,0),pos+Vector2(0,-2),pos+Vector2(8,1),pos+Vector2(1,3)])
+		draw_colored_polygon(petal,Color("d84862",.2+.38*(1.0-phase)))
+	var pulse=.28+.18*(sin(clock*2.2)+1.0)*.5
+	draw_arc(Vector2(408,143),52+sin(clock*1.4)*4,-2.75,-.35,22,Color("f0d3ae",pulse),1)
+
+func draw_legacy_backdrop():
+	# The later pages retain the original programmatic scenery and its lighter
+	# training/workshop overlays.
+	for y in range(360):
+		var color = Color("090d24").lerp(Color("323354"), float(y)/360.0)
+		draw_line(Vector2(0,y),Vector2(640,y),color)
+	for layer in range(3):
+		for i in range(65):
+			var x = fposmod(i*137.0-layer*clock*4.0,640)
+			var y = fposmod(i*73.0+layer*39.0,260)
+			var glow = 0.4+0.3*sin(clock+i)
+			draw_rect(Rect2(x,y,1+int(layer==2),1),Color(.65,.8,1,glow))
+	for band in range(9):
+		for i in range(24):
+			var x = fposmod(i*31.0+band*19-clock*(2+band*.4),740)-50
+			var y = 90+band*9+sin(i*.9+band)*13
+			draw_rect(Rect2(x,y,34,3),Color(.24,.25+band*.008,.46,.20))
+	if planet_tex!=null: draw_texture(planet_tex,Vector2(357,51))
+	var crack = PackedVector2Array([Vector2(175,0),Vector2(210,55),Vector2(194,92),Vector2(239,132),Vector2(220,177),Vector2(265,226)])
+	draw_polyline(crack,Color(.52,.36,.9,.15),13)
+	draw_polyline(crack,Color(.65,.55,1,.7),3)
+	draw_polyline(crack,Color("e0d9ff"),1)
+	for layer in range(3):
+		var points = PackedVector2Array([Vector2(0,270)])
+		for i in range(34):
+			points.append(Vector2(i*20,220+layer*13-sin(i*.8+layer)*15-sin(i*1.9)*8))
+		points.append(Vector2(640,360)); points.append(Vector2(0,360))
+		draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
 
 
 func draw_training():

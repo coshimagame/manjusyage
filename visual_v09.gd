@@ -426,6 +426,9 @@ func draw(g):
 	if g.mode=="controls":g.draw_controls();return
 	if g.mode=="menu":g.draw_menu();return
 	if g.gate>0:g.draw_gate()
+	# BIO-004: growing wall tendrils belong between the scenery and enemies, so
+	# their glow telegraphs the later spore without hiding players or bullets.
+	g.bio.draw_tendrils(g)
 	for o in g.bio.organs:
 		g.draw_texture(creatures[3],o.pos-Vector2(27,27))
 		if o.cool<.6:g.draw_arc(o.pos,25,0,TAU,24,Color("ffd0a0"),1)

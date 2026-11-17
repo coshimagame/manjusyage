@@ -3,12 +3,16 @@ extends RefCounted
 # BIO-001: playable design experiment, not final creature/character canon.
 var organs: Array = []
 var next_organ := 700.0
+var tendrils: Array = []
+var next_tendril := 620.0
 var armor: Array = []
 
 func reset():
 	organs.clear()
+	tendrils.clear()
 	armor.clear()
 	next_organ=700.0
+	next_tendril=620.0
 
 func ceiling(x: float, distance: float, time: float) -> float:
 	return 65+sin((x+distance*.4)*.014)*13+sin(time*1.7)*5
@@ -19,12 +23,31 @@ func floor_y(x: float, distance: float, time: float) -> float:
 func update(g, dt):
 	if g.gate>0 or not g.boss.is_empty():
 		organs.clear()
+		tendrils.clear()
 		return
 	if g.travel<500: return
 	if g.travel>=next_organ:
 		var upper=int(next_organ/600)%2==1
 		organs.append({"pos":Vector2(660,108 if upper else 255),"upper":upper,"hp":6+g.count*2,"cool":1.5,"flash":0.0})
 		next_organ+=600
+	if g.travel>=next_tendril:
+		var tendril_upper=int(next_tendril/460)%2==0
+		tendrils.append({"x":672.0,"upper":tendril_upper,"age":0.0,"phase":float(tendrils.size())*.83,"fired":false})
+		next_tendril+=460
+	for tendril in tendrils:
+		tendril.x-=dt*52.0
+		tendril.age+=dt
+		# The wall grows first, holds a bright readably telegraphed bud, then
+		# releases one slow spore. It uses the existing enemy-shot path and never
+		# changes the solid ceiling/floor or player save data.
+		if not tendril.fired and tendril.age>=1.28 and tendril.x<600:
+			var live_players=g.players.filter(func(p): return p.down==0)
+			if not live_players.is_empty():
+				var tip=tendril_tip(g,tendril)
+				var target=live_players[0]
+				g.shots.append({"pos":tip,"vel":(target.pos-tip).normalized()*80.0,"r":3,"form":"spore","bio_tendril":true})
+			tendril.fired=true
+	tendrils=tendrils.filter(func(t): return t.x>-80 and t.age<8.0)
 	for organ in organs:
 		organ.pos.x-=dt*44
 		organ.cool-=dt; organ.flash=maxf(0,organ.flash-dt)
@@ -48,8 +71,18 @@ func update(g, dt):
 		if pilot.down==0 and (pilot.pos.y<ceiling(pilot.pos.x,g.travel,g.clock)+6 or pilot.pos.y>floor_y(pilot.pos.x,g.travel,g.clock)-6):
 			g.hurt(pilot)
 
+func tendril_anchor(g, tendril) -> Vector2:
+	return Vector2(tendril.x,ceiling(tendril.x,g.travel,g.clock) if tendril.upper else floor_y(tendril.x,g.travel,g.clock))
+
+func tendril_tip(g, tendril) -> Vector2:
+	var inward=1.0 if tendril.upper else -1.0
+	var reach=clampf(tendril.age/1.05,0.0,1.0)
+	var sway=sin(tendril.age*5.0+tendril.phase)*8.0
+	return tendril_anchor(g,tendril)+Vector2(sway,inward*(22.0+48.0*reach))
+
 func begin_boss(count):
 	organs.clear()
+	tendrils.clear()
 	armor=[18+count*6,18+count*6]
 
 func part_pos(g, index):
@@ -108,6 +141,24 @@ func draw_organs(g):
 		g.draw_circle(p,21,Color("542d4e"))
 		g.draw_circle(p+Vector2(-3,-3),16,Color("b65070"))
 		g.draw_circle(p+Vector2(-7,-3),8,Color("fff1d0") if organ.flash>0 else Color("f7aa7c"))
+
+func draw_tendrils(g):
+	for tendril in tendrils:
+		var anchor=tendril_anchor(g,tendril)
+		var tip=tendril_tip(g,tendril)
+		var inward=1.0 if tendril.upper else -1.0
+		var points=PackedVector2Array([anchor])
+		for i in range(1,7):
+			var ratio=float(i)/6.0
+			points.append(anchor.lerp(tip,ratio)+Vector2(sin(tendril.age*5.0+i*1.7+tendril.phase)*5.0*ratio,inward*sin(ratio*PI)*6.0))
+		g.draw_polyline(points,Color("4b233d"),11)
+		g.draw_polyline(points,Color("9f4966"),6)
+		g.draw_polyline(points,Color("e08187"),2)
+		var telegraph=clampf((tendril.age-.74)/.45,0.0,1.0) if not tendril.fired else 0.0
+		g.draw_circle(tip,9+telegraph*5,Color("6b2d52"))
+		g.draw_circle(tip+Vector2(-2,-2),5,Color("ffc091") if telegraph>.6 else Color("d2687b"))
+		if telegraph>0:
+			g.draw_arc(tip,14+telegraph*9,0,TAU,18,Color("fff0c5",telegraph*.78),1)
 
 func draw_boss(g):
 	var p=g.boss.pos

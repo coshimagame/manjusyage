@@ -1129,7 +1129,9 @@ func _draw():
 		if mode=="over": draw_result()
 		return
 	if shake>0: draw_set_transform(Vector2(randf_range(-shake,shake),randf_range(-shake,shake)))
-	if bio_route: bio.draw_organs(self)
+	if bio_route:
+		bio.draw_tendrils(self)
+		bio.draw_organs(self)
 	if gate>0: draw_gate()
 	for e in enemies:
 		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)

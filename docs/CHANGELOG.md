@@ -223,3 +223,9 @@ docs/manjushage/SOUND_DESIGN.mdを新規作成、Codexの開発ルールにコ�
 - Godot 4.6.3 console＋隔離APPDATAで`test_status_v09.gd`、`test_prologue.gd`、`stage_intermission_smoke.gd`、`test_v09.gd`がPASS。通常レンダラーで保存済みの[コルミィ会話画面](screenshots/latest/prologue_cormii_pixel_dialogue_20261117.png)は実ゲームのプロローグ表示記録である。人間操作、物理パッド、実聴、性能は未検証。
 - 今回の通常Godot再起動はWindows signal 11で失敗したため、幕間の新規連続キャプチャと更新Windows配布版は未作成。`Image.load_from_file`のexport警告と終了時Resource解放警告も継続する。
 
+# 2026-11-17 — 成長して攻める生体壁と起動演出の裂け目
+
+- 生体壁は、交互に根状触手を伸ばし、明滅する芽の予告後に低速胞子を一発だけ放つようになった。触手は背景と敵の間に描き、既存の敵弾経路を通るため、敵弾・味方弾・HUDを隠さず、天井床の接触判定や救出、被弾無敵、保存、1〜3人、横縦切替を変更しない。全滅・ボス・ゲート・リトライ時の安全な破棄も追加した。
+- 新規生成のオリジナル背景`OPEN-VIS-001`をプロローグ第1ページへ実接続。nearest表示の宇宙裂け目に、コード描画の星屑・流れる花弁・脈動を重ねる。原本、生成方法、ハッシュ、v0.9試作採用、正史にしない範囲を[背景台帳](../art/active/cinematics/README.md)と`ART_ASSETS.md`に記録した。原画資料は未参照であり、アートブック準拠とは称さない。
+- Godot 4.6.3 console＋隔離APPDATAで`test_prologue.gd`、`test_biological_stage.gd`（全員ダウン時を含む）、`test_v09.gd`、`test_status_v09.gd`がPASS。headlessのViewportは読取り不能のため`--opening-shot`は明示して安全にSKIPする。これは実画面キャプチャでも人間操作検収でもない。通常レンダラーのWindows signal 11、物理パッド、実聴、性能、Windows PCK/ZIP更新は未解決・未実施。
+
