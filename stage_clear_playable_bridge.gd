@@ -3,6 +3,7 @@ extends Control
 ## Prototype dialogue is NOT canon. Existing character art is never replaced.
 const PILOTS := ["コルミィ", "ジヨーザ", "マフィオ"]
 var pilot_index := 0
+var player_count := 1 # isolated smoke UI only; does not create combat players
 var stage := 1
 var phase := 0 # 0=result, 1=dialogue, 2=next sortie
 var line_index := 0
@@ -17,6 +18,7 @@ var message: Label
 var action: Button
 var back: Button
 var change_pilot: Button
+var change_count: Button
 var save_button: Button
 var load_button: Button
 const SAVE_PATH := "user://stage_bridge_smoke.cfg"
@@ -37,6 +39,8 @@ func _ready() -> void:
 	back = _button(Vector2(40, 310), "タイトル相当へ", _reset)
 	change_pilot = _button(Vector2(240, 310), "操縦者変更", _cycle_pilot)
 	change_pilot.size = Vector2(150, 38)
+	change_count = _button(Vector2(420, 270), "参加人数: 1人", _cycle_count)
+	change_count.size = Vector2(180, 34)
 	save_button = _button(Vector2(40, 270), "試作状態を保存", _save_progress)
 	save_button.size = Vector2(175, 34)
 	load_button = _button(Vector2(230, 270), "試作状態を復元", _load_progress)
@@ -80,6 +84,8 @@ func _try_portrait(paths: Array[String]) -> Texture2D:
 
 func _show_phase() -> void:
 	change_pilot.visible = phase == 0
+	change_count.visible = phase == 0
+	change_count.text = "参加人数: %d人" % player_count
 	action.disabled = false
 	left_name.text = PILOTS[pilot_index]
 	right_name.text = "ムゥ"
@@ -131,16 +137,24 @@ func _cycle_pilot() -> void:
 	pilot_index = (pilot_index + 1) % PILOTS.size()
 	_show_phase()
 
+func _cycle_count() -> void:
+	if phase != 0:
+		return
+	player_count = player_count % 3 + 1
+	_show_phase()
+
 func _reset() -> void:
 	phase = 0
 	stage = 1
+	player_count = 1
 	final_clear = false
 	line_index = 0
 	_show_phase()
 
 func _save_progress() -> void:
 	var cfg := ConfigFile.new()
-	cfg.set_value("bridge", "version", 2)
+	cfg.set_value("bridge", "version", 3)
+	cfg.set_value("bridge", "player_count", player_count)
 	cfg.set_value("bridge", "final_clear", final_clear)
 	cfg.set_value("bridge", "stage", stage)
 	cfg.set_value("bridge", "pilot", pilot_index)
@@ -155,20 +169,22 @@ func _load_progress() -> void:
 	if cfg.load(SAVE_PATH) != OK:
 		return
 	var version := int(cfg.get_value("bridge", "version", 0))
-	if version != 1 and version != 2:
+	if version != 1 and version != 2 and version != 3:
 		return
+	var restored_count := int(cfg.get_value("bridge", "player_count", 1)) if version == 3 else 1
 	var restored_stage := int(cfg.get_value("bridge", "stage", -1))
 	var restored_pilot := int(cfg.get_value("bridge", "pilot", -1))
 	var restored_phase := int(cfg.get_value("bridge", "phase", -1))
 	var restored_line := int(cfg.get_value("bridge", "line", -1))
-	var restored_final := bool(cfg.get_value("bridge", "final_clear", false)) if version == 2 else false
-	if restored_stage < 1 or restored_stage > 8 or restored_pilot < 0 or restored_pilot >= PILOTS.size() or restored_phase < 0 or restored_phase > 2:
+	var restored_final := bool(cfg.get_value("bridge", "final_clear", false)) if version >= 2 else false
+	if restored_count < 1 or restored_count > 3 or restored_stage < 1 or restored_stage > 8 or restored_pilot < 0 or restored_pilot >= PILOTS.size() or restored_phase < 0 or restored_phase > 2:
 		return
 	if restored_final and (restored_stage != 8 or restored_phase != 2):
 		return
 	if restored_phase == 1 and (restored_line < 0 or restored_line >= 3):
 		return
 	stage = restored_stage
+	player_count = restored_count
 	pilot_index = restored_pilot
 	phase = restored_phase
 	final_clear = restored_final
