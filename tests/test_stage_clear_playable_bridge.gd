@@ -26,6 +26,15 @@ func _run() -> void:
 	if bridge.phase != 1 or bridge.lines.size() != 3:
 		_fail("control room transition")
 		return
+	bridge._open_dialogue_log()
+	var accept := InputEventAction.new()
+	accept.action = "ui_accept"
+	accept.pressed = true
+	bridge._unhandled_key_input(accept)
+	if bridge.phase != 1 or bridge.line_index != 0:
+		_fail("opening dialogue log must block underlying accept")
+		return
+	bridge.dialogue_log.hide()
 	bridge._skip_dialogue()
 	if bridge.phase != 2 or bridge.stage != 2 or bridge.player_count != 3:
 		_fail("skip must preserve participants and advance stage")
