@@ -229,6 +229,9 @@ func _load_progress() -> void:
 	_show_phase()
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	# Do not advance the underlying story while the log dialog owns focus.
+	if dialogue_log != null and dialogue_log.visible:
+		return
 	if event.is_action_pressed("ui_accept") and not event.is_echo():
 		_advance()
 		get_viewport().set_input_as_handled()
