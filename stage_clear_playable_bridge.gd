@@ -21,6 +21,9 @@ var change_pilot: Button
 var change_count: Button
 var save_button: Button
 var load_button: Button
+var log_button: Button
+var skip_button: Button
+var dialogue_log: AcceptDialog
 const SAVE_PATH := "user://stage_bridge_smoke.cfg"
 
 func _ready() -> void:
@@ -45,6 +48,14 @@ func _ready() -> void:
 	save_button.size = Vector2(175, 34)
 	load_button = _button(Vector2(230, 270), "試作状態を復元", _load_progress)
 	load_button.size = Vector2(175, 34)
+	log_button = _button(Vector2(215, 165), "会話ログ", _open_dialogue_log)
+	log_button.size = Vector2(100, 36)
+	skip_button = _button(Vector2(325, 165), "会話スキップ", _skip_dialogue)
+	skip_button.size = Vector2(120, 36)
+	dialogue_log = AcceptDialog.new()
+	dialogue_log.title = "管制会話ログ（仮台詞）"
+	dialogue_log.dialog_text = ""
+	add_child(dialogue_log)
 	_show_phase()
 
 func _label(pos: Vector2, dims: Vector2, font_size: int) -> Label:
@@ -85,6 +96,8 @@ func _try_portrait(paths: Array[String]) -> Texture2D:
 func _show_phase() -> void:
 	change_pilot.visible = phase == 0
 	change_count.visible = phase == 0
+	log_button.visible = phase == 1
+	skip_button.visible = phase == 1
 	change_count.text = "参加人数: %d人" % player_count
 	action.disabled = false
 	left_name.text = PILOTS[pilot_index]
@@ -130,6 +143,21 @@ func _advance() -> void:
 	else:
 		phase = 0
 	_show_phase()
+
+func _open_dialogue_log() -> void:
+	if phase != 1 or lines.is_empty():
+		return
+	var entries: Array[String] = []
+	for i in range(mini(line_index + 1, lines.size())):
+		entries.append(lines[i])
+	dialogue_log.dialog_text = "\n\n".join(entries)
+	dialogue_log.popup_centered(Vector2i(520, 260))
+
+func _skip_dialogue() -> void:
+	if phase != 1:
+		return
+	line_index = lines.size() - 1
+	_advance()
 
 func _cycle_pilot() -> void:
 	if phase != 0:
