@@ -38,10 +38,14 @@ func _ready():
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	music.stream = load("res://audio/title.wav")
-	music.volume_db = -6
-	music.play()
-	music.finished.connect(_loop_music)
+	# Missing optional audio must not prevent the playable prologue from opening.
+	# Keep the original soundtrack when it is available; do not replace it.
+	if ResourceLoader.exists("res://audio/title.wav"):
+		music.stream = load("res://audio/title.wav")
+	if music.stream != null:
+		music.volume_db = -6
+		music.finished.connect(_loop_music)
+		music.play()
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--autotest" or arg.begins_with("--shot="):
 			finish()
@@ -68,7 +72,7 @@ func cache_planet_texture():
 	planet_tex=ImageTexture.create_from_image(image)
 
 func _loop_music():
-	if not finished: music.play()
+	if not finished and music != null and music.stream != null: music.play()
 
 func _unhandled_input(event):
 	if finished: return
