@@ -1306,6 +1306,16 @@ func draw_controls():
 	japanese("Esc：キャンセル（元の設定を維持）",Vector2(203,292),13)
 	japanese("登録完了後は、決定ボタンを一度離してください",Vector2(167,318),12,DIM)
 
+# Provisional stage-one radio exchange. Keep this in the real result screen
+# until the dedicated cinematic is connected; never override approved portraits.
+func draw_stage_one_radio():
+	var pilot_name=PILOT_NAMES[pilot_offset%3] if count==1 else "3人"
+	draw_rect(Rect2(64,110,512,78),Color(0.025,0.055,0.11,0.95))
+	draw_rect(Rect2(64,110,512,78),Color("617797"),false,1)
+	japanese("通信 / 第1面クリア後（仮台詞）",Vector2(78,130),12,DIM)
+	japanese(pilot_name+"：まだ、先があるんだね。",Vector2(78,152),14,WHITE)
+	japanese("ムゥ：戻ったら機体を見せろ。次の出撃に備える。",Vector2(78,174),13,Color("ffce63"))
+
 func draw_result():
 	if result_delay>0:return
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
@@ -1313,8 +1323,9 @@ func draw_result():
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
 	else: japanese("記憶の門が、もう一度ひらく。" if mode=="clear" else "態勢を整えて、もう一度。",Vector2(210,126),13,DIM)
-	centered("%07d"%score,153,WHITE,4)
-	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
-	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
+	if mode=="clear": draw_stage_one_radio()
+	centered("%07d"%score,203 if mode=="clear" else 153,WHITE,4)
+	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",224 if mode=="clear" else 198,COLORS[2])
+	if mode!="clear": centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
 	centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
