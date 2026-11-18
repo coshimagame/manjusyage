@@ -245,7 +245,12 @@ func sfx(name):
 	for player in sfx_pool:
 		if not player.playing:
 			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
-			player.stream = sounds[name]
+			# Optional audio assets may be absent from a partial checkout or Web export.
+			# Never assign a missing stream to a pooled player.
+			var stream: AudioStream = sounds.get(name, null)
+			if stream == null:
+				return
+			player.stream = stream
 			player.play()
 			return
 
