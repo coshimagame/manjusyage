@@ -859,8 +859,13 @@ func draw_intermission():
 	draw_rect(Rect2(18,208,604,126),Color("b45066"),false,2)
 	japanese("管制通信 / 幕間・仮台詞",Vector2(32,42),18,WHITE)
 	if intermission_log_open:
-		for i in range(mini(intermission_line+1,INTERMISSION_DRAFT_LINES.size())):
-			japanese(INTERMISSION_DRAFT_LINES[i],Vector2(32,100+i*30),13,WHITE)
+		# Show only the latest five read lines; keep the footer unobstructed.
+		# The full history remains accessible as dialogue advances.
+		var last_read=mini(intermission_line,INTERMISSION_DRAFT_LINES.size()-1)
+		var first_read=maxi(0,last_read-4)
+		for i in range(first_read,last_read+1):
+			japanese(INTERMISSION_DRAFT_LINES[i],Vector2(32,100+(i-first_read)*30),13,WHITE)
+		centered("LOG %d-%d / %d"%(first_read+1,last_read+1,INTERMISSION_DRAFT_LINES.size()),274,DIM)
 		centered("L / X : CLOSE LOG",307,COLORS[0])
 	else:
 		japanese(INTERMISSION_DRAFT_LINES[intermission_line],Vector2(32,258),15,WHITE)
