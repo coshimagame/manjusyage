@@ -20,6 +20,7 @@ var result_delay=0.0
 var stage_index=1
 var intermission_line=0
 var intermission_log_open=false
+var intermission_log_end=0
 const INTERMISSION_DRAFT_LINES = [
 	"クゥ：第一区域の反応が消えました。通信を維持します。",
 	"ムゥ：よく戻ったな。機体を確認させてくれ。",
@@ -469,7 +470,8 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
 			if mode=="intermission":
-				if key==KEY_L: intermission_log_open=not intermission_log_open; queue_redraw()
+				if key==KEY_L: toggle_intermission_log()
+				elif intermission_log_open and key in [KEY_UP,KEY_DOWN]: scroll_intermission_log(-1 if key==KEY_UP else 1)
 				elif key==KEY_TAB: skip_intermission()
 				elif key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
 				if key == KEY_ESCAPE: mode="menu"; track("title")
@@ -552,7 +554,9 @@ func _process(dt):
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode=="intermission":
-			if x: intermission_log_open=not intermission_log_open; queue_redraw()
+			if x: toggle_intermission_log()
+			elif intermission_log_open and up: scroll_intermission_log(-1)
+			elif intermission_log_open and down: scroll_intermission_log(1)
 			elif b: skip_intermission()
 			elif start or a: advance_intermission()
 		elif mode=="clear" and stage_index==1 and (start or a):
@@ -834,7 +838,19 @@ func open_intermission():
 	mode="intermission"
 	intermission_line=0
 	intermission_log_open=false
+	intermission_log_end=0
 	music.stop()
+	queue_redraw()
+
+func toggle_intermission_log():
+	if mode!="intermission": return
+	intermission_log_open=not intermission_log_open
+	if intermission_log_open: intermission_log_end=mini(intermission_line,INTERMISSION_DRAFT_LINES.size()-1)
+	queue_redraw()
+
+func scroll_intermission_log(direction:int):
+	if mode!="intermission" or not intermission_log_open: return
+	intermission_log_end=clampi(intermission_log_end+direction,0,mini(intermission_line,INTERMISSION_DRAFT_LINES.size()-1))
 	queue_redraw()
 
 func advance_intermission():
@@ -861,12 +877,12 @@ func draw_intermission():
 	if intermission_log_open:
 		# Show only the latest five read lines; keep the footer unobstructed.
 		# The full history remains accessible as dialogue advances.
-		var last_read=mini(intermission_line,INTERMISSION_DRAFT_LINES.size()-1)
+		var last_read=clampi(intermission_log_end,0,mini(intermission_line,INTERMISSION_DRAFT_LINES.size()-1))
 		var first_read=maxi(0,last_read-4)
 		for i in range(first_read,last_read+1):
 			japanese(INTERMISSION_DRAFT_LINES[i],Vector2(32,100+(i-first_read)*30),13,WHITE)
 		centered("LOG %d-%d / %d"%(first_read+1,last_read+1,INTERMISSION_DRAFT_LINES.size()),274,DIM)
-		centered("L / X : CLOSE LOG",307,COLORS[0])
+		centered("UP/DOWN : SCROLL   L / X : CLOSE LOG",307,COLORS[0])
 	else:
 		japanese(INTERMISSION_DRAFT_LINES[intermission_line],Vector2(32,258),15,WHITE)
 		centered("ENTER / A : NEXT  |  L / X : LOG  |  TAB / B : SKIP",307,COLORS[0])
