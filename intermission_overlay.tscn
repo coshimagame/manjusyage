@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://intermission_overlay.gd" id="1"]
+
+[node name="IntermissionOverlay" type="Control"]
+offset_right = 640.0
+offset_bottom = 360.0
+script = ExtResource("1")
