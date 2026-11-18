@@ -48,13 +48,15 @@ func _build_slot(is_mu: bool) -> void:
 			image.texture = resource
 	column.add_child(image)
 
-	if image.texture == null:
-		var missing := Label.new()
-		missing.text = "画像未登録"
-		missing.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		missing.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		image.add_child(missing)
-		missing.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	# 常に欠落ラベルを用意する。初期PNGが存在しても後から未登録へ戻せる。
+	var missing := Label.new()
+	missing.name = "MissingLabel"
+	missing.text = "画像未登録"
+	missing.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	missing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	image.add_child(missing)
+	missing.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	missing.visible = image.texture == null
 
 	var label := Label.new()
 	label.text = mu_name if is_mu else partner_name
