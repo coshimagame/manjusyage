@@ -471,7 +471,7 @@ func _input(event):
 				if key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
 				if key == KEY_ESCAPE: mode="menu"; track("title")
 			elif mode=="clear" and key in [KEY_ENTER,KEY_SPACE] and stage_index==1:
-				open_intermission()
+				if result_delay<=0: open_intermission()
 			else:
 				if key in [KEY_ENTER,KEY_SPACE]: start_game()
 				if key == KEY_ESCAPE: mode = "menu"; track("title")
@@ -545,7 +545,8 @@ func _process(dt):
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode=="intermission" and (start or a): advance_intermission()
-		elif mode=="clear" and stage_index==1 and (start or a): open_intermission()
+		elif mode=="clear" and stage_index==1 and (start or a):
+			if result_delay<=0: open_intermission()
 		elif start or a: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
