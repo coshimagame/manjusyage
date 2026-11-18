@@ -160,13 +160,15 @@ func restore_snapshot(data: Dictionary) -> bool:
         return false
     if saved_party < 1 or saved_party > 3 or saved_line < 0 or saved_line > 3:
         return false
-    if saved_finished and saved_line != 3:
+    # An unfinished checkpoint at the end would emit a transition on load.
+    # Only a completed checkpoint may point past the last dialogue line.
+    if saved_finished != (saved_line == 3):
         return false
     configure(saved_stage, saved_pilot, saved_party)
     line_index = saved_line
     finished = saved_finished
     history.clear()
-    for i in range(mini(line_index + 1, dialogue.size())):
+    for i in range(mini(line_index + (0 if finished else 1), dialogue.size())):
         var entry: Dictionary = dialogue[i]
         history.append("%s: %s" % [entry["speaker"], entry["text"]])
     if finished:
