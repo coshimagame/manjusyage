@@ -19,6 +19,7 @@ var aftermath=0.0
 var result_delay=0.0
 var stage_index=1
 var intermission_line=0
+var intermission_log_open=false
 const INTERMISSION_DRAFT_LINES = [
 	"クゥ：第一区域の反応が消えました。通信を維持します。",
 	"ムゥ：よく戻ったな。機体を確認させてくれ。",
@@ -468,7 +469,9 @@ func _input(event):
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
 			if mode=="intermission":
-				if key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
+				if key==KEY_L: intermission_log_open=not intermission_log_open; queue_redraw()
+				elif key==KEY_TAB: skip_intermission()
+				elif key in [KEY_ENTER,KEY_SPACE]: advance_intermission()
 				if key == KEY_ESCAPE: mode="menu"; track("title")
 			elif mode=="clear" and key in [KEY_ENTER,KEY_SPACE] and stage_index==1:
 				if result_delay<=0: open_intermission()
@@ -544,7 +547,10 @@ func _process(dt):
 			elif right: status_slot=(status_slot+1)%maxi(1,players.size()); archive_page=false
 			elif x and players[status_slot].character==2: archive_page=not archive_page
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
-		elif mode=="intermission" and (start or a): advance_intermission()
+		elif mode=="intermission":
+			if x: intermission_log_open=not intermission_log_open; queue_redraw()
+			elif b: skip_intermission()
+			elif start or a: advance_intermission()
 		elif mode=="clear" and stage_index==1 and (start or a):
 			if result_delay<=0: open_intermission()
 		elif start or a: start_game()
@@ -819,15 +825,24 @@ func open_intermission():
 	if mode!="clear" or stage_index!=1 or result_delay>0: return
 	mode="intermission"
 	intermission_line=0
+	intermission_log_open=false
 	music.stop()
 	queue_redraw()
 
 func advance_intermission():
-	if mode!="intermission": return
+	if mode!="intermission" or intermission_log_open: return
 	intermission_line+=1
 	if intermission_line>=INTERMISSION_DRAFT_LINES.size():
+		intermission_log_open=false
 		stage_index=2
 		start_stage_run()
+	queue_redraw()
+
+func skip_intermission():
+	if mode!="intermission": return
+	intermission_log_open=false
+	stage_index=2
+	start_stage_run()
 	queue_redraw()
 
 func draw_intermission():
@@ -835,8 +850,13 @@ func draw_intermission():
 	draw_rect(Rect2(18,208,604,126),Color("182139"))
 	draw_rect(Rect2(18,208,604,126),Color("b45066"),false,2)
 	japanese("管制通信 / 幕間・仮台詞",Vector2(32,42),18,WHITE)
-	japanese(INTERMISSION_DRAFT_LINES[intermission_line],Vector2(32,258),15,WHITE)
-	centered("ENTER / A : NEXT",307,COLORS[0])
+	if intermission_log_open:
+		for i in range(mini(intermission_line+1,INTERMISSION_DRAFT_LINES.size())):
+			japanese(INTERMISSION_DRAFT_LINES[i],Vector2(32,100+i*30),13,WHITE)
+		centered("L / X : CLOSE LOG",307,COLORS[0])
+	else:
+		japanese(INTERMISSION_DRAFT_LINES[intermission_line],Vector2(32,258),15,WHITE)
+		centered("ENTER / A : NEXT  |  L / X : LOG  |  TAB / B : SKIP",307,COLORS[0])
 
 func finish(won):
 	mode="clear" if won else "over"
