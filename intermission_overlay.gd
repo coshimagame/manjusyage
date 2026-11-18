@@ -128,3 +128,50 @@ func _unhandled_key_input(event: InputEvent) -> void:
         line_index += 1
         _show_line()
         get_viewport().set_input_as_handled()
+
+## Return a validated checkpoint for the parent game's existing save system.
+## No disk writes here: avoid changing the established save format.
+func snapshot() -> Dictionary:
+    return {
+        "version": 1,
+        "stage": stage,
+        "pilot": pilot,
+        "party_size": party_size,
+        "line_index": line_index,
+        "finished": finished
+    }
+
+
+## Restore without emitting stage transition signals during loading.
+func restore_snapshot(data: Dictionary) -> bool:
+    if data.get("version", -1) != 1:
+        return false
+    for key in ["stage", "pilot", "party_size", "line_index"]:
+        if typeof(data.get(key)) != TYPE_INT:
+            return false
+    if typeof(data.get("finished")) != TYPE_BOOL:
+        return false
+    var saved_stage: int = data["stage"]
+    var saved_pilot: int = data["pilot"]
+    var saved_party: int = data["party_size"]
+    var saved_line: int = data["line_index"]
+    var saved_finished: bool = data["finished"]
+    if saved_stage < 1 or saved_stage > 8 or saved_pilot < 0 or saved_pilot > 2:
+        return false
+    if saved_party < 1 or saved_party > 3 or saved_line < 0 or saved_line > 3:
+        return false
+    if saved_finished and saved_line != 3:
+        return false
+    configure(saved_stage, saved_pilot, saved_party)
+    line_index = saved_line
+    finished = saved_finished
+    history.clear()
+    for i in range(mini(line_index + 1, dialogue.size())):
+        var entry: Dictionary = dialogue[i]
+        history.append("%s: %s" % [entry["speaker"], entry["text"]])
+    if finished:
+        hide()
+    else:
+        show()
+        _show_line()
+    return true
