@@ -476,7 +476,11 @@ func _input(event):
 			elif mode=="clear" and key in [KEY_ENTER,KEY_SPACE] and stage_index==1:
 				if result_delay<=0: open_intermission()
 			else:
-				if key in [KEY_ENTER,KEY_SPACE]: start_game()
+				if key in [KEY_ENTER,KEY_SPACE]:
+					if mode=="clear" and result_delay>0: pass
+					elif mode=="clear" and stage_index==2: mode="menu"; track("title")
+					elif mode=="over" and stage_index==2: start_stage_run()
+					else: start_game()
 				if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
@@ -553,7 +557,11 @@ func _process(dt):
 			elif start or a: advance_intermission()
 		elif mode=="clear" and stage_index==1 and (start or a):
 			if result_delay<=0: open_intermission()
-		elif start or a: start_game()
+		elif start or a:
+			if mode=="clear" and result_delay>0: pass
+			elif mode=="clear" and stage_index==2: mode="menu"; track("title")
+			elif mode=="over" and stage_index==2: start_stage_run()
+			else: start_game()
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
@@ -1387,5 +1395,5 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : CONTROL ROOM (DRAFT)" if mode=="clear" and stage_index==1 else "ENTER / A : FLY AGAIN",269,WHITE)
+	centered("ENTER / A : CONTROL ROOM (DRAFT)" if mode=="clear" and stage_index==1 else ("ENTER / A : TITLE (STAGE 2 TEST END)" if mode=="clear" and stage_index==2 else "ENTER / A : RETRY STAGE"),269,WHITE)
 	centered("ESC : TITLE",289,DIM)
