@@ -196,8 +196,14 @@ func _ready():
 	queue_redraw()
 
 func image_texture_from_file(path:String)->Texture2D:
+	# Optional, user-approved artwork may not be present in every checkout.
+	# Avoid engine errors for absent PNGs; callers retain their existing fallback.
+	if not FileAccess.file_exists(path):
+		return null
 	var image=Image.load_from_file(path)
-	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
+	if image == null or image.is_empty():
+		return null
+	return ImageTexture.create_from_image(image)
 
 func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 	if chat_ui_atlas:
