@@ -1224,7 +1224,9 @@ func draw_hud():
 	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
 	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
 	draw_rect(Rect2(0,337,640,23),Color("080f22"))
-	japanese("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",Vector2(12,354),11,DIM)
+	# Keep the stage label within the left HUD column; the sound toggle begins at x=265.
+	# Stage 2 still reuses Stage 1 combat, so label it as a connection test.
+	japanese(("第二境界：接続試験" if stage_index==2 else "第一境界：赤い残響") if bio_route else "旧試作：共鳴遺跡",Vector2(12,354),11,DIM)
 	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
 	text_at("START PAUSE",Vector2(405,345),DIM)
 	draw_rect(Rect2(500,347,125,2),Color("28374e"))
