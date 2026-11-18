@@ -34,13 +34,16 @@ static func speaker_side(speaker: String, partner: String) -> String:
 	return "none"
 
 ## Paths must be actual PNG resource paths, never character names.
+## Cache the displayed tuple to avoid reloading textures on every spoken line.
 ## The empty defaults deliberately show the scene's missing-art indicator.
 static func apply_dialogue(overlay: Node, speaker: String, previous_partner: String = "コルミィ", partner_png: String = "", mu_png: String = "") -> String:
 	var partner := dialogue_partner(speaker, previous_partner)
 	if overlay == null:
 		return partner
-	if overlay.has_method("set_portraits"):
+	var portrait_key := [partner_png, mu_png, partner]
+	if overlay.has_method("set_portraits") and overlay.get_meta("manjushage_portrait_key", []) != portrait_key:
 		overlay.call("set_portraits", partner_png, mu_png, partner)
+		overlay.set_meta("manjushage_portrait_key", portrait_key)
 	if overlay.has_method("set_speaker"):
 		overlay.call("set_speaker", speaker_side(speaker, partner))
 	return partner
