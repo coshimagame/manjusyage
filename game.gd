@@ -242,10 +242,13 @@ func sfx(name):
 		if sound_cooldowns.get(name,0)>0:return
 		sound_cooldowns[name]=.045 if name=="impact_v09" else .025
 	if muted or auto_test: return
+	# Missing or optional audio must never interrupt gameplay or assign a null stream.
+	var stream: AudioStream = sounds.get(name, null)
+	if stream == null: return
 	for player in sfx_pool:
 		if not player.playing:
 			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
-			player.stream = sounds[name]
+			player.stream = stream
 			player.play()
 			return
 
