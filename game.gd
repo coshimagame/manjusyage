@@ -963,8 +963,23 @@ func _draw():
 		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
 		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
 	for item in pickups:
-		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
-		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
+		# Two distinct silhouettes stay readable at 640x360 even without a font.
+		# Existing pickup mechanics and textures are not modified.
+		var center:Vector2=item.pos
+		if item.kind==0:
+			# Recovery: cyan cross with a dark outline.
+			draw_rect(Rect2(center-Vector2(3,7),Vector2(6,14)),Color("0a1730"))
+			draw_rect(Rect2(center-Vector2(7,3),Vector2(14,6)),Color("0a1730"))
+			draw_rect(Rect2(center-Vector2(2,6),Vector2(4,12)),COLORS[0])
+			draw_rect(Rect2(center-Vector2(6,2),Vector2(12,4)),COLORS[0])
+			draw_rect(Rect2(center-Vector2(1,1),Vector2(2,2)),WHITE)
+		else:
+			# Energy: warm diamond, visually separate from recovery.
+			var diamond=PackedVector2Array([center+Vector2(0,-8),center+Vector2(7,0),center+Vector2(0,8),center+Vector2(-7,0)])
+			draw_colored_polygon(diamond,Color("4a2c17"))
+			var core=PackedVector2Array([center+Vector2(0,-6),center+Vector2(5,0),center+Vector2(0,6),center+Vector2(-5,0)])
+			draw_colored_polygon(core,COLORS[2])
+			draw_line(center+Vector2(-2,0),center+Vector2(2,0),WHITE,2.0)
 	if not boss.is_empty(): draw_boss()
 	for i in range(players.size()):
 		var p=players[i]
