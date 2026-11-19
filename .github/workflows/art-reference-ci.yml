@@ -1,5 +1,14 @@
 name: Art references and Godot smoke test
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'art/**'
+      - 'docs/manjushage/**'
+      - 'art_catalog.gd'
+      - 'tests/test_art_slots.gd'
+      - 'tools/validate_asset_migration.py'
+      - '.github/workflows/art-reference-ci.yml'
   pull_request:
     paths:
       - 'art/**'
