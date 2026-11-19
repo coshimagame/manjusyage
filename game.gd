@@ -1313,8 +1313,16 @@ func draw_result():
 	if bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
 	else: japanese("記憶の門が、もう一度ひらく。" if mode=="clear" else "態勢を整えて、もう一度。",Vector2(210,126),13,DIM)
+	# Stage-one clear radio is provisional, not approved canon.
+	if mode=="clear":
+		var lead_name=PILOT_NAMES[pilot_offset%3] if count==1 else "3人"
+		draw_rect(Rect2(44,235,552,62),Color(0.025,0.06,0.13,0.94))
+		draw_rect(Rect2(44,235,552,2),COLORS[0])
+		japanese(lead_name+"（左）",Vector2(57,254),12,COLORS[0])
+		japanese("ムゥ（右）",Vector2(493,254),12,COLORS[2])
+		japanese("仮稿：通信確認。帰還後に機体を点検する。",Vector2(80,280),12,WHITE)
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : FLY AGAIN",269,WHITE)
-	centered("ESC : TITLE",289,DIM)
+	centered("ENTER / A : FLY AGAIN",314,WHITE)
+	centered("ESC : TITLE",335,DIM)
