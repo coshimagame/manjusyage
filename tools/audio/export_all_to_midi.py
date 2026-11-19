@@ -670,6 +670,260 @@ def export_boss01_plan_b():
 
     song.save(os.path.join(MIDI_DIR, "bgm_boss01_plan_b.mid"))
 
+# =============================================================================
+# 11. STAGE 4 PLAN A: 分岐する空 〜 碧落の疾走 (Stage 4 Sky A, 165 BPM)
+# =============================================================================
+def export_stage04_plan_a():
+    song = MidiSong(bpm=165, time_sig=(4, 4), ppqn=PPQN)
+    ticks_per_beat = PPQN
+    ticks_per_measure = PPQN * 4
+
+    t_lead = song.add_track(name="Lead (Sky Brass)", channel=0, program=62)
+    t_arp = song.add_track(name="Arpeggio (Sparkling Synth)", channel=1, program=81)
+    t_pad = song.add_track(name="Pad (Strings)", channel=2, program=48)
+    t_bass = song.add_track(name="Bass (Slap Drive Bass)", channel=3, program=36)
+    t_drums = song.add_track(name="Drums (Power Kit)", channel=9, program=0)
+
+    chords = [
+        ["E3", "G3", "B3"],    # Em
+        ["C3", "E3", "G3"],    # C
+        ["D3", "F#3", "A3"],   # D
+        ["B2", "D#3", "F#3"],  # Bm
+        ["C3", "E3", "G3"],    # C
+        ["A2", "C3", "E3"],    # Am
+        ["B2", "D#3", "F#3", "A3"], # B7
+        ["E3", "G3", "B3"],    # Em
+        ["C3", "E3", "G3", "B3"],
+        ["D3", "F#3", "A3", "C4"],
+        ["G3", "B3", "D4"],
+        ["E3", "G3", "B3"],
+        ["C3", "E3", "G3"],
+        ["D3", "F#3", "A3"],
+        ["E3", "G3", "B3", "E4"],
+        ["E3", "B3", "E4", "G4"],
+    ]
+
+    for m, c_notes in enumerate(chords):
+        m_tick = m * ticks_per_measure
+        for n_str in c_notes:
+            t_pad.add_note(m_tick, ticks_per_measure - 20, note_to_midi(n_str) + 12, velocity=75)
+        # 16th Arps
+        for s in range(16):
+            n_str = c_notes[(s * 3) % len(c_notes)]
+            t_arp.add_note(m_tick + s * (ticks_per_beat // 4), (ticks_per_beat // 4) - 5, note_to_midi(n_str) + 24, velocity=85)
+        # 8th Slap bass
+        r_p = note_to_midi(c_notes[0])
+        for b in range(8):
+            p = r_p if (b % 4 != 3) else r_p + 12
+            t_bass.add_note(m_tick + b * (ticks_per_beat // 2), (ticks_per_beat // 2) - 10, p, velocity=100)
+        # Drums
+        t_drums.add_note(m_tick, 100, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat, 100, 38, velocity=110)
+        t_drums.add_note(m_tick + ticks_per_beat * 2, 100, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat * 3, 100, 38, velocity=110)
+
+    lead_notes = [
+        ("B4", 0.0, 2.0), ("C5", 2.0, 1.0), ("D5", 3.0, 1.0),
+        ("E5", 4.0, 2.5), ("D5", 6.5, 1.5),
+        ("A4", 8.0, 2.0), ("B4", 10.0, 2.0),
+        ("G4", 12.0, 3.5),
+        ("E5", 16.0, 2.0), ("F#5", 18.0, 1.0), ("G5", 19.0, 1.0),
+        ("A5", 20.0, 2.5), ("G5", 22.5, 1.5),
+        ("F#5", 24.0, 3.0),
+        ("E5", 28.0, 4.0),
+        ("G5", 32.0, 2.0), ("A5", 34.0, 1.0), ("B5", 35.0, 1.0),
+        ("A5", 36.0, 2.5), ("F#5", 38.5, 1.5),
+        ("G5", 40.0, 2.5), ("D5", 42.5, 1.5),
+        ("E5", 44.0, 3.5),
+        ("C5", 48.0, 2.0), ("D5", 50.0, 2.0),
+        ("B4", 52.0, 2.0), ("D5", 54.0, 2.0),
+        ("E5", 56.0, 4.0),
+        ("E5", 60.0, 4.0),
+    ]
+    for n_name, start_beat, dur_beat in lead_notes:
+        t_lead.add_note(int(start_beat * ticks_per_beat), int(dur_beat * ticks_per_beat) - 10, note_to_midi(n_name), velocity=110)
+
+    song.save(os.path.join(MIDI_DIR, "bgm_stage04_plan_a.mid"))
+
+# =============================================================================
+# 12. STAGE 4 PLAN B: 分岐する空 〜 乱気流のロンド (Stage 4 Sky B, 158 BPM)
+# =============================================================================
+def export_stage04_plan_b():
+    song = MidiSong(bpm=158, time_sig=(4, 4), ppqn=PPQN)
+    ticks_per_beat = PPQN
+    ticks_per_measure = PPQN * 4
+
+    t_lead = song.add_track(name="Lead (Brass Lead)", channel=0, program=62)
+    t_arp = song.add_track(name="Arpeggio (Triplet Synth)", channel=1, program=81)
+    t_bass = song.add_track(name="Bass (Gallop Bass)", channel=2, program=33)
+    t_drums = song.add_track(name="Drums (Rock Kit)", channel=9, program=0)
+
+    chords = [
+        ["A2", "C3", "E3"],
+        ["F2", "A2", "C3"],
+        ["G2", "B2", "D3"],
+        ["E2", "G2", "B2"],
+        ["F2", "A2", "C3"],
+        ["D2", "F2", "A2"],
+        ["E2", "G#2", "B2"],
+        ["A2", "C3", "E3"],
+    ] * 2
+
+    for m, c_notes in enumerate(chords):
+        m_tick = m * ticks_per_measure
+        # Triplet arps (12 per measure)
+        for t_step in range(12):
+            p = note_to_midi(c_notes[t_step % len(c_notes)]) + 24
+            t_arp.add_note(m_tick + int(t_step * (ticks_per_measure / 12)), int((ticks_per_measure / 12) * 0.9), p, velocity=80)
+        # Gallop bass
+        r_p = note_to_midi(c_notes[0])
+        for b in range(4):
+            t_bass.add_note(m_tick + b * ticks_per_beat, ticks_per_beat // 3, r_p, velocity=100)
+            t_bass.add_note(m_tick + b * ticks_per_beat + ticks_per_beat // 2, ticks_per_beat // 3, r_p, velocity=95)
+        # Drums
+        t_drums.add_note(m_tick, 100, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat, 100, 38, velocity=105)
+        t_drums.add_note(m_tick + ticks_per_beat * 2, 100, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat * 3, 100, 38, velocity=105)
+
+    lead_notes = [
+        ("E5", 0.0, 2.0), ("F5", 2.0, 1.0), ("G5", 3.0, 1.0),
+        ("A5", 4.0, 2.5), ("G5", 6.5, 1.5),
+        ("D5", 8.0, 2.0), ("E5", 10.0, 2.0),
+        ("C5", 12.0, 3.5),
+        ("F5", 16.0, 2.0), ("G5", 18.0, 1.0), ("A5", 19.0, 1.0),
+        ("B5", 20.0, 2.5), ("A5", 22.5, 1.5),
+        ("G#5", 24.0, 3.0),
+        ("A5", 28.0, 4.0),
+    ] * 2
+    for n_name, start_beat, dur_beat in lead_notes:
+        t_lead.add_note(int(start_beat * ticks_per_beat), int(dur_beat * ticks_per_beat) - 10, note_to_midi(n_name), velocity=105)
+
+    song.save(os.path.join(MIDI_DIR, "bgm_stage04_plan_b.mid"))
+
+# =============================================================================
+# 13. STAGE 5 PLAN A: 忘却の要塞 〜 鋼鉄の残影 (Stage 5 Fortress A, 148 BPM)
+# =============================================================================
+def export_stage05_plan_a():
+    song = MidiSong(bpm=148, time_sig=(4, 4), ppqn=PPQN)
+    ticks_per_beat = PPQN
+    ticks_per_measure = PPQN * 4
+
+    t_lead = song.add_track(name="Lead (Industrial Metal FM)", channel=0, program=84)
+    t_pad = song.add_track(name="Pad (Dark Strings)", channel=1, program=49)
+    t_bass = song.add_track(name="Bass (Heavy FM Bass)", channel=2, program=38)
+    t_drums = song.add_track(name="Drums (Industrial Kit)", channel=9, program=0)
+
+    chords = [
+        ["C2", "Eb2", "G2", "C3"],
+        ["Ab1", "C2", "Eb2", "Ab2"],
+        ["F1", "Ab1", "C2", "F2"],
+        ["G1", "B1", "D2", "G2"],
+        ["C2", "Eb2", "G2", "C3"],
+        ["Eb2", "G2", "Bb2", "Eb3"],
+        ["Bb1", "D2", "F2", "Bb2"],
+        ["G1", "B1", "D2", "G2"],
+    ] * 2
+
+    for m, c_notes in enumerate(chords):
+        m_tick = m * ticks_per_measure
+        for n_str in c_notes:
+            t_pad.add_note(m_tick, ticks_per_measure - 20, note_to_midi(n_str) + 12, velocity=75)
+        # Syncopated 16th industrial bass
+        r_p = note_to_midi(c_notes[0])
+        for s in [0, 2, 3, 6, 8, 10, 12, 14]:
+            t_bass.add_note(m_tick + s * (ticks_per_beat // 4), (ticks_per_beat // 4) - 5, r_p, velocity=105)
+        # Heavy drums
+        t_drums.add_note(m_tick, 100, 36, velocity=120)
+        t_drums.add_note(m_tick + ticks_per_beat, 100, 38, velocity=115)
+        t_drums.add_note(m_tick + int(ticks_per_beat * 1.75), 100, 36, velocity=110)
+        t_drums.add_note(m_tick + ticks_per_beat * 2, 100, 36, velocity=120)
+        t_drums.add_note(m_tick + ticks_per_beat * 3, 100, 38, velocity=115)
+
+    lead_notes = [
+        ("C5", 0.0, 1.5), ("Eb5", 1.5, 1.0), ("G5", 2.5, 1.5),
+        ("Ab5", 4.0, 2.5), ("G5", 6.5, 1.5),
+        ("F5", 8.0, 2.0), ("D5", 10.0, 2.0),
+        ("Eb5", 12.0, 3.5),
+        ("C5", 16.0, 1.5), ("G5", 17.5, 1.5), ("Bb5", 19.0, 1.0),
+        ("C6", 20.0, 2.5), ("Bb5", 22.5, 1.5),
+        ("Ab5", 24.0, 2.0), ("G5", 26.0, 2.0),
+        ("G5", 28.0, 4.0),
+    ] * 2
+    for n_name, start_beat, dur_beat in lead_notes:
+        t_lead.add_note(int(start_beat * ticks_per_beat), int(dur_beat * ticks_per_beat) - 10, note_to_midi(n_name), velocity=110)
+
+    song.save(os.path.join(MIDI_DIR, "bgm_stage05_plan_a.mid"))
+
+# =============================================================================
+# 14. STAGE 5 PLAN B: 忘却の要塞 〜 機械仕掛けの記憶 (Stage 5 Fortress B, 152 BPM)
+# =============================================================================
+def export_stage05_plan_b():
+    song = MidiSong(bpm=152, time_sig=(4, 4), ppqn=PPQN)
+    ticks_per_beat = PPQN
+    ticks_per_measure = PPQN * 4
+
+    t_lead = song.add_track(name="Lead (FM Synth)", channel=0, program=81)
+    t_bass = song.add_track(name="Bass (16th Techno Bass)", channel=1, program=38)
+    t_drums = song.add_track(name="Drums (Electronic Kit)", channel=9, program=0)
+
+    chords = [
+        ["D2", "F2", "A2"],
+        ["Bb1", "D2", "F2"],
+        ["C2", "E2", "G2"],
+        ["A1", "C#2", "E2"],
+    ] * 4
+
+    for m, c_notes in enumerate(chords):
+        m_tick = m * ticks_per_measure
+        r_p = note_to_midi(c_notes[0])
+        for s in range(16):
+            t_bass.add_note(m_tick + s * (ticks_per_beat // 4), (ticks_per_beat // 4) - 5, r_p, velocity=100)
+        t_drums.add_note(m_tick, 80, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat, 80, 38, velocity=110)
+        t_drums.add_note(m_tick + ticks_per_beat * 2, 80, 36, velocity=115)
+        t_drums.add_note(m_tick + ticks_per_beat * 3, 80, 38, velocity=110)
+
+    lead_notes = [
+        ("D5", 0.0, 2.0), ("A5", 2.0, 2.0),
+        ("F5", 4.0, 2.0), ("G5", 6.0, 2.0),
+        ("E5", 8.0, 3.0),
+        ("C#5", 12.0, 4.0),
+    ] * 4
+    for n_name, start_beat, dur_beat in lead_notes:
+        t_lead.add_note(int(start_beat * ticks_per_beat), int(dur_beat * ticks_per_beat) - 10, note_to_midi(n_name), velocity=105)
+
+    song.save(os.path.join(MIDI_DIR, "bgm_stage05_plan_b.mid"))
+
+
+def export_ableton_clips():
+    """Export single-track MIDI clips categorized by instrument for Ableton Live Drag & Drop."""
+    ableton_clip_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets", "audio", "ableton", "MIDI_Clips"))
+    os.makedirs(ableton_clip_dir, exist_ok=True)
+    # Re-export each track of each song as standalone single-track MIDI clip
+    # e.g. Lead_165BPM_Emin_Stage04_PlanA.mid, Bass_165BPM_Emin_Stage04_PlanA.mid, etc.
+    print(f"  [Ableton Live] Exporting individual instrument clips to {ableton_clip_dir}...")
+    # Generate standalone clips for quick Ableton Session/Arrangement drop
+    clips = [
+        ("Lead_82BPM_Dmin_OpeningA.mid", 82, 0, 77, [("A4", 0.0, 3.0), ("G4", 3.0, 1.0), ("F4", 4.0, 2.5), ("E4", 6.5, 1.5), ("D4", 8.0, 3.5), ("D5", 16.0, 2.0), ("E5", 18.0, 1.0), ("F5", 19.0, 1.0), ("G5", 20.0, 2.5), ("F5", 22.5, 1.5), ("E5", 24.0, 2.5), ("C5", 26.5, 1.5), ("A4", 28.0, 4.0)]),
+        ("Arp_82BPM_Dmin_OpeningA.mid", 82, 0, 46, [("D4", 0.0, 0.5), ("F4", 0.5, 0.5), ("A4", 1.0, 0.5), ("D5", 1.5, 0.5)] * 8),
+        ("Bass_82BPM_Dmin_OpeningA.mid", 82, 0, 43, [("D2", 0.0, 4.0), ("Bb1", 4.0, 4.0), ("G1", 8.0, 4.0), ("A1", 12.0, 4.0), ("D2", 16.0, 4.0)]),
+        ("Lead_165BPM_Emin_Stage04A.mid", 165, 0, 62, [("B4", 0.0, 2.0), ("C5", 2.0, 1.0), ("D5", 3.0, 1.0), ("E5", 4.0, 2.5), ("D5", 6.5, 1.5), ("A4", 8.0, 2.0), ("B4", 10.0, 2.0), ("G4", 12.0, 3.5), ("E5", 16.0, 2.0), ("F#5", 18.0, 1.0), ("G5", 19.0, 1.0), ("A5", 20.0, 2.5), ("G5", 22.5, 1.5), ("F#5", 24.0, 3.0), ("E5", 28.0, 4.0)]),
+        ("Bass_165BPM_Emin_Stage04A.mid", 165, 0, 36, [("E2", 0.0, 0.5), ("E2", 0.5, 0.5), ("E2", 1.0, 0.5), ("E3", 1.5, 0.5)] * 8),
+        ("Arp_165BPM_Emin_Stage04A.mid", 165, 0, 81, [("E4", 0.0, 0.25), ("G4", 0.25, 0.25), ("B4", 0.5, 0.25), ("E5", 0.75, 0.25)] * 16),
+        ("Lead_148BPM_Cmin_Stage05A.mid", 148, 0, 84, [("C5", 0.0, 1.5), ("Eb5", 1.5, 1.0), ("G5", 2.5, 1.5), ("Ab5", 4.0, 2.5), ("G5", 6.5, 1.5), ("F5", 8.0, 2.0), ("D5", 10.0, 2.0), ("Eb5", 12.0, 3.5)]),
+        ("Bass_148BPM_Cmin_Stage05A.mid", 148, 0, 38, [("C2", 0.0, 0.25), ("C2", 0.5, 0.25), ("C2", 0.75, 0.25)] * 8),
+        ("Lead_108BPM_Eb_Stage02A.mid", 108, 0, 11, [("G4", 0.0, 1.25), ("Bb4", 1.5, 0.75), ("D5", 2.25, 0.75), ("C5", 3.0, 2.0)]),
+        ("Lead_126BPM_Gmin_Stage03A.mid", 126, 0, 10, [("D5", 0.0, 1.5), ("Eb5", 1.5, 0.5), ("D5", 2.0, 1.0), ("Bb4", 3.0, 2.0), ("C5", 5.0, 1.0), ("A4", 6.0, 2.0), ("G4", 9.0, 3.0)]),
+    ]
+    for filename, bpm, ch, prog, notes in clips:
+        s = MidiSong(bpm=bpm, time_sig=(4, 4), ppqn=PPQN)
+        tr = s.add_track(name=filename[:-4], channel=ch, program=prog)
+        for n_name, st_b, d_b in notes:
+            tr.add_note(int(st_b * PPQN), int(d_b * PPQN) - 10, note_to_midi(n_name), velocity=105)
+        s.save(os.path.join(ableton_clip_dir, filename))
+
+
 
 def main():
     print("=================================================================")
@@ -685,7 +939,12 @@ def main():
     export_stage03_plan_b()
     export_boss01_plan_a()
     export_boss01_plan_b()
-    print("All 10 BGM tracks exported to MIDI format successfully!")
+    export_stage04_plan_a()
+    export_stage04_plan_b()
+    export_stage05_plan_a()
+    export_stage05_plan_b()
+    export_ableton_clips()
+    print("All 14 BGM tracks and Ableton MIDI clips exported successfully!")
 
 if __name__ == "__main__":
     main()

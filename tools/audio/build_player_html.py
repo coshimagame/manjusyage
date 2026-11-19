@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Mw-fActory Sound Team: Comprehensive HTML5 Web Audio Preview Player Builder
-Encodes all 32 generated audio assets into a single standalone HTML page with Base64 audio URIs.
+Encodes all 49 generated audio assets into a standalone HTML player with Base64 audio URIs.
 """
 
 import os
@@ -14,296 +14,286 @@ PREVIEW_DIR = os.path.join(r"C:\Users\wa-ma\.gemini\antigravity\brain\8d77af9d-9
 OUTPUT_HTML = os.path.join(r"C:\Users\wa-ma\.gemini\antigravity\brain\8d77af9d-9696-457f-a23d-0b87681dcbec", "audio_player.html")
 
 TRACKS = [
-    # BGM
+    # --- BGM (14 tracks) ---
     {
-        "id": "AUD-001",
-        "category": "bgm",
+        "id": "AUD-001", "category": "bgm",
         "title": "タイトル・オープニング A案「曼珠沙華 〜 記憶の深淵」",
         "subtitle": "82 BPM / D minor / 44.0s (本採用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_opening_plan_a.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_opening_plan_a.wav"), "loop": True,
         "desc": "【正式採用】笙の幽玄な和音、ハープ・琴のアルペジオ、哀愁と情熱のSFC木管リード、重厚なチェロとティンパニ。"
     },
     {
-        "id": "AUD-002",
-        "category": "bgm",
+        "id": "AUD-002", "category": "bgm",
         "title": "タイトル・オープニング B案「曼珠沙華 〜 輪廻のプロローグ」",
         "subtitle": "96 BPM / A minor / 37.5s (2周目変奏用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_opening_plan_b.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_opening_plan_b.wav"), "loop": True,
         "desc": "透明感ある水晶チャイム、心臓の鼓動を思わせるサブビート、胸を打つ哀愁の旋律と静かな情熱。"
     },
     {
-        "id": "AUD-013",
-        "category": "bgm",
+        "id": "AUD-013", "category": "bgm",
         "title": "第1面「赤い残響」A案「幽玄の飛翔」",
         "subtitle": "156 BPM / D minor / 49.2s (本採用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage01_plan_a.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage01_plan_a.wav"), "loop": True,
         "desc": "【正式採用】雅楽フューチャー × 哀愁の疾走感。笙の宇宙空間、篳篥のエモーショナルな主旋律、FMベースの推進力。"
     },
     {
-        "id": "AUD-014",
-        "category": "bgm",
+        "id": "AUD-014", "category": "bgm",
         "title": "第1面「赤い残響」B案「緋色の鼓動」",
         "subtitle": "162 BPM / F# minor / 51.2s",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage01_plan_b.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage01_plan_b.wav"), "loop": True,
         "desc": "往年の王道アクションSTGを彷彿とさせる疾走感。三連符ギャロップベースと切ないサビ展開。"
     },
     {
-        "id": "AUD-015",
-        "category": "bgm",
+        "id": "AUD-015", "category": "bgm",
         "title": "第1面ボス戦 A案「生体中枢 〜 脈動する境界」",
         "subtitle": "168 BPM / G minor / 46.8s (本採用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_boss01_plan_a.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_boss01_plan_a.wav"), "loop": True,
         "desc": "【正式採用】巨大生体コアの脈動。減五度トリトーンの不気味さ、叫ぶ篳篥、緊迫のポリリズム太鼓。"
     },
     {
-        "id": "AUD-016",
-        "category": "bgm",
+        "id": "AUD-016", "category": "bgm",
         "title": "第1面ボス戦 B案「輪廻の狂詩曲 〜 死線突破」",
         "subtitle": "174 BPM / E minor / 45.2s",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_boss01_plan_b.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_boss01_plan_b.wav"), "loop": True,
         "desc": "超高速テクノSTGバトル。主題動機を極限まで加速させ、死線を潜り抜ける緊張感。"
     },
     {
-        "id": "AUD-023",
-        "category": "bgm",
+        "id": "AUD-023", "category": "bgm",
         "title": "第2面「追憶の海」A案「水底の残照」",
         "subtitle": "108 BPM / 6/8拍子 潮騒ワルツ / Eb Major / 28.7s (本採用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_a.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_a.wav"), "loop": True,
         "desc": "【正式採用】透明なビブラフォン主旋律、暖かなRhodesエレピ和音、クラシックギター分散和音、水滴音、ブラシスネア。"
     },
     {
-        "id": "AUD-024",
-        "category": "bgm",
+        "id": "AUD-024", "category": "bgm",
         "title": "第2面「追憶の海」B案「潮流のセレナーデ」",
         "subtitle": "120 BPM / G minor / 34.0s",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_b.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage02_plan_b.wav"), "loop": True,
         "desc": "木製マリンバの16分アルペジオ水流、ビブラフォン哀愁旋律、水泡チャープ、深海フレットレスベース。"
     },
     {
-        "id": "AUD-025",
-        "category": "bgm",
+        "id": "AUD-025", "category": "bgm",
         "title": "第3面「孤独な庭・廃墟」A案「錆びた歯車と曼珠沙華」",
         "subtitle": "126 BPM / 3/4拍子 からくりワルツ / G minor / 25.4s (本採用)",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_a.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_a.wav"), "loop": True,
         "desc": "【正式採用】アンティークオルゴール（鉄櫛歯の結晶音）、古時計のチクタク音、クラシックギター、チェンバロ、教会鐘。"
     },
     {
-        "id": "AUD-026",
-        "category": "bgm",
+        "id": "AUD-026", "category": "bgm",
         "title": "第3面「孤独な庭・廃墟」B案「静寂の回廊」",
         "subtitle": "88 BPM / D minor / 35.7s",
-        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_b.wav"),
-        "loop": True,
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage03_plan_b.wav"), "loop": True,
         "desc": "むせび泣く孤独なチェロ独奏、爪弾くクラシックギターアルペジオ、教会鐘の残響、パイプオルガン。"
     },
-    # Jingles
     {
-        "id": "AUD-010",
-        "category": "jingle",
-        "title": "JG-001: タイトル表示ジングル",
-        "subtitle": "2.60s / Title Logo / Bloom",
-        "file": os.path.join(PREVIEW_DIR, "jingles", "jg001_title.wav"),
-        "loop": False,
+        "id": "AUD-027", "category": "bgm",
+        "title": "第4面「分岐する空」A案「碧落の疾走」",
+        "subtitle": "165 BPM / E minor / 25.3s (本採用)",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage04_plan_a.wav"), "loop": True,
+        "desc": "【新作・正式採用】雲海を突き抜ける圧倒的スピード感。突き抜けるブラス、跳ねるスラップベース、煌めく16分アルペジオ。"
+    },
+    {
+        "id": "AUD-028", "category": "bgm",
+        "title": "第4面「分岐する空」B案「乱気流のロンド」",
+        "subtitle": "158 BPM / A minor / 26.3s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage04_plan_b.wav"), "loop": True,
+        "desc": "変幻自在の風と雲。疾走感あふれる三連符シンコペーションと切ない高音リード。"
+    },
+    {
+        "id": "AUD-029", "category": "bgm",
+        "title": "第5面「忘却の要塞」A案「鋼鉄の残影」",
+        "subtitle": "148 BPM / C minor / 28.0s (本採用)",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage05_plan_a.wav"), "loop": True,
+        "desc": "【新作・正式採用】重厚な冷たい機械要塞。16分変拍子FMベース、金属的パーカッション、重厚なインダストリアル突入BGM。"
+    },
+    {
+        "id": "AUD-030", "category": "bgm",
+        "title": "第5面「忘却の要塞」B案「機械仕掛けの記憶」",
+        "subtitle": "152 BPM / D minor / 27.3s",
+        "file": os.path.join(PREVIEW_DIR, "music", "bgm_stage05_plan_b.wav"), "loop": True,
+        "desc": "冷たい機械仕掛けの記憶装置。メタリックシンセと硬質なテクノドラム。"
+    },
+
+    # --- Jingles (8 tracks) ---
+    {
+        "id": "AUD-010", "category": "jingle", "title": "JG-001: タイトル表示ジングル",
+        "subtitle": "2.60s / Title Logo / Bloom", "file": os.path.join(PREVIEW_DIR, "jingles", "jg001_title.wav"), "loop": False,
         "desc": "笙の重厚な開花和音から、高音クリスタルチャイムが駆け上がる神聖なロゴ表示音。"
     },
     {
-        "id": "AUD-017",
-        "category": "jingle",
-        "title": "JG-002: 出撃決定ファンファーレ",
-        "subtitle": "3.80s / Sortie Confirmed",
-        "file": os.path.join(PREVIEW_DIR, "jingles", "jg002_sortie.wav"),
-        "loop": False,
+        "id": "AUD-017", "category": "jingle", "title": "JG-002: 出撃決定ファンファーレ",
+        "subtitle": "3.80s / Sortie Confirmed", "file": os.path.join(PREVIEW_DIR, "jingles", "jg002_sortie.wav"), "loop": False,
         "desc": "笙の和音から龍笛・琵琶の駆け上がりアルペジオ、太鼓の連打とブースト点火の低域炸裂音。"
     },
     {
-        "id": "AUD-011",
-        "category": "jingle",
-        "title": "JG-003: ステージ開始・発進ジングル",
-        "subtitle": "2.80s / Stage Launch Departure",
-        "file": os.path.join(PREVIEW_DIR, "jingles", "jg003_stage_start.wav"),
-        "loop": False,
+        "id": "AUD-011", "category": "jingle", "title": "JG-003: ステージ開始・発進ジングル",
+        "subtitle": "2.80s / Stage Launch Departure", "file": os.path.join(PREVIEW_DIR, "jingles", "jg003_stage_start.wav"), "loop": False,
         "desc": "ジェットエンジン点火・高周波スイープから金管ファンファーレ、ブースト加速炸裂音への展開。"
     },
     {
-        "id": "AUD-012",
-        "category": "jingle",
-        "title": "JG-007: ステージクリアジングル",
-        "subtitle": "3.60s / Victory Resolution",
-        "file": os.path.join(PREVIEW_DIR, "jingles", "jg007_stage_clear.wav"),
-        "loop": False,
+        "id": "AUD-044", "category": "jingle", "title": "JG-004: 小ボス出現アラート",
+        "subtitle": "2.40s / Mid-Boss Alert", "file": os.path.join(PREVIEW_DIR, "jingles", "jg004_miniboss.wav"), "loop": False,
+        "desc": "【新作】急接近警報パルスから緊迫のブラスファンファーレと低音インパクト。"
+    },
+    {
+        "id": "AUD-045", "category": "jingle", "title": "JG-006: 大ボス出現警告",
+        "subtitle": "3.40s / Great Boss Siren", "file": os.path.join(PREVIEW_DIR, "jingles", "jg006_boss_warning.wav"), "loop": False,
+        "desc": "【新作】空間を引き裂く交互サイレン警報から、圧倒的巨躯の出現を告げる重厚な金管和音。"
+    },
+    {
+        "id": "AUD-012", "category": "jingle", "title": "JG-007: ステージクリアジングル",
+        "subtitle": "3.60s / Victory Resolution", "file": os.path.join(PREVIEW_DIR, "jingles", "jg007_stage_clear.wav"), "loop": False,
         "desc": "勝利のファンファーレアルペジオ、和太鼓の連打と安堵の和音着地。"
     },
-    # Character SFX
     {
-        "id": "AUD-018",
-        "category": "sfx",
-        "title": "コルミィ通常ショット SE",
-        "subtitle": "0.14s / Plasma Burst",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_cormii.wav"),
-        "loop": False,
+        "id": "AUD-046", "category": "jingle", "title": "JG-011: 新武器完成・パワー全開",
+        "subtitle": "2.60s / Power Triumph", "file": os.path.join(PREVIEW_DIR, "jingles", "jg011_weapon_unlocked.wav"), "loop": False,
+        "desc": "【新作】急速駆け上がりパワーアルペジオから、高揚感あふれるC Major勝利ファンファーレ。"
+    },
+    {
+        "id": "AUD-047", "category": "jingle", "title": "JG-012: 世界線移動・時空ワープ",
+        "subtitle": "2.80s / Time Warp Shift", "file": os.path.join(PREVIEW_DIR, "jingles", "jg012_worldline_shift.wav"), "loop": False,
+        "desc": "【新作】時空が歪み世界線が交錯するディメンション・ワープスイープ音。"
+    },
+
+    # --- SFX (27 tracks) ---
+    # Lasers
+    {
+        "id": "AUD-048", "category": "sfx", "title": "貫通ハイパービームレーザー SE",
+        "subtitle": "0.38s / Piercing Beam", "file": os.path.join(PREVIEW_DIR, "sfx", "se_laser_pierce.wav"), "loop": False,
+        "desc": "【新作・爽快】空間を鋭く切り裂く高エネルギーFM貫通ビーム音。"
+    },
+    {
+        "id": "AUD-049", "category": "sfx", "title": "敵極太薙ぎ払いレーザー SE",
+        "subtitle": "0.85s / Massive Sweep Beam", "file": os.path.join(PREVIEW_DIR, "sfx", "se_laser_enemy_sweep.wav"), "loop": False,
+        "desc": "【新作・大迫力】低音エネルギーチャージから咆哮とともに照射される極大破壊レーザー。"
+    },
+    {
+        "id": "AUD-050", "category": "sfx", "title": "追尾ホーミングレーザー SE",
+        "subtitle": "0.28s / Homing Multi-Chirp", "file": os.path.join(PREVIEW_DIR, "sfx", "se_laser_homing.wav"), "loop": False,
+        "desc": "【新作】弧を描きながら敵を追尾する連続高周波レーザー音。"
+    },
+    # Exciting Shots
+    {
+        "id": "AUD-051", "category": "sfx", "title": "コルミィ 5WAY拡散ショット SE",
+        "subtitle": "0.20s / Plasma Spread", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_cormii_wide.wav"), "loop": False,
+        "desc": "【新作・爽快】画面いっぱいに広がるデュアル高域プラズマ拡散音。"
+    },
+    {
+        "id": "AUD-052", "category": "sfx", "title": "ジヨーザ 集束貫通フォトンレーザー SE",
+        "subtitle": "0.24s / Photon Laser", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_jiyoza_beam.wav"), "loop": False,
+        "desc": "【新作】高周波パルスで装甲を貫く知的・精密フォトンビーム。"
+    },
+    {
+        "id": "AUD-053", "category": "sfx", "title": "マフィオ 波動生体キャノン SE",
+        "subtitle": "0.32s / Bio Shockwave", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_mafio_wave.wav"), "loop": False,
+        "desc": "【新作・重低音】腹の底に響く生体波動エネルギー砲。"
+    },
+    # Cathartic Destructions
+    {
+        "id": "AUD-054", "category": "sfx", "title": "中型敵撃破重爆発 SE",
+        "subtitle": "0.65s / Heavy Crash Explosion", "file": os.path.join(PREVIEW_DIR, "sfx", "se_destroy_medium.wav"), "loop": False,
+        "desc": "【新作・爽快】ズドドンという重低音と金属破砕クラッシュ。"
+    },
+    {
+        "id": "AUD-055", "category": "sfx", "title": "大型敵連続誘爆 SE",
+        "subtitle": "1.60s / Multi-Stage Chain Explosion", "file": os.path.join(PREVIEW_DIR, "sfx", "se_destroy_heavy_chain.wav"), "loop": False,
+        "desc": "【新作・大迫力】バリバリと火花を散らしながら時間差で連続炸裂する巨大爆発。"
+    },
+    {
+        "id": "AUD-056", "category": "sfx", "title": "装甲破壊・シールドブレイク SE",
+        "subtitle": "0.42s / Armor Shatter", "file": os.path.join(PREVIEW_DIR, "sfx", "se_armor_break.wav"), "loop": False,
+        "desc": "【新作・爽快感】硬質な装甲やバリアが粉々に砕け散るカタルシス音。"
+    },
+    # Player Basics & Specials
+    {
+        "id": "AUD-018", "category": "sfx", "title": "コルミィ通常ショット SE",
+        "subtitle": "0.14s / Plasma Burst", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_cormii.wav"), "loop": False,
         "desc": "920Hz→180Hz急降下。快活で瞬間火力の高いプラズマバースト音。"
     },
     {
-        "id": "AUD-031",
-        "category": "sfx",
-        "title": "コルミィ最大出力・チャージ完了 SE",
-        "subtitle": "0.45s / Full Power Surge",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_cormii_charge.wav"),
-        "loop": False,
+        "id": "AUD-031", "category": "sfx", "title": "コルミィ最大出力・チャージ完了 SE",
+        "subtitle": "0.45s / Full Power Surge", "file": os.path.join(PREVIEW_DIR, "sfx", "se_cormii_charge.wav"), "loop": False,
         "desc": "220Hzから急上昇するプラズマ共鳴パルス。最大出力到達の爽快な合図。"
     },
     {
-        "id": "AUD-032",
-        "category": "sfx",
-        "title": "コルミィ開運おみくじ・アイテム発動 SE",
-        "subtitle": "0.38s / Lucky Shinto Chime",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_cormii_omikuji.wav"),
-        "loop": False,
+        "id": "AUD-032", "category": "sfx", "title": "コルミィ開運おみくじ・アイテム発動 SE",
+        "subtitle": "0.38s / Lucky Shinto Chime", "file": os.path.join(PREVIEW_DIR, "sfx", "se_cormii_omikuji.wav"), "loop": False,
         "desc": "神社の鈴のような四重クリスタルチャイム。運気上昇を告げる軽やかな煌めき。"
     },
     {
-        "id": "AUD-019",
-        "category": "sfx",
-        "title": "ジヨーザ通常ショット SE",
-        "subtitle": "0.15s / Dual Laser Chirp",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_jiyoza.wav"),
-        "loop": False,
+        "id": "AUD-019", "category": "sfx", "title": "ジヨーザ通常ショット SE",
+        "subtitle": "0.15s / Dual Laser Chirp", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_jiyoza.wav"), "loop": False,
         "desc": "1950Hz/1300Hzデュアルスイープ。知的で精緻な集束レーザー音。"
     },
     {
-        "id": "AUD-033",
-        "category": "sfx",
-        "title": "ジヨーザ解析完了 SE",
-        "subtitle": "0.30s / Lock-on Analysis",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_jiyoza_analyze.wav"),
-        "loop": False,
+        "id": "AUD-033", "category": "sfx", "title": "ジヨーザ解析完了 SE",
+        "subtitle": "0.30s / Lock-on Analysis", "file": os.path.join(PREVIEW_DIR, "sfx", "se_jiyoza_analyze.wav"), "loop": False,
         "desc": "2段階のハイテク電子チャープ音。弱点看破・解析完了の精緻なフィードバック。"
     },
     {
-        "id": "AUD-034",
-        "category": "sfx",
-        "title": "ジヨーザ解析バリア展開 SE",
-        "subtitle": "0.40s / Crystal Barrier",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_jiyoza_barrier.wav"),
-        "loop": False,
+        "id": "AUD-034", "category": "sfx", "title": "ジヨーザ解析バリア展開 SE",
+        "subtitle": "0.40s / Crystal Barrier", "file": os.path.join(PREVIEW_DIR, "sfx", "se_jiyoza_barrier.wav"), "loop": False,
         "desc": "共振周波数を捉えて展開するクリスタル防御シールドのハム音。"
     },
     {
-        "id": "AUD-020",
-        "category": "sfx",
-        "title": "マフィオ通常ショット SE",
-        "subtitle": "0.18s / Bio Cannon",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_mafio.wav"),
-        "loop": False,
+        "id": "AUD-020", "category": "sfx", "title": "マフィオ通常ショット SE",
+        "subtitle": "0.18s / Bio Cannon", "file": os.path.join(PREVIEW_DIR, "sfx", "se_shot_mafio.wav"), "loop": False,
         "desc": "165Hz→42Hz重低音＋クラッシュ。食欲旺盛・力強い生体弾撃音。"
     },
     {
-        "id": "AUD-035",
-        "category": "sfx",
-        "title": "マフィオ捕食音 SE",
-        "subtitle": "0.32s / Vacuum Predation",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_mafio_predation.wav"),
-        "loop": False,
+        "id": "AUD-035", "category": "sfx", "title": "マフィオ捕食音 SE",
+        "subtitle": "0.32s / Vacuum Predation", "file": os.path.join(PREVIEW_DIR, "sfx", "se_mafio_predation.wav"), "loop": False,
         "desc": "敵を引き裂き丸呑みするバキューム吸引と咀嚼クランチ音。"
     },
     {
-        "id": "AUD-036",
-        "category": "sfx",
-        "title": "マフィオ能力獲得・消化完了 SE",
-        "subtitle": "0.38s / Power Mutation",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_mafio_absorb.wav"),
-        "loop": False,
+        "id": "AUD-036", "category": "sfx", "title": "マフィオ能力獲得・消化完了 SE",
+        "subtitle": "0.38s / Power Mutation", "file": os.path.join(PREVIEW_DIR, "sfx", "se_mafio_absorb.wav"), "loop": False,
         "desc": "捕食した特性を機体へ同化・定着させる生体重低音パルス。"
     },
-    # Core Combat & System SFX
     {
-        "id": "AUD-037",
-        "category": "sfx",
-        "title": "自機被弾・シールド損傷 SE",
-        "subtitle": "0.28s / Shield Damage",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_player_hit.wav"),
-        "loop": False,
+        "id": "AUD-037", "category": "sfx", "title": "自機被弾・シールド損傷 SE",
+        "subtitle": "0.28s / Shield Damage", "file": os.path.join(PREVIEW_DIR, "sfx", "se_player_hit.wav"), "loop": False,
         "desc": "金属的打撃衝撃音とシールド低下のアラート。"
     },
     {
-        "id": "AUD-038",
-        "category": "sfx",
-        "title": "敵弾発射 SE",
-        "subtitle": "0.12s / Enemy Laser",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_enemy_shot.wav"),
-        "loop": False,
+        "id": "AUD-038", "category": "sfx", "title": "敵弾発射 SE",
+        "subtitle": "0.12s / Enemy Laser", "file": os.path.join(PREVIEW_DIR, "sfx", "se_enemy_shot.wav"), "loop": False,
         "desc": "レトロSTG定番の鋭い高域下降レーザーパルス。"
     },
     {
-        "id": "AUD-039",
-        "category": "sfx",
-        "title": "小型敵撃破爆発 SE",
-        "subtitle": "0.35s / Crisp Explosion",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_enemy_destroy_small.wav"),
-        "loop": False,
+        "id": "AUD-039", "category": "sfx", "title": "小型敵撃破爆発 SE",
+        "subtitle": "0.35s / Crisp Explosion", "file": os.path.join(PREVIEW_DIR, "sfx", "se_enemy_destroy_small.wav"), "loop": False,
         "desc": "小気味よい低音アタックと破砕ノイズ。連鎖撃破時の爽快感を重視。"
     },
     {
-        "id": "AUD-021",
-        "category": "sfx",
-        "title": "ボス大技予兆 SE",
-        "subtitle": "0.85s / Threat Alert",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_boss_warning.wav"),
-        "loop": False,
+        "id": "AUD-021", "category": "sfx", "title": "ボス大技予兆 SE",
+        "subtitle": "0.85s / Threat Alert", "file": os.path.join(PREVIEW_DIR, "sfx", "se_boss_warning.wav"), "loop": False,
         "desc": "320Hz→980Hz FM金属音＋18Hz変調。BGMを突き抜ける危険警告。"
     },
     {
-        "id": "AUD-022",
-        "category": "sfx",
-        "title": "ボス撃破 SE",
-        "subtitle": "2.80s / Massive Destruction",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_boss_destroy.wav"),
-        "loop": False,
+        "id": "AUD-022", "category": "sfx", "title": "ボス撃破大爆発 SE",
+        "subtitle": "2.80s / Massive Destruction", "file": os.path.join(PREVIEW_DIR, "sfx", "se_boss_destroy.wav"), "loop": False,
         "desc": "初速衝撃波＋深層地響き＋多重連鎖爆発＋結晶散乱テール。"
     },
     {
-        "id": "AUD-040",
-        "category": "sfx",
-        "title": "アイテム取得・パワーアップ SE",
-        "subtitle": "0.25s / Item Get",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_item_get.wav"),
-        "loop": False,
+        "id": "AUD-040", "category": "sfx", "title": "アイテム取得・パワーアップ SE",
+        "subtitle": "0.25s / Item Get", "file": os.path.join(PREVIEW_DIR, "sfx", "se_item_get.wav"), "loop": False,
         "desc": "D6→A6の爽やかな二連ベル音。"
     },
     {
-        "id": "AUD-041",
-        "category": "sfx",
-        "title": "メニュー移動 SE",
-        "subtitle": "0.04s / Cursor Move",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_cursor.wav"),
-        "loop": False,
+        "id": "AUD-041", "category": "sfx", "title": "メニュー移動 SE",
+        "subtitle": "0.04s / Cursor Move", "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_cursor.wav"), "loop": False,
         "desc": "軽快で邪魔にならない880Hz短音ブリップ。"
     },
     {
-        "id": "AUD-042",
-        "category": "sfx",
-        "title": "メニュー決定 SE",
-        "subtitle": "0.12s / Confirm",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_select.wav"),
-        "loop": False,
+        "id": "AUD-042", "category": "sfx", "title": "メニュー決定 SE",
+        "subtitle": "0.12s / Confirm", "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_select.wav"), "loop": False,
         "desc": "前向きな2連上昇トーン。"
     },
     {
-        "id": "AUD-043",
-        "category": "sfx",
-        "title": "メニューキャンセル SE",
-        "subtitle": "0.10s / Cancel",
-        "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_cancel.wav"),
-        "loop": False,
+        "id": "AUD-043", "category": "sfx", "title": "メニューキャンセル SE",
+        "subtitle": "0.10s / Cancel", "file": os.path.join(PREVIEW_DIR, "sfx", "se_menu_cancel.wav"), "loop": False,
         "desc": "落ち着いた2連下降トーン。"
     },
 ]
@@ -331,7 +321,7 @@ html_content = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>曼珠沙華 (MANJUSHAGE) - Mw-fActory 音楽・効果音試聴コンソール</title>
+<title>曼珠沙華 (MANJUSHAGE) - Mw-fActory 音響コンソール (全49素材)</title>
 <style>
   :root {{
     --bg-dark: #0a0a10;
@@ -383,6 +373,7 @@ html_content = f"""<!DOCTYPE html>
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
   }}
   .tab-btn {{
     background: var(--card-bg);
@@ -512,15 +503,15 @@ html_content = f"""<!DOCTYPE html>
 <body>
 
 <header>
-  <h1>曼珠沙華 (MANJUSHAGE) <span class="badge">全32音響素材 正式採用カタログ</span></h1>
-  <div class="sub-header">Mw-fActory 音楽制作責任者（Antigravity） | 44.1kHz 16bit Stereo PCM 完全保証 | クリッピング皆無</div>
+  <h1>曼珠沙華 (MANJUSHAGE) <span class="badge">全49音響素材 完全カタログ</span></h1>
+  <div class="sub-header">Mw-fActory 音楽制作責任者（Antigravity） | Ableton Live & Godot 4.6 連携 | 44.1kHz 16bit Stereo PCM</div>
 </header>
 
 <div class="filter-tabs">
-  <button class="tab-btn active" onclick="filterCategory('all')">全素材 (32)</button>
-  <button class="tab-btn" onclick="filterCategory('bgm')">BGM (10)</button>
-  <button class="tab-btn" onclick="filterCategory('jingle')">ジングル (4)</button>
-  <button class="tab-btn" onclick="filterCategory('sfx')">効果音 (18)</button>
+  <button class="tab-btn active" onclick="filterCategory('all')">全素材 (49)</button>
+  <button class="tab-btn" onclick="filterCategory('bgm')">BGM (14)</button>
+  <button class="tab-btn" onclick="filterCategory('jingle')">ジングル (8)</button>
+  <button class="tab-btn" onclick="filterCategory('sfx')">効果音 (27)</button>
 </div>
 
 <div class="grid" id="grid"></div>
