@@ -1,4 +1,9 @@
 # アート・音楽・参考画像の原本台帳
+
+## 2026-11-19 第1ステージ試遊結果
+
+- `docs/screenshots/latest/stage1_{items_vfx,vertical_vfx,boss_vfx,bullet_curtain}_20261119.png` はGodot 4.6.3の通常レンダラーで保存した640×360の撮影用配置。縦のEN001/EN002はSTG1-ENEMY-DRAFT-001のPNGを保持し、`visual_v09.gd`で欄外を除く座標だけを指定した。来歴と試作採用状態は同じ。
+- 試遊版と同じパックから第1ステージ冒頭16秒の連続映像を撮影。動画は3人の自動操作で、道中・ボスの試聴用WAVは既存のV09-AUD-001をそのまま添付。
 2026-10-30 v0.1
 
 **目的**：後日設定資料集に絵、BGM、没案、ステージ変遷図を正確に掲載する。画像ファイルの「存在」と「公式デザイン採用」は別物。
@@ -171,4 +176,6 @@ AUD-013-GAME：audio/wistful_demo.wav（生成物、ZIP同梱）、tools/build_w
 - **CAP-V09-STATUS-001**：`docs/screenshots/latest/stage1_status_before_loadout_20261116.png`、`stage1_status-cormii_loadout_20261116.png`、`stage1_status-jiyoza_loadout_20261116.png`、`stage1_status-mafio_loadout_20261116.png`。640×360、Godot 4.6.3通常レンダラーの`res://main.tscn -- --shot=status-*`で保存した実ゲーム画面。最初の1枚は改修前、後3枚は2026-11-17にV09-PILOT-002へ更新したライブステータス。撮影用の経験値・消化値は実保存に書き込まない。状態: 動作表示の記録／正式人物原画・人間プレイ検収・音声検収ではない。外部画像・音源の混入なし。
 - **OPEN-VIS-001**：`art/originals/cinematics/prologue_rift_source_v01.png`（原本）と`art/active/cinematics/prologue_rift_pixel_v01.png`（実装版）。1672×941、SHA-256 `B64B3EED0FD05B8BE2525F43072A6F8F75DEC632138A050BA52AB84CDFAF5C20`、2026-11-17、Codex内蔵ImageGenで新規生成したオリジナルの16bit風「深い藍の宇宙／裂け目／遠景惑星／暗い生体根と緋い花／三機の小さな編隊」。制作指示・採用範囲は`art/active/cinematics/README.md`に保存。状態: プロローグ第1ページの**v0.9実装上の試作採用**。`prologue.gd`がnearest表示し、星屑・花弁・裂け目の脈動だけをライブで重ねる。地名、遺跡、生物、三機の外見詳細を公式設定に決めるものではない。原画資料は未参照であり、アートブック準拠とは扱わない。
 - **BIO-004**：`biological_stage.gd`／`visual_v09.gd`／`game.gd`のプログラム描画と既存敵弾経路。2026-11-17、Codex実装、v0.9試作採用。生体壁から交互に根状触手が成長し、明るい芽の予告後に一発だけ低速胞子を放つ。背景と同じ色層に置き、敵・味方弾・HUDを隠さない。天井床の当たり判定、既存の保存、救出、被弾無敵、機体性能は変更しない。敵名・生物の正体・物語設定の正式採用ではない。
+- **VFX-P0-SHEET-001 / VFX-P0-TARGETING-001**：`art/originals/vfx_generated/vfx_p0_sheet_source_v01.png`（SHA-256 `740837204326248A7F3257A2304D64BD80D31351652980CEBB79F4646D4D83A5`）と`vfx_p0_targeting_source_v01.png`（`51E2E3512471C6DABAD1E5282193E83D179509650E30AA2E6B6C977D2ADEF757`）。2026-11-17、Codex内蔵ImageGenで新規生成。GitHub `origin/main` のcommit `d22c61e` にあるVFXラフSVG・P0仕様を参照した実装用原本で、外部ゲーム素材の流用なし。`art/active/vfx/README.md`と原本READMEに制作方法・再生成手順・採否を保存。原画資料は未参照であり、アートブック準拠・公式キャラクター設定とは扱わない。
+- **VFX-P0-IMPL-001**：`art/active/items/item_{hp,energy}_p0.png`、`art/active/vfx/{bullet_petal,bullet_needle,bullet_flower_ring,bullet_target_eye,defeat_petals,hit_flash,pickup_pillar}_p0.png`、`tools/extract_vfx_sheet.gd`。同日、0.9 Stage 1へ**試作採用**。I01/I02は既存のHP+1／charge+25の見た目のみ、B01/B02/B05/B10は既存のpetal/needle/ring/orb危険弾の見た目のみ、V01/V02/V15は撃破・命中・取得の無害な短命演出。B10はorbへ視覚的に当てているだけで、追尾規則を追加していない。I03以降の専用取得物、能力、敵名、物語は未実装・未決定。ID・切出し座標は`vfx_p0_manifest_v01.csv`、原本SVGは`docs/manjushage/visuals/`に保存。
 

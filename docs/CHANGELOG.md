@@ -1,5 +1,18 @@
 
 
+# 2026-11-19 第1ステージ Windows試遊版
+
+- 危険弾を散華・取得光の手前に描画し、花弁・針・花輪・赤眼を明るい芯で表示。F12の閃光切替とリトライ時の演出リセットを適用。
+- 縦区間にEN001/EN002の縦素材と花弁・針弾を接続。ボスは外殻の状態で花弁弾と花輪弾を使い分け、封印中のHPを明るく表示。
+- Windows用PCKに幕間UIを収録。Godot 4.6.3で1〜3人の短縮ルートを自動クリアし、通常描画で実ゲーム画像を取得。確認内容と未検収項目は`HANDOFF.md`に記録。
+
+# 2026-11-17 Stage 1 優先アイテム・VFX素材の統合
+
+- GitHub `origin/main` commit `d22c61e`から、VFX仕様、アイテム効果表、ラフSVG、成長敵ラフを**原本資料**として選別取り込み。リモートの旧ゲームコードはマージせず、現行0.9の戦闘・保存・3機表示を維持した。
+- I01紅医晶／I02蒼電晶、B01花弁／B02針／B05花輪／B10赤眼、V01散華／V02被弾十字／V15取得柱の透明PNGを生成・版付き保存し、`visual_v09.gd`へ接続。HP+1、charge+25、弾数・速度・追尾・判定・スコア・セーブには変更なし。B10は既存orbの見た目のみで、追尾行動を追加していない。
+- `tools/extract_vfx_sheet.gd`で再生成可能にし、原本・ハッシュ・制作方法・採否は`art/originals/vfx_generated/README.md`、`art/active/vfx/README.md`、`ART_ASSETS.md`へ登録。ラフSVGは最終PNGではなく、公式設定・アートブック準拠の主張はしない。
+- Godot 4.7.2 console＋隔離APPDATAでアセット再インポート、`tests/test_v09.gd`、`tests/test_biological_stage.gd`、1P自動攻略がPASS。4.6.3 headlessはこの環境でsignal 11のため未検証。通常レンダラー、手動操作、物理パッド、実聴、性能、更新Windows ZIPは未検証・未更新。
+
 ## 2026-10-30 0.6：曼珠沙華の表示移行
 正式タイトルと3人の名前をタイトル/HUDに反映。能力・キャラ色・外見・物語は確定しない。内部保存識別名と既存戦闘を維持。1/2/3人自動攻略、セーブ、導入、音楽/ボス検査PASS。タイトル描画確認。終了時リソース解放警告、物理パッドと実聴・手操作検収は未完了。詳細：[公式設定との差分監査](manjushage/IMPLEMENTATION_AUDIT.md)（docs内では manjushage/IMPLEMENTATION_AUDIT.md）。旧稿は docs/manjushage/archive/v0.5/ に保管。Steam公開は後回し。
 ## 0.5 — 2026-10-30：グラフィック調整

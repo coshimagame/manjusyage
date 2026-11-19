@@ -68,6 +68,10 @@ func _ready() -> void:
 	_refresh()
 
 func _load_pilot_portrait(path: String) -> Texture2D:
+	if ResourceLoader.exists(path, "Texture2D"):
+		return load(path) as Texture2D
+	if not FileAccess.file_exists(path):
+		return null
 	var image := Image.load_from_file(path)
 	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
 

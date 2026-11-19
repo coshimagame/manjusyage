@@ -187,7 +187,7 @@ func _ready():
 		visual.flash_level=clampf(visual_cfg.get_value("v","flash",.35),0,1)
 	if not auto_test: track("title")
 	if auto_test:
-		Engine.time_scale = 20.0
+		if not slice_mode: Engine.time_scale = 20.0
 		count = test_count
 		start_game()
 		run_mechanics_tests()
@@ -196,10 +196,16 @@ func _ready():
 		start_game()
 		if screenshot_mode == "vertical":
 			bio_route=true;travel=3100;vertical.begin(self);vertical.age=3
+			elapsed=37.0
+			vertical.spawn=0
+			screenshot_capture_frame=85
 		if screenshot_mode == "gate": begin_gate(1)
 		if screenshot_mode == "boss":
 			travel=4800
 			begin_boss()
+			elapsed=55.0
+			boss.cool=.25
+			screenshot_capture_frame=55
 		if screenshot_mode in ["encounter","long-body","bullet-curtain"]:
 			# Capture-only encounter: it places the real wave organisms inside the
 			# frame with their normal movement/shot data. `long-body` and
@@ -212,6 +218,20 @@ func _ready():
 				enemies[i].pos.x=438+i*34
 				enemies[i].cool=0.0 if screenshot_mode=="bullet-curtain" else .34+i*.045
 			if screenshot_mode=="bullet-curtain": screenshot_capture_frame=42
+		if screenshot_mode == "items-vfx":
+			elapsed=5.0
+			wave_timer=2.0
+			pickups=[
+				{"pos":Vector2(215,122),"kind":0},
+				{"pos":Vector2(272,148),"kind":1},
+				{"pos":players[1].pos,"kind":1}
+			]
+			visual.confirm(Vector2(407,196),2)
+			visual.hit(Vector2(369,142))
+			for index in range(4):
+				var form: String = ["petal","needle","ring","orb"][index]
+				shots.append({"pos":Vector2(520+index*13,111+index*33),"vel":Vector2(-86,0),"r":3,"form":form})
+			screenshot_capture_frame=5
 		if screenshot_mode in ["status","status-cormii","status-jiyoza","status-mafio"]:
 			mode="status"
 			var status_character=0 if screenshot_mode in ["status","status-cormii"] else (1 if screenshot_mode=="status-jiyoza" else 2)
@@ -252,6 +272,10 @@ func _ready():
 	queue_redraw()
 
 func image_texture_from_file(path:String)->Texture2D:
+	if ResourceLoader.exists(path, "Texture2D"):
+		return load(path) as Texture2D
+	if not FileAccess.file_exists(path):
+		return null
 	var image=Image.load_from_file(path)
 	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
 
@@ -451,7 +475,11 @@ func start_game():
 	bio.reset()
 	vertical.reset()
 	vertical.duration=12.0 if slice_mode else 24.0
-	aftermath=0;result_delay=0;visual.blasts.clear()
+	aftermath=0;result_delay=0
+	visual.blasts.clear()
+	visual.hits.clear()
+	visual.confirms.clear()
+	visual.collects.clear()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
 	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
@@ -640,9 +668,16 @@ func _process(dt):
 	shake = maxf(0,shake-dt*20)
 	queue_redraw()
 	if screenshot_mode != "" and frame_count == screenshot_capture_frame:
+		if DisplayServer.get_name()=="headless":
+			push_error("Gameplay capture requires a display renderer.")
+			get_tree().quit(1)
+			return
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://"+screenshot_mode+".png")
-		get_tree().quit()
+		var frame := get_viewport().get_texture().get_image()
+		var error := frame.save_png("res://"+screenshot_mode+".png") if frame else ERR_CANT_CREATE
+		if error!=OK:
+			push_error("Could not save gameplay capture: "+error_string(error))
+		get_tree().quit(0 if error==OK else 1)
 	if auto_test and elapsed > 245 and not tests_done:
 		push_error("AUTOTEST TIMEOUT")
 		get_tree().quit(1)
@@ -944,9 +979,10 @@ func update_boss(dt):
 		boss.cool=2.3 if boss.volleys%3==0 else 1.55
 		var phase=1 if not bio_route or not bio.exposed() else (3 if boss.hp<boss.max*.5 else 2)
 		var fan=7 if phase==3 else 5
+		var form := "ring" if phase>1 else "petal"
 		for j in range(fan):
 			var angle=PI+(j-(fan-1)*.5)*.24+sin(boss.age)*.15
-			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4})
+			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4,"form":form})
 		if boss.hp<boss.max*.5 and boss.volleys%3==0:
 			for p in players:
 				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})

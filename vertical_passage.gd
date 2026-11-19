@@ -31,8 +31,9 @@ func update(g,dt):
 	spawn-=dt
 	if spawn<=0:
 		spawn=1.4; wave+=1
+		var fan: bool = wave%2==0
 		for j in range(3):
-			g.enemies.append({"pos":Vector2(110+fposmod(wave*71+j*143,430),40),"hp":3.0,"cool":1.2,"technique":"fan" if wave%2==0 else "aimed"})
+			g.enemies.append({"pos":Vector2(110+fposmod(wave*71+j*143,430),40),"hp":3.0,"cool":1.2,"technique":"fan" if fan else "aimed","art_id":"EN001" if fan else "EN002"})
 	for i in range(g.count):
 		var p=g.players[i]
 		p.inv-=dt; p.cool-=dt; p.burst=maxf(0,p.burst-dt); p.charge=minf(100,p.charge+dt*2)
@@ -66,12 +67,14 @@ func update(g,dt):
 		if e.cool<=0:
 			e.cool=2.1
 			var direction=(g.players[wave%g.count].pos-e.pos).normalized()
+			var form := "petal" if e.technique=="fan" else "needle"
 			for angle in ([-.2,0,.2] if e.technique=="fan" else [0]):
-				g.shots.append({"pos":e.pos,"vel":direction.rotated(angle)*80,"r":3})
+				g.shots.append({"pos":e.pos,"vel":direction.rotated(angle)*80,"r":3,"form":form})
 		for p in g.players:
 			if p.down==0 and e.pos.distance_to(p.pos)<20:g.hurt(p)
 		if e.hp<=0:
 			g.explode(e.pos,Color("ff799e"),20);g.score+=100
+			if g.art_v09: g.visual.confirm(e.pos,1)
 			for p in g.players:
 				if p.down==0:p.experience+=1
 	for shot in g.shots:

@@ -1,0 +1,10 @@
+id,gameplay_path,source_sheet_rect,output_pixels,role,adoption
+I01,art/active/items/item_hp_p0.png,"80,70,390,350",64x64,"HP+1 pickup visual only",prototype_active_v09
+I02,art/active/items/item_energy_p0.png,"570,70,400,350",64x64,"charge+25 pickup visual only",prototype_active_v09
+B01,art/active/vfx/bullet_petal_p0.png,"1050,70,390,350",64x64,"petal hostile projectile visual only",prototype_active_v09
+B02,art/active/vfx/bullet_needle_p0.png,"50,560,440,370",80x48,"needle hostile projectile visual only",prototype_active_v09
+B05,art/active/vfx/bullet_flower_ring_p0.png,"210,170,600,600 from vfx_p0_targeting_source_v01.png",64x64,"ring hostile projectile visual only",prototype_active_v09
+B10,art/active/vfx/bullet_target_eye_p0.png,"970,150,570,620 from vfx_p0_targeting_source_v01.png",64x64,"orb hostile projectile visual only; tracking behavior is not added",prototype_active_v09
+V01,art/active/vfx/defeat_petals_p0.png,"515,530,450,400",72x64,"harmless enemy-defeat scatter",prototype_active_v09
+V02,art/active/vfx/hit_flash_p0.png,"code-rendered from V02 rough",48x48,"harmless white-yellow hit flash",prototype_active_v09
+V15,art/active/vfx/pickup_pillar_p0.png,"1120,510,380,450",48x72,"harmless pickup confirmation",prototype_active_v09

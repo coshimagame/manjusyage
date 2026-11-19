@@ -8,12 +8,26 @@ var stage_concepts: Texture2D
 var creatures=[]
 var stage1_enemy_h={}
 var stage1_enemy_v={}
+var item_hp_texture: Texture2D
+var item_energy_texture: Texture2D
+var bullet_petal_texture: Texture2D
+var bullet_needle_texture: Texture2D
+var bullet_flower_ring_texture: Texture2D
+var bullet_target_eye_texture: Texture2D
+var defeat_petals_texture: Texture2D
+var hit_flash_texture: Texture2D
+var pickup_pillar_texture: Texture2D
 var blasts=[]
 var hits=[]
 var confirms=[]
 var collects=[]
 var intensity=1.0
 var flash_level=.35
+
+func optional_texture(path: String) -> Texture2D:
+	if ResourceLoader.exists(path, "Texture2D"):
+		return load(path) as Texture2D
+	return null
 
 func setup():
 	cosmos=load("res://art/v09/cosmos.png")
@@ -32,11 +46,31 @@ func setup():
 	for id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01","BB01"]:
 		stage1_enemy_h[id]=load("res://art/stage1/enemies/"+id+"_h_draft.png")
 		stage1_enemy_v[id]=load("res://art/stage1/enemies/"+id+"_v_draft.png")
+	for id in ["EN001","EN002"]:
+		# Use only the creature area of the supplied vertical proof. Its top
+		# label belongs to the reference sheet and stays in the original PNG.
+		var cropped := AtlasTexture.new()
+		cropped.atlas=stage1_enemy_v[id]
+		cropped.region=Rect2(0,13,37,24) if id=="EN001" else Rect2(5,8,32,26)
+		cropped.filter_clip=true
+		stage1_enemy_v[id]=cropped
+	# VFX-P0-SHEET-001 is a presentation-only visual pass from the 2026-11-17
+	# GitHub rough pack. Pickup values, collision radii, projectile count and
+	# hit timing remain owned by game.gd; a missing PNG still falls back to the
+	# code-drawn glyph below.
+	item_hp_texture=optional_texture("res://art/active/items/item_hp_p0.png")
+	item_energy_texture=optional_texture("res://art/active/items/item_energy_p0.png")
+	bullet_petal_texture=optional_texture("res://art/active/vfx/bullet_petal_p0.png")
+	bullet_needle_texture=optional_texture("res://art/active/vfx/bullet_needle_p0.png")
+	bullet_flower_ring_texture=optional_texture("res://art/active/vfx/bullet_flower_ring_p0.png")
+	bullet_target_eye_texture=optional_texture("res://art/active/vfx/bullet_target_eye_p0.png")
+	defeat_petals_texture=optional_texture("res://art/active/vfx/defeat_petals_p0.png")
+	hit_flash_texture=optional_texture("res://art/active/vfx/hit_flash_p0.png")
+	pickup_pillar_texture=optional_texture("res://art/active/vfx/pickup_pillar_p0.png")
 	# STG-CONCEPT-001 is a user-supplied eight-stage concept board. Only its
 	# Stage 1 environment strip is used here as a dim, non-colliding backdrop;
 	# the other seven rows remain concept material, not playable stage claims.
-	var concept_image=Image.load_from_file("res://art/concept/eight_stage_retro_pixel_concepts_20261106.png")
-	stage_concepts=ImageTexture.create_from_image(concept_image) if concept_image and not concept_image.is_empty() else null
+	stage_concepts=optional_texture("res://art/concept/eight_stage_retro_pixel_concepts_20261106.png")
 	for i in range(4):creatures.append(load("res://art/v09/enemy-"+str(i)+".png"))
 
 func stage1_enemy_texture(id:String,vertical:bool):
@@ -220,7 +254,7 @@ func enemy(g,e):
 	# Mechanics tests can inject a minimal legacy enemy dictionary. Presentation
 	# must keep drawing that fixture even when it has no authored phase value.
 	var phase=float(e.get("phase",0.0))
-	var tilt=PI/2 if g.vertical.active else sin(g.clock*4+e.pos.x)*.035
+	var tilt=0.0 if g.vertical.active else sin(g.clock*4+e.pos.x)*.035
 	if motion in ["bird","wasp","crab"]:tilt+=sin(e.age*1.35+phase)*.16
 	elif motion in ["turtle","mushroom","centipede"]:tilt+=sin(e.age*1.15+phase)*.07
 	elif motion in ["rotor","flower"]:tilt+=sin(e.age*2.0+phase)*.1
@@ -252,12 +286,30 @@ func enemy(g,e):
 		g.draw_arc(e.pos,27,PI*.65,PI*1.35,10,Color("d4b576"),1)
 
 func projectile(g,b,hostile=false):
-	g.draw_set_transform(b.pos.round(),b.get("vel",Vector2.RIGHT).angle())
+	var direction: float = b.get("vel",Vector2.RIGHT).angle()
+	g.draw_set_transform(b.pos.round(),direction)
 	if hostile:
 		# Enemy shots have a dark diamond hull, warm core and short ember. They
 		# therefore read differently from long friendly bolts even in dense fire.
-		var radius=float(b.r)
+		var radius:=float(b.r)
 		var form=str(b.get("form","thorn"))
+		var sprite: Texture2D
+		match form:
+			"petal": sprite=bullet_petal_texture
+			"needle": sprite=bullet_needle_texture
+			"ring": sprite=bullet_flower_ring_texture
+			"orb": sprite=bullet_target_eye_texture
+		if sprite:
+			# Correct the source art's baked angle. Keep the contact cue at b.pos.
+			var bounds := Vector2.ONE * (radius * 2.0 + 8.0)
+			if form=="needle":
+				g.draw_set_transform(b.pos.round(),direction-2.65)
+				bounds=Vector2(17,12)
+			var size := fitted_texture_size(sprite,bounds)
+			g.draw_texture_rect(sprite,Rect2(-size*.5,size),false)
+			g.draw_rect(Rect2(-1,-1,2,2),Color("fff4da"))
+			g.draw_set_transform(Vector2.ZERO)
+			return
 		var dark=Color("171329")
 		var hot=Color("e36f71")
 		if form=="needle":
@@ -316,7 +368,10 @@ func pickup(g,item):
 	# slow bob and shaped cores prevent a heal or cell from reading as a bullet.
 	g.draw_arc(pos,10+sin(g.clock*4.0)*1.5,0,TAU,16,Color(col,.32),1)
 	g.draw_arc(pos,7,0,TAU,16,Color(glow,.82),1)
-	if hull:
+	var texture:=item_hp_texture if hull else item_energy_texture
+	if texture:
+		g.draw_texture_rect(texture,Rect2(pos-Vector2(13,13),Vector2(26,26)),false,Color.WHITE)
+	elif hull:
 		for petal in range(4):
 			var d=Vector2.from_angle(petal*TAU/4.0)
 			g.draw_colored_polygon(PackedVector2Array([pos+d*2,pos+d.rotated(.45)*7,pos+d*10,pos+d.rotated(-.45)*7]),col)
@@ -358,6 +413,7 @@ func boss(g):
 		g.draw_texture_rect(boss_tex,Rect2(p-boss_size*.5,boss_size),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
 	else:g.draw_texture_rect(creatures[2],Rect2(p+Vector2(-40,-77),Vector2(164,154+sin(g.clock*2.8)*3)),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
 	var core=g.COLORS[g.boss.color] if g.bio.exposed() else Color("542d48")
+	var meter_color: Color = core if g.bio.exposed() else Color("eab17f")
 	g.draw_circle(p,18,Color("0b1023"))
 	g.draw_arc(p,18,0,TAU,28,Color("c28d78"),2)
 	g.draw_circle(p,12+sin(g.clock*2.8),core)
@@ -379,15 +435,19 @@ func boss(g):
 	g.draw_rect(Rect2(409,55,3,15),core)
 	g.japanese("外殻を破壊" if not g.bio.exposed() else "コア露出 / 同じ色で撃つ",Vector2(417,61),10,Color("f5dfc8"))
 	g.draw_rect(Rect2(417,67,201,3),Color("392438"))
-	g.draw_rect(Rect2(417,67,201*maxf(0,g.boss.hp)/g.boss.max,3),core)
+	g.draw_rect(Rect2(417,67,201*maxf(0,g.boss.hp)/g.boss.max,3),meter_color)
 	if anticipation>.42:
 		g.japanese("扇弾 接近",Vector2(557,84),9,Color("ffd29a"))
 
 func effects(g):
 	for h in hits:
+		var hit_alpha=maxf(0,1-h.age/.16)
+		if hit_flash_texture and flash_level>0 and h.age<.12:
+			var flash_alpha: float = minf(1.0,flash_level/.35) * (1.0-h.age/.12)
+			g.draw_texture_rect(hit_flash_texture,Rect2(h.pos-Vector2(11,11),Vector2(22,22)),false,Color(1,1,1,flash_alpha))
 		for i in range(5):
 			var d=Vector2.from_angle(i*TAU/5)
-			g.draw_line(h.pos+d*(3+h.age*20),h.pos+d*(6+h.age*60),Color(1,.84,.64,1-h.age/.16),1)
+			g.draw_line(h.pos+d*(3+h.age*20),h.pos+d*(6+h.age*60),Color(1,.84,.64,hit_alpha),1)
 	for e in blasts:
 		var t=e.age
 		var radius=[13,25,55][e.size]
@@ -408,6 +468,10 @@ func effects(g):
 		var t=c.age
 		var alpha=maxf(0,1-t/.62)
 		var pos=c.pos+Vector2(0,-10-t*26)
+		if defeat_petals_texture and t<.38:
+			var progress: float = t/.38
+			var size := Vector2(38,34)*lerpf(.48,1.0,ease(progress,.55))
+			g.draw_texture_rect(defeat_petals_texture,Rect2(c.pos-size*.5,size),false,Color(1,1,1,1.0-progress))
 		for i in range(4):
 			var d=Vector2.from_angle(i*TAU/4+PI*.25)
 			g.draw_line(pos+d*(3+t*10),pos+d*(7+t*20),Color(1,.82,.52,alpha),1)
@@ -416,6 +480,8 @@ func effects(g):
 		var t=c.age
 		var alpha=maxf(0,1-t/.42)
 		var col=Color("ff8fa4") if c.kind==0 else Color("91edff")
+		if pickup_pillar_texture and t<.28:
+			g.draw_texture_rect(pickup_pillar_texture,Rect2(c.pos+Vector2(-12,-38),Vector2(24,44)),false,Color(1,1,1,1.0-t/.28))
 		for i in range(6):
 			var d=Vector2.from_angle(i*TAU/6.0+t*2.0)
 			g.draw_line(c.pos+d*(3+t*24),c.pos+d*(8+t*44),Color(col,alpha),1)
@@ -434,11 +500,10 @@ func draw(g):
 		if o.cool<.6:g.draw_arc(o.pos,25,0,TAU,24,Color("ffd0a0"),1)
 	for e in g.enemies:enemy(g,e)
 	for b in g.bullets:projectile(g,b)
-	for b in g.shots:
-		if float(b.get("delay",0.0))<=0:projectile(g,b,true)
+	if not g.boss.is_empty():boss(g)
+	effects(g)
 	for item in g.pickups:
 		pickup(g,item)
-	if not g.boss.is_empty():boss(g)
 	for i in range(g.players.size()):
 		var p=g.players[i]
 		if p.down>0:
@@ -463,7 +528,8 @@ func draw(g):
 				g.draw_arc(p.pos,15+rescue_ratio*12,0,TAU,16,Color(1,1,1,.7),1)
 		else:ship(g,p,i,-PI/2 if g.vertical.active else 0)
 		if p.burst>0:g.draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,g.COLORS[p.color],2)
-	effects(g)
+	for b in g.shots:
+		if float(b.get("delay",0.0))<=0:projectile(g,b,true)
 	hud(g)
 	if g.vertical.active and (g.vertical.age<2 or g.vertical.age>g.vertical.duration-2):
 		g.japanese("進路転換：上へ射撃" if g.vertical.age<2 else "進路転換：右へ射撃",Vector2(217,177),17,Color("f1dfbe"))

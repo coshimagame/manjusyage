@@ -326,3 +326,17 @@ Official title: **曼珠沙華（MANJUSHAGE）**. Characters: **コルミィ / �
 - **検証**：Godot 4.6.3 console＋隔離`APPDATA`で`test_prologue.gd`、`test_biological_stage.gd`（全員ダウン時の触手安全化を含む）、`test_v09.gd`、`test_status_v09.gd`がPASS。`--opening-shot`はheadlessのViewportに読み取り可能テクスチャがないため、安全に`CAPTURE SKIP`して終了するよう修正した。これは画面検収ではない。通常レンダラーはこの環境でWindows signal 11を再現しているため、更新後のプロローグ実画面キャプチャ、手操作、物理コントローラー、音楽実聴、性能測定、Windows PCK/ZIPは未検証・未更新。
 - **次**：通常レンダラーが起動できる環境で、起動→オープニング→ページ送りを640×360で撮り、下部文章の可読性を人間のキーボード操作で確認する。次に触手の予告色・胞子速度・1P/3Pの退避経路を手操作で調整する。PNG読み込みを静的Texture2D参照へ置換し、PCK起動試験後にのみWindows配布版を更新する。GitHub取得／pushはcredential-managerの`NtCreateDirectoryObject ... 0xC0000022`を解消し、リモートの他者更新を再確認してから非強制で行う。
 
+# 2026-11-17 GitHub VFXラフをP0素材化・Stage 1へ接続
+
+- `origin/main`をfetchし、commit `d22c61e`の`CODEX_VFX_TASK_V01.md`、P0仕様、I01〜I20効果表、VFXラフSVG、成長敵ラフを読み込み、資料として選別取り込んだ。リモートは現行0.9より古いゲームコードを削除／置換する差分を含むため、リモートのゲームコードはマージしていない。
+- まず現行コードに存在するI01（HP+1）／I02（charge+25）だけを採用し、I03以降の新規取得物や能力は実装していない。`visual_v09.gd`にP0テクスチャ読み込みと欠損時フォールバックを追加。petal/needle/ring/orb弾にB01/B02/B05/B10の見た目を重ね、V01散華、V02白黄十字、V15青紫取得柱を無害な有限演出として描く。B10は既存orbの表示のみで追尾機構を新設しない。保存、救出、無敵、横縦、1〜3P、弾の物理値は不変。
+- 原本は`art/originals/vfx_generated/`、実装PNGは`art/active/items/`／`art/active/vfx/`、再生成ツールは`tools/extract_vfx_sheet.gd`。GitHubラフSVGも`docs/manjushage/visuals/`に原本として保存。制作方法・SHA-256・採否は各README、`ART_ASSETS.md`、manifestに記録。試作採用であり、敵名・人物／機体外観・物語・専用アイテム効果の正式決定ではない。
+- **検証**：Godot 4.7.2 console＋隔離APPDATAで再インポート、`tests/test_v09.gd`（P0の全Texture2D読み込みと既存取得値を含む）と`tests/test_biological_stage.gd`、1P自動攻略（192.6秒）がPASS。既存の`Image.load_from_file` export警告、終了時Resource警告、4.7のSafe save警告は残る。Godot 4.6.3 headlessはsignal 11で落ちるため今回の4.6検証は未実施。3P通しは起動と共通メカニクスPASSまで確認したが、30秒実行上限で完走ログを取得できず未確認として残す。通常レンダラー、手動操作、物理パッド、実聴、性能、Windows PCK/ZIPは未検証・未更新。
+- **次**：通常レンダラーでI01/I02、ring/orbを含む弾幕、V01/V02/V15を640×360連続撮影し、人間のキーボード操作で危険弾と無害散華／取得柱の識別を確認する。次の素材化はP1のI03/I04を先に**既存能力監査**し、新効果として追加しない。4.6/PCKクラッシュを切り分け、正式exportが通った時だけWindows試遊版を更新する。
+
+# 2026-11-19 第1ステージ Windows試遊版
+
+- GitHubのラフから作った9枚を通常出撃に組み込んだ。敵弾の芯を明るくし、散華や光柱より手前に描画する。閃光はF12設定に従い、リトライで残留演出を消す。縦区間には花弁・針弾とEN001/EN002の縦原稿を接続し、原稿欄外の文字は描画範囲から外した。ボスの外殻状態・露出後を弾の形で区別し、封印中のHPバーも明るくした。
+- Godot 4.6.3 consoleと隔離APPDATAでインポート、素材再生成、v0.9・生体背景・ステータス・プロローグ・セーブの各回帰に合格。Windows用PCKの自動走行は1P約66.5秒、2P約63.1秒、3P約62.8秒でクリア。通常レンダラーでプロローグ、道中、縦、ボス、幕間を確認した。初期化時と終了時に既知の設定保存・リソース解放警告が残る。自動走行は無敵と自動照準を使用する。人間の操作感、物理パッド、実聴、性能測定、正式exportは未検収。
+- `tools/pack.gd`の出力先を絶対パス化し、`ui/`を同梱した。試遊ZIPはGodot 4.6.3ランタイム＋PCK。展開後の`START.cmd`から通常起動し、保存は展開先の`userdata`に作成される。画像は`docs/screenshots/latest/stage1_*_20261119.png`、動画は配布ZIPと同じ出力フォルダにある。GitHub `main`の最新版は確認時`b549b0b`。試遊ソースを保存するブランチは`playtest/stage1-v09-20261119`。
+

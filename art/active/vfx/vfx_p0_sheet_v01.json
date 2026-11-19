@@ -1,0 +1,10 @@
+{
+  "id": "VFX-P0-SHEET-001",
+  "source": ["art/originals/vfx_generated/vfx_p0_sheet_source_v01.png", "art/originals/vfx_generated/vfx_p0_targeting_source_v01.png"],
+  "source_size": [[1536, 1024], [1774, 887]],
+  "layout": "3x2 concept sheet plus B05/B10 pair; coordinates are recorded in vfx_p0_manifest_v01.csv",
+  "transparent_output": "Individual RGBA PNG files generated with tools/extract_vfx_sheet.gd",
+  "filter": "nearest",
+  "status": "prototype_active_v09",
+  "notes": "The original GitHub SVG rough sheets remain in docs/manjushage/visuals/. This generated source is an implementation experiment, not official character or story art."
+}

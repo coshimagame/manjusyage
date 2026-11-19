@@ -32,6 +32,10 @@ func run():
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
 	assert(g.visual.ship_variants.size()==3)
 	assert(g.visual.ship_variants[0]!=null and g.visual.ship_variants[1]!=null and g.visual.ship_variants[2]!=null)
+	assert(g.visual.item_hp_texture!=null and g.visual.item_energy_texture!=null)
+	assert(g.visual.bullet_petal_texture!=null and g.visual.bullet_needle_texture!=null)
+	assert(g.visual.bullet_flower_ring_texture!=null and g.visual.bullet_target_eye_texture!=null)
+	assert(g.visual.defeat_petals_texture!=null and g.visual.hit_flash_texture!=null and g.visual.pickup_pillar_texture!=null)
 	assert(g.visual.stage1_enemy_h.size()==12 and g.visual.stage1_enemy_v.size()==12)
 	for art_id in ["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009","MB01","SB01","BB01"]:
 		assert(g.visual.stage1_enemy_texture(art_id,false)!=null)
@@ -42,6 +46,22 @@ func run():
 	g.pickups=[{"pos":g.players[0].pos,"kind":0}]
 	g.update_game(.01)
 	assert(g.players[0].hp==4 and not g.visual.collects.is_empty())
+	g.players[0].charge=54
+	g.pickups=[{"pos":g.players[0].pos,"kind":1}]
+	g.update_game(.01)
+	assert(absf(g.players[0].charge-79.02)<.01 and g.pickups.is_empty())
+	assert(g.visual.collects.back().kind==1)
+	g.visual.hit(Vector2(200,180))
+	g.visual.confirm(Vector2(200,180),1)
+	g.start_game()
+	assert(g.visual.hits.is_empty() and g.visual.confirms.is_empty() and g.visual.collects.is_empty())
+	g.travel=3100
+	g.vertical.begin(g);g.vertical.age=3;g.vertical.spawn=0
+	g.vertical.update(g,.01)
+	for enemy in g.enemies: enemy.cool=0
+	g.vertical.update(g,.01)
+	assert(not g.shots.is_empty() and g.shots[0].form=="needle")
+	g.start_game()
 	g.enemies.clear();g.wave_id=0;g.spawn_wave()
 	var forms={}
 	for enemy in g.enemies: forms[enemy.technique]=true
@@ -100,5 +120,5 @@ func run():
 	var cfg=ConfigFile.new();assert(cfg.load("user://visual.cfg")==OK)
 	assert(cfg.get_value("v","shake",-1)==expected_shake and cfg.get_value("v","flash",-1)==expected_flash)
 	g.queue_free();await process_frame;await process_frame
-	print("V09 PASS: Stage 1 enemy H/V sheets, default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, pickup bloom, retry, accessible effects persisted")
+	print("V09 PASS: Stage 1 enemy H/V sheets, P0 item/projectile/VFX textures, default route, music/loop, short vertical, score isolation, boss/aftermath, intermission, pickup bloom, retry, accessible effects persisted")
 	quit()

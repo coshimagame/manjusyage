@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="710" viewBox="0 0 960 710">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071123"/><stop offset=".65" stop-color="#0d1226"/><stop offset="1" stop-color="#1c0c25"/></linearGradient><filter id="softglow"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/></filter></defs>
+<rect width="960" height="710" fill="url(#bg)"/>
+<path d="M23 25H937V686H23Z" fill="none" stroke="#b78b71" stroke-width="2"/>
+<text x="46" y="61" font-size="29" font-weight="700" fill="#f1f2fa" font-family="sans-serif">EFFECTS / 視覚効果</text>
+<text x="46" y="91" font-size="14" fill="#a0b6d5" font-family="sans-serif">V01–V16  |  危険弾と無害な装飾粒子を明確に分離。ラフ図面（未実装）</text>
+<g>
+  <rect x="44" y="125" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="49" y="130" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(149 171)" filter="url(#softglow)"><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(0)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(45)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(90)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(135)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(180)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(225)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(270)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -30 Q -8 -19 0 -6 Q 8 -19 0 -30 Z" transform="rotate(315)" fill="#f24a6c" stroke="#eff8ff" stroke-width="1.7"/><circle r="4" fill="#eff8ff"/></g>
+  <text x="53" y="228" font-size="14" fill="#b3c9ee" font-weight="700">V01</text>
+  <text x="96" y="228" font-size="14" fill="#f0edf6" font-weight="600">散華</text>
+  <rect x="53" y="236" width="28" height="2" fill="#f24a6c"/>
+  </g>
+<g>
+  <rect x="269" y="125" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="274" y="130" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(374 171)" filter="url(#softglow)"><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(0)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(36)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(72)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(108)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(144)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(180)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(216)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(252)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(288)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><path d="M0-32L3-4L0 0L-3-4Z" transform="rotate(324)" fill="#ffb7b2" stroke="#eff8ff" stroke-width="1.7"/><circle r="9" fill="#eff8ff"/></g>
+  <text x="278" y="228" font-size="14" fill="#b3c9ee" font-weight="700">V02</text>
+  <text x="321" y="228" font-size="14" fill="#f0edf6" font-weight="600">被弾閃光</text>
+  <rect x="278" y="236" width="28" height="2" fill="#ffb7b2"/>
+  </g>
+<g>
+  <rect x="494" y="125" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="499" y="130" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(599 171)" filter="url(#softglow)"><path d="M-38 0H38" stroke="#a683fd" stroke-width="12"/><path d="M-38 0H38" stroke="#eff8ff" stroke-width="3"/><ellipse rx="12" ry="30" fill="none" stroke="#eff8ff" stroke-width="3"/></g>
+  <text x="503" y="228" font-size="14" fill="#b3c9ee" font-weight="700">V03</text>
+  <text x="546" y="228" font-size="14" fill="#f0edf6" font-weight="600">貫通レーザー</text>
+  <rect x="503" y="236" width="28" height="2" fill="#a683fd"/>
+  </g>
+<g>
+  <rect x="719" y="125" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="724" y="130" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(824 171)" filter="url(#softglow)"><circle r="22" fill="none" stroke="#fa5e8e" stroke-width="6"/><circle r="18" fill="none" stroke="#eff8ff" stroke-width="1"/><circle r="33" fill="none" stroke="#fa5e8e" stroke-width="2" stroke-dasharray="6 4"/></g>
+  <text x="728" y="228" font-size="14" fill="#b3c9ee" font-weight="700">V04</text>
+  <text x="771" y="228" font-size="14" fill="#f0edf6" font-weight="600">共鳴環</text>
+  <rect x="728" y="236" width="28" height="2" fill="#fa5e8e"/>
+  </g>
+<g>
+  <rect x="44" y="261" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="49" y="266" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(149 307)" filter="url(#softglow)"><rect x="-30" y="-21" width="60" height="42" fill="none" stroke="#65c7ff" stroke-width="2"/><circle r="18" fill="none" stroke="#eff8ff" stroke-width="2"/><path d="M-35 0H35 M0-28V28" stroke="#eff8ff" stroke-width="2"/></g>
+  <text x="53" y="364" font-size="14" fill="#b3c9ee" font-weight="700">V05</text>
+  <text x="96" y="364" font-size="14" fill="#f0edf6" font-weight="600">解析走査</text>
+  <rect x="53" y="372" width="28" height="2" fill="#65c7ff"/>
+  </g>
+<g>
+  <rect x="269" y="261" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="274" y="266" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(374 307)" filter="url(#softglow)"><path d="M -33 22 Q -20 -42 20 -23" fill="none" stroke="#b673eb" stroke-width="5"/><path d="M -23 12 Q -5 -37 25 -10" fill="none" stroke="#b673eb" stroke-width="5"/><path d="M -13 2 Q 10 -32 30 3" fill="none" stroke="#b673eb" stroke-width="5"/><circle r="5" fill="#eff8ff"/></g>
+  <text x="278" y="364" font-size="14" fill="#b3c9ee" font-weight="700">V06</text>
+  <text x="321" y="364" font-size="14" fill="#f0edf6" font-weight="600">捕食渦</text>
+  <rect x="278" y="372" width="28" height="2" fill="#b673eb"/>
+  </g>
+<g>
+  <rect x="494" y="261" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="499" y="266" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(599 307)" filter="url(#softglow)"><rect x="-30" y="-23" width="3" height="3" fill="#f9ac6c" /><rect x="-7" y="-6" width="6" height="6" fill="#eff8ff" /><rect x="16" y="11" width="9" height="9" fill="#f9ac6c" /><rect x="-21" y="-20" width="3" height="3" fill="#eff8ff" /><rect x="2" y="-3" width="6" height="6" fill="#f9ac6c" /><rect x="25" y="14" width="9" height="9" fill="#eff8ff" /><rect x="-12" y="-17" width="3" height="3" fill="#f9ac6c" /><rect x="11" y="0" width="6" height="6" fill="#eff8ff" /><rect x="-26" y="17" width="9" height="9" fill="#f9ac6c" /><rect x="-3" y="-14" width="3" height="3" fill="#eff8ff" /><rect x="20" y="3" width="6" height="6" fill="#f9ac6c" /><rect x="-17" y="20" width="9" height="9" fill="#eff8ff" /></g>
+  <text x="503" y="364" font-size="14" fill="#b3c9ee" font-weight="700">V07</text>
+  <text x="546" y="364" font-size="14" fill="#f0edf6" font-weight="600">粒子解体</text>
+  <rect x="503" y="372" width="28" height="2" fill="#f9ac6c"/>
+  </g>
+<g>
+  <rect x="719" y="261" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="724" y="266" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(824 307)" filter="url(#softglow)"><path d="M-35 14Q-25-33 0-28Q25-33 35 14" fill="none" stroke="#a7afff" stroke-width="5"/><path d="M-30 10Q0-14 30 10" fill="none" stroke="#eff8ff" stroke-width="2"/></g>
+  <text x="728" y="364" font-size="14" fill="#b3c9ee" font-weight="700">V08</text>
+  <text x="771" y="364" font-size="14" fill="#f0edf6" font-weight="600">花弁防壁</text>
+  <rect x="728" y="372" width="28" height="2" fill="#a7afff"/>
+  </g>
+<g>
+  <rect x="44" y="397" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="49" y="402" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(149 443)" filter="url(#softglow)"><path d="M-9-10L4-33L18-8L4-3Z" transform="rotate(0)" fill="#9fd1ff" stroke="#eff8ff" stroke-width="1.7"/><path d="M-9-10L4-33L18-8L4-3Z" transform="rotate(90)" fill="#9fd1ff" stroke="#eff8ff" stroke-width="1.7"/><path d="M-9-10L4-33L18-8L4-3Z" transform="rotate(180)" fill="#9fd1ff" stroke="#eff8ff" stroke-width="1.7"/><path d="M-9-10L4-33L18-8L4-3Z" transform="rotate(270)" fill="#9fd1ff" stroke="#eff8ff" stroke-width="1.7"/></g>
+  <text x="53" y="500" font-size="14" fill="#b3c9ee" font-weight="700">V09</text>
+  <text x="96" y="500" font-size="14" fill="#f0edf6" font-weight="600">装甲破砕</text>
+  <rect x="53" y="508" width="28" height="2" fill="#9fd1ff"/>
+  </g>
+<g>
+  <rect x="269" y="397" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="274" y="402" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(374 443)" filter="url(#softglow)"><path d="M-32-20L-14-28L0-9L16-27L32-18L23 24L0 33L-24 23Z" fill="#271929" stroke="#fa6679" stroke-width="5"/><circle r="10" fill="#eff8ff"/></g>
+  <text x="278" y="500" font-size="14" fill="#b3c9ee" font-weight="700">V10</text>
+  <text x="321" y="500" font-size="14" fill="#f0edf6" font-weight="600">生体核露出</text>
+  <rect x="278" y="508" width="28" height="2" fill="#fa6679"/>
+  </g>
+<g>
+  <rect x="494" y="397" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="499" y="402" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(599 443)" filter="url(#softglow)"><path d="M-31 26L-8-16L3-7L19-31L4-2L13 12L-3 30" fill="none" stroke="#bf89f9" stroke-width="7"/></g>
+  <text x="503" y="500" font-size="14" fill="#b3c9ee" font-weight="700">V11</text>
+  <text x="546" y="500" font-size="14" fill="#f0edf6" font-weight="600">次元亀裂</text>
+  <rect x="503" y="508" width="28" height="2" fill="#bf89f9"/>
+  </g>
+<g>
+  <rect x="719" y="397" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="724" y="402" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(824 443)" filter="url(#softglow)"><path d="M-30 26H30" stroke="#f7d78a" stroke-width="3"/><path d="M-10-35V35M0-35V35M10-35V35" stroke="#eff8ff" stroke-width="5" opacity=".6"/></g>
+  <text x="728" y="500" font-size="14" fill="#b3c9ee" font-weight="700">V12</text>
+  <text x="771" y="500" font-size="14" fill="#f0edf6" font-weight="600">帰還光柱</text>
+  <rect x="728" y="508" width="28" height="2" fill="#f7d78a"/>
+  </g>
+<g>
+  <rect x="44" y="533" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="49" y="538" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(149 579)" filter="url(#softglow)"><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(0)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(30)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(60)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(90)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(120)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(150)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(180)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(210)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(240)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(270)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(300)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -29 Q -8 -18 0 -5 Q 8 -18 0 -29 Z" transform="rotate(330)" fill="#f85979" stroke="#eff8ff" stroke-width="1.7"/><circle r="17" fill="none" stroke="#f85979" stroke-width="6"/><circle r="13" fill="none" stroke="#eff8ff" stroke-width="1"/></g>
+  <text x="53" y="636" font-size="14" fill="#b3c9ee" font-weight="700">V13</text>
+  <text x="96" y="636" font-size="14" fill="#f0edf6" font-weight="600">開花予告</text>
+  <rect x="53" y="644" width="28" height="2" fill="#f85979"/>
+  </g>
+<g>
+  <rect x="269" y="533" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="274" y="538" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(374 579)" filter="url(#softglow)"><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(0)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(60)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(120)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(180)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(240)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -22 Q -8 -11 0 --2 Q 8 -11 0 -22 Z" transform="rotate(300)" fill="#ffd18e" stroke="#eff8ff" stroke-width="1.7"/><ellipse rx="33" ry="17" fill="none" stroke="#ffd18e" stroke-width="3" transform="rotate(-25)"/></g>
+  <text x="278" y="636" font-size="14" fill="#b3c9ee" font-weight="700">V14</text>
+  <text x="321" y="636" font-size="14" fill="#f0edf6" font-weight="600">二機共振</text>
+  <rect x="278" y="644" width="28" height="2" fill="#ffd18e"/>
+  </g>
+<g>
+  <rect x="494" y="533" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="499" y="538" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(599 579)" filter="url(#softglow)"><path d="M0-36V36" stroke="#eff8ff" stroke-width="9"/><ellipse rx="27" ry="8" fill="none" stroke="#a5c6ff" stroke-width="3" transform="translate(0 27)"/></g>
+  <text x="503" y="636" font-size="14" fill="#b3c9ee" font-weight="700">V15</text>
+  <text x="546" y="636" font-size="14" fill="#f0edf6" font-weight="600">アイテム取得柱</text>
+  <rect x="503" y="644" width="28" height="2" fill="#a5c6ff"/>
+  </g>
+<g>
+  <rect x="719" y="533" width="211" height="123" rx="5" fill="#111a30" stroke="#45516d" stroke-width="1"/>
+  <rect x="724" y="538" width="201" height="81" rx="2" fill="#0b1024"/>
+  <g transform="translate(824 579)" filter="url(#softglow)"><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(0)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(25.714285714285715)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(51.42857142857143)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(77.14285714285714)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(102.85714285714286)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(128.57142857142858)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(154.28571428571428)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(180)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(205.71428571428572)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(231.42857142857142)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(257.14285714285717)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(282.85714285714283)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(308.57142857142856)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><path d="M 0 -38 Q -8 -27 0 -14 Q 8 -27 0 -38 Z" transform="rotate(334.2857142857143)" fill="#ff869e" stroke="#eff8ff" stroke-width="1.7"/><circle r="14" fill="#eff8ff"/><circle r="23" fill="none" stroke="#ff869e" stroke-width="3"/></g>
+  <text x="728" y="636" font-size="14" fill="#b3c9ee" font-weight="700">V16</text>
+  <text x="771" y="636" font-size="14" fill="#f0edf6" font-weight="600">終極開花</text>
+  <rect x="728" y="644" width="28" height="2" fill="#ff869e"/>
+  </g>
+<text x="47" y="688" font-family="sans-serif" font-size="12" fill="#98a9c8">MANJUSHAGE / v0.1 concept only — SVG roughs, not transparent production PNG sprites. 2026-11-17</text>
+</svg>
