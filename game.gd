@@ -455,6 +455,12 @@ func _input(event):
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventScreenTouch and event.pressed and mode in ["clear", "over"]:
+		handle_result_pointer(event.position)
+		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode in ["clear", "over"]:
+		handle_result_pointer(get_global_mouse_position())
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
 		if Rect2(220,236,200,32).has_point(p): start_game()
@@ -462,6 +468,17 @@ func _input(event):
 		elif p.y > 200 and p.y < 232:
 			if p.x < 320: count=maxi(1,count-1)
 			else: count=mini(3,count+1)
+
+# Touch/click parity for the result screen (Android Web and desktop mouse).
+# The delayed result overlay must not accept a tap intended for gameplay.
+func handle_result_pointer(position: Vector2) -> void:
+	if mode not in ["clear", "over"] or result_delay > 0.0:
+		return
+	if Rect2(160, 249, 320, 29).has_point(position):
+		start_game()
+	elif Rect2(160, 279, 320, 29).has_point(position):
+		mode = "menu"
+		track("title")
 
 func change_color(i):
 	if players[i].down > 0: return
