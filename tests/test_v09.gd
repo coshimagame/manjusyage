@@ -33,6 +33,7 @@ func run():
 	assert(g.visual.ship_variants.size()==3)
 	for ship in g.visual.ship_variants:
 		assert(ship is AtlasTexture and ship.atlas.resource_path.begins_with("res://art/active/ships/"))
+	assert(g.visual.ship_variants[2].atlas.resource_path.ends_with("/mafio_gold_black_v02.png"))
 	assert(g.visual.item_hp_texture!=null and g.visual.item_energy_texture!=null)
 	assert(g.visual.bullet_petal_texture!=null and g.visual.bullet_needle_texture!=null)
 	assert(g.visual.bullet_flower_ring_texture!=null and g.visual.bullet_target_eye_texture!=null)
