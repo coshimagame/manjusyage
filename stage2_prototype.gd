@@ -15,6 +15,34 @@ var won := false
 var fire_cooldown := 0.0
 var hit_grace := 0.0
 const HIT_GRACE_SECONDS := 1.25
+# Touch: left half steers relative to the initial finger position; right half fires.
+var touch_anchors: Dictionary = {}
+var touch_positions: Dictionary = {}
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touch_anchors[event.index] = event.position
+			touch_positions[event.index] = event.position
+		else:
+			touch_anchors.erase(event.index)
+			touch_positions.erase(event.index)
+	elif event is InputEventScreenDrag and touch_anchors.has(event.index):
+		touch_positions[event.index] = event.position
+
+func touch_movement() -> Vector2:
+	var direction := Vector2.ZERO
+	for finger in touch_positions:
+		var anchor: Vector2 = touch_anchors[finger]
+		if anchor.x < SIZE.x * 0.5:
+			direction += ((touch_positions[finger] as Vector2) - anchor) / 45.0
+	return direction.limit_length(1.0)
+
+func touch_firing() -> bool:
+	for finger in touch_positions:
+		if (touch_anchors[finger] as Vector2).x >= SIZE.x * 0.5:
+			return true
+	return false
 
 func _process(delta: float) -> void:
 	if finished:
@@ -23,9 +51,9 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	hit_grace = maxf(0.0, hit_grace - delta)
-	var movement := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var movement := (Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down") + touch_movement()).limit_length(1.0)
 	ship = (ship + movement * delta * 180.0).clamp(Vector2(14, 18), SIZE - Vector2(14, 18))
-	var firing := Input.is_key_pressed(KEY_SPACE)
+	var firing := Input.is_key_pressed(KEY_SPACE) or touch_firing()
 	for pad in Input.get_connected_joypads():
 		firing = firing or Input.is_joy_button_pressed(pad, JOY_BUTTON_A)
 	if firing and fire_cooldown <= 0.0:
@@ -107,6 +135,9 @@ func _draw() -> void:
 		draw_circle(p, 18, Color("#e6a5b0"))
 		draw_rect(Rect2(430, 14, 180.0 * maxf(0.0, boss_hp / 20.0), 6), Color("#f05b83"))
 	draw_string(ThemeDB.fallback_font, Vector2(15, 23), "STAGE 2 PROTOTYPE / HP " + str(hp), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+	# Low-opacity guidance, not part of the approved game art.
+	draw_string(ThemeDB.fallback_font, Vector2(16, 344), "LEFT: MOVE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#7891a6"))
+	draw_string(ThemeDB.fallback_font, Vector2(524, 344), "RIGHT: FIRE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#7891a6"))
 	if finished:
 		draw_string(ThemeDB.fallback_font, Vector2(160, 180), "CLEAR" if won else "GAME OVER", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color.WHITE)
 		draw_string(ThemeDB.fallback_font, Vector2(160, 210), "R: RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color.WHITE)
