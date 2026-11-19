@@ -377,6 +377,8 @@ func button_edge(device, button):
 	return down and not previous
 
 func _input(event):
+	# Let the intermission Control handle Enter/Space/Esc before result retry/title shortcuts.
+	if has_node("StageClearIntermission"): return
 	if mode=="controls":
 		capture_binding(event)
 		return
@@ -792,11 +794,32 @@ func explode(pos,color,amount):
 	for i in range(amount):
 		particles.append({"pos":pos,"vel":Vector2.from_angle(randf()*TAU)*randf_range(20,115),"life":randf_range(.2,.8),"color":color})
 
+# Stage-clear communication is an optional overlay, never a replacement for the result screen.
+# The dialogue scene belongs to PR #293; its lines are provisional, not canon.
+func show_stage_clear_intermission() -> void:
+	if auto_test or not ResourceLoader.exists("res://intermission_dialogue_playable.tscn"):
+		return
+	var scene := load("res://intermission_dialogue_playable.tscn") as PackedScene
+	if scene == null:
+		return
+	var dialogue := scene.instantiate() as Control
+	if dialogue == null:
+		return
+	add_child(dialogue)
+	dialogue.name = "StageClearIntermission"
+	dialogue.finished.connect(func(): dialogue.queue_free())
+	var selected_name: String = PILOT_NAMES[players[0].character] if not players.is_empty() else PILOT_NAMES[0]
+	dialogue.begin([
+		{"speaker":"ムゥ","text":"通信確認。機体の状態を調べる。"},
+		{"speaker":selected_name,"text":"了解。次の出撃に備える。"}
+	])
+
 func finish(won):
 	mode="clear" if won else "over"
 	result_delay=1.2 if won and art_v09 else 0.0
 	music.stop(); sfx("gate" if won else "burst")
 	if won: track("ending")
+	if won and not auto_test: show_stage_clear_intermission()
 	if won:
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
