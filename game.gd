@@ -453,7 +453,9 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if mode == "clear" and key == KEY_N and result_delay <= 0.0:
+				launch_next_stage()
+			elif key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
@@ -816,6 +818,17 @@ func finish(won):
 		else:
 			push_error("AUTOTEST FAIL")
 			get_tree().quit(1)
+
+func launch_next_stage() -> void:
+	# The Stage 2 prototype is proposed in a separate PR; do not break the
+	# released Stage 1 flow if that scene has not been integrated yet.
+	const stage_two_path := "res://stage2_prototype.tscn"
+	if mode != "clear" or result_delay > 0.0:
+		return
+	if not ResourceLoader.exists(stage_two_path):
+		tell("STAGE 2 NOT INSTALLED", 3.0)
+		return
+	get_tree().change_scene_to_file.call_deferred(stage_two_path)
 
 func run_mechanics_tests():
 	# Exercise actual keyboard event handlers and the same collision/recovery update used in play.
@@ -1316,5 +1329,7 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
+	if mode=="clear":
+		centered("N : NEXT STAGE (IF INSTALLED)",249,COLORS[0])
 	centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
