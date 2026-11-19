@@ -801,6 +801,19 @@ func finish(won):
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
 	if not auto_test:
+		if won:
+			# Stage-1 checkpoint is written only after a real clear, never in autotests.
+			# The existing score and run-history files retain their original formats.
+			var progress=ConfigFile.new()
+			progress.set_value("progress","schema",1)
+			progress.set_value("progress","cleared_stage",1)
+			progress.set_value("progress","next_stage",2)
+			progress.set_value("progress","players",clampi(count,1,3))
+			var selected_pilots=[]
+			for i in range(count): selected_pilots.append((i+pilot_offset)%3)
+			progress.set_value("progress","pilot_ids",selected_pilots)
+			var save_error=progress.save("user://stage_progress.cfg")
+			if save_error!=OK: push_warning("Stage checkpoint save failed: "+str(save_error))
 		if not slice_mode:high_scores[count-1]=maxi(high_scores[count-1],score)
 		var cfg=ConfigFile.new()
 		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
