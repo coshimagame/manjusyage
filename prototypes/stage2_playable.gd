@@ -8,6 +8,7 @@ const W := 640.0
 const H := 360.0
 # Reuse the existing optional PNG registry; missing artwork keeps procedural fallback.
 const ArtCatalog = preload("res://art_catalog.gd")
+const PixelType = preload("res://ui/pixel_type.gd")
 const BOSS_ART = preload("res://art/enemies/stage02_draft/BB02_h_draft.png")
 const OCEAN_BACKDROP = preload("res://art/v09/cosmos.png")
 const BOSS_REGION := Rect2(9,72,239,107)
@@ -16,7 +17,6 @@ var player_art: Texture2D
 var capture_requested := false
 var hit_flash := 0.0
 var hit_grace := 0.0
-var ui_font := SystemFont.new()
 var ship := Vector2(90, 180)
 var hp := 5
 var enemy_hp := 30
@@ -38,7 +38,6 @@ func _ready() -> void:
 	player_art=ArtCatalog.reference_ship(0)
 	if player_art==null:
 		player_art=artwork.texture("ship_cormii")
-	ui_font.font_names=PackedStringArray(["Yu Gothic","Meiryo","Noto Sans CJK JP","sans-serif"])
 	capture_requested=OS.get_cmdline_user_args().has("--stage2-shot")
 	DisplayServer.window_set_title("曼珠沙華 — 第2ステージ ボス試作")
 	set_process(true)
@@ -182,11 +181,10 @@ func _draw() -> void:
 	draw_rect(Rect2(0,0,W,34),Color("#071025",.88))
 	draw_rect(Rect2(12, 12, float(hp) * 22.0, 7), Color("#5ee2c5"))
 	draw_rect(Rect2(420, 12, maxf(0.0, float(enemy_hp)) * 6.0, 7), Color("#f06088"))
-	draw_string(ui_font,Vector2(217,23),"第2ステージ  ボス試作",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#c8edff"))
-	draw_string(ui_font,Vector2(12,347),"矢印キーで移動   Z / Space で射撃   Esc で終了",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("#c8edff"))
+	PixelType.draw(self,12,Vector2(255,23),"第2ステージ  ボス試作",Color("#c8edff"))
+	PixelType.draw(self,12,Vector2(12,347),"矢印キーで移動   Z / Space で射撃   Esc で終了",Color("#c8edff"))
 	if state != "playing":
 		draw_rect(Rect2(150, 132, 340, 90), Color(0.02, 0.04, 0.12, 0.92))
-		var font := ThemeDB.fallback_font
 		var label := "STAGE CLEAR" if state == "clear" else "GAME OVER"
-		draw_string(font, Vector2(240, 170), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
-		draw_string(font, Vector2(205, 201), "ENTER / TAP : RETRY", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		PixelType.draw(self,20,Vector2(240,170),label,Color.WHITE)
+		PixelType.draw(self,12,Vector2(266,201),"ENTER / TAP : RETRY",Color.WHITE)

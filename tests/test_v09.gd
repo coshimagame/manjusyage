@@ -30,10 +30,14 @@ func run():
 	assert(g.mode=="menu")
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
-	assert(g.visual.ship_variants.size()==3)
-	for ship in g.visual.ship_variants:
-		assert(ship is AtlasTexture and ship.atlas.resource_path.begins_with("res://art/active/ships/"))
-	assert(g.visual.ship_variants[2].atlas.resource_path.ends_with("/mafio_gold_black_v02.png"))
+	var horizontal_names := ["cormii_muu_v02_h.png", "jiyoza_muu_v02_h.png", "mafio_gold_black_v03_h.png"]
+	var vertical_names := ["cormii_muu_v02_v.png", "jiyoza_muu_v02_v.png", "mafio_gold_black_v02.png"]
+	assert(g.visual.ship_variants.size()==3 and g.visual.vertical_ship_variants.size()==3)
+	for i in range(3):
+		var horizontal: AtlasTexture = g.visual.ship_variants[i]
+		var vertical: AtlasTexture = g.visual.vertical_ship_variants[i]
+		assert(horizontal != null and horizontal.atlas.resource_path == "res://art/active/ships/"+horizontal_names[i])
+		assert(vertical != null and vertical.atlas.resource_path == "res://art/active/ships/"+vertical_names[i])
 	assert(g.visual.item_hp_texture!=null and g.visual.item_energy_texture!=null)
 	assert(g.visual.bullet_petal_texture!=null and g.visual.bullet_needle_texture!=null)
 	assert(g.visual.bullet_flower_ring_texture!=null and g.visual.bullet_target_eye_texture!=null)

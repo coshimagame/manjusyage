@@ -6,6 +6,7 @@ const ArtCatalog = preload("res://art_catalog.gd")
 var cosmos: Texture2D
 var atlas: Texture2D
 var ship_variants=[]
+var vertical_ship_variants=[]
 var stage_concepts: Texture2D
 var creatures=[]
 var stage1_enemy_h={}
@@ -34,11 +35,15 @@ func optional_texture(path: String) -> Texture2D:
 func setup():
 	cosmos=load("res://art/v09/cosmos.png")
 	atlas=load("res://art/v09/ship-atlas.png")
-	# Use the three cutouts derived from the design board as the visible hulls.
 	ship_variants=[
 		ArtCatalog.reference_ship(0),
 		ArtCatalog.reference_ship(1),
 		ArtCatalog.reference_ship(2)
+	]
+	vertical_ship_variants=[
+		ArtCatalog.reference_ship(0,true),
+		ArtCatalog.reference_ship(1,true),
+		ArtCatalog.reference_ship(2,true)
 	]
 	# User-provided Stage 1 enemy sheets stay as byte-preserved draft assets.
 	# H/V are deliberately loaded as separate layouts rather than rotating an
@@ -148,9 +153,10 @@ func background(g):
 		g.draw_polyline(ceiling_edge,Color("a46b76"),3)
 		g.draw_polyline(floor_edge,Color("b17c83"),2)
 
-func ship(g,p,index,rotation=0.0,scale_factor=1.0):
+func ship(g,p,index,vertical_view := false,scale_factor := 1.0):
 	var character := clampi(int(p.get("character",index)),0,ship_variants.size()-1)
-	var variant: Texture2D = ship_variants[character]
+	var variant: Texture2D = vertical_ship_variants[character] if vertical_view else ship_variants[character]
+	var rotation := -PI/2 if vertical_view else 0.0
 	var motion: Vector2 = p.get("motion",Vector2.ZERO)
 	var local_motion := motion.rotated(-rotation)
 	var in_flight: bool = g.mode=="play" or g.mode=="pause"
@@ -496,7 +502,7 @@ func draw(g):
 					if rescuer.down==0 and rescuer.pos.distance_to(p.pos)<55:
 						g.draw_line(rescuer.pos,p.pos,Color(g.COLORS[rescuer.color].r,g.COLORS[rescuer.color].g,g.COLORS[rescuer.color].b,.72),1.5,true)
 				g.draw_arc(p.pos,15+rescue_ratio*12,0,TAU,16,Color(1,1,1,.7),1)
-		else:ship(g,p,i,-PI/2 if g.vertical.active else 0)
+		else:ship(g,p,i,g.vertical.active)
 		if p.burst>0:g.draw_arc(p.pos,(.55-p.burst)*650,0,TAU,48,g.COLORS[p.color],2)
 	for b in g.shots:
 		if float(b.get("delay",0.0))<=0:projectile(g,b,true)

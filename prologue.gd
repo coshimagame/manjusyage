@@ -1,5 +1,7 @@
 extends Node2D
 
+const PixelType = preload("res://ui/pixel_type.gd")
+
 # Temporary story treatment; names and narration are not final canon.
 const PAGES = [
 	["PROLOGUE / 01", "星が消えた夜", "空が裂けた夜、宇宙はひとつではなくなった。\n昨日まで隣にあった星が、別の世界へ消えていった。"],
@@ -25,7 +27,6 @@ var page := 0
 var age := 0.0
 var clock := 0.0
 var finished := false
-var font: SystemFont
 var planet_tex: ImageTexture
 var music: AudioStreamPlayer
 var pilot_dialogue_portraits: Dictionary = {}
@@ -36,8 +37,6 @@ var frames := 0
 
 func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
-	font = SystemFont.new()
-	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
 	pilot_dialogue_portraits = {
 		"コルミィ": pilot_texture_from_file("res://art/active/pilots/cormii_dialogue_pixel_v01.png"),
 		"ジヨーザ": pilot_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
@@ -140,7 +139,7 @@ func _process(dt):
 		get_tree().quit()
 
 func _draw():
-	if finished or font == null: return
+	if finished: return
 	var has_opening_backdrop := page == 0 and opening_backdrop != null
 	if has_opening_backdrop:
 		draw_opening_backdrop()
@@ -160,14 +159,14 @@ func _draw():
 	draw_rect(Rect2(0,252,640,108),Color(.025,.04,.08,.94))
 	draw_line(Vector2(28,253),Vector2(612,253),Color("637e9b"))
 	var opacity=clampf(age*1.5,0,1)
-	draw_string(font,Vector2(30,34),PAGES[page][0],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.55,.76,.86,opacity))
-	draw_string(font,Vector2(30,281),PAGES[page][1],HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color(.94,.9,.75,opacity))
+	PixelType.draw(self,12,Vector2(30,34),PAGES[page][0],Color(.55,.76,.86,opacity))
+	PixelType.draw(self,20,Vector2(30,281),PAGES[page][1],Color(.94,.9,.75,opacity))
 	var lines = PAGES[page][2].split("\n")
 	for i in range(lines.size()):
 		var text=lines[i].substr(0,int(age*22))
-		draw_string(font,Vector2(30,307+i*21),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("d8e5ee"))
-	draw_string(font,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
-	draw_string(font,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("8ba4be"))
+		PixelType.draw(self,12,Vector2(30,307+i*21),text,Color("d8e5ee"))
+	PixelType.draw(self,10,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",Color("8ba4be"))
+	PixelType.draw(self,10,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),Color("8ba4be"))
 
 func draw_opening_backdrop():
 	# Preserve the generated pixel clusters with nearest sampling and add only
@@ -231,7 +230,7 @@ func draw_training():
 		draw_rect(Rect2(pos+Vector2(4,-13),Vector2(7,8)),Color("e8eddd"))
 		draw_rect(Rect2(pos+Vector2(-30,-2),Vector2(12+int(clock*10)%4,4)),col)
 		if page==2:
-			draw_string(font,pos+Vector2(-28,27),["コルミィ","ジヨーザ","マフィオ"][i],HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("e5e8eb"))
+			PixelType.draw(self,12,pos+Vector2(-24,27),["コルミィ","ジヨーザ","マフィオ"][i],Color("e5e8eb"))
 		else:
 			for j in range(4):
 				var offset=Vector2(38+j*11,sin(clock*4+j)*(8 if i==0 else 2))
@@ -276,7 +275,7 @@ func draw_workshop():
 		var x=390+float(k*5)
 		var y=186+sin(clock*3+k*2)*10
 		draw_rect(Rect2(x,y,2,2),Color(1,.76,.47,.3+.5*absf(sin(clock*2+k))))
-	draw_string(font,Vector2(63,99),"ANALYSIS / 3 WORLDLINES",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("87cde1"))
+	PixelType.draw(self,12,Vector2(63,99),"ANALYSIS / 3 WORLDLINES",Color("87cde1"))
 
 func draw_story_dialogue():
 	var index=0 if age < 4.25 else 1
@@ -288,8 +287,8 @@ func draw_story_dialogue():
 	draw_story_pilot_portrait(str(entry[0]),reveal)
 	draw_rect(Rect2(62,209,518,37),Color(.025,.055,.115,.83*reveal))
 	draw_rect(Rect2(62,209,3,37),Color(.95,.48,.51,.87*reveal))
-	draw_string(font,Vector2(77,224),entry[0],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.95,.68,.54,reveal))
-	draw_string(font,Vector2(143,232),dialogue,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color(.95,.94,.87,reveal))
+	PixelType.draw(self,12,Vector2(77,224),entry[0],Color(.95,.68,.54,reveal))
+	PixelType.draw(self,12,Vector2(143,232),dialogue,Color(.95,.94,.87,reveal))
 	if int(clock*2)%2==0 and letters>=entry[1].length():
 		draw_rect(Rect2(555,232,7,2),Color(.91,.76,.54,reveal))
 

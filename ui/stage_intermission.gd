@@ -4,6 +4,7 @@ extends Control
 signal completed(next_stage: int)
 signal skipped(next_stage: int)
 
+const PixelType = preload("res://ui/pixel_type.gd")
 const W := 640.0
 const H := 360.0
 const CHARS_PER_SECOND := 28.0
@@ -79,7 +80,9 @@ func _make_label(pos: Vector2, dimensions: Vector2, font_size: int) -> Label:
 	var label := Label.new()
 	label.position = pos
 	label.size = dimensions
-	label.add_theme_font_size_override("font_size", font_size)
+	var size := PixelType.native_size(font_size)
+	label.add_theme_font_override("font", PixelType.font_at(size))
+	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", Color("e5f5ff"))
 	add_child(label)
 	return label

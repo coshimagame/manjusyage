@@ -78,7 +78,7 @@ static func draw_loadout(game, pilot: Dictionary, id: int, accent: Color) -> voi
 	var preview := pilot.duplicate()
 	preview.pos=Vector2(141,296)
 	preview.inv=0.0
-	game.visual.ship(game,preview,id,0,2.0)
+	game.visual.ship(game,preview,id,false,2.0)
 	game.japanese("機体",Vector2(28,287),12,accent)
 	game.japanese("搭載系",Vector2(254,285),13,accent)
 	var modules: Array = game.status_frame_modules(id)

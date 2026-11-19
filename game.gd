@@ -30,6 +30,7 @@ const FONT = {
 
 const Visual=preload("res://visual_v09.gd")
 const PilotStatus=preload("res://ui/pilot_status.gd")
+const PixelType=preload("res://ui/pixel_type.gd")
 var visual=Visual.new()
 var art_v09=true
 var slice_mode=true
@@ -120,7 +121,6 @@ var calibration_ready = false
 var calibration_previous = {}
 var calibration_axis_baseline = {}
 var music_name = ""
-var jp_font: SystemFont
 const CONTROL_ACTIONS = ["up","down","left","right","fire","color","burst","start"]
 const CONTROL_LABELS = ["上","下","左","右","ショットのボタン","色切り替えのボタン","バーストのボタン","決定・ポーズのボタン"]
 
@@ -149,8 +149,6 @@ func _ready():
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
 	pads = Array(Input.get_connected_joypads())
 	Input.joy_connection_changed.connect(_pad_changed)
-	jp_font=SystemFont.new()
-	jp_font.font_names=PackedStringArray(["Yu Gothic", "Meiryo", "sans-serif"])
 	var input_cfg=ConfigFile.new()
 	if input_cfg.load("user://controls.cfg")==OK: pad_profiles=input_cfg.get_value("input","profiles",{})
 	var audio_cfg=ConfigFile.new()
@@ -415,7 +413,7 @@ func capture_binding(event):
 		mode=calibration_return; calibration_step=-1
 
 func japanese(message,pos,size=13,color=WHITE):
-	draw_string(jp_font,pos,message,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
+	PixelType.draw(self,size,pos,message,color)
 
 func tell(message, duration = 3.0):
 	notice = message
@@ -1372,7 +1370,7 @@ func draw_menu():
 	japanese("赤い残響" if bio_route else "共鳴遺跡",Vector2(386,180),11,COLORS[0])
 	if art_v09 and bio_route:
 		for i in range(3):
-			visual.ship(self,{"pos":Vector2(240+i*80,202),"color":i,"character":i,"experience":0},i,0,1.15)
+			visual.ship(self,{"pos":Vector2(240+i*80,202),"color":i,"character":i,"experience":0},i,false,1.15)
 	else:
 		ship(Vector2(319,202),COLORS[0],2)
 		ship(Vector2(240,201),COLORS[1])
