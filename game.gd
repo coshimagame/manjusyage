@@ -808,6 +808,22 @@ func finish(won):
 		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
 		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
+		# Preserve the first-stage completion as a resumable progression checkpoint.
+		# Keep this separate from scores.cfg and last_run.json for save compatibility.
+		if won:
+			var checkpoint=ConfigFile.new()
+			checkpoint.load("user://stage_progress.cfg")
+			var unlocked=maxi(2,int(checkpoint.get_value("progress","unlocked_stage",1)))
+			checkpoint.set_value("progress","unlocked_stage",unlocked)
+			checkpoint.set_value("progress","last_cleared_stage",maxi(1,int(checkpoint.get_value("progress","last_cleared_stage",0))))
+			checkpoint.set_value("progress","party_size",count)
+			var pilot_ids=[]
+			for pilot in players:
+				pilot_ids.append(int(pilot.get("character",0)))
+			checkpoint.set_value("progress","pilot_ids",pilot_ids)
+			var save_error=checkpoint.save("user://stage_progress.cfg")
+			if save_error!=OK:
+				push_warning("Stage checkpoint save failed: "+str(save_error))
 	else:
 		tests_done=true
 		if won and (gates_done==2 or slice_mode):
