@@ -414,10 +414,14 @@ func boss(g):
 	else:g.draw_texture_rect(creatures[2],Rect2(p+Vector2(-40,-77),Vector2(164,154+sin(g.clock*2.8)*3)),false,Color(1,.7,.7) if g.boss.flash>0 else Color.WHITE)
 	var core=g.COLORS[g.boss.color] if g.bio.exposed() else Color("542d48")
 	var meter_color: Color = core if g.bio.exposed() else Color("eab17f")
-	g.draw_circle(p,18,Color("0b1023"))
-	g.draw_arc(p,18,0,TAU,28,Color("c28d78"),2)
-	g.draw_circle(p,12+sin(g.clock*2.8),core)
-	if g.bio.exposed():g.draw_arc(p,15+anticipation*4,0,TAU,24,Color("fff5c7"),1)
+	if not boss_tex:
+		g.draw_circle(p,18,Color("0b1023"))
+		g.draw_circle(p,12+sin(g.clock*2.8),core)
+	if g.bio.exposed():
+		g.draw_arc(p,16+anticipation*4,0,TAU,24,Color(core,.88),1.5)
+	else:
+		for angle in [PI*.13,PI*1.13]:
+			g.draw_arc(p,19,angle,angle+PI*.49,9,Color("ffd19f",.78),1)
 	for i in range(g.bio.armor.size()):
 		var a=g.bio.part_pos(g,i)
 		if g.bio.armor[i]>0:

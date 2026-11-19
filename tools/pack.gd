@@ -28,6 +28,8 @@ func _initialize():
 		return
 	for path in ["project.godot","main.tscn","game.gd","visual_v09.gd","art_catalog.gd","ambient_stage_music.gd","biological_stage.gd","briefing_progress.gd","enemy_analysis.gd","jingle_cues.gd","mafio_archive.gd","pilot_abilities.gd","pilot_journals.gd","vertical_passage.gd","prologue.gd","prologue.tscn"]:
 		assert(packer.add_file("res://"+path,"res://"+path)==OK)
+	for path in ["res://prototypes/stage2_playable.tscn","res://prototypes/stage2_playable.gd"]:
+		assert(packer.add_file(path,path)==OK)
 	for folder in ["res://art","res://audio","res://scripts","res://ui","res://.godot/imported"]:
 		add_tree(packer,folder)
 	assert(packer.flush()==OK)

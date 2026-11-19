@@ -2,6 +2,8 @@
 
 ## 2026-11-19 第1ステージ試遊結果
 
+- **STG2-BOSS-DRAFT-001**。ユーザー提供の `manjushage_stage02_24_sprites_draft.zip`（第1・第2ステージ敵素材フォルダ）から `art/enemies/stage02_draft/BB02_{h,v}_draft.png` を無加工で取り込んだ。SHA-256は横 `EF504D3DC1007FCCE2F1ED30D4EE0B94BC57C3781E413ED056D2642430B4B244`、縦 `248C813C6FA1215F585B213EA1481C9E56433A81624BF4A1FE5D59223969DEA3`。横は欄外を除いた描画範囲でボス戦の単体試作に採用。縦は保管。外部再配布権と制作手段は未確認。実画面は `docs/screenshots/latest/stage2_bb02_preview_20261119.png`。
+- `docs/screenshots/latest/stage1_boss_unmasked_20261119.png` はBB01の中心が見える修正版のGodot実画面。原本BB01を保ち、ゲーム内の弱点表示だけを更新した。
 - `docs/screenshots/latest/stage1_{items_vfx,vertical_vfx,boss_vfx,bullet_curtain}_20261119.png` はGodot 4.6.3の通常レンダラーで保存した640×360の撮影用配置。縦のEN001/EN002はSTG1-ENEMY-DRAFT-001のPNGを保持し、`visual_v09.gd`で欄外を除く座標だけを指定した。来歴と試作採用状態は同じ。
 - 試遊版と同じパックから第1ステージ冒頭16秒の連続映像を撮影。動画は3人の自動操作で、道中・ボスの試聴用WAVは既存のV09-AUD-001をそのまま添付。
 2026-10-30 v0.1
