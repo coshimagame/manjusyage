@@ -245,7 +245,10 @@ func sfx(name):
 	for player in sfx_pool:
 		if not player.playing:
 			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
-			player.stream = sounds[name]
+			var effect: AudioStream = sounds.get(name, null)
+			if effect == null:
+				return
+			player.stream = effect
 			player.play()
 			return
 
@@ -265,7 +268,13 @@ func track(name):
 		elif name=="sentinel":name="red_echo_boss_v09"
 	music_name=name
 	music.volume_db=1.5 if name.begins_with("red_echo") else -3
-	music.stream = load("res://audio/"+name+".wav")
+	var audio_path = "res://audio/" + name + ".wav"
+	if not ResourceLoader.exists(audio_path):
+		music.stop()
+		music.stream = null
+		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
+		return
+	music.stream = load(audio_path)
 	if music.stream == null:
 		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
 		return
@@ -424,7 +433,8 @@ func _input(event):
 			muted=false
 			AudioServer.set_bus_mute(0,false)
 			music.stream_paused=false
-			music.play()
+			if music.stream != null:
+				music.play()
 			sfx("pickup")
 		if key==KEY_F7:
 			var outputs=AudioServer.get_output_device_list()
