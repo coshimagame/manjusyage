@@ -97,7 +97,7 @@ func _process(delta: float) -> void:
 					foes[j]["hp"] -= 1
 					if foes[j]["hp"] <= 0:
 						foes.remove_at(j)
-					hit = true
+				hit = true
 					break
 			if hit:
 				shots.remove_at(i)
