@@ -30,6 +30,7 @@ var planet_tex: ImageTexture
 var music: AudioStreamPlayer
 var test_shot := false
 var frames := 0
+var last_touch_ms := -10000
 
 func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
@@ -79,8 +80,13 @@ func _unhandled_input(event):
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_START: finish()
 		elif event.button_index == JOY_BUTTON_A: advance()
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	elif event is InputEventScreenTouch and event.pressed:
+		# Android/Web: advance once on touch; ignore its emulated mouse click.
+		last_touch_ms = Time.get_ticks_msec()
 		advance()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if Time.get_ticks_msec() - last_touch_ms > 350:
+			advance()
 
 func advance():
 	if age < 2.5: age = 2.5; return
