@@ -13,6 +13,8 @@ var boss_active := false
 var finished := false
 var won := false
 var fire_cooldown := 0.0
+var hit_grace := 0.0
+const HIT_GRACE_SECONDS := 1.25
 
 func _process(delta: float) -> void:
 	if finished:
@@ -20,9 +22,13 @@ func _process(delta: float) -> void:
 		return
 	elapsed += delta
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
+	hit_grace = maxf(0.0, hit_grace - delta)
 	var movement := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	ship = (ship + movement * delta * 180.0).clamp(Vector2(14, 18), SIZE - Vector2(14, 18))
-	if Input.is_key_pressed(KEY_SPACE) and fire_cooldown <= 0.0:
+	var firing := Input.is_key_pressed(KEY_SPACE)
+	for pad in Input.get_connected_joypads():
+		firing = firing or Input.is_joy_button_pressed(pad, JOY_BUTTON_A)
+	if firing and fire_cooldown <= 0.0:
 		shots.append(ship + Vector2(14, 0))
 		fire_cooldown = 0.16
 	for i in range(shots.size() - 1, -1, -1):
@@ -40,14 +46,14 @@ func _process(delta: float) -> void:
 		var foe: Dictionary = foes[i]
 		foe["pos"] = foe["pos"] + Vector2(-75.0 * delta, 0)
 		if (foe["pos"] as Vector2).distance_to(ship) < 20.0:
-			hp -= 1
+			apply_ship_hit()
 			foes.remove_at(i)
 		elif (foe["pos"] as Vector2).x < -20:
 			foes.remove_at(i)
 	if boss_active:
 		var boss_pos := Vector2(525, 180 + sin(elapsed * 1.8) * 70)
 		if ship.distance_to(boss_pos) < 38.0:
-			hp = 0
+			apply_ship_hit()
 		for i in range(shots.size() - 1, -1, -1):
 			if shots[i].distance_to(boss_pos) < 39.0:
 				shots.remove_at(i)
@@ -71,6 +77,12 @@ func _process(delta: float) -> void:
 		finished = true
 	queue_redraw()
 
+func apply_ship_hit() -> void:
+	if hit_grace > 0.0 or finished:
+		return
+	hp -= 1
+	hit_grace = HIT_GRACE_SECONDS
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R and finished:
 		get_tree().reload_current_scene()
@@ -80,8 +92,10 @@ func _draw() -> void:
 	for i in range(18):
 		var x := fposmod(float(i * 83) - elapsed * 24.0, 640.0)
 		draw_circle(Vector2(x, float((i * 59) % 340) + 10), 1.0, Color("#547e9c"))
-	draw_circle(ship, 9, Color("#e9d9b7"))
-	draw_colored_polygon(PackedVector2Array([ship + Vector2(16, 0), ship + Vector2(-9, -10), ship + Vector2(-9, 10)]), Color("#67dff0"))
+	if hit_grace <= 0.0 or int(elapsed * 12.0) % 2 == 0:
+		draw_circle(ship, 9, Color("#e9d9b7"))
+	if hit_grace <= 0.0 or int(elapsed * 12.0) % 2 == 0:
+		draw_colored_polygon(PackedVector2Array([ship + Vector2(16, 0), ship + Vector2(-9, -10), ship + Vector2(-9, 10)]), Color("#67dff0"))
 	for shot in shots:
 		draw_rect(Rect2(shot - Vector2(1, 2), Vector2(11, 4)), Color("#ffe6a6"))
 	for foe in foes:
