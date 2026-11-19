@@ -1154,6 +1154,16 @@ func draw_hud():
 	text_at("%07d"%score,Vector2(515,7),WHITE)
 	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
 	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
+	# Keep boss health readable in both the biological and classic stage renderers.
+	# This is drawn as HUD geometry, not as a replacement for approved sprite art.
+	if mode in ["play","pause"] and not boss.is_empty():
+		var boss_max: float = maxf(1.0, float(boss.get("max", 1.0)))
+		var boss_ratio: float = clampf(float(boss.get("hp", 0.0)) / boss_max, 0.0, 1.0)
+		draw_rect(Rect2(165,310,310,22),Color(0.025,0.045,0.10,0.88))
+		text_at("BOSS",Vector2(173,316),WHITE)
+		draw_rect(Rect2(229,317,236,8),Color("26314b"))
+		draw_rect(Rect2(229,317,236.0*boss_ratio,8),Color("ff668e"))
+		draw_rect(Rect2(229,317,236,8),WHITE,false,1.0)
 	draw_rect(Rect2(0,337,640,23),Color("080f22"))
 	japanese("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",Vector2(12,354),11,DIM)
 	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
