@@ -1,0 +1,33 @@
+name: Art references and Godot smoke test
+on:
+  pull_request:
+    paths:
+      - 'art/**'
+      - 'docs/manjushage/**'
+      - 'art_catalog.gd'
+      - 'tests/test_art_slots.gd'
+      - 'tools/validate_asset_migration.py'
+      - '.github/workflows/art-reference-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate references and preserved originals
+        run: python3 tools/validate_asset_migration.py --base origin/main --strict
+      - name: Install Godot 4.6
+        run: |
+          curl -fL --retry 3 -o /tmp/godot.zip https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.6-stable_linux.x86_64
+          sudo install /tmp/godot-bin/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Import Godot resources
+        run: godot --headless --path . --editor --import
+      - name: Test art slots and legacy fallbacks
+        run: godot --headless --path . --script tests/test_art_slots.gd
