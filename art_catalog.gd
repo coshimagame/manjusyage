@@ -2,6 +2,16 @@ extends RefCounted
 # Optional PNG artwork. Keep each slot independent so art experiments never
 # break gameplay when a file is missing. Textures load at game startup.
 const ROOT = "res://art/active/"
+const REFERENCE_SHIPS := [
+	"cormii_reference_v01.png",
+	"jiyoza_reference_v01.png",
+	"mafio_reference_v01.png",
+]
+const SHIP_REGIONS := [
+	Rect2(218,100,1337,690),
+	Rect2(179,100,1416,693),
+	Rect2(211,110,1348,660),
+]
 const SLOTS = [
 	"title_logo", "title_backdrop",
 	"ship_cormii", "ship_jiyoza", "ship_mafio",
@@ -23,3 +33,14 @@ func reload():
 
 func texture(key: String) -> Texture2D:
 	return images.get(key, null) as Texture2D
+
+static func reference_ship(character: int) -> Texture2D:
+	var index := clampi(character,0,REFERENCE_SHIPS.size()-1)
+	var path: String = ROOT+"ships/"+REFERENCE_SHIPS[index]
+	if not ResourceLoader.exists(path,"Texture2D"):
+		return null
+	var ship := AtlasTexture.new()
+	ship.atlas=load(path)
+	ship.region=SHIP_REGIONS[index]
+	ship.filter_clip=true
+	return ship

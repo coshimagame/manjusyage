@@ -29,6 +29,7 @@ const FONT = {
 }
 
 const Visual=preload("res://visual_v09.gd")
+const PilotStatus=preload("res://ui/pilot_status.gd")
 var visual=Visual.new()
 var art_v09=true
 var slice_mode=true
@@ -283,28 +284,6 @@ func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 	if chat_ui_atlas:
 		draw_texture_rect_region(chat_ui_atlas,target,source,modulate)
 
-# VIS-021 — user-selected transparent portraits, now rendered as an active
-# pixel-art set, replace the profile-board crop in the live status page.  The
-# former board crop only keeps older/incomplete asset packs usable.
-func draw_fixed_pilot_visual(char_id:int,accent:Color):
-	var panel=Rect2(438,55,180,183)
-	draw_rect(panel,Color("080d1c",.92))
-	var portrait=pilot_portraits[clampi(char_id,0,pilot_portraits.size()-1)] if not pilot_portraits.is_empty() else null
-	if portrait:
-		var source_size=portrait.get_size()
-		var scale=minf(112.0/source_size.x,152.0/source_size.y)
-		var portrait_size=source_size*scale
-		var portrait_rect=Rect2(panel.get_center()-portrait_size*.5,portrait_size)
-		# A very quiet silhouette halo keeps a transparent sprite legible without
-		# rebuilding a background behind it.
-		draw_circle(panel.get_center()+Vector2(0,5),59,Color(accent.r,accent.g,accent.b,.09))
-		draw_texture_rect(portrait,portrait_rect,false)
-	elif character_system_ui:
-		var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
-		draw_texture_rect_region(character_system_ui,Rect2(447,59,162,169),sources[clampi(char_id,0,2)])
-	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
-	draw_rect(Rect2(447,211,162,17),Color("101525",.82))
-	japanese("顔プロファイル / "+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
 
 func _repeat_music():
 	music.play()
@@ -1228,42 +1207,7 @@ func _draw():
 func draw_status_screen():
 	if players.is_empty(): return
 	status_slot=clampi(status_slot,0,players.size()-1)
-	var p=players[status_slot]
-	var char_id=int(p.character)
-	var accents=[Color("ff668e"),Color("67ecff"),Color("ffce63")]
-	var backgrounds=[Color("21111f"),Color("071b31"),Color("211a26")]
-	var accent=accents[char_id]
-	draw_rect(Rect2(0,0,W,H),backgrounds[char_id])
-	draw_rect(Rect2(0,0,W,4),accent)
-	for i in range(21):
-		draw_line(Vector2(i*32,48),Vector2(i*32,326),Color(accent.r,accent.g,accent.b,.07),1)
-	for i in range(8):
-		draw_line(Vector2(20,68+i*32),Vector2(620,68+i*32),Color(accent.r,accent.g,accent.b,.035),1)
-	japanese(PILOT_NAMES[char_id],Vector2(23,33),23,WHITE)
-	text_at("P"+str(status_slot+1),Vector2(184,21),accent,2)
-	japanese("ライフ",Vector2(292,28),12,WHITE)
-	for h in range(4):
-		var heart=Color("ff8fa7") if h<int(p.hp) else Color("364055")
-		draw_colored_polygon(PackedVector2Array([Vector2(350+h*19,18),Vector2(354+h*19,14),Vector2(358+h*19,18),Vector2(362+h*19,14),Vector2(366+h*19,18),Vector2(358+h*19,29)]),heart)
-	japanese("エネルギー",Vector2(447,28),12,DIM)
-	draw_rect(Rect2(519,19,96,8),Color("26324a"))
-	draw_rect(Rect2(519,19,96*clampf(float(p.charge)/100.0,0,1),8),accent)
-	draw_line(Vector2(22,49),Vector2(618,49),accent,2)
-	if archive_page and char_id==2:
-		draw_mafio_archive()
-	elif char_id==0:
-		draw_cormii_status(p,accent)
-	elif char_id==1:
-		draw_jiyoza_status(p,accent)
-	else:
-		draw_mafio_status(p,accent)
-	# Draw after each live page so the supplied, fixed protagonist appearance is
-	# visible rather than becoming a barely-readable watermark. The underlying
-	# mechanic cards remain active game data; this panel is display-only.
-	if not archive_page:
-		draw_fixed_pilot_visual(char_id,accent)
-		draw_status_frame_loadout(p,char_id,accent)
-	text_at("TAB / START : BACK   LEFT / RIGHT : PILOT",Vector2(28,341),accent)
+	PilotStatus.draw(self,players[status_slot],status_slot)
 
 func status_frame_modules(char_id:int)->Array:
 	# These are visible components of the existing prototype abilities, not a new
@@ -1274,105 +1218,13 @@ func status_frame_modules(char_id:int)->Array:
 		["捕食ポッド","融合槽","変換薄翼"]
 	][clampi(char_id,0,2)]
 
-func draw_status_frame_loadout(p,char_id:int,accent:Color):
-	var panel=Rect2(438,242,180,84)
-	draw_rect(panel,Color("080d1c",.94))
-	draw_rect(panel,Color(accent.r,accent.g,accent.b,.72),false,1)
-	text_at("FRAME / LIVE LOADOUT",Vector2(445,253),accent)
-	var preview=p.duplicate()
-	preview.pos=Vector2(475,286)
-	preview.color=char_id
-	preview.motion=Vector2.ZERO
-	preview.cool=0.0
-	preview.inv=0.0
-	visual.ship(self,preview,char_id,0,.82)
-	var modules=status_frame_modules(char_id)
-	for i in range(modules.size()):
-		var y=263+i*19
-		var active=Color(accent.r,accent.g,accent.b,.18+.08*i)
-		draw_rect(Rect2(506,y,105,15),Color("101b2e"))
-		draw_rect(Rect2(506,y,105,15),active,false,1)
-		if char_id==0:
-			draw_circle(Vector2(514,y+7),3,accent)
-			for petal in range(4):
-				draw_line(Vector2(514,y+7),Vector2(514,y+7)+Vector2.from_angle(petal*TAU/4.0)*5,Color("ffe1bd"),1)
-		elif char_id==1:
-			draw_line(Vector2(510,y+7),Vector2(518,y+7),accent,1)
-			draw_line(Vector2(514,y+3),Vector2(514,y+11),accent,1)
-			draw_rect(Rect2(512,y+5,4,4),Color("d7f9ff"),false,1)
-		else:
-			draw_circle(Vector2(514,y+7),4,Color("e8c270"),false,1)
-			draw_arc(Vector2(514,y+7),6,-PI*.6,PI*.6,8,Color("e5a6ec"),1)
-		japanese(str(modules[i]),Vector2(524,y+11),10,Color("f5efe3"))
-	var live_state=Abilities.label(p,elapsed)
-	japanese("現象："+live_state,Vector2(445,322),9,accent)
 
-func draw_cormii_status(p,accent):
-	japanese("出力変動盤 / 瞬間最大火力",Vector2(29,78),20,Color("ffdbe5"))
-	var phase=fposmod(elapsed,8.0)
-	var labels=["最大出力","反動","安定","増幅予告"]
-	var active=0 if phase<1.5 else (1 if phase<3.0 else (3 if phase>6.5 else 2))
-	for i in range(4):
-		# Reserve the far-right column for the fixed portrait without dropping the
-		# live fourth phase card.
-		var x=30+i*99
-		var tint=accent if i==active else Color("593447")
-		draw_rect(Rect2(x,120,88,105),Color("321a2b"))
-		draw_rect(Rect2(x,120,88,105),tint,false,2)
-		draw_rect(Rect2(x+12,173,64,13),Color("3b2638"))
-		draw_rect(Rect2(x+12,173,64*(1.0 if i==active else .22),13),tint)
-		japanese(labels[i],Vector2(x+10,150),12,WHITE)
-		text_at("NOW" if i==active else "WAIT",Vector2(x+21,198),tint,1)
-	japanese("現在："+Abilities.label(p,elapsed)+"   成長 Lv "+str(Abilities.level(p)+1),Vector2(38,263),17,Color("ffe9be"))
-	japanese("大きく開花し、反動を越えて次の波を待つ。数値は試作調整中。",Vector2(38,302),14,WHITE)
 
-func draw_jiyoza_status(p,accent):
-	japanese("解析端末 / 精密・漸進成長",Vector2(29,78),20,Color("b9efff"))
-	for i in range(8):
-		draw_line(Vector2(42+i*53,110),Vector2(42+i*53,284),Color("1b5b79"),1)
-	for i in range(7):
-		draw_line(Vector2(42,110+i*25),Vector2(418,110+i*25),Color("1b5b79"),1)
-	text_at("ANALYSIS LV "+str(Abilities.level(p)+1),Vector2(57,126),accent,2)
-	for i in range(12):
-		draw_rect(Rect2(57+i*29,164,22,16),accent if i<mini(12,int(p.experience)) else Color("173b58"))
-	draw_arc(Vector2(360,224),57,0,TAU,40,Color("397b9b"),1)
-	draw_arc(Vector2(360,224),45,-PI/2,-PI/2+TAU*float(Abilities.level(p)+1)/4.0,40,Color("d3f6ff"),3)
-	draw_line(Vector2(302,224),Vector2(418,224),Color("85e7f4"),1)
-	draw_line(Vector2(360,166),Vector2(360,282),Color("85e7f4"),1)
-	japanese("取得経験 "+str(p.experience)+" / 次の解析 "+str((Abilities.level(p)+1)*8),Vector2(57,257),16,WHITE)
-	japanese("敵の軌道を読み、撃破ごとに確実に出力を高める。",Vector2(57,303),14,Color("c8f2ff"))
 
 func status_technique_name(technique:String)->String:
 	var names={"none":"基本弾","fan":"散華三連","weave":"蛇行弾","dive":"急降下弾","orbit":"環状弾","petal":"散華扇","seed":"種子分裂","halo":"放射光","beam":"細光レーザー","pierce":"貫通ニードル"}
 	return str(names.get(technique,"解析中"))
 
-func draw_mafio_status(p,accent):
-	japanese("融合器官 / 捕食・消化・変異",Vector2(29,78),20,Color("ffe6bd"))
-	# Keep all actionable digestion data left of the dedicated character panel.
-	draw_rect(Rect2(31,101,391,184),Color("352733"))
-	draw_rect(Rect2(31,101,391,184),Color("dfba6a",.48),false,1)
-	draw_line(Vector2(220,112),Vector2(220,274),Color("fff0d0"),2)
-	var total=maxf(.1,float(p.get("digest_total",1.2)))
-	var progress=1.0-clampf(float(p.digest)/total,0,1)
-	draw_arc(Vector2(220,191),67,0,TAU,40,Color("e5d1af"),2)
-	draw_arc(Vector2(220,191),65,-PI/2,-PI/2+progress*TAU,40,Color("9adeff"),4)
-	text_at(str(int(round(progress*100)))+"%",Vector2(194,184),accent,2)
-	japanese("消化度",Vector2(195,207),12,Color("fff0cf"))
-	japanese("消化中の技",Vector2(56,135),14,WHITE)
-	japanese(status_technique_name(str(p.get("pending_technique","none"))) if p.digest>0 else status_technique_name(str(p.learned)),Vector2(56,173),20,Color("ffe5b4"))
-	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(250,145),17,WHITE)
-	japanese("保持技  "+status_technique_name(str(p.learned)),Vector2(250,183),15,Color("fff0cf"))
-	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(250,219),15,WHITE)
-	japanese("E / X : 図鑑",Vector2(304,240),9,Color("dfbdf7"))
-	var stages=["捕食","分解","同化"]
-	for i in range(3):
-		var amount=clampf(progress*3.0-i,0,1)
-		var x=55+i*112
-		draw_rect(Rect2(x,263,96,8),Color("4d3a4d"))
-		draw_rect(Rect2(x,263,96*amount,8),accent)
-		draw_rect(Rect2(x,263,96,8),Color("f8ddb4",.72),false,1)
-		japanese(stages[i],Vector2(x+32,282),10,Color("fff0cf") if amount>.01 else Color("917c91"))
-	japanese("弱った敵へ近づき、バーストで捕食。消化後に敵技を再現。",Vector2(72,309),14,WHITE)
 
 func draw_mafio_archive():
 	japanese("マフィオの捕食図鑑",Vector2(23,78),20,Color("fff0d4"))

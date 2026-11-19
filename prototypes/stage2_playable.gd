@@ -12,6 +12,7 @@ const BOSS_ART = preload("res://art/enemies/stage02_draft/BB02_h_draft.png")
 const OCEAN_BACKDROP = preload("res://art/v09/cosmos.png")
 const BOSS_REGION := Rect2(9,72,239,107)
 var artwork = ArtCatalog.new()
+var player_art: Texture2D
 var capture_requested := false
 var hit_flash := 0.0
 var hit_grace := 0.0
@@ -34,6 +35,9 @@ var fire_touch_id := -1
 
 func _ready() -> void:
 	artwork.reload()
+	player_art=ArtCatalog.reference_ship(0)
+	if player_art==null:
+		player_art=artwork.texture("ship_cormii")
 	ui_font.font_names=PackedStringArray(["Yu Gothic","Meiryo","Noto Sans CJK JP","sans-serif"])
 	capture_requested=OS.get_cmdline_user_args().has("--stage2-shot")
 	DisplayServer.window_set_title("曼珠沙華 — 第2ステージ ボス試作")
@@ -162,9 +166,8 @@ func _draw() -> void:
 		var x := fposmod(float(n * 83) - elapsed * 22.0, W)
 		var y := float((n * 47) % 350)
 		draw_circle(Vector2(x, y), 1.0, Color("#496b91"))
-	var player_art: Texture2D = artwork.texture("ship_cormii")
 	if player_art != null and (hit_grace<=0 or int(elapsed*16)%2==0):
-		draw_texture_rect(player_art, Rect2(ship - Vector2(20, 14), Vector2(40, 28)), false)
+		draw_texture_rect(player_art, Rect2(ship - Vector2(27, 14), Vector2(54, 28)), false)
 	elif player_art==null:
 		draw_colored_polygon(PackedVector2Array([ship + Vector2(19, 0), ship + Vector2(-14, -11), ship + Vector2(-8, 0), ship + Vector2(-14, 11)]), Color("#69e4ff"))
 	if enemy_hp>0:

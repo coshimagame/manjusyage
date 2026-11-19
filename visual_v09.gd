@@ -1,5 +1,7 @@
 extends RefCounted
 
+const ArtCatalog = preload("res://art_catalog.gd")
+
 # Candidate art, not canon. Native-size detail is redrawn over registered sprites.
 var cosmos: Texture2D
 var atlas: Texture2D
@@ -32,13 +34,11 @@ func optional_texture(path: String) -> Texture2D:
 func setup():
 	cosmos=load("res://art/v09/cosmos.png")
 	atlas=load("res://art/v09/ship-atlas.png")
-	# These three authored combat sprites were already present in art/active, but
-	# the v0.9 renderer had never consumed them. Keep the shared atlas as a
-	# motion underlay and put the individual silhouette on top at gameplay scale.
+	# Use the three cutouts derived from the design board as the visible hulls.
 	ship_variants=[
-		load("res://art/active/ship_cormii.png"),
-		load("res://art/active/ship_jiyoza.png"),
-		load("res://art/active/ship_mafio.png")
+		ArtCatalog.reference_ship(0),
+		ArtCatalog.reference_ship(1),
+		ArtCatalog.reference_ship(2)
 	]
 	# User-provided Stage 1 enemy sheets stay as byte-preserved draft assets.
 	# H/V are deliberately loaded as separate layouts rather than rotating an
@@ -149,78 +149,44 @@ func background(g):
 		g.draw_polyline(floor_edge,Color("b17c83"),2)
 
 func ship(g,p,index,rotation=0.0,scale_factor=1.0):
-	var direction=p.get("motion",Vector2.ZERO)
-	var state=1 if direction.y<-.2 else (2 if direction.y>.2 else (3 if direction.x>.2 else 0))
-	if p.get("cool",0)>.085 and state==0:state=4
-	if p.get("digest",0)>0 or p.get("burst",0)>0:state=5
-	var tint=g.COLORS[p.color]
-	g.draw_set_transform(p.pos.round(),rotation,Vector2.ONE*scale_factor)
-	for side in [-1,1]:
-		var length=10+int(g.clock*24)%3*3+int(direction.x>0)*7
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-23,side*7-2),Vector2(-26-length,side*7),Vector2(-23,side*7+3)]),Color("375778"))
-		g.draw_line(Vector2(-24,side*7),Vector2(-24-length*.7,side*7),tint,2)
-		g.draw_line(Vector2(-24,side*7),Vector2(-29,side*7),Color("fff3d5"),1)
-	var modulation=Color(.55,.78,1,.7) if p.get("inv",0)>0 and int(g.clock*12)%2==0 else Color.WHITE
-	var character=int(p.get("character",index))
-	var variant=ship_variants[clampi(character,0,ship_variants.size()-1)] if not ship_variants.is_empty() else null
+	var character := clampi(int(p.get("character",index)),0,ship_variants.size()-1)
+	var variant: Texture2D = ship_variants[character]
+	var motion: Vector2 = p.get("motion",Vector2.ZERO)
+	var local_motion := motion.rotated(-rotation)
+	var in_flight: bool = g.mode=="play" or g.mode=="pause"
+	var modulation := Color(.68,.81,1,.65) if p.get("inv",0)>0 and int(g.clock*12)%2==0 else Color.WHITE
+	var tint: Color = g.COLORS[p.color]
+	var ship_size := fitted_texture_size(variant,Vector2(56,29)) if variant else Vector2(56,36)
+	var bank := clampf(local_motion.y*.06,-.06,.06) if in_flight else 0.0
+	g.draw_set_transform(p.pos.round(),rotation+bank,Vector2.ONE*scale_factor)
+
+	if in_flight:
+		var nozzle := Vector2(-ship_size.x*.44,0)
+		var length := 6.0+floorf(fposmod(g.clock*27,3))*1.5+maxf(0.0,local_motion.x)*7.0
+		g.draw_colored_polygon(PackedVector2Array([
+			nozzle+Vector2(0,-3),nozzle-Vector2(length,0),nozzle+Vector2(0,3)
+		]),Color(tint,.64*modulation.a))
+		g.draw_line(nozzle,nozzle-Vector2(length*.65,0),Color("fff4d8",.88*modulation.a),1)
+
 	if variant:
-		# The animated common frame preserves the shared-designer language; the
-		# individual 32x20 base is the visible fighter body rather than a menu-only
-		# asset. It also rotates with vertical passage because this function already
-		# inherits the stage transform.
-		g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),Color(modulation.r,modulation.g,modulation.b,.30))
-		g.draw_texture_rect(variant,Rect2(-24,-15,48,30),false,modulation)
+		g.draw_texture_rect(variant,Rect2(-ship_size*.5,ship_size),false,modulation)
 	else:
-		g.draw_texture_rect_region(atlas,Rect2(-28,-18,56,36),Rect2(state*56,0,56,36),modulation)
-	# All three use the same core atlas, but their visible equipment silhouette is
-	# now distinct at gameplay scale. These overlays deliberately change fins,
-	# sensors and thrusters rather than merely tinting one identical fighter.
-	if character==0: # コルミィ: broad heat-petal vanes / burst thrusters.
-		for side in [-1,1]:
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-8,side*5),Vector2(9,side*20),Vector2(24,side*14),Vector2(9,side*2)]),Color("b93f59"))
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-3,side*6),Vector2(9,side*16),Vector2(18,side*11),Vector2(7,side*4)]),Color("ff7790"))
-			g.draw_line(Vector2(-1,side*7),Vector2(20,side*13),Color("ffe2b2"),1)
-			g.draw_circle(Vector2(-18,side*7),2,Color("ff8f9e"))
-		g.draw_arc(Vector2(-12,0),18,PI*.62,PI*1.38,14,Color("ff9bab",.82),2)
-	elif character==1: # ジヨーザ: long sensor booms / precise symmetric lattice.
-		for side in [-1,1]:
-			g.draw_line(Vector2(-4,side*6),Vector2(7,side*19),Color("70dff5"),2)
-			g.draw_line(Vector2(7,side*19),Vector2(22,side*14),Color("bdf7ff"),1)
-			g.draw_circle(Vector2(22,side*14),2,Color("d6fbff"))
-		g.draw_line(Vector2(8,-11),Vector2(25,-15),Color("70dff5"),1)
-		g.draw_line(Vector2(8,11),Vector2(25,15),Color("70dff5"),1)
-		g.draw_line(Vector2(20,-18),Vector2(20,18),Color("bdf7ff"),1)
-		g.draw_circle(Vector2(20,0),4,Color("1a5578"),false,1)
-	else: # マフィオ: asymmetric intake pods / absorb-and-rebuild fins.
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-16,-7),Vector2(-4,-18),Vector2(12,-11),Vector2(1,-3)]),Color("d4a65a"))
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-21,7),Vector2(-8,19),Vector2(13,11),Vector2(-3,3)]),Color("7b5b9a"))
-		g.draw_colored_polygon(PackedVector2Array([Vector2(-14,4),Vector2(-2,14),Vector2(7,10),Vector2(-4,1)]),Color("b782c8"))
-		g.draw_circle(Vector2(-11,0),7,Color("6d4f72"))
-		g.draw_circle(Vector2(-11,0),4,Color("f3d17b"))
-		g.draw_arc(Vector2(-11,0),10,-PI*.65,PI*.65,10,Color("e8b7ff"),2)
-	# Hand-placed native cockpit, armor seams, nozzles and muzzle stay legible.
-	g.draw_line(Vector2(-6,-4),Vector2(5,-3),Color("90e2df"),1)
-	g.draw_line(Vector2(6,-2),Vector2(17,-1),Color("eee1bf"),1)
-	g.draw_line(Vector2(3,3),Vector2(19,2),Color("384451"),1)
-	for side in [-1,1]:
-		g.draw_rect(Rect2(21,side*2-1,5,2),Color("111b2a"))
-		g.draw_rect(Rect2(-19,side*7-1,3,2),tint)
-	if p.get("cool",0)>.085:
-		g.draw_colored_polygon(PackedVector2Array([Vector2(26,-3),Vector2(36,0),Vector2(26,3),Vector2(29,0)]),tint)
-		g.draw_line(Vector2(25,0),Vector2(32,0),Color("fffbe7"),1)
-	if p.character==0 and fposmod(g.elapsed,8)<1.5:
-		g.draw_arc(Vector2(-7,0),17+sin(g.clock*18)*2,PI*.65,PI*1.35,12,Color(tint,.6),1)
-	elif p.character==1:
-		for j in range(1+g.Abilities.level(p)):
-			g.draw_line(Vector2(10+j*4,-10),Vector2(12+j*4,-10),tint,1)
-	elif p.character==2 and p.get("digest",0)>0:
-		for j in range(6):
-			var a=g.clock*5+j*TAU/6
-			g.draw_line(Vector2.from_angle(a)*20,Vector2.from_angle(a+.2)*13,Color("ffe0a2"),2)
-	g.draw_arc(Vector2.ZERO,8,0,TAU,20,Color(.8,.95,1,.4),1)
-	g.draw_rect(Rect2(-1,-1,2,2),Color.WHITE)
+		var state := 1 if local_motion.y<-.2 else (2 if local_motion.y>.2 else 0)
+		g.draw_texture_rect_region(atlas,Rect2(-ship_size*.5,ship_size),Rect2(state*56,0,56,36),modulation)
+
+	if in_flight:
+		if p.get("cool",0)>.105:
+			g.draw_line(Vector2(27,0),Vector2(33,0),Color("fff4db"),1)
+		if character==2 and p.get("digest",0)>0:
+			var angle: float = g.clock*3.4
+			g.draw_arc(Vector2.ZERO,17,angle,angle+PI*.64,12,Color("f7d080",.72),1)
+		# The two-pixel center stays visible against bright hulls and the backdrop.
+		g.draw_rect(Rect2(-2,-2,4,4),Color("15162c",.7))
+		g.draw_rect(Rect2(-1,-1,2,2),Color("fff9e8"))
+
 	g.draw_set_transform(Vector2.ZERO)
-	if scale_factor==1:g.text_at(str(index+1),p.pos+Vector2(-3,-24),g.COLORS[index])
+	if in_flight and scale_factor==1:
+		g.text_at(str(index+1),p.pos+Vector2(-3,-24),g.COLORS[index])
 
 func enemy(g,e):
 	var technique=e.get("technique","")

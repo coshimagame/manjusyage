@@ -31,7 +31,8 @@ func run():
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
 	assert(g.visual.ship_variants.size()==3)
-	assert(g.visual.ship_variants[0]!=null and g.visual.ship_variants[1]!=null and g.visual.ship_variants[2]!=null)
+	for ship in g.visual.ship_variants:
+		assert(ship is AtlasTexture and ship.atlas.resource_path.begins_with("res://art/active/ships/"))
 	assert(g.visual.item_hp_texture!=null and g.visual.item_energy_texture!=null)
 	assert(g.visual.bullet_petal_texture!=null and g.visual.bullet_needle_texture!=null)
 	assert(g.visual.bullet_flower_ring_texture!=null and g.visual.bullet_target_eye_texture!=null)

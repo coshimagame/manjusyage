@@ -1,5 +1,10 @@
 # アート・音楽・参考画像の原本台帳
 
+## 2026-11-19 機体とステータス
+
+- **V09-SHIP-004**。既存の生成透過素材3枚を`art/active/ships/`に保管。チャットで検討した細身の機体案を参照した素材で、ハッシュと制作履歴は同ディレクトリのREADMEを参照。3機はv0.9で試作採用。旧PNGと機体アトラスも保存。
+- **V09-STATUS-002**。ユーザー添付「曼珠沙華 キャラクター別UI図鑑.png」の上段を参照し、肖像、色別の枠、固有能力、機体と搭載系の配置を`ui/pilot_status.gd`で作成。添付画像と既存の`art/ui/character_system_ui_20261106.png`はSHA-256が一致。既存肖像を使用し、出力・解析・消化の表示はプレイ中の値から算出する。
+
 ## 2026-11-19 第1ステージ試遊結果
 
 - **STG2-BOSS-DRAFT-001**。ユーザー提供の `manjushage_stage02_24_sprites_draft.zip`（第1・第2ステージ敵素材フォルダ）から `art/enemies/stage02_draft/BB02_{h,v}_draft.png` を無加工で取り込んだ。SHA-256は横 `EF504D3DC1007FCCE2F1ED30D4EE0B94BC57C3781E413ED056D2642430B4B244`、縦 `248C813C6FA1215F585B213EA1481C9E56433A81624BF4A1FE5D59223969DEA3`。横は欄外を除いた描画範囲でボス戦の単体試作に採用。縦は保管。外部再配布権と制作手段は未確認。実画面は `docs/screenshots/latest/stage2_bb02_preview_20261119.png`。
