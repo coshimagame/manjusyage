@@ -4,7 +4,7 @@ signal launch_requested(stage_number: int)
 signal return_requested
 
 @export_range(1, 8) var stage_number: int = 2
-var _launch_button: Button
+@export var selected_pilots: PackedStringArray = PackedStringArray()\nvar _launch_button: Button
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -26,6 +26,11 @@ func _ready() -> void:
 	stage.text = "STAGE %02d / 08" % stage_number
 	stage.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(stage)
+	var party := Label.new()
+	party.name = "PartyLabel"
+	party.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	party.text = _party_summary()
+	layout.add_child(party)
 	var placeholder := Label.new()
 	placeholder.text = "管制通信終了。次の出撃準備へ。\n（仮表示・正式台詞ではありません）"
 	placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -47,3 +52,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_launch() -> void:
 	launch_requested.emit(stage_number)
+
+func _party_summary() -> String:
+	var valid: Array[String] = []
+	for pilot in selected_pilots:
+		if pilot in ["コルミィ", "ジヨーザ", "マフィオ"] and not valid.has(pilot):
+			valid.append(pilot)
+	if valid.is_empty():
+		return "出撃メンバー：未設定"
+	return "出撃メンバー（%d人）：%s" % [valid.size(), " / ".join(valid)]
