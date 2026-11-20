@@ -6,7 +6,7 @@ on:
       - main
       - ci/windows-playtest-zip-20261105
   schedule:
-    - cron: '0 11 * * *' # 20:00 JST
+    - cron: '0 7 * * *' # 16:00 JST
 permissions:
   contents: read
 jobs:

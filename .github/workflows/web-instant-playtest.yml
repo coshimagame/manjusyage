@@ -1,0 +1,60 @@
+name: MANJUSHAGE Web instant playtest
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: manjusyage-web-pages
+  cancel-in-progress: false
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate project music
+        run: node tools/build_story_music.cjs
+      - name: Install Godot 4.6 and templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          sudo install /tmp/godot-bin/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
+          curl -fL --retry 3 -o /tmp/templates.tpz "https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.6.stable" /tmp/godot-templates
+          unzip -q /tmp/templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.6.stable/"
+      - name: Import resources
+        run: godot --headless --path . --editor --import
+      - name: Export browser game
+        run: |
+          mkdir -p build/web
+          godot --headless --path . --export-release Web build/web/index.html
+          test -s build/web/index.html
+          test -s build/web/index.wasm
+          touch build/web/.nojekyll
+      - name: Keep downloadable web build for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: MANJUSHAGE-Web-${{ github.run_number }}
+          path: build/web/
+          retention-days: 14
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+      - name: Publish stable browser link
+        id: deployment
+        uses: actions/deploy-pages@v4
