@@ -174,6 +174,16 @@ func draw_training():
 		draw_rect(Rect2(pos+Vector2(-12,-13),Vector2(7,8)),col)
 		draw_rect(Rect2(pos+Vector2(4,-13),Vector2(7,8)),Color("e8eddd"))
 		draw_rect(Rect2(pos+Vector2(-30,-2),Vector2(12+int(clock*10)%4,4)),col)
+		# Original pixel exhaust: each craft has a distinct pulse, with no new
+		# character/ship design. The staggered fragments read at 640x360.
+		var pulse = 0.5 + 0.5 * sin(clock * (9.0 + float(i)) + float(i) * 1.7)
+		for trail in range(6):
+			var drift = fposmod(clock * (28.0 + float(i) * 4.0) + float(trail) * 9.0, 57.0)
+			var spark_pos = pos + Vector2(-35.0 - drift, sin(float(trail) * 2.1 + clock * 4.0) * (2.0 + drift * 0.07))
+			var spark_alpha = (1.0 - drift / 57.0) * (0.30 + pulse * 0.55)
+			var spark_color = col.lerp(Color("ffe4bd"), 0.45)
+			spark_color.a = spark_alpha
+			draw_rect(Rect2(spark_pos.floor(), Vector2(3.0 if trail % 2 == 0 else 2.0, 2.0)), spark_color)
 		if page==2:
 			draw_string(font,pos+Vector2(-28,27),["コルミィ","ジヨーザ","マフィオ"][i],HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("e5e8eb"))
 		else:
