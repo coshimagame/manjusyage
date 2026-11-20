@@ -50,4 +50,4 @@ jobs:
           name: MANJUSHAGE-Windows-${{ github.run_number }}
           path: build/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1

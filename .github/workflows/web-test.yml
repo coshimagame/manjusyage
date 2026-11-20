@@ -30,3 +30,4 @@ jobs:
           name: manjushage-web-test
           path: build/web/
           if-no-files-found: error
+          retention-days: 1
