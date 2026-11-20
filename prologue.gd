@@ -38,9 +38,14 @@ func _ready():
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	music.stream = load("res://audio/title.wav")
-	music.volume_db = -6
-	music.play()
+	var title_audio = "res://audio/title.wav"
+	if ResourceLoader.exists(title_audio):
+		music.stream = load(title_audio)
+		if music.stream != null:
+			music.volume_db = -6
+			music.play()
+	else:
+		push_warning("Prologue title BGM missing; continuing silently: " + title_audio)
 	music.finished.connect(_loop_music)
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--autotest" or arg.begins_with("--shot="):
@@ -68,7 +73,7 @@ func cache_planet_texture():
 	planet_tex=ImageTexture.create_from_image(image)
 
 func _loop_music():
-	if not finished: music.play()
+	if not finished and music.stream != null: music.play()
 
 func _unhandled_input(event):
 	if finished: return
