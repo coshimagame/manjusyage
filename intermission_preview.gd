@@ -105,12 +105,15 @@ func _panel(pos: Vector2, dimensions: Vector2, color: Color) -> Panel:
 	add_child(panel)
 	return panel
 
-func _label(value: String, pos: Vector2, dimensions: Vector2, font_size: int, parent: Control = self) -> Label:
+func _label(value: String, pos: Vector2, dimensions: Vector2, font_size: int, parent: Control = null) -> Label:
 	var label := Label.new()
 	label.text = value
 	label.position = pos
 	label.size = dimensions
 	label.add_theme_font_size_override("font_size", font_size)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	parent.add_child(label)
+	if parent == null:
+		add_child(label)
+	else:
+		parent.add_child(label)
 	return label
