@@ -808,6 +808,15 @@ func finish(won):
 		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
 		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
+		# Record a genuine stage-1 clear for future stage-select integration.
+		# This does not unlock an unimplemented stage or overwrite existing saves.
+		if won and bio_route:
+			var progress=ConfigFile.new()
+			progress.load("user://stage_progress.cfg")
+			progress.set_value("stages","stage_01_cleared",true)
+			progress.set_value("stages","stage_01_best_score",maxi(int(progress.get_value("stages","stage_01_best_score",0)),score))
+			var progress_error=progress.save("user://stage_progress.cfg")
+			if progress_error!=OK: push_warning("Stage clear progress could not be saved: "+str(progress_error))
 	else:
 		tests_done=true
 		if won and (gates_done==2 or slice_mode):
@@ -1316,5 +1325,9 @@ func draw_result():
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
+	if mode=="clear" and bio_route:
+		var saved=ConfigFile.new()
+		if saved.load("user://stage_progress.cfg")==OK and saved.get_value("stages","stage_01_cleared",false):
+			centered("STAGE 01 CLEAR RECORDED",245,COLORS[2])
 	centered("ENTER / A : FLY AGAIN",269,WHITE)
 	centered("ESC : TITLE",289,DIM)
