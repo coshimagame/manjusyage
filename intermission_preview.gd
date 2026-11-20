@@ -34,6 +34,17 @@ func _process(delta: float) -> void:
 		revealed = minf(float(full_text.length()), revealed + delta / TICK)
 		dialogue_label.text = full_text.substr(0, int(revealed))
 
+func _unhandled_input(event: InputEvent) -> void:
+	# Controller A advances/reveals text; B skips. Joypad events must work
+	# even when the mouse or keyboard is unavailable (Windows/Web).
+	if event is InputEventJoypadButton and event.pressed:
+		if event.button_index == JOY_BUTTON_A:
+			_advance()
+			get_viewport().set_input_as_handled()
+		elif event.button_index == JOY_BUTTON_B:
+			_finish()
+			get_viewport().set_input_as_handled()
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
@@ -72,7 +83,8 @@ func _refresh() -> void:
 	revealed = 0.0
 	speaker_label.text = str(LINES[line_index]["speaker"])
 	dialogue_label.text = ""
-	progress_label.text = "%d / %d    ENTER・クリック: 送る    ESC: スキップ" % [line_index + 1, LINES.size()]
+	progress_label.text = "%d / %d    ENTER・A・クリック: 送る    ESC・B: スキップ" % [line_index + 1, LINES.size()]
+	left_label.text = "%s\\n\\n[ PORTRAIT SLOT ]" % str(LINES[line_index]["speaker"]) if LINES[line_index]["side"] == "left" else "PILOT / KUU\\n\\n[ PORTRAIT SLOT ]"
 	left_label.modulate = Color.WHITE if LINES[line_index]["side"] == "left" else Color("718093")
 	right_label.modulate = Color.WHITE if LINES[line_index]["side"] == "right" else Color("718093")
 
