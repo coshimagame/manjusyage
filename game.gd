@@ -1142,13 +1142,13 @@ func draw_hud():
 	for i in range(count):
 		var p=players[i]
 		var x=12+i*138
-		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
+		text_at("P"+str(i+1),Vector2(x,8),COLORS[p.color])
 		japanese(PILOT_NAMES[p.character],Vector2(x,39),10,WHITE)
 		if bio_route: japanese(Abilities.label(p,elapsed),Vector2(x+48,39),9,COLORS[i])
-		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
+		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[p.color] if h<p.hp else Color("26314b"))
 		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
 		draw_rect(Rect2(x,22,110,3),Color("26314b"))
-		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[i])
+		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[p.color])
 		if p.charge>=100: text_at("B",Vector2(x+115,19),WHITE)
 	text_at("SCORE",Vector2(460,7),DIM)
 	text_at("%07d"%score,Vector2(515,7),WHITE)
