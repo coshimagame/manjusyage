@@ -134,7 +134,8 @@ func _ready():
 	music.volume_db = -3
 	music.finished.connect(_repeat_music)
 	for name in ["shot","switch","hit","burst","gate","pickup","pulse_v09","lance_v09","spore_v09","impact_v09","break_small_v09","break_medium_v09","break_boss_v09","consume_v09"]:
-		sounds[name] = load("res://audio/"+name+".wav")
+		var sound_path = "res://audio/" + name + ".wav"
+		sounds[name] = load(sound_path) if ResourceLoader.exists(sound_path) else null
 	for i in range(12):
 		var player = AudioStreamPlayer.new()
 		player.volume_db = -8
@@ -245,7 +246,10 @@ func sfx(name):
 	for player in sfx_pool:
 		if not player.playing:
 			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
-			player.stream = sounds[name]
+			var stream: AudioStream = sounds.get(name)
+			if stream == null:
+				return
+			player.stream = stream
 			player.play()
 			return
 
@@ -265,7 +269,8 @@ func track(name):
 		elif name=="sentinel":name="red_echo_boss_v09"
 	music_name=name
 	music.volume_db=1.5 if name.begins_with("red_echo") else -3
-	music.stream = load("res://audio/"+name+".wav")
+	var music_path = "res://audio/" + name + ".wav"
+	music.stream = load(music_path) if ResourceLoader.exists(music_path) else null
 	if music.stream == null:
 		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
 		return
