@@ -453,6 +453,9 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		else:
+			if mode == "clear" and key == KEY_N and not auto_test:
+				open_stage_clear_bridge()
+				return
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
@@ -462,6 +465,19 @@ func _input(event):
 		elif p.y > 200 and p.y < 232:
 			if p.x < 320: count=maxi(1,count-1)
 			else: count=mini(3,count+1)
+
+# Optional post-clear story bridge. Keep original retry flow usable.
+func open_stage_clear_bridge() -> void:
+	const BRIDGE_PATH = "res://stage_clear_bridge.tscn"
+	if not ResourceLoader.exists(BRIDGE_PATH):
+		notice = "INTERLUDE NOT INSTALLED"
+		notice_time = 3.0
+		return
+	var err = get_tree().change_scene_to_file(BRIDGE_PATH)
+	if err != OK:
+		notice = "INTERLUDE LOAD FAILED"
+		notice_time = 3.0
+		push_warning("Stage clear bridge failed to load: %s" % err)
 
 func change_color(i):
 	if players[i].down > 0: return
