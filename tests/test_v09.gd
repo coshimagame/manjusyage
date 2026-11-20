@@ -6,7 +6,7 @@ func run():
 	g.set_process(false)
 	assert(g.art_v09 and g.slice_mode)
 	g.count=3;g.start_game()
-	assert(g.music_name=="red_echo_v09" and absf(g.music.stream.get_length()-76.8)<.01)
+	assert(g.music_name=="bgm_stage01_plan_a" and absf(g.music.stream.get_length()-49.23)<.05)
 	assert(g.music.stream.loop_mode==AudioStreamWAV.LOOP_FORWARD)
 	assert(g.vertical.duration==12)
 	var prior=g.high_scores.duplicate()
@@ -16,18 +16,18 @@ func run():
 	assert(record.ruleset=="red-echo-slice-v09")
 	g.start_game();g.elapsed=54.99;g.vertical.done=true
 	g.update_game(.02)
-	assert(not g.boss.is_empty() and g.music_name=="red_echo_boss_v09")
+	assert(not g.boss.is_empty() and g.music_name=="bgm_boss01_plan_a")
 	g.boss.hp=0;g.update_game(.02)
 	assert(g.aftermath>0 and g.mode=="play" and g.shots.is_empty())
 	g.update_game(3.1)
 	assert(g.mode=="clear")
 	# Stage clear must open the provisional story overlay without starting a
-	# second run; completing or skipping it returns to the verified title flow.
+	# second run; completing or skipping it continues the same party into the sea.
 	g.open_stage1_intermission()
 	assert(g.mode=="intermission")
 	var overlay: Control = g.get_child(g.get_child_count()-1)
 	overlay._complete(true)
-	assert(g.mode=="menu")
+	assert(g.mode=="play" and g.stage_number==2)
 	g.start_game()
 	assert(g.aftermath==0 and g.visual.blasts.is_empty())
 	var horizontal_names := ["cormii_muu_v02_h.png", "jiyoza_muu_v02_h.png", "mafio_gold_black_v03_h.png"]

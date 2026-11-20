@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Boundaries = preload("res://scripts/living_boundaries.gd")
+var sea_textures := {}
 const ArtCatalog = preload("res://art_catalog.gd")
 
 # Candidate art, not canon. Native-size detail is redrawn over registered sprites.
@@ -33,6 +35,12 @@ func optional_texture(path: String) -> Texture2D:
 	return null
 
 func setup():
+	for id in Boundaries.CROPS:
+		var crop := AtlasTexture.new()
+		crop.atlas=load("res://art/enemies/stage02_draft/"+id+"_h_draft.png")
+		crop.region=Boundaries.CROPS[id]
+		crop.filter_clip=true
+		sea_textures[id]=crop
 	cosmos=load("res://art/v09/cosmos.png")
 	atlas=load("res://art/v09/ship-atlas.png")
 	ship_variants=[
@@ -114,7 +122,10 @@ func explode(pos,amount):
 func background(g):
 	g.draw_rect(Rect2(0,0,640,360),Color("080d21"))
 	g.draw_texture(cosmos,Vector2(-36-floor(sin(g.travel*.0006)*24),-36),Color(.63,.65,.78,1))
-	if g.bio_route and stage_concepts:
+	if g.mode not in ["menu","controls"] and g.slice_mode:
+		Boundaries.draw_landscape(g,stage_concepts,g.stage_number==2)
+		if g.stage_number==2: return
+	elif g.bio_route and stage_concepts:
 		# Source rect 180..815 / 0..116 is the Stage 1 scenery only: it omits
 		# the board title, tile previews, and boss progression samples.
 		g.draw_texture_rect_region(stage_concepts,Rect2(0,37,640,117),Rect2(180,0,635,116),Color(1,.74,.78,.44))
@@ -150,8 +161,11 @@ func background(g):
 			var bottom=g.bio.floor_y(x,g.travel,g.clock)
 			g.draw_texture_rect_region(cosmos,Rect2(x,36,8,maxf(0,top-36)),Rect2(fposmod(x+g.travel*.4,760),0,8,70),Color(.65,.55,.65,1))
 			g.draw_texture_rect_region(cosmos,Rect2(x,bottom,8,337-bottom),Rect2(fposmod(x+g.travel*.4,760),345,8,80),Color(.65,.55,.65,1))
-		g.draw_polyline(ceiling_edge,Color("a46b76"),3)
-		g.draw_polyline(floor_edge,Color("b17c83"),2)
+		for side in range(2):
+			var edge:PackedVector2Array=ceiling_edge if side==0 else floor_edge
+			var recovery:float=g.bio.recoil[side]/g.bio.RECOIL_TIME
+			var rim:=Color("a46b76") if side==0 else Color("b17c83")
+			g.draw_polyline(edge,rim.lerp(Color("94efdf"),recovery),3 if side==0 else 2)
 
 func ship(g,p,index,vertical_view := false,scale_factor := 1.0):
 	var character := clampi(int(p.get("character",index)),0,ship_variants.size()-1)
@@ -197,7 +211,7 @@ func ship(g,p,index,vertical_view := false,scale_factor := 1.0):
 func enemy(g,e):
 	var technique=e.get("technique","")
 	var art_id=str(e.get("art_id",""))
-	var tex=stage1_enemy_texture(art_id,g.vertical.active)
+	var tex=sea_textures.get(art_id) if g.stage_number==2 else stage1_enemy_texture(art_id,g.vertical.active)
 	if tex==null:tex=creatures[1 if technique=="fan" or technique=="orbit" else 0]
 	var elite=art_id in ["MB01","SB01"]
 	var display_scale=float(e.get("scale",1.0))
@@ -357,6 +371,9 @@ func pickup(g,item):
 		g.draw_line(pos+Vector2(-3,0),pos+Vector2(3,0),glow,1)
 
 func boss(g):
+	if g.stage_number==2:
+		Boundaries.draw_guardian(g,sea_textures["BB02"])
+		return
 	var p=g.boss.pos
 	var anticipation=clampf((.65-g.boss.cool)/.65,0,1)
 	# Show the actual fan lanes shortly before release.  This is intentionally
@@ -472,6 +489,9 @@ func draw(g):
 	# their glow telegraphs the later spore without hiding players or bullets.
 	g.bio.draw_tendrils(g)
 	for o in g.bio.organs:
+		var anchor:=Vector2(o.pos.x,g.bio.ceiling(o.pos.x,g.travel,g.clock) if o.upper else g.bio.floor_y(o.pos.x,g.travel,g.clock))
+		g.draw_line(anchor,o.pos,Color("68354e"),6)
+		g.draw_line(anchor,o.pos,Color("b86670"),2)
 		g.draw_texture(creatures[3],o.pos-Vector2(27,27))
 		if o.cool<.6:g.draw_arc(o.pos,25,0,TAU,24,Color("ffd0a0"),1)
 	for e in g.enemies:enemy(g,e)
@@ -509,7 +529,15 @@ func draw(g):
 	hud(g)
 	if g.vertical.active and (g.vertical.age<2 or g.vertical.age>g.vertical.duration-2):
 		g.japanese("進路転換：上へ射撃" if g.vertical.age<2 else "進路転換：右へ射撃",Vector2(217,177),17,Color("f1dfbe"))
-	if g.slice_mode and g.elapsed<4:g.japanese("赤い残響",Vector2(40,100),27,Color("f0ddd0"))
+	if g.stage_number==2 and g.mode=="play":
+		var radio: String=""
+		if g.elapsed>4.0 and g.elapsed<8.3: radio="クゥ「いま、私たちの通信が……水底から返ってきたわ」"
+		elif g.elapsed>15.0 and g.elapsed<18.2: radio="ジヨーザ「同じ波形だ。次は上から来る」"
+		elif not g.boss.is_empty() and g.boss.age<2.5: radio="クゥ「発光部と同じ色で撃って！」"
+		if radio!="":
+			g.draw_rect(Rect2(14,53,385,17),Color("07172a",.90))
+			g.japanese(radio,Vector2(20,66),11,Color("b9e1e5"))
+	if g.slice_mode and g.elapsed<4:g.japanese("追憶の海" if g.stage_number==2 else "赤い残響",Vector2(40,100),27,Color("f0ddd0"))
 	if g.mode=="pause":
 		g.draw_rect(Rect2(0,100,640,150),Color(0,.02,.06,.9))
 		g.centered("PAUSED / START TO RESUME",160,g.WHITE,2)
@@ -573,7 +601,7 @@ func hud(g):
 	g.draw_rect(Rect2(0,337,640,23),Color("070d1d"))
 	g.draw_rect(Rect2(8,340,624,16),Color("0e1930"))
 	g.draw_rect(Rect2(8,340,624,16),Color("594d62"),false,1)
-	g.japanese("RED ECHO // 第1境界・生体宙域",Vector2(16,352),10,Color("e1c6bd"))
+	g.japanese("MEMORY SEA // 第2境界・追憶の海" if g.stage_number==2 else "RED ECHO // 第1境界・生体宙域",Vector2(16,352),10,Color("e1c6bd"))
 	g.draw_rect(Rect2(286,346,150,3),Color("34364c"))
-	g.draw_rect(Rect2(286,346,minf(150,g.travel/4800.0*150),3),Color("d57b73"))
+	g.draw_rect(Rect2(286,346,minf(150,g.elapsed/24.0*150 if g.stage_number==2 else g.travel/4800.0*150),3),Color("d57b73"))
 	g.japanese("X 色  /  B 固有技  /  START 停止",Vector2(454,352),9,Color("aaa2b5"))

@@ -28,6 +28,10 @@ const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
 }
 
+const Boundaries = preload("res://scripts/living_boundaries.gd")
+var stage_number := 1
+var stage_entry: Array = []
+var briefing_progress = preload("res://briefing_progress.gd").new()
 const Visual=preload("res://visual_v09.gd")
 const PilotStatus=preload("res://ui/pilot_status.gd")
 const PixelType=preload("res://ui/pixel_type.gd")
@@ -129,6 +133,7 @@ func _ready():
 	randomize()
 	visual.setup()
 	mafio_archive.load_data()
+	briefing_progress.load_data()
 	# Adopt the GitHub main title art when it is present.  The old drawn mark remains
 	# as a safe fallback for earlier checkouts and incomplete asset packages.
 	# This source tree is deliberately usable without a pre-generated .godot import
@@ -158,7 +163,7 @@ func _ready():
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.volume_db = -3
-	music.finished.connect(_repeat_music)
+	sounds["departure"] = load("res://assets/audio/jingles/jg003_stage_start.wav")
 	for name in ["shot","switch","hit","burst","gate","pickup","pulse_v09","lance_v09","spore_v09","impact_v09","break_small_v09","break_medium_v09","break_boss_v09","consume_v09"]:
 		sounds[name] = load("res://audio/"+name+".wav")
 	for i in range(12):
@@ -193,6 +198,23 @@ func _ready():
 	elif screenshot_mode != "" and screenshot_mode != "menu":
 		count = 3
 		start_game()
+		if screenshot_mode in ["memory-sea","memory-boss"]:
+			start_game(2)
+			elapsed=9.25 if screenshot_mode=="memory-sea" else 28
+			spawn_wave()
+			for i in range(enemies.size()): enemies[i].pos.x=330+i*48
+			if screenshot_mode=="memory-boss":
+				begin_boss()
+				boss.volleys=2; boss.cool=.08
+				screenshot_capture_frame=44
+		if screenshot_mode in ["artery","heart-chamber"]:
+			elapsed=23 if screenshot_mode=="artery" else 56
+			vertical.done=true
+			if elapsed>55:
+				begin_boss()
+			else:
+				spawn_wave()
+				for i in range(enemies.size()): enemies[i].pos.x=320+i*52
 		if screenshot_mode == "vertical":
 			bio_route=true;travel=3100;vertical.begin(self);vertical.age=3
 			elapsed=37.0
@@ -283,8 +305,6 @@ func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 		draw_texture_rect_region(chat_ui_atlas,target,source,modulate)
 
 
-func _repeat_music():
-	music.play()
 
 func _pad_changed(device, connected):
 	if connected:
@@ -308,7 +328,7 @@ func sfx(name):
 		elif name=="shot":name="pulse_v09"
 		if sound_cooldowns.get(name,0)>0:return
 		sound_cooldowns[name]=.045 if name=="impact_v09" else .025
-	if muted or auto_test: return
+	if muted or (auto_test and Engine.get_write_movie_path()==""): return
 	for player in sfx_pool:
 		if not player.playing:
 			player.volume_db=-10 if name in ["pulse_v09","lance_v09","spore_v09","impact_v09"] else -6
@@ -317,30 +337,24 @@ func sfx(name):
 			return
 
 func track(name):
-	if music.playing and not auto_test:
-		var tail=AudioStreamPlayer.new()
-		tail.stream=music.stream;tail.volume_db=music.volume_db
-		add_child(tail);tail.play(music.get_playback_position())
-		var fade=create_tween()
-		fade.tween_property(tail,"volume_db",-45,.25)
-		fade.tween_callback(tail.queue_free)
-	if name=="wistful_demo" and not ResourceLoader.exists("res://audio/wistful_demo.wav"):
-		name="ruins" if mode=="play" else "title"
-		tell("NEW MUSIC NOT BUILT / USING ORIGINAL",5)
-	if art_v09 and bio_route and slice_mode:
-		if name in ["ruins","wistful_demo"]:name="red_echo_v09"
-		elif name=="sentinel":name="red_echo_boss_v09"
-	music_name=name
-	music.volume_db=1.5 if name.begins_with("red_echo") else -3
-	music.stream = load("res://audio/"+name+".wav")
-	if music.stream == null:
-		tell("AUDIO FILE MISSING / PLEASE REBUILD",30)
+	var file_name: String = {
+		"title":"music/bgm_opening_plan_a",
+		"ruins":"music/bgm_stage02_plan_a" if stage_number==2 else "music/bgm_stage01_plan_a",
+		"sentinel":"music/bgm_boss01_plan_b" if stage_number==2 else "music/bgm_boss01_plan_a",
+		"ending":"jingles/jg007_stage_clear"
+	}[name]
+	music_name=file_name.get_file()
+	var stream := load("res://assets/audio/"+file_name+".wav") as AudioStreamWAV
+	if stream==null:
+		push_error("Missing score "+file_name)
 		return
-	if music.stream is AudioStreamWAV:
-		music.stream.loop_mode=AudioStreamWAV.LOOP_FORWARD
-		music.stream.loop_begin=0
-		music.stream.loop_end=int(music.stream.get_length()*music.stream.mix_rate)
-	if not auto_test: music.play()
+	stream.loop_mode=AudioStreamWAV.LOOP_DISABLED if name=="ending" else AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin=0
+	stream.loop_end=roundi(stream.get_length()*stream.mix_rate)
+	music.volume_db=-6
+	music.stream=stream
+	if not auto_test or Engine.get_write_movie_path()!="":
+		music.play()
 
 func profile_key(device):
 	return Input.get_joy_guid(device)+":"+Input.get_joy_name(device)
@@ -419,12 +433,12 @@ func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
 
-# Stage 1 clear -> short, skippable story intermission -> title.
-# The Stage 2 route is deliberately not opened here: this v0.9 slice has no
-# verified Stage 2 combat scene yet.  Keep the intermission playable without
-# pretending an unfinished stage is available.
 func open_stage1_intermission():
 	if mode != "clear":
+		return
+	if stage_number==2:
+		mode="menu"
+		track("title")
 		return
 	var intermission_script = load("res://ui/stage_intermission_stage1.gd")
 	if intermission_script == null:
@@ -444,11 +458,18 @@ func open_stage1_intermission():
 
 func _on_stage1_intermission_end(_next_stage: int, overlay: Control):
 	overlay.queue_free()
-	mode = "menu"
-	track("title")
-	tell("STAGE 02 は制作中です。次の境界を準備しています。", 4.0)
+	if bio_route and art_v09 and slice_mode:
+		start_game(2,players.duplicate(true))
+	else:
+		mode="menu"
+		track("title")
 
-func start_game():
+func can_resume_sea()->bool:
+	return bio_route and art_v09 and slice_mode and briefing_progress.can_launch(2)
+
+func start_game(stage:int=1, entry:Array=[]):
+	stage_number=stage
+	stage_entry=entry.duplicate(true)
 	bio.reset()
 	vertical.reset()
 	vertical.duration=12.0 if slice_mode else 24.0
@@ -463,11 +484,16 @@ func start_game():
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
-	for i in range(count): Abilities.initialize(players[i],(i+pilot_offset)%3)
+	for i in range(count):
+		Abilities.initialize(players[i],(i+pilot_offset)%3)
+		if i<stage_entry.size():
+			for key in ["character","experience","learned","digest","digest_total","pending_technique","color"]:
+				players[i][key]=stage_entry[i][key]
 	mode = "play"
 	show_help = false
-	track("wistful_demo" if new_music else "ruins")
-	tell("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",4)
+	track("ruins")
+	sfx("departure")
+	tell("追憶の海" if stage_number==2 else ("赤い残響" if bio_route else "共鳴遺跡"),4)
 
 func button_edge(device, button):
 	var key = str(device)+":"+str(button)
@@ -513,7 +539,8 @@ func _input(event):
 		if key==KEY_F5 and mode=="menu": mixed_scroll=not mixed_scroll; return
 		if key==KEY_F8 and mode=="menu":
 			new_music=not new_music
-			track("wistful_demo" if new_music else "title")
+			if new_music: stage_number=1
+			track("ruins" if new_music else "title")
 			return
 		if key==KEY_F3 and mode=="menu":
 			bio_route=not bio_route
@@ -544,6 +571,7 @@ func _input(event):
 			if key in [KEY_LEFT,KEY_A]: count = maxi(1,count-1)
 			if key in [KEY_RIGHT,KEY_D]: count = mini(3,count+1)
 			if key in [KEY_1,KEY_2,KEY_3]: count = key-KEY_1+1
+			if key == KEY_N and can_resume_sea(): start_game(2)
 			if key == KEY_H: show_help = not show_help
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 		elif mode == "play":
@@ -555,13 +583,15 @@ func _input(event):
 			if key in [KEY_ESCAPE,KEY_P,KEY_ENTER]: mode = "play"
 			if key == KEY_Q: mode = "menu"; track("title")
 		elif mode == "clear":
+			if key == KEY_ESCAPE: mode="menu"; track("title")
 			if key in [KEY_ENTER,KEY_SPACE]: open_stage1_intermission()
 		else:
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if key in [KEY_ENTER,KEY_SPACE]: start_game(stage_number,stage_entry)
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
-		if Rect2(220,236,200,32).has_point(p): start_game()
+		if can_resume_sea() and Rect2(454,250,169,44).has_point(p): start_game(2)
+		elif Rect2(190,250,260,44).has_point(p): start_game()
 		elif Rect2(185,307,270,20).has_point(p): open_calibration()
 		elif p.y > 200 and p.y < 232:
 			if p.x < 320: count=maxi(1,count-1)
@@ -615,6 +645,7 @@ func _process(dt):
 			if x: pilot_offset=(pilot_offset+1)%3
 			if b: bio_route=not bio_route;slice_mode=bio_route
 			if start or a: start_game()
+			elif button_edge(device,JOY_BUTTON_Y) and can_resume_sea(): start_game(2)
 		elif mode == "play":
 			if start: mode="pause"; notice="FLIGHT PAUSED"
 			var slot = pads.find(device)
@@ -632,7 +663,7 @@ func _process(dt):
 			elif a and archive_page: archive_cursor=(archive_cursor+1)%MafioArchive.ENTRIES.size()
 		elif mode == "clear":
 			if start or a: open_stage1_intermission()
-		elif start or a: start_game()
+		elif start or a: start_game(stage_number,stage_entry)
 	if mode == "play":
 		update_game(minf(dt,.05))
 	elif mode == "menu":
@@ -677,12 +708,15 @@ func update_game(dt):
 		shots.clear();bullets.clear()
 		if aftermath>=3.0:finish(true)
 		return
-	if slice_mode:
+	if stage_number==2:
+		Boundaries.tide(self,elapsed-dt)
+		if elapsed>=24 and boss.is_empty(): begin_boss()
+	elif slice_mode:
 		if elapsed<34:travel=elapsed*55
 		elif mixed_scroll and not vertical.done:travel=3100
 		elif elapsed<55:travel=3700+(elapsed-46)*95
 		if elapsed>=55 and boss.is_empty():begin_boss()
-	if bio_route and mixed_scroll and not vertical.done and travel>=3100 and gate==0 and boss.is_empty():
+	if stage_number==1 and bio_route and mixed_scroll and not vertical.done and travel>=3100 and gate==0 and boss.is_empty():
 		if not vertical.active: vertical.begin(self)
 		vertical.update(self,dt)
 		return
@@ -691,7 +725,7 @@ func update_game(dt):
 	combo_time -= dt
 	if combo_time<0: combo=1
 	if gate==0 and boss.is_empty(): travel+=dt*(28 if bio_route else 35)
-	if bio_route: bio.update(self,dt)
+	if bio_route and stage_number==1: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
 		Abilities.digest(p,dt)
@@ -773,7 +807,9 @@ func update_game(dt):
 			if e.hp>0 and enemy_body_contains(e,bullet.pos,float(e.get("hit_radius",19.0))):
 				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
-		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
+				break
+		if bullet.pos.x>=700: continue
+		if stage_number==1 and bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
 		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
 			visual.hit(bullet.pos)
 			if bullet.color==boss.color and (not bio_route or bio.exposed()):
@@ -889,22 +925,23 @@ func spawn_wave():
 	wave_id+=1
 	var base=85+(wave_id*61)%190
 	var art_cycle=["EN001","EN002","EN003","EN004","EN005","EN006","EN007","EN008","EN009"]
+	if stage_number==2: art_cycle=Boundaries.SEA_ENEMIES
 	for j in range(3+count):
 		var technique=["fan","weave","dive","orbit"][(wave_id+j)%4] if bio_route else "aimed"
 		var lane=base+(j-(count+1)*.5)*18
 		var art_id=art_cycle[(wave_id*2+j)%art_cycle.size()] if bio_route else ""
 		var hp=2+int(count>1)
 		var speed=55.0+wave_id%4*9
-		var profile=STAGE1_ENEMY_PROFILES.get(art_id,{})
+		var profile=STAGE1_ENEMY_PROFILES.get(Boundaries.MOTION_PROFILES.get(art_id,art_id),{})
 		if not profile.is_empty():
 			technique=str(profile["technique"])
 			hp+=int(profile["hp_bonus"])
 			speed=float(profile["speed"])
 		# MB/SB are intentionally infrequent visual-and-health accents. They reuse
 		# the authored profile's visible wind-up and familiar digestible moves.
-		if bio_route and j==0 and wave_id%6==0:
+		if stage_number==1 and bio_route and j==0 and wave_id%6==0:
 			art_id="MB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
-		elif bio_route and j==0 and wave_id%4==0:
+		elif stage_number==1 and bio_route and j==0 and wave_id%4==0:
 			art_id="SB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
 		var amplitude=float(profile.get("amplitude",23.0+int(technique=="dive")*8))
 		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn")),"volley_count":int(profile.get("volley_count",1)),"volley_gap":float(profile.get("volley_gap",0.0)),"volley_twist":float(profile.get("volley_twist",0.0)),"body_segments":int(profile.get("body_segments",0)),"body_spacing":float(profile.get("body_spacing",0.0)),"body_radius":float(profile.get("body_radius",0.0)),"body_span":float(profile.get("body_span",0.0))})
@@ -944,6 +981,9 @@ func begin_boss():
 	if slice_mode:
 		boss.hp=40.0+count*18;boss.max=boss.hp
 		bio.armor=[10+count*3,10+count*3]
+	if stage_number==2:
+		bio.armor=[0,0]
+		boss.hp=30+12*count; boss.max=boss.hp
 	track("sentinel")
 	tell("WARNING / LIVING CORE - EXPERIMENT" if bio_route else "WARNING / PRISM SENTINEL",4)
 
@@ -951,7 +991,14 @@ func update_boss(dt):
 	boss.age+=dt; boss.cool-=dt; boss.flash=maxf(0,boss.flash-dt)
 	boss.pos.y=180+sin(boss.age*.65)*74
 	boss.color=int(boss.age/7)%3
-	if boss.cool<=0:
+	if stage_number==2:
+		boss.pos.x=510+sin(boss.age*.45)*28
+		if boss.cool<=0:
+			boss.volleys+=1
+			boss.cool=2.15
+			for lane in Boundaries.boss_lanes(boss.volleys):
+				shots.append({"pos":boss.pos+Vector2(-34,0),"vel":lane*85,"r":3,"form":"ring" if boss.volleys%3==0 else "bubble"})
+	elif boss.cool<=0:
 		boss.volleys+=1
 		boss.cool=2.3 if boss.volleys%3==0 else 1.55
 		var phase=1 if not bio_route or not bio.exposed() else (3 if boss.hp<boss.max*.5 else 2)
@@ -987,7 +1034,8 @@ func explode(pos,color,amount):
 func finish(won):
 	mode="clear" if won else "over"
 	result_delay=1.2 if won and art_v09 else 0.0
-	music.stop(); sfx("gate" if won else "burst")
+	music.stop()
+	if not won: sfx("burst")
 	if won: track("ending")
 	if won:
 		score+=reserves*1000
@@ -998,7 +1046,10 @@ func finish(won):
 		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
 		cfg.save("user://scores.cfg")
 		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
-		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
+		if won and slice_mode and art_v09 and bio_route and stage_number==1:
+			briefing_progress.mark_cleared(1)
+		if stage_number==2: record.ruleset="memory-sea-slice-v09"
+		var file=FileAccess.open("user://last_run_stage2.json" if stage_number==2 else "user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
 	else:
 		tests_done=true
@@ -1037,7 +1088,7 @@ func run_mechanics_tests():
 		update_game(.02)
 		assert(players[0].down==0 and reserves==2,"Solo recovery must consume one reserve")
 	print("MECHANICS PASS: color, burst, pause/resume, damage and recovery")
-	start_game()
+	start_game(2 if OS.get_cmdline_user_args().has("--sea") else 1)
 
 func text_at(message, pos, color=WHITE, scale_px=1):
 	var x=pos.x
@@ -1395,9 +1446,12 @@ func draw_menu():
 		draw_rect(Rect2(198,255,244,36),Color("0d3150"))
 		draw_rect(Rect2(198,255,244,36),COLORS[0],false,2)
 		draw_rect(Rect2(204,261,232,3),Color("f0fff6",.55))
+	if can_resume_sea():
+		draw_rect(Rect2(459,252,161,38),Color("102941"))
+		japanese("N / Y　追憶の海へ",Vector2(472,276),12,Color("99e5ee"))
 	japanese("出　撃",Vector2(289,281),19,WHITE)
 	japanese("A / ENTER",Vector2(373,281),10,COLORS[2])
-	centered("左右：人数選択　　F4 / X：先導機　　F8 / B：航路",309,DIM)
+	centered("左右：人数選択　　F4 / X：先導機　　F3 / B：航路",309,DIM)
 	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+"  //  BGM "+("OFF" if muted else "ON"),323,COLORS[2])
 	japanese("F2：コントローラー設定",Vector2(22,341),10,COLORS[0])
 	japanese("H：遊び方",Vector2(282,341),10,WHITE)
@@ -1431,11 +1485,13 @@ func draw_result():
 	if result_delay>0:return
 	draw_rect(Rect2(0,0,W,H),Color(0.015,.025,.08,.9))
 	japanese("境界を越えた" if mode=="clear" else "通信が途切れた",Vector2(232 if mode=="clear" else 205,92),24,COLORS[0] if mode=="clear" else COLORS[1])
-	if bio_route and mode=="clear":
+	if stage_number==2 and mode=="clear":
+		japanese("水門の向こうで、波音だけが残った。",Vector2(185,126),13,WHITE)
+	elif bio_route and mode=="clear":
 		japanese("記憶の断片・仮稿：赤い光の向こうに、道が続いていた。",Vector2(96,126),13,WHITE)
 	else: japanese("記憶の門が、もう一度ひらく。" if mode=="clear" else "態勢を整えて、もう一度。",Vector2(210,126),13,DIM)
 	centered("%07d"%score,153,WHITE,4)
 	centered(str(count)+" PILOTS / "+str(gates_done)+" RELAYS / "+str(int(elapsed))+" SECONDS",198,COLORS[2])
 	centered("LOCAL BEST  %07d"%high_scores[count-1],223,DIM)
-	centered("ENTER / A : FLY AGAIN",269,WHITE)
+	japanese(("ENTER / A　幕間へ" if stage_number==1 else "ENTER / A　タイトルへ") if mode=="clear" else "ENTER / A　再出撃",Vector2(239,269),14,WHITE)
 	centered("ESC : TITLE",289,DIM)

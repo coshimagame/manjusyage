@@ -12,6 +12,7 @@ const PixelType = preload("res://ui/pixel_type.gd")
 const BOSS_ART = preload("res://art/enemies/stage02_draft/BB02_h_draft.png")
 const OCEAN_BACKDROP = preload("res://art/v09/cosmos.png")
 const BOSS_REGION := Rect2(9,72,239,107)
+var music := AudioStreamPlayer.new()
 var artwork = ArtCatalog.new()
 var player_art: Texture2D
 var capture_requested := false
@@ -34,6 +35,11 @@ var touch_id := -1
 var fire_touch_id := -1
 
 func _ready() -> void:
+	add_child(music)
+	music.volume_db=-6
+	music.stream=preload("res://assets/audio/music/bgm_boss01_plan_b.wav")
+	music.finished.connect(func(): if state=="playing": music.play())
+	music.play()
 	artwork.reload()
 	player_art=ArtCatalog.reference_ship(0)
 	if player_art==null:
@@ -110,6 +116,8 @@ func _process(delta: float) -> void:
 			hit_flash=.08
 			if enemy_hp <= 0:
 				state = "clear"
+				music.stream=preload("res://assets/audio/jingles/jg007_stage_clear.wav")
+				music.play()
 				stage_cleared.emit()
 				break
 		elif shots[i].x > W:
@@ -127,6 +135,7 @@ func _process(delta: float) -> void:
 			hp -= 1
 			if hp <= 0:
 				state = "gameover"
+				music.stop()
 				break
 		elif hostile[i].x < 0.0:
 			hostile.remove_at(i)
@@ -154,6 +163,8 @@ func _restart() -> void:
 	fire_touch_id = -1
 	touch_fire = false
 	state = "playing"
+	music.stream=preload("res://assets/audio/music/bgm_boss01_plan_b.wav")
+	music.play()
 	retry_requested.emit()
 	queue_redraw()
 

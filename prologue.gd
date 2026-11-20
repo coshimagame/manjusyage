@@ -49,7 +49,7 @@ func _ready():
 	cache_planet_texture()
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	music.stream = load("res://audio/title.wav")
+	music.stream = load("res://assets/audio/music/bgm_opening_plan_a.wav")
 	music.volume_db = -6
 	music.play()
 	music.finished.connect(_loop_music)

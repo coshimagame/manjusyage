@@ -1,5 +1,14 @@
 # アート・音楽・参考画像の原本台帳
 
+## 2026-11-20　2面連続試遊 v0.9
+
+- **背景**　提供資料 `art/concept/eight_stage_retro_pixel_concepts_20261106.png` の第1・第2面の風景部分を使用。屈折、脈動、血管、反応する壁、水底の予告は `scripts/living_boundaries.gd` と `biological_stage.gd` の実行時描画。今回の2面の試遊に採用。
+- **第2面の敵**　提供ZIP `manjushage_stage02_24_sprites_draft.zip` の EN201〜204 の横向きPNGを `art/enemies/stage02_draft/` に原寸で保管。実行時に本体領域を切り出し、種別の移動と組み合わせる。BB02は既存原本を使用。いずれもドラフトの試遊採用。
+- **音楽**　Mw-fActory / Antigravity 制作 v01。原本は `assets/audio/music/` の opening・stage01・boss01・stage02 の plan_a と boss01_plan_b、および `assets/audio/midi/` の同名の編集用MIDI。`assets/audio/jingles/` の jg003 は発進、jg007 はクリアに採用。タイトル・1面道中・1面ボス・2面道中は制作者の割当。2面ボスでは既存の1面ボスB案をこの試遊版だけに仮配置した。[制作台帳](https://github.com/coshimagame/manjusyage/blob/b15390e3fccd35bf5261c794e901419a04e7e329/docs/manjushage/audio/AUDIO_CATALOG_V01.md)・[制作スクリプト](https://github.com/coshimagame/manjusyage/tree/b15390e3fccd35bf5261c794e901419a04e7e329/tools/audio)
+- **仮台詞 v01**　プレイ中の予告としてクゥ「いま、私たちの通信が……水底から返ってきたわ」、ジヨーザ「同じ波形だ。次は上から来る」、クゥ「発光部と同じ色で撃って！」を執筆。原本は `visual_v09.gd`。2面クリア時の「水門の向こうで、波音だけが残った。」は `game.gd`。いずれも演出検証用。
+- **実ゲーム画像**　Godotで640×360の4場面を描画。`docs/screenshots/latest/living_*_20261120.png` に原寸保存。
+
+
 ## 2026-11-20 3機の横・縦スプライトとドット書体
 
 - 0.9試遊に3機各2視点を接続。コルミィとジヨーザは横・縦を新規制作。マフィオは採用済みの金×黒 v02を縦で使い、その側面を横へ追加。透過PNGの原本、制作指示、SHA-256、採否は [機体素材台帳](../../art/active/ships/README.md) に記録。

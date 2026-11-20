@@ -30,7 +30,7 @@ func _initialize():
 		assert(packer.add_file("res://"+path,"res://"+path)==OK)
 	for path in ["res://prototypes/stage2_playable.tscn","res://prototypes/stage2_playable.gd"]:
 		assert(packer.add_file(path,path)==OK)
-	for folder in ["res://art","res://audio","res://scripts","res://ui","res://.godot/imported"]:
+	for folder in ["res://art","res://audio","res://assets/audio/music","res://assets/audio/jingles","res://scripts","res://ui","res://.godot/imported"]:
 		add_tree(packer,folder)
 	assert(packer.flush()==OK)
 	print("PACKAGED ",output)

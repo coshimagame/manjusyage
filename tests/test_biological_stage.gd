@@ -31,7 +31,14 @@ func run():
 	g.bullets.append({"pos":organ.pos,"color":0,"owner":0})
 	g.bio.update(g,.016)
 	assert(g.bio.organs.is_empty() and g.pickups.size()==1,"Destroyable organ drops energy")
+	var wall=0 if organ.upper else 1
+	assert(g.bio.recoil[wall]==g.bio.RECOIL_TIME and g.bio.recoil[1-wall]==0)
+	g.bio.tendrils=[{"x":460.0,"upper":organ.upper,"age":1.27,"phase":0.0,"fired":false}]
+	g.shots.clear()
+	g.bio.update(g,.02)
+	assert(g.bio.tendrils[0].fired and g.shots.is_empty())
 	g.begin_boss()
+	assert(g.bio.recoil==[0.0,0.0])
 	assert(g.bio.tendrils.is_empty(),"Boss entry must remove background tendrils immediately")
 	assert(not g.bio.exposed())
 	var hp=g.boss.hp

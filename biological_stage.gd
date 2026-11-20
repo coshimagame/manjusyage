@@ -6,21 +6,25 @@ var next_organ := 700.0
 var tendrils: Array = []
 var next_tendril := 620.0
 var armor: Array = []
+var recoil := [0.0,0.0]
+const RECOIL_TIME := 3.0
 
 func reset():
 	organs.clear()
 	tendrils.clear()
 	armor.clear()
+	recoil=[0.0,0.0]
 	next_organ=700.0
 	next_tendril=620.0
 
 func ceiling(x: float, distance: float, time: float) -> float:
-	return 65+sin((x+distance*.4)*.014)*13+sin(time*1.7)*5
+	return 65+sin((x+distance*.4)*.014)*13+sin(time*1.7)*5-11*recoil[0]/RECOIL_TIME
 
 func floor_y(x: float, distance: float, time: float) -> float:
-	return 298+sin((x+distance*.4)*.012+2)*12-sin(time*1.7)*5
+	return 298+sin((x+distance*.4)*.012+2)*12-sin(time*1.7)*5+11*recoil[1]/RECOIL_TIME
 
 func update(g, dt):
+	for i in range(2): recoil[i]=maxf(0,recoil[i]-dt)
 	if g.gate>0 or not g.boss.is_empty():
 		organs.clear()
 		tendrils.clear()
@@ -42,7 +46,7 @@ func update(g, dt):
 		# changes the solid ceiling/floor or player save data.
 		if not tendril.fired and tendril.age>=1.28 and tendril.x<600:
 			var live_players=g.players.filter(func(p): return p.down==0)
-			if not live_players.is_empty():
+			if not live_players.is_empty() and recoil[0 if tendril.upper else 1]<=0:
 				var tip=tendril_tip(g,tendril)
 				var target=live_players[0]
 				g.shots.append({"pos":tip,"vel":(target.pos-tip).normalized()*80.0,"r":3,"form":"spore","bio_tendril":true})
@@ -62,6 +66,7 @@ func update(g, dt):
 		for pilot in g.players:
 			if pilot.down==0 and pilot.pos.distance_to(organ.pos)<23: g.hurt(pilot)
 		if organ.hp<=0:
+			if g.slice_mode and g.art_v09: recoil[0 if organ.upper else 1]=RECOIL_TIME
 			g.explode(organ.pos,Color("ff7185"),28)
 			g.sfx("burst")
 			g.score+=300
@@ -76,13 +81,14 @@ func tendril_anchor(g, tendril) -> Vector2:
 
 func tendril_tip(g, tendril) -> Vector2:
 	var inward=1.0 if tendril.upper else -1.0
-	var reach=clampf(tendril.age/1.05,0.0,1.0)
+	var reach=clampf(tendril.age/1.05,0.0,1.0)*(1.0-.8*clampf(recoil[0 if tendril.upper else 1],0,1))
 	var sway=sin(tendril.age*5.0+tendril.phase)*8.0
 	return tendril_anchor(g,tendril)+Vector2(sway,inward*(22.0+48.0*reach))
 
 func begin_boss(count):
 	organs.clear()
 	tendrils.clear()
+	recoil=[0.0,0.0]
 	armor=[18+count*6,18+count*6]
 
 func part_pos(g, index):
@@ -154,7 +160,7 @@ func draw_tendrils(g):
 		g.draw_polyline(points,Color("4b233d"),11)
 		g.draw_polyline(points,Color("9f4966"),6)
 		g.draw_polyline(points,Color("e08187"),2)
-		var telegraph=clampf((tendril.age-.74)/.45,0.0,1.0) if not tendril.fired else 0.0
+		var telegraph=clampf((tendril.age-.74)/.45,0.0,1.0) if not tendril.fired and recoil[0 if tendril.upper else 1]<=0 else 0.0
 		g.draw_circle(tip,9+telegraph*5,Color("6b2d52"))
 		g.draw_circle(tip+Vector2(-2,-2),5,Color("ffc091") if telegraph>.6 else Color("d2687b"))
 		if telegraph>0:

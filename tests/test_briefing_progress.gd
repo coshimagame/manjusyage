@@ -15,7 +15,7 @@ func _initialize():
 	progress.mark_cleared(1)
 	assert(progress.highest_unlocked==2)
 	assert(progress.can_select(1) and progress.can_select(2))
-	assert(progress.can_launch(1) and not progress.can_launch(2))
+	assert(progress.can_launch(1) and progress.can_launch(2))
 	assert(progress.next_briefing_stage()==2)
 	var reloaded=Progress.new()
 	reloaded.save_path=progress.save_path

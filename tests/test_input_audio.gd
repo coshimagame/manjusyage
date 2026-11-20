@@ -9,7 +9,7 @@ func run():
 	var scene=load("res://main.tscn").instantiate()
 	root.add_child(scene)
 	await create_timer(.4).timeout
-	check(scene.music.playing and scene.music_name=="title","Title BGM must play immediately")
+	check(scene.music.playing and scene.music_name=="bgm_opening_plan_a","Title BGM must play immediately")
 	check(scene.music.get_playback_position()>.1,"Audio playback position must advance")
 	check(scene.music.stream.loop_mode==AudioStreamWAV.LOOP_FORWARD,"Music must loop")
 	print("AUDIO: playing=",scene.music.playing," position=",scene.music.get_playback_position()," bus_peak_db=",AudioServer.get_bus_peak_volume_left_db(0,0))
