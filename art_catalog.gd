@@ -8,7 +8,12 @@ const SLOTS = [
 	"ship_cormii", "ship_jiyoza", "ship_mafio",
 	"enemy_lance", "enemy_bloom",
 	"item_hp", "item_energy", "item_omikuji", "item_analysis",
-	"bio_backdrop", "boss_body"
+	"bio_backdrop", "boss_body", "bullet_player", "bullet_enemy",
+	"fx_petal", "fx_spark", "bullet_needle", "bullet_eye", "bullet_ring",
+	"v09_cosmos", "v09_ship_atlas", "v09_enemy_0", "v09_enemy_1",
+	"v09_enemy_2", "v09_enemy_3", "stage_concept_board",
+	"title_logo_extended", "launch_button", "chat_ui_atlas",
+	"character_hub_ui", "character_system_ui"
 ]
 const ORGANIZED_PATHS = {
 	"title_logo": "res://art/ui/logos/title_logo.png",
@@ -23,7 +28,26 @@ const ORGANIZED_PATHS = {
 	"item_energy": "res://art/items/common/energy/icon.png",
 	"item_omikuji": "res://art/items/characters/cormii/omikuji/icon.png",
 	"item_analysis": "res://art/items/characters/jiyoza/analysis/icon.png",
-	"boss_body": "res://art/enemies/boss/body.png"
+	"boss_body": "res://art/enemies/boss/body.png",
+	"bullet_player": "res://art/bullets/player.png",
+	"bullet_enemy": "res://art/bullets/enemy_petal.png",
+	"fx_petal": "res://art/effects/petal.png",
+	"fx_spark": "res://art/effects/spark.png",
+	"bullet_needle": "res://art/bullets/needle.png",
+	"bullet_eye": "res://art/bullets/eye.png",
+	"bullet_ring": "res://art/bullets/ring.png",
+	"v09_cosmos": "res://art/v09/cosmos.png",
+	"v09_ship_atlas": "res://art/v09/ship-atlas.png",
+	"v09_enemy_0": "res://art/v09/enemy-0.png",
+	"v09_enemy_1": "res://art/v09/enemy-1.png",
+	"v09_enemy_2": "res://art/v09/enemy-2.png",
+	"v09_enemy_3": "res://art/v09/enemy-3.png",
+	"stage_concept_board": "res://art/concept/eight_stage_retro_pixel_concepts_20261106.png",
+	"title_logo_extended": "res://art/ui/title_logo_extended_v01.png",
+	"launch_button": "res://art/ui/launch_button_v01.png",
+	"chat_ui_atlas": "res://art/ui/chat_ui_atlas_20261106.png",
+	"character_hub_ui": "res://art/ui/character_hub_ui_20261106.png",
+	"character_system_ui": "res://art/ui/character_system_ui_20261106.png"
 }
 const COPIED_ORIGINAL_PATHS = {
 	"title_logo": "res://art/backgrounds/title/title_logo.png",

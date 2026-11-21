@@ -15,7 +15,7 @@ func _initialize():
 	progress.mark_cleared(1)
 	assert(progress.highest_unlocked==2)
 	assert(progress.can_select(1) and progress.can_select(2))
-	assert(progress.can_launch(1) and not progress.can_launch(2))
+	assert(progress.can_launch(1) and progress.can_launch(2)) # STAGE-001: stage 2 is playable once unlocked.
 	assert(progress.next_briefing_stage()==2)
 	var reloaded=Progress.new()
 	reloaded.save_path=progress.save_path
@@ -28,7 +28,7 @@ func _initialize():
 	assert(reloaded.feature_available("jiyoza") and not reloaded.feature_available("cormii"))
 	reloaded.highest_unlocked=6
 	assert(reloaded.feature_available("cormii"))
-	assert(not reloaded.can_launch(6))
+	assert(reloaded.can_launch(6)) # Unlocked stages are launchable (all 8 playable).
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(progress.save_path))
-	print("BRIEFING PASS: stage-1 immediate launch, stage-2 unlock and preview, stage-1 replay, feature milestones")
+	print("BRIEFING PASS: stage-1 immediate launch, stage-2 unlock and launch, stage-1 replay, feature milestones")
 	quit(0)

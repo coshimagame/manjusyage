@@ -34,6 +34,15 @@ var character_system_ui: Texture2D
 const Abilities=preload("res://pilot_abilities.gd")
 const MafioArchive=preload("res://mafio_archive.gd")
 var mafio_archive=MafioArchive.new()
+const EnemyAnalysis=preload("res://enemy_analysis.gd")
+var enemy_analysis=EnemyAnalysis.new()
+const BriefingProgress=preload("res://briefing_progress.gd")
+var briefing_progress=BriefingProgress.new()
+const AmbientStageMusic=preload("res://ambient_stage_music.gd")
+var briefing_stage=1
+var briefing_slot=0
+var briefing_chars=[0,1,2]
+var launch_chars=[]
 var status_slot=0
 var status_return_mode="play"
 var archive_page=false
@@ -44,6 +53,31 @@ var mixed_scroll=true
 var pilot_offset=0
 var new_music=false
 const BioStage = preload("res://biological_stage.gd")
+const ArtCatalog = preload("res://art_catalog.gd")
+const StageDefs = preload("res://stage_defs.gd")
+var current_stage = 1
+var menu_stage = 1
+
+func stage_def() -> Dictionary: return StageDefs.def_for(current_stage)
+func stage_length() -> float: return float(stage_def()["length"])
+var bullet_player_tex: Texture2D
+var bullet_enemy_tex: Texture2D
+var item_hp_tex: Texture2D
+var item_energy_tex: Texture2D
+var fx_petal_tex: Texture2D
+var fx_spark_tex: Texture2D
+var bullet_needle_tex: Texture2D
+var bullet_eye_tex: Texture2D
+var bullet_ring_tex: Texture2D
+
+func slot_texture(key: String) -> Texture2D:
+	# Same no-import-cache convention as the title art: organised slot path
+	# first, then the flat art/active/<key>.png drop-in path.
+	if ArtCatalog.ORGANIZED_PATHS.has(key) and FileAccess.file_exists(ArtCatalog.ORGANIZED_PATHS[key]):
+		var organised = image_texture_from_file(ArtCatalog.ORGANIZED_PATHS[key])
+		if organised != null: return organised
+	var flat = "res://art/active/" + key + ".png"
+	return image_texture_from_file(flat) if FileAccess.file_exists(flat) else null
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
@@ -62,6 +96,8 @@ var clock = 0.0
 var travel = 0.0
 var elapsed = 0.0
 var wave_timer = 1.0
+var wave_count = 0 # Waves spawned this run; drives the encounter rhythm.
+var pace_now = 1.0 # Current scroll-pace multiplier from the stage profile.
 var wave_id = 0
 var score = 0
 var reserves = 3
@@ -106,16 +142,28 @@ func _ready():
 	randomize()
 	visual.setup()
 	mafio_archive.load_data()
+	enemy_analysis.load_data()
+	briefing_progress.load_data()
 	# Adopt the GitHub main title art when it is present.  The old drawn mark remains
 	# as a safe fallback for earlier checkouts and incomplete asset packages.
 	# This source tree is deliberately usable without a pre-generated .godot import
 	# cache, so load PNGs as images rather than depending on Texture2D import.
 	title_logo=image_texture_from_file("res://art/active/title_logo.png")
-	title_logo_extended=image_texture_from_file("res://art/ui/title_logo_extended_v01.png")
-	launch_button=image_texture_from_file("res://art/ui/launch_button_v01.png")
-	chat_ui_atlas=image_texture_from_file("res://art/ui/chat_ui_atlas_20261106.png")
-	character_hub_ui=image_texture_from_file("res://art/ui/character_hub_ui_20261106.png")
-	character_system_ui=image_texture_from_file("res://art/ui/character_system_ui_20261106.png")
+	# UI art follows the same swap convention: art/active/<key>.png wins.
+	title_logo_extended=ui_texture("title_logo_extended","res://art/ui/title_logo_extended_v01.png")
+	launch_button=ui_texture("launch_button","res://art/ui/launch_button_v01.png")
+	chat_ui_atlas=ui_texture("chat_ui_atlas","res://art/ui/chat_ui_atlas_20261106.png")
+	character_hub_ui=ui_texture("character_hub_ui","res://art/ui/character_hub_ui_20261106.png")
+	character_system_ui=ui_texture("character_system_ui","res://art/ui/character_system_ui_20261106.png")
+	bullet_player_tex=slot_texture("bullet_player")
+	bullet_enemy_tex=slot_texture("bullet_enemy")
+	item_hp_tex=slot_texture("item_hp")
+	item_energy_tex=slot_texture("item_energy")
+	fx_petal_tex=slot_texture("fx_petal")
+	fx_spark_tex=slot_texture("fx_spark")
+	bullet_needle_tex=slot_texture("bullet_needle")
+	bullet_eye_tex=slot_texture("bullet_eye")
+	bullet_ring_tex=slot_texture("bullet_ring")
 	build_planet_texture()
 	for i in range(130):
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
@@ -147,6 +195,7 @@ func _ready():
 		if arg == "--legacy": bio_route=false;slice_mode=false
 		if arg == "--bio": bio_route=true
 		if arg.begins_with("--pilot="): pilot_offset=clampi(int(arg.substr(8)),0,2)
+		if arg.begins_with("--stage="): menu_stage=clampi(int(arg.substr(8)),1,8)
 		if arg=="--new-music":new_music=true
 		if arg == "--autotest": auto_test = true;slice_mode=false
 		if arg.begins_with("--players="): test_count = clampi(int(arg.substr(10)),1,3)
@@ -162,7 +211,7 @@ func _ready():
 	if auto_test:
 		Engine.time_scale = 20.0
 		count = test_count
-		start_game()
+		start_game(menu_stage)
 		run_mechanics_tests()
 	elif screenshot_mode != "" and screenshot_mode != "menu":
 		count = 3
@@ -198,6 +247,13 @@ func _ready():
 func image_texture_from_file(path:String)->Texture2D:
 	var image=Image.load_from_file(path)
 	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
+
+func ui_texture(key:String, fallback:String)->Texture2D:
+	var flat="res://art/active/"+key+".png"
+	if FileAccess.file_exists(flat):
+		var override=image_texture_from_file(flat)
+		if override!=null: return override
+	return image_texture_from_file(fallback)
 
 func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 	if chat_ui_atlas:
@@ -250,6 +306,16 @@ func sfx(name):
 			return
 
 func track(name):
+	if name=="ambient_stage":
+		music_name=name
+		music.volume_db=-3
+		music.stream=AmbientStageMusic.make_stream()
+		if music.stream is AudioStreamWAV:
+			music.stream.loop_mode=AudioStreamWAV.LOOP_FORWARD
+			music.stream.loop_begin=0
+			music.stream.loop_end=int(music.stream.get_length()*music.stream.mix_rate)
+		if not auto_test: music.play()
+		return
 	if music.playing and not auto_test:
 		var tail=AudioStreamPlayer.new()
 		tail.stream=music.stream;tail.volume_db=music.volume_db
@@ -352,22 +418,26 @@ func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
 
-func start_game():
+func start_game(p_stage:=-1):
+	if p_stage>=1: current_stage=clampi(p_stage,1,8)
+	if slice_mode: current_stage=1
+	menu_stage=current_stage
 	bio.reset()
 	vertical.reset()
 	vertical.duration=12.0 if slice_mode else 24.0
 	aftermath=0;result_delay=0;visual.blasts.clear()
 	pads = Array(Input.get_connected_joypads())
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
-	travel = 0; elapsed = 0; wave_id = 0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
+	travel = 0; elapsed = 0; wave_id = 0; wave_count = 0; pace_now = 1.0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
-	for i in range(count): Abilities.initialize(players[i],(i+pilot_offset)%3)
+	for i in range(count): Abilities.initialize(players[i],launch_chars[i] if launch_chars.size()==count else (i+pilot_offset)%3)
+	launch_chars=[]
 	mode = "play"
 	show_help = false
-	track("wistful_demo" if new_music else "ruins")
-	tell("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",4)
+	track("ambient_stage" if new_music else "ruins")
+	tell("第%d境界：%s" % [current_stage, briefing_progress.stage_name(current_stage)] if bio_route else "旧試作：共鳴遺跡",4)
 
 func button_edge(device, button):
 	var key = str(device)+":"+str(button)
@@ -438,12 +508,21 @@ func _input(event):
 		if key == KEY_M:
 			muted = not muted
 			AudioServer.set_bus_mute(0,muted)
-		if mode == "menu":
+		if mode == "select":
+			if key in [KEY_LEFT,KEY_A]: cycle_character(-1)
+			if key in [KEY_RIGHT,KEY_D]: cycle_character(1)
+			if key in [KEY_UP,KEY_W]: briefing_slot = maxi(0,briefing_slot-1)
+			if key in [KEY_DOWN,KEY_S]: briefing_slot = mini(count-1,briefing_slot+1)
+			if key in [KEY_ENTER,KEY_SPACE]: launch_from_select()
+			if key == KEY_ESCAPE: mode = "menu"
+		elif mode == "menu":
 			if key in [KEY_LEFT,KEY_A]: count = maxi(1,count-1)
 			if key in [KEY_RIGHT,KEY_D]: count = mini(3,count+1)
 			if key in [KEY_1,KEY_2,KEY_3]: count = key-KEY_1+1
+			if key in [KEY_UP,KEY_W]: menu_stage = mini(briefing_progress.highest_unlocked,menu_stage+1)
+			if key in [KEY_DOWN,KEY_S]: menu_stage = maxi(1,menu_stage-1)
 			if key == KEY_H: show_help = not show_help
-			if key in [KEY_ENTER,KEY_SPACE]: start_game()
+			if key in [KEY_ENTER,KEY_SPACE]: open_select()
 		elif mode == "play":
 			if key in [KEY_ESCAPE,KEY_P]: mode = "pause"; notice = "FLIGHT PAUSED"
 			for i in range(count):
@@ -457,21 +536,92 @@ func _input(event):
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
-		if Rect2(220,236,200,32).has_point(p): start_game()
+		if Rect2(220,236,200,32).has_point(p): open_select()
 		elif Rect2(185,307,270,20).has_point(p): open_calibration()
 		elif p.y > 200 and p.y < 232:
 			if p.x < 320: count=maxi(1,count-1)
 			else: count=mini(3,count+1)
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "select":
+		var p = get_global_mouse_position()
+		if Rect2(220,304,200,34).has_point(p):
+			launch_from_select()
+			return
+		for i in range(count):
+			var x = 28+i*204
+			if Rect2(x,84,188,208).has_point(p):
+				briefing_slot = i
+				if Rect2(x,232,34,24).has_point(p): cycle_character(-1)
+				elif Rect2(x+154,232,34,24).has_point(p): cycle_character(1)
+				return
 
 func change_color(i):
 	if players[i].down > 0: return
 	players[i].color = (players[i].color+1)%3
 	sfx("switch")
 
+# JIYOZA-ANALYSIS-001: screen-clear only for patterns already encountered.
+# First sightings and bosses are immune; consumes the analysis gauge, max 2 uses.
+func special_analysis(p):
+	if p.character!=1: return
+	if int(p.get("analysis_uses",0))>=2: return
+	if int(p.get("analysis_charge",0))<100: return
+	var targets=enemies.filter(func(e): return e.get("analysis_eligible",false) and e.hp>0)
+	var target_shots=shots.filter(func(s): return s.get("analysis_eligible",false))
+	if targets.is_empty() and target_shots.is_empty(): return
+	for e in targets: e.hp=0
+	shots=shots.filter(func(s): return not s.get("analysis_eligible",false))
+	p.analysis_charge=0
+	p.analysis_uses=int(p.get("analysis_uses",0))+1
+	sfx("burst")
+
+# BRIEFING-001: post-clear briefing. Stage availability lives in
+# briefing_progress; this only moves the game between modes.
+func open_briefing(stage):
+	briefing_stage=stage
+	briefing_chars=[]
+	if players.size()>0:
+		for p in players: briefing_chars.append(int(p.character))
+	while briefing_chars.size()<3: briefing_chars.append((briefing_chars.size()+pilot_offset)%3)
+	briefing_slot=0
+	mode="briefing"
+
+func change_briefing_character():
+	cycle_character(1)
+
+func cycle_character(dir):
+	# Shared by briefing swaps and the character select screen: cycle the
+	# current slot's pilot, swapping with whoever holds the target pilot so
+	# two slots never share one character.
+	if briefing_chars.size()<3: return
+	var current=int(briefing_chars[briefing_slot])
+	var next=(current+dir+3)%3
+	var holder=briefing_chars.find(next)
+	if holder>=0: briefing_chars[holder]=current
+	briefing_chars[briefing_slot]=next
+
+func open_select():
+	briefing_chars=[]
+	for i in range(3): briefing_chars.append((i+pilot_offset)%3)
+	briefing_slot=0
+	mode="select"
+
+func launch_from_select():
+	launch_chars=briefing_chars.slice(0,count)
+	start_game(menu_stage)
+
+func launch_from_briefing():
+	if not briefing_progress.can_launch(briefing_stage): return
+	launch_chars=briefing_chars.slice(0,count)
+	start_game(briefing_stage)
+
 func burst(i):
 	var p = players[i]
 	if p.down>0: return
 	if bio_route and p.character==2 and Abilities.eat(self,p): return
+	if bio_route and p.character==1 and int(p.get("analysis_charge",0))>=100 and int(p.get("analysis_uses",0))<2:
+		var before=int(p.analysis_uses)
+		special_analysis(p)
+		if int(p.analysis_uses)>before: return
 	if p.charge<100: return
 	p.charge = 0; p.burst = .55; p.inv = 1
 	shots.clear()
@@ -503,12 +653,23 @@ func _process(dt):
 		var b = pad_action_edge(device,"burst",JOY_BUTTON_B)
 		var left = pad_action_edge(device,"left",JOY_BUTTON_DPAD_LEFT)
 		var right = pad_action_edge(device,"right",JOY_BUTTON_DPAD_RIGHT)
+		var up = pad_action_edge(device,"up",JOY_BUTTON_DPAD_UP)
+		var down = pad_action_edge(device,"down",JOY_BUTTON_DPAD_DOWN)
 		if mode == "menu":
 			if left: count=maxi(1,count-1)
 			if right: count=mini(3,count+1)
+			if up: menu_stage=mini(briefing_progress.highest_unlocked,menu_stage+1)
+			if down: menu_stage=maxi(1,menu_stage-1)
 			if x: pilot_offset=(pilot_offset+1)%3
 			if b: bio_route=not bio_route;slice_mode=bio_route
-			if start or a: start_game()
+			if start or a: open_select()
+		elif mode == "select":
+			if left: cycle_character(-1)
+			if right: cycle_character(1)
+			if up: briefing_slot=maxi(0,briefing_slot-1)
+			if down: briefing_slot=mini(count-1,briefing_slot+1)
+			if b: mode="menu"
+			elif start or a: launch_from_select()
 		elif mode == "play":
 			if start: mode="pause"; notice="FLIGHT PAUSED"
 			var slot = pads.find(device)
@@ -567,7 +728,7 @@ func update_game(dt):
 		elif mixed_scroll and not vertical.done:travel=3100
 		elif elapsed<55:travel=3700+(elapsed-46)*95
 		if elapsed>=55 and boss.is_empty():begin_boss()
-	if bio_route and mixed_scroll and not vertical.done and travel>=3100 and gate==0 and boss.is_empty():
+	if bio_route and mixed_scroll and bool(stage_def()["vertical"]) and not vertical.done and travel>=stage_length()*3100.0/4800.0 and gate==0 and boss.is_empty():
 		if not vertical.active: vertical.begin(self)
 		vertical.update(self,dt)
 		return
@@ -575,7 +736,11 @@ func update_game(dt):
 	gate_flash = maxf(0,gate_flash-dt)
 	combo_time -= dt
 	if combo_time<0: combo=1
-	if gate==0 and boss.is_empty(): travel+=dt*(28 if bio_route else 35)
+	if gate==0 and boss.is_empty():
+		# Scroll pace breathes per stage profile (slice demo keeps its fixed
+		# timeline). pace_now is exposed for future HUD/effect use.
+		pace_now = 1.0 if slice_mode else StageDefs.pace_at(current_stage, travel/stage_length())
+		travel+=dt*(28 if bio_route else 35)*pace_now
 	if bio_route: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
@@ -631,13 +796,17 @@ func update_game(dt):
 		finish(false)
 		return
 	if gate==0 and boss.is_empty():
-		if not slice_mode and travel>=1400 and gates_done==0: begin_gate(1)
-		elif not slice_mode and travel>=3000 and gates_done==1: begin_gate(2)
-		elif not slice_mode and travel>=4800: begin_boss()
+		if not slice_mode and travel>=stage_length()*1400.0/4800.0 and gates_done==0: begin_gate(1)
+		elif not slice_mode and travel>=stage_length()*3000.0/4800.0 and gates_done==1: begin_gate(2)
+		elif not slice_mode and travel>=stage_length(): begin_boss()
 		else:
 			wave_timer-=dt
 			if wave_timer<=0:
-				spawn_wave(); wave_timer=3.2 if slice_mode else 2.5
+				spawn_wave(); wave_count+=1
+				# Encounter rhythm: breather, standard, rush - repeating, so a
+				# quiet moment lands right before each surge.
+				var rhythm=[1.35,1.0,0.7][wave_count%3] if not slice_mode else 1.0
+				wave_timer=3.2 if slice_mode else float(stage_def()["wave_gap"])*rhythm
 	if gate>0:
 		for i in range(3): gate_lights[i]=maxf(0,gate_lights[i]-dt) if gate==2 else gate_lights[i]
 		if gate==2 and gate_lights.all(func(t): return t>0): open_gate()
@@ -658,6 +827,9 @@ func update_game(dt):
 			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
 				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
+			var owner=int(bullet.get("owner",-1))
+			if owner>=0 and owner<players.size() and players[owner].character==1:
+				players[owner].analysis_charge=mini(100,int(players[owner].get("analysis_charge",0))+3)
 		if bio_route and not boss.is_empty() and bio.intercept(self,bullet): continue
 		if not boss.is_empty() and bullet.pos.distance_to(boss.pos)<38:
 			visual.hit(bullet.pos)
@@ -667,34 +839,52 @@ func update_game(dt):
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
 	for e in enemies:
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
+		e.prev_y=e.pos.y
 		var motion=e.get("technique","aimed")
 		# Each organism has a readable, repeatable route before its shot telegraph.
+		# Routes favour one bold, smooth curve per technique: high-frequency
+		# jitter read as unpleasant trembling, so it was removed (2026-11-20).
 		if motion=="fan":
 			e.pos.x-=e.speed*dt
 			e.pos.y=e.base+sin(e.age*2.3+e.phase)*e.amplitude
 		elif motion=="weave":
 			e.pos.x-=e.speed*.82*dt
-			e.pos.y=e.base+sin(e.age*3.4+e.phase)*e.amplitude*1.35
+			e.pos.y=e.base+sin(e.age*2.6+e.phase)*e.amplitude*1.15
 		elif motion=="dive":
 			e.pos.x-=e.speed*.92*dt
 			var plunge=sin(e.age*1.35+e.phase)*.5+.5
-			e.pos.y=e.base+sin(e.age*4.1+e.phase)*12+(plunge-.5)*e.amplitude*2.1
-		else: # orbit: a slow looping sidestep with a tight inner pulse.
-			e.pos.x-=e.speed*.72*dt+sin(e.age*2.0+e.phase)*17*dt
-			e.pos.y=e.base+sin(e.age*2.0+e.phase)*e.amplitude+sin(e.age*6.0+e.phase)*9
+			e.pos.y=e.base+sin(e.age*4.1+e.phase)*5+(plunge-.5)*e.amplitude*2.1
+		else: # orbit: one slow, wide loop; no inner pulse.
+			e.pos.x-=e.speed*.72*dt
+			e.pos.y=e.base+sin(e.age*2.0+e.phase)*e.amplitude
 		# This slice teaches bullets and routes, not surprise contact damage.
 		# Holding the living hull beyond the player lane preserves a clear rescue space.
 		if bio_route:e.pos.x=maxf(420,e.pos.x)
+		# P02 silver needle line: a dive enemy mid-burst keeps firing its
+		# locked aim line, one needle every 0.09s.
+		if int(e.get("burst",0))>0:
+			e.burst_timer=float(e.get("burst_timer",0.0))-dt
+			if e.burst_timer<=0:
+				shots.append({"pos":e.pos,"vel":e.aim_dir*120,"r":4,"kind":"needle"})
+				e.burst=int(e.burst)-1
+				e.burst_timer=0.09
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
 			e.cool=2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)
 			var target=players[wave_id%count].pos
-			var angles=[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11])
-			for angle in angles:
-				var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*(78 if motion=="orbit" else 88),"r":4 if motion=="dive" else 3}
-				if motion=="weave":shot.turn=.46 if angle<0 else -.46
-				if motion=="orbit":shot.turn=.22 if angle<0 else -.22
-				shots.append(shot)
+			if motion=="dive":
+				# The aim was telegraphed for the last 0.35s (see visual_v09);
+				# lock it and loose a 3-needle line instead of a single shot.
+				e.aim_dir=(target-e.pos).normalized()
+				e.burst=3
+				e.burst_timer=0.0
+			else:
+				var angles=[-.2,0,.2] if bio_route and motion=="fan" else [-.11,.11]
+				for angle in angles:
+					var shot={"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*(78 if motion=="orbit" else 88),"r":3}
+					if motion=="weave":shot.turn=.46 if angle<0 else -.46
+					if motion=="orbit":shot.turn=.22 if angle<0 else -.22
+					shots.append(shot)
 		for p in players:
 			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
 		if e.hp<=0:
@@ -718,7 +908,9 @@ func update_game(dt):
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
 				if item.kind==0: p.hp=mini(4,p.hp+1)
 				else: p.charge=minf(100,p.charge+25)
-				score+=50; sfx("pickup"); item.pos.x=-100
+				score+=50; sfx("pickup")
+				if art_v09 and bio_route: visual.pillar(item.pos,item.kind) # V15 pickup pillar.
+				item.pos.x=-100
 	pickups=pickups.filter(func(p):return p.pos.x>-20)
 	if not boss.is_empty() and boss.hp<=0:
 		if slice_mode:
@@ -727,11 +919,14 @@ func update_game(dt):
 
 func spawn_wave():
 	wave_id+=1
+	var def=stage_def()
 	var base=85+(wave_id*61)%190
 	for j in range(3+count):
 		var technique=["fan","weave","dive","orbit"][(wave_id+j)%4] if bio_route else "aimed"
+		if bio_route and str(def["signature"])!="" and j%2==0: technique=str(def["signature"])
 		var lane=base+(j-(count+1)*.5)*18
-		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":55.0+wave_id%4*9,"amplitude":23.0+int(technique=="dive")*8,"hp":2+int(count>1),"cool":1.3+j*.27,"flash":0.0,"technique":technique})
+		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":(55.0+wave_id%4*9)*float(def["speed_mul"]),"amplitude":23.0+int(technique=="dive")*8,"hp":2+int(count>1)+int(def["hp_bonus"]),"cool":1.3+j*.27,"flash":0.0,"technique":technique})
+		enemy_analysis.mark_new_group([enemies[-1]],technique)
 
 func begin_gate(number):
 	gate=number; gate_step=0; gate_lights=[0.0,0.0,0.0]
@@ -748,8 +943,9 @@ func open_gate():
 
 func begin_boss():
 	enemies.clear(); shots.clear(); bullets.clear()
-	boss={"pos":Vector2(525,180),"hp":65.0+count*35,"max":65.0+count*35,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
-	if bio_route: bio.begin_boss(count)
+	var boss_hp=(65.0+count*35)*float(stage_def()["boss_hp_mul"])
+	boss={"pos":Vector2(525,180),"hp":boss_hp,"max":boss_hp,"age":0.0,"cool":2.5,"volleys":0,"color":0,"flash":0.0}
+	if bio_route: bio.begin_boss(count,int(stage_def()["armor_bonus"]))
 	if slice_mode:
 		boss.hp=40.0+count*18;boss.max=boss.hp
 		bio.armor=[10+count*3,10+count*3]
@@ -760,17 +956,31 @@ func update_boss(dt):
 	boss.age+=dt; boss.cool-=dt; boss.flash=maxf(0,boss.flash-dt)
 	boss.pos.y=180+sin(boss.age*.65)*74
 	boss.color=int(boss.age/7)%3
+	# P05 crimson ring expansion: three expanding rings with real gaps,
+	# released 0.45s apart once a ring sequence has been triggered.
+	if int(boss.get("rings",0))>0:
+		boss.ring_timer=float(boss.get("ring_timer",0.0))-dt
+		if boss.ring_timer<=0:
+			for j in range(14):
+				var ang=boss.age*1.7+j*TAU/14.0
+				shots.append({"pos":boss.pos,"vel":Vector2.from_angle(ang)*55,"r":4,"kind":"ring"})
+			boss.rings=int(boss.rings)-1
+			boss.ring_timer=0.45
 	if boss.cool<=0:
 		boss.volleys+=1
 		boss.cool=2.3 if boss.volleys%3==0 else 1.55
 		var phase=1 if not bio_route or not bio.exposed() else (3 if boss.hp<boss.max*.5 else 2)
-		var fan=7 if phase==3 else 5
-		for j in range(fan):
-			var angle=PI+(j-(fan-1)*.5)*.24+sin(boss.age)*.15
-			shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4})
+		if phase>=2 and boss.volleys%4==0:
+			boss.rings=3
+			boss.ring_timer=0.35
+		else:
+			var fan=(7 if phase==3 else 5)+(int(stage_def()["fan_bonus"]) if phase>=2 else 0)
+			for j in range(fan):
+				var angle=PI+(j-(fan-1)*.5)*.24+sin(boss.age)*.15
+				shots.append({"pos":boss.pos+Vector2(-35,0),"vel":Vector2.from_angle(angle)*(72+(phase-1)*7),"r":4,"kind":"ring" if j==fan/2 else "petal"})
 		if boss.hp<boss.max*.5 and boss.volleys%3==0:
 			for p in players:
-				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3})
+				if p.down==0: shots.append({"pos":boss.pos,"vel":(p.pos-boss.pos).normalized()*95,"r":3,"kind":"eye"})
 	for p in players:
 		if p.down==0 and p.pos.distance_to(boss.pos)<60: hurt(p)
 
@@ -798,6 +1008,7 @@ func finish(won):
 	music.stop(); sfx("gate" if won else "burst")
 	if won: track("ending")
 	if won:
+		briefing_progress.mark_cleared(current_stage)
 		score+=reserves*1000
 		explode(Vector2(525,180),COLORS[2],90)
 	if not auto_test:
@@ -805,7 +1016,7 @@ func finish(won):
 		var cfg=ConfigFile.new()
 		for i in range(3): cfg.set_value("scores",str(i),high_scores[i])
 		cfg.save("user://scores.cfg")
-		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else "ruins-v1","players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
+		var record={"version":"0.2.0","ruleset":"red-echo-slice-v09" if slice_mode else ("red-echo-bio-v1" if bio_route else "ruins-v1"),"players":count,"score":score,"elapsed":elapsed,"cleared":won,"gates":gates_done,"timestamp":Time.get_datetime_string_from_system()}
 		var file=FileAccess.open("user://last_run.json",FileAccess.WRITE)
 		if file: file.store_string(JSON.stringify(record,"  "))
 	else:
@@ -943,6 +1154,9 @@ func _draw():
 	if mode=="menu":
 		draw_menu()
 		return
+	if mode=="select":
+		draw_select_screen()
+		return
 	if vertical.active and mode in ["play","pause","over"]:
 		vertical.draw(self)
 		draw_hud()
@@ -956,15 +1170,29 @@ func _draw():
 		if bio_route and e.hp<=3 and players.any(func(p):return p.character==2): draw_arc(e.pos,24,0,TAU,16,Color("f0da9a"),1)
 		sprite(FOE,e.pos-Vector2(16,10),[Color("3c2c59"),Color("9379b8"),Color("d871a4"),WHITE if e.flash>0 else Color("ffce63")],2)
 	for b in bullets:
-		draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
-		draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
+		if bullet_player_tex != null:
+			draw_set_transform(b.pos, b.vel.angle(), Vector2.ONE)
+			draw_texture(bullet_player_tex, -bullet_player_tex.get_size() / 2, COLORS[b.color])
+			draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+		else:
+			draw_rect(Rect2(b.pos.x-8,b.pos.y-2,13,4),COLORS[b.color])
+			draw_rect(Rect2(b.pos.x,b.pos.y-1,6,2),WHITE)
 	for s in shots:
-		draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
-		draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
-		draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
+		if bullet_enemy_tex != null:
+			draw_set_transform(s.pos, s.vel.angle(), Vector2.ONE)
+			draw_texture(bullet_enemy_tex, -bullet_enemy_tex.get_size() / 2)
+			draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+		else:
+			draw_rect(Rect2(s.pos-Vector2.ONE*(s.r+1),Vector2.ONE*(s.r+1)*2),Color("7a2a66"))
+			draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
+			draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
 	for item in pickups:
-		draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
-		text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
+		var item_tex = item_hp_tex if item.kind==0 else item_energy_tex
+		if item_tex != null:
+			draw_texture(item_tex, item.pos - item_tex.get_size() / 2)
+		else:
+			draw_rect(Rect2(item.pos-Vector2(6,6),Vector2(12,12)),COLORS[0] if item.kind==0 else COLORS[2],false,1)
+			text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3),WHITE)
 	if not boss.is_empty(): draw_boss()
 	for i in range(players.size()):
 		var p=players[i]
@@ -1008,6 +1236,38 @@ func _draw():
 
 # STATUS-001 — battle pauses behind this screen.  HP and energy retain the same
 # shape for all pilots; each page only explains the already-playable mechanism.
+func draw_select_screen():
+	# Character select (user-confirmed feature): one card per player slot,
+	# existing fixed portraits and ships only - no new character art.
+	draw_rect(Rect2(0,0,W,H),Color("0a0f1e"))
+	japanese("キャラクター選択",Vector2(30,34),22,WHITE)
+	japanese("第%d境界：%s" % [menu_stage, briefing_progress.stage_name(menu_stage)],Vector2(30,60),12,DIM)
+	var accents=[Color("ff668e"),Color("67ecff"),Color("ffce63")]
+	var system_names=["運気 / RISK & LUCK","解析 / ANALYSIS","捕食 / PREDATION"]
+	var system_descs=["おみくじで火力が変動","敵を読んで漸進成長","敵を食べて技を習得"]
+	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+	for i in range(count):
+		var char_id=int(briefing_chars[i])
+		var x=28+i*204
+		var card=Rect2(x,84,188,208)
+		var selected=i==briefing_slot
+		draw_rect(card,Color("10182c"))
+		draw_rect(card,accents[char_id],false,3 if selected else 1)
+		text_at("P"+str(i+1),Vector2(x+12,96),accents[char_id],2)
+		japanese(PILOT_NAMES[char_id],Vector2(x+58,102),17,WHITE)
+		if character_system_ui:
+			draw_texture_rect_region(character_system_ui,Rect2(x+44,120,100,108),sources[char_id])
+		if art_v09 and bio_route:
+			visual.ship(self,{"pos":Vector2(x+94,246),"color":i,"character":char_id,"experience":0},i,0,1.0)
+		japanese("◀",Vector2(x+10,240),14,accents[char_id])
+		japanese("▶",Vector2(x+162,240),14,accents[char_id])
+		japanese(system_names[char_id],Vector2(x+12,272),11,accents[char_id])
+		japanese(system_descs[char_id],Vector2(x+12,288),10,WHITE)
+	draw_rect(Rect2(220,304,200,34),Color("0d3150"))
+	draw_rect(Rect2(220,304,200,34),COLORS[0],false,2)
+	japanese("出　撃",Vector2(292,328),16,WHITE)
+	centered("左右：キャラ変更　　上下：プレイヤー切替　　ENTER：出撃　　ESC：もどる",346,DIM)
+
 func draw_status_screen():
 	if players.is_empty(): return
 	status_slot=clampi(status_slot,0,players.size()-1)
@@ -1048,60 +1308,106 @@ func draw_status_screen():
 	text_at("TAB / START : BACK   LEFT / RIGHT : PILOT",Vector2(28,341),accent)
 
 func draw_cormii_status(p,accent):
-	japanese("出力変動盤 / 瞬間最大火力",Vector2(29,78),20,Color("ffdbe5"))
-	var phase=fposmod(elapsed,8.0)
-	var labels=["最大出力","反動","安定","増幅予告"]
-	var active=0 if phase<1.5 else (1 if phase<3.0 else (3 if phase>6.5 else 2))
-	for i in range(4):
-		# Reserve the far-right column for the fixed portrait without dropping the
-		# live fourth phase card.
-		var x=30+i*99
-		var tint=accent if i==active else Color("593447")
-		draw_rect(Rect2(x,120,88,105),Color("321a2b"))
-		draw_rect(Rect2(x,120,88,105),tint,false,2)
-		draw_rect(Rect2(x+12,173,64,13),Color("3b2638"))
-		draw_rect(Rect2(x+12,173,64*(1.0 if i==active else .22),13),tint)
-		japanese(labels[i],Vector2(x+10,150),12,WHITE)
-		text_at("NOW" if i==active else "WAIT",Vector2(x+21,198),tint,1)
-	japanese("現在："+Abilities.label(p,elapsed)+"   成長 Lv "+str(Abilities.level(p)+1),Vector2(38,263),17,Color("ffe9be"))
-	japanese("大きく開花し、反動を越えて次の波を待つ。数値は試作調整中。",Vector2(38,302),14,WHITE)
+	# Design board: RISK & LUCK. The big number is her real luck (C-065);
+	# the probability bars are the exact chances her shot rolls use.
+	japanese("RISK & LUCK / 運気盤",Vector2(29,78),20,Color("ffdbe5"))
+	var luck=int(p.get("luck",50))
+	var profile=Abilities.chance_profile(p,0.5)
+	text_at(str(luck),Vector2(38,112),accent,4)
+	japanese("%",Vector2(48+str(luck).length()*33,116),28,accent) # text_at's font has no % glyph; the JP font does.
+	japanese(Abilities.luck_title(p),Vector2(200,120),26,Color("ffe9be"))
+	draw_rect(Rect2(38,158,384,14),Color("3b2638"))
+	draw_rect(Rect2(38,158,384*clampf(luck/100.0,0,1),14),accent)
+	for i in range(1,5):
+		draw_line(Vector2(38+i*76.8,158),Vector2(38+i*76.8,172),Color("ffdbe5"),1)
+	var rows=[["大当たり",float(profile["jackpot_chance"]),Color("ffd166")],["通常",1.0-float(profile["jackpot_chance"])-float(profile["low_chance"]),WHITE],["弱",float(profile["low_chance"]),Color("7fb2ff")]]
+	for i in range(3):
+		var y=192+i*30
+		japanese(str(rows[i][0]),Vector2(38,y+13),13,WHITE)
+		draw_rect(Rect2(112,y,238,13),Color("321a2b"))
+		draw_rect(Rect2(112,y,238*clampf(float(rows[i][1]),0,1),13),rows[i][2])
+		var pct_text=str(roundi(float(rows[i][1])*100))
+		text_at(pct_text,Vector2(362,y),WHITE,1)
+		japanese("%",Vector2(364+pct_text.length()*9,y+1),13,WHITE)
+	japanese("おみくじ履歴",Vector2(38,296),12,DIM)
+	var history=p.get("fortune_history",[])
+	var hx=132
+	for i in range(maxi(0,history.size()-4),history.size()):
+		var rec=history[i]
+		var delta=int(rec["delta"])
+		var chip_col=Color("ffd166") if delta>0 else (Color("7fb2ff") if delta<0 else DIM)
+		text_at(str(int(rec["before"]))+"->"+str(int(rec["after"])),Vector2(hx,288),chip_col,1)
+		hx+=78
+	japanese("溜め攻撃で運気-8。通常攻撃では減らない。",Vector2(38,324),12,Color("ffdbe5"))
 
 func draw_jiyoza_status(p,accent):
-	japanese("解析端末 / 精密・漸進成長",Vector2(29,78),20,Color("b9efff"))
+	# Design board: analysis radar + data board, all from live values.
+	japanese("解析ボード / 精密・漸進成長",Vector2(29,78),20,Color("b9efff"))
 	for i in range(8):
 		draw_line(Vector2(42+i*53,110),Vector2(42+i*53,284),Color("1b5b79"),1)
 	for i in range(7):
 		draw_line(Vector2(42,110+i*25),Vector2(418,110+i*25),Color("1b5b79"),1)
-	text_at("ANALYSIS LV "+str(Abilities.level(p)+1),Vector2(57,126),accent,2)
+	var center=Vector2(128,206)
+	var radius=62.0
+	var values=[clampf(float(p.experience)/24.0,0,1),clampf(float(p.get("analysis_charge",0))/100.0,0,1),clampf(float(Abilities.level(p))/3.0,0,1),clampf(float(2-int(p.get("analysis_uses",0)))/2.0,0,1)]
+	for ring in range(1,5):
+		var pts=PackedVector2Array()
+		for a in range(4):
+			var dir=Vector2(cos(-PI/2+a*PI/2),sin(-PI/2+a*PI/2))
+			pts.append(center+dir*radius*ring/4.0)
+		pts.append(pts[0])
+		draw_polyline(pts,Color("397b9b"),1)
+	var data=PackedVector2Array()
+	for a in range(4):
+		var dir=Vector2(cos(-PI/2+a*PI/2),sin(-PI/2+a*PI/2))
+		data.append(center+dir*radius*values[a])
+	draw_colored_polygon(data,Color(accent.r,accent.g,accent.b,.30))
+	var outline=PackedVector2Array(data)
+	outline.append(data[0])
+	draw_polyline(outline,accent,2)
+	var axis_labels=["経験","ゲージ","成長","残回数"]
+	for a in range(4):
+		var dir=Vector2(cos(-PI/2+a*PI/2),sin(-PI/2+a*PI/2))
+		japanese(axis_labels[a],center+dir*(radius+12)-Vector2(12,-4),11,Color("b9efff"))
+	var bx=238
+	text_at("ANALYSIS LV "+str(Abilities.level(p)+1),Vector2(bx,124),accent,2)
 	for i in range(12):
-		draw_rect(Rect2(57+i*29,164,22,16),accent if i<mini(12,int(p.experience)) else Color("173b58"))
-	draw_arc(Vector2(360,224),57,0,TAU,40,Color("397b9b"),1)
-	draw_arc(Vector2(360,224),45,-PI/2,-PI/2+TAU*float(Abilities.level(p)+1)/4.0,40,Color("d3f6ff"),3)
-	draw_line(Vector2(302,224),Vector2(418,224),Color("85e7f4"),1)
-	draw_line(Vector2(360,166),Vector2(360,282),Color("85e7f4"),1)
-	japanese("取得経験 "+str(p.experience)+" / 次の解析 "+str((Abilities.level(p)+1)*8),Vector2(57,257),16,WHITE)
-	japanese("敵の軌道を読み、撃破ごとに確実に出力を高める。",Vector2(57,303),14,Color("c8f2ff"))
+		draw_rect(Rect2(bx+i*15,148,12,12),accent if i<mini(12,int(p.experience)) else Color("173b58"))
+	japanese("取得経験 "+str(p.experience)+" / 次の解析 "+str((Abilities.level(p)+1)*8),Vector2(bx,188),14,WHITE)
+	japanese("解析ゲージ "+str(int(p.get("analysis_charge",0)))+"%",Vector2(bx,220),14,WHITE)
+	japanese("特殊解析 あと "+str(2-int(p.get("analysis_uses",0)))+" 回",Vector2(bx,252),14,WHITE)
+	japanese("敵の軌道を読み、撃破ごとに確実に出力を高める。",Vector2(38,324),13,Color("c8f2ff"))
 
 func status_technique_name(technique:String)->String:
 	var names={"none":"基本弾","fan":"散華三連","weave":"蛇行弾","dive":"急降下弾","orbit":"環状弾","petal":"散華扇","seed":"種子分裂","halo":"放射光","beam":"細光レーザー","pierce":"貫通ニードル"}
 	return str(names.get(technique,"解析中"))
 
 func draw_mafio_status(p,accent):
-	japanese("融合器官 / 捕食・消化・変異",Vector2(29,78),20,Color("ffe6bd"))
-	# Keep all actionable digestion data left of the dedicated character panel.
-	draw_rect(Rect2(31,101,391,184),Color("352733"))
-	draw_rect(Rect2(31,101,391,184),Color("dfba6a",.48),false,1)
-	draw_line(Vector2(220,112),Vector2(220,274),Color("fff0d0"),2)
+	# Design board: stomach gauge. The % is digestion progress while eating,
+	# 100 while a technique is held, 0 when hungry.
+	japanese("おなかゲージ / 捕食・消化・変異",Vector2(29,78),20,Color("ffe6bd"))
 	var total=maxf(.1,float(p.get("digest_total",1.2)))
-	var progress=1.0-clampf(float(p.digest)/total,0,1)
-	draw_arc(Vector2(220,191),67,0,TAU,40,Color("e5d1af"),2)
-	draw_arc(Vector2(220,191),65,-PI/2,-PI/2+progress*TAU,40,Color("9adeff"),4)
-	japanese("消化中の技",Vector2(56,135),14,WHITE)
-	japanese(status_technique_name(str(p.get("pending_technique","none"))) if p.digest>0 else status_technique_name(str(p.learned)),Vector2(56,173),20,Color("ffe5b4"))
-	japanese("残り "+str(snappedf(p.digest,.1))+" 秒",Vector2(250,145),17,WHITE)
-	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+"/"+str(MafioArchive.ENTRIES.size()),Vector2(250,205),15,WHITE)
-	text_at("E / X : ENEMY ARCHIVE",Vector2(250,255),Color("dfbdf7"))
-	japanese("弱った敵へ近づき、バーストで捕食。消化後に敵技を再現。",Vector2(72,309),14,WHITE)
+	var digesting=float(p.digest)>0
+	var pct=0
+	var state=""
+	if digesting:
+		pct=roundi((1.0-clampf(float(p.digest)/total,0,1))*100)
+		state="消化中："+status_technique_name(str(p.get("pending_technique","none")))+"（残り "+str(snappedf(p.digest,.1))+" 秒）"
+	elif str(p.learned)!="none":
+		pct=100
+		state="保持中："+status_technique_name(str(p.learned))
+	else:
+		state="空腹（弱った敵へ近づき、バーストで捕食）"
+	text_at(str(pct),Vector2(38,112),accent,4)
+	japanese("%",Vector2(48+str(pct).length()*33,116),28,accent) # text_at's font has no % glyph; the JP font does.
+	japanese("まんぷく" if pct>=100 else ("消化の進み" if digesting else "おなか"),Vector2(200,120),15,Color("ffe9be"))
+	draw_rect(Rect2(38,158,384,22),Color("352733"))
+	draw_rect(Rect2(38,158,384*clampf(pct/100.0,0,1),22),Color("ffce63"))
+	draw_rect(Rect2(38,158,384,22),Color("dfba6a",.48),false,1)
+	japanese(state,Vector2(38,216),16,WHITE)
+	japanese("捕食記録  "+str(mafio_archive.total_unlocked())+" / "+str(MafioArchive.ENTRIES.size())+" 種",Vector2(38,254),15,WHITE)
+	text_at("E / X : ENEMY ARCHIVE",Vector2(38,284),Color("dfbdf7"))
+	japanese("消化が終わると、食べた敵の技を自分の弾として再現する。",Vector2(38,324),13,WHITE)
 
 func draw_mafio_archive():
 	japanese("マフィオの捕食図鑑",Vector2(23,78),20,Color("fff0d4"))
@@ -1159,7 +1465,7 @@ func draw_hud():
 	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
 	text_at("START PAUSE",Vector2(405,345),DIM)
 	draw_rect(Rect2(500,347,125,2),Color("28374e"))
-	draw_rect(Rect2(500,347,minf(125,travel/4800*125),2),COLORS[0])
+	draw_rect(Rect2(500,347,minf(125,travel/stage_length()*125),2),COLORS[0])
 
 func draw_gate():
 	var col=COLORS[1] if gate_flash>0 else Color("365878")
@@ -1219,7 +1525,7 @@ func draw_menu():
 	draw_rect(Rect2(12,10,616,42),Color("527e9c"),false,1)
 	draw_rect(Rect2(18,16,4,30),COLORS[0])
 	japanese("MISSION  //  RED ECHO",Vector2(30,27),12,Color("d9e8ec"))
-	japanese("第1境界・生体宙域",Vector2(30,44),10,COLORS[2])
+	japanese("第%d境界・%s" % [menu_stage, briefing_progress.stage_name(menu_stage)],Vector2(30,44),10,COLORS[2])
 	draw_rect(Rect2(506,18,108,25),Color("10283e"))
 	draw_rect(Rect2(506,18,108,25),Color(COLORS[0],.7),false,1)
 	japanese("LOCAL  1 - 3P",Vector2(518,34),10,COLORS[0])
@@ -1237,16 +1543,19 @@ func draw_menu():
 		japanese("曼珠沙華",Vector2(221,100),48,WHITE)
 		centered("MANJUSHAGE",116,COLORS[0],3)
 	# Compact parameter strip: it names every setting that can change on this screen.
-	draw_rect(Rect2(164,156,312,29),Color("08162b",.9))
-	draw_rect(Rect2(164,156,312,29),Color("527e9c"),false,1)
-	draw_line(Vector2(267,160),Vector2(267,181),Color("35536d"),1)
-	draw_line(Vector2(373,160),Vector2(373,181),Color("35536d"),1)
-	japanese("人数",Vector2(176,168),9,DIM)
-	japanese(str(count)+" PILOTS",Vector2(176,180),11,WHITE)
-	japanese("先導機",Vector2(280,168),9,DIM)
-	japanese(PILOT_NAMES[pilot_offset],Vector2(280,180),11,COLORS[2])
-	japanese("航路",Vector2(386,168),9,DIM)
-	japanese("赤い残響" if bio_route else "共鳴遺跡",Vector2(386,180),11,COLORS[0])
+	draw_rect(Rect2(112,156,416,29),Color("08162b",.9))
+	draw_rect(Rect2(112,156,416,29),Color("527e9c"),false,1)
+	draw_line(Vector2(216,160),Vector2(216,181),Color("35536d"),1)
+	draw_line(Vector2(320,160),Vector2(320,181),Color("35536d"),1)
+	draw_line(Vector2(424,160),Vector2(424,181),Color("35536d"),1)
+	japanese("人数",Vector2(124,168),9,DIM)
+	japanese(str(count)+" PILOTS",Vector2(124,180),11,WHITE)
+	japanese("先導機",Vector2(228,168),9,DIM)
+	japanese(PILOT_NAMES[pilot_offset],Vector2(228,180),11,COLORS[2])
+	japanese("航路",Vector2(332,168),9,DIM)
+	japanese("赤い残響" if bio_route else "共鳴遺跡",Vector2(332,180),11,COLORS[0])
+	japanese("ステージ",Vector2(436,168),9,DIM)
+	japanese(str(menu_stage)+" / 8",Vector2(436,180),11,COLORS[2])
 	if art_v09 and bio_route:
 		for i in range(3):
 			visual.ship(self,{"pos":Vector2(240+i*80,202),"color":i,"character":i,"experience":0},i,0,1.15)
@@ -1276,7 +1585,7 @@ func draw_menu():
 		draw_rect(Rect2(204,261,232,3),Color("f0fff6",.55))
 	japanese("出　撃",Vector2(289,281),19,WHITE)
 	japanese("A / ENTER",Vector2(373,281),10,COLORS[2])
-	centered("左右：人数選択　　F4 / X：先導機　　F8 / B：航路",309,DIM)
+	centered("左右：人数選択　　F4 / X：先導機　　F8 / B：航路　　上下：ステージ",309,DIM)
 	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+"  //  BGM "+("OFF" if muted else "ON"),323,COLORS[2])
 	japanese("F2：コントローラー設定",Vector2(22,341),10,COLORS[0])
 	japanese("H：遊び方",Vector2(282,341),10,WHITE)

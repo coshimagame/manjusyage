@@ -9,17 +9,58 @@ static func initialize(p, character):
 	p.digest_total=1.2
 	p.pending_technique="none"
 	p.fusion_flash=0.0
+	p.luck=50
+	p.fortune_history=[]
+	p.analysis_charge=0
+	p.analysis_uses=0
 
 static func level(p):
 	return mini(3,int(p.experience/8))
 
-static func damage(p, time):
+# C-065: Cormii fortune. Omikuji redraws luck (5-100, may go down);
+# normal shots never drain it; only a charged shot consumes 8 points.
+static func draw_omikuji(p, value):
+	var before=int(p.get("luck",50))
+	var after=clampi(int(value),5,100)
+	p.luck=after
+	var record={"before":before,"after":after,"delta":after-before}
+	if p.get("fortune_history")==null: p.fortune_history=[]
+	p.fortune_history.append(record)
+	return record
+
+static func chance_profile(p, roll):
+	var t=clampf(float(p.get("luck",50))/100.0,0.0,1.0)
+	var jackpot_chance=lerpf(.08,.46,t)
+	var low_chance=lerpf(.36,.06,t)
+	var grade="normal"
+	if roll>=1.0-jackpot_chance: grade="jackpot"
+	elif roll<low_chance: grade="low"
+	return {"grade":grade,"jackpot_chance":jackpot_chance,"low_chance":low_chance}
+
+static func consume_charged_luck(p):
+	p.luck=maxi(0,int(p.get("luck",50))-8)
+	return p.luck
+
+static func luck_title(p):
+	var luck=int(p.get("luck",50))
+	if luck>=80: return "大吉"
+	if luck>=60: return "中吉"
+	if luck>=40: return "吉"
+	if luck>=20: return "末吉"
+	return "凶"
+
+static func damage(p, time, roll=-1.0):
 	var growth=level(p)
 	if p.character==0:
 		var phase=fposmod(time,8.0)
-		if phase<1.5: return 2.4+growth*.7
-		if phase<3.0: return .55+growth*1.0
-		return 1.0+growth*.8
+		var base=1.0+growth*.8
+		if phase<1.5: base=2.4+growth*.7
+		elif phase<3.0: base=.55+growth*1.0
+		if roll>=0.0:
+			var grade=chance_profile(p,roll).grade
+			if grade=="jackpot": return maxf(base,2.2+growth*.7)
+			if grade=="low": return .55+growth*.5
+		return base
 	if p.character==1: return 1.0+growth*1.3
 	return 1.0+growth*.2
 
@@ -35,7 +76,9 @@ static func digest(p,dt):
 	p.digest=maxf(0,p.digest-dt)
 	p.fusion_flash=maxf(0,p.get("fusion_flash",0.0)-dt)
 	if p.digest==0:
-		p.learned=p.pending_technique
+		# Digestion finished: the temporary equipment is spent.
+		p.learned="none"
+		p.pending_technique="none"
 		p.experience+=8
 		p.fusion_flash=.7
 
@@ -45,6 +88,9 @@ static func eat(g,p) -> bool:
 		if e.hp>0 and e.hp<=3 and p.pos.distance_to(e.pos)<85:
 			p.charge-=40
 			p.pending_technique=e.get("technique","aimed")
+			# Current rules: the captured pattern is equipped immediately,
+			# and digestion restores regular fire when it completes.
+			p.learned=p.pending_technique
 			p.digest_total=1.2
 			p.digest=p.digest_total
 			if g.get("mafio_archive")!=null: g.mafio_archive.capture(e)

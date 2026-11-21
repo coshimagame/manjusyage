@@ -30,3 +30,6 @@ jobs:
           name: manjushage-web-test
           path: build/web/
           if-no-files-found: error
+          # Default retention (90 days) let every run's full web build pile up
+          # until the account artifact quota blocked all builds (2026-11 audit).
+          retention-days: 7

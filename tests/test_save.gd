@@ -6,6 +6,7 @@ func _initialize():
 func run():
 	var scene=load("res://main.tscn").instantiate()
 	root.add_child(scene)
+	scene.slice_mode=false # Persistence belongs to the full game, not the slice.
 	scene.count=2
 	scene.bio_route=true
 	scene.start_game()
