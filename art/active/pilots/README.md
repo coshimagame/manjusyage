@@ -1,20 +1,22 @@
 # v0.9 パイロット会話肖像 — 採用台帳
 
-## 採用範囲
+2026-11-21　[3人の指定透過原本・自機の横と縦を一枚で参照](../../../docs/manjushage/PILOT_SHIP_REFERENCE.md)。現行の会話・ステータスはこの原本から縮小描画する。
 
-2026-11-17、ユーザーがこの3人の背景透過ビジュアルを「基本」として指定した。v0.9では、ステータス画面、プロローグの発話者肖像、Stage 1クリア後の通信幕間で共通に使う。ゲーム上の呼称と性別は既存の設定を維持する。
+## 11月17日版での採用範囲
 
-| パイロット | 選定済み透過ソース | アクティブなドット絵 | 表示先 |
+2026-11-17、ユーザーがこの3人の背景透過ビジュアルを「基本」として指定した。11月17日の試遊版では、ステータス画面、プロローグの発話者肖像、Stage 1クリア後の通信幕間で共通に使う。ゲーム上の呼称と性別は既存の設定を維持する。
+
+| パイロット | 選定済み透過ソース | 11月17日のドット絵 | 表示先 |
 |---|---|---|---|
 | コルミィ | `art/originals/pilots/cormii_transparent_source_v01.png` | `cormii_dialogue_pixel_v01.png` | ステータス／プロローグ／幕間 |
 | ジヨーザ（男の子） | `art/originals/pilots/jiyoza_transparent_source_v01.png` | `jiyoza_dialogue_pixel_v01.png` | ステータス／プロローグ／幕間 |
 | マフィオ（ボーイッシュな女の子） | `art/originals/pilots/mafio_transparent_source_v01.png` | `mafio_dialogue_pixel_v01.png` | ステータス／プロローグ／幕間 |
 
-## 来歴と制作方法
+## 11月17日版の来歴と制作方法
 
 - 選定済み透過ソースのコピー元: `C:\Users\wa-ma\Documents\Codex\2026-11-07\new-chat\outputs\manjushage-transparent\characters\`。同梱`manifest.json`は、これらを「reference-based generated derivative」であり、失われた原画を復元したものではないと記録している。
-- アクティブ版: CodexのImageGenで2026-11-17に各選定ソースから生成。透明背景を維持し、既存のポーズ、表情、髪色、衣装の識別を保ちながら、640×360のUIでnearest表示できる16bit風のドット絵表現へ変換した。外部ゲームの人物・ロゴ・文字は指定・使用していない。
-- 採用状態: ユーザー指示に基づく**v0.9実装の基本肖像**。服装等の全詳細を長期の公式設定として新規決定したものではない。正式設定を更新する場合は、別途CANON/CHARACTERSの判断を要する。
+- 11月17日版: CodexのImageGenで2026-11-17に各選定ソースから生成。透明背景を維持し、既存のポーズ、表情、髪色、衣装の識別を保ちながら、640×360のUIでnearest表示できる16bit風のドット絵表現へ変換した。外部ゲームの人物・ロゴ・文字は指定・使用していない。
+- 採用状態: ユーザー指示に基づく**11月17日の試遊版の基本肖像**。服装等の全詳細を長期の公式設定として新規決定したものではない。正式設定を更新する場合は、別途CANON/CHARACTERSの判断を要する。
 - 置換時: 同名ファイルを上書きせず、`*_v02`を追加してからコード、`ART_ASSETS.md`、実画面をまとめて更新する。元の選定ソースは消さない。
 
 ## 版・検証値
@@ -28,7 +30,7 @@
 | `jiyoza_dialogue_pixel_v01.png` | 1117×1408 | `980a00e870939b8c36aeb67af9b6c06ec699ee19c8e2934eacafb00f3aa7f28e` |
 | `mafio_dialogue_pixel_v01.png` | 1159×1357 | `723f9685b3f906c6e85ce2c331e72d4f173dbf81c1592f0c30b57dc4f590f092` |
 
-## 検証状態
+## 11月17日版の検証状態
 
 - Godot 4.6.3 console + 隔離`APPDATA`: `test_status_v09.gd`、`test_prologue.gd`、`stage_intermission_smoke.gd`、`test_v09.gd`がPASS。
 - `docs/screenshots/latest/prologue_cormii_pixel_dialogue_20261117.png`は通常レンダラーで保存済みの640×360会話画面。コルミィの発話時にこのドット絵肖像が表示される。

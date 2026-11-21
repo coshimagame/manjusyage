@@ -19,6 +19,12 @@ func run():
 	assert(scene.page==1)
 	for i in range(scene.PAGES.size()-2):
 		scene.age=3.0
+		if scene.DIALOGUES.has(scene.page):
+			var prior=scene.page
+			scene.advance()
+			assert(scene.page==prior and scene.beat==1)
+			scene._process(9.0)
+			assert(scene.page==prior and scene.beat==1)
 		scene.advance()
 	assert(scene.page==7)
 	# The eighth advance enters the title, without indexing page 8.

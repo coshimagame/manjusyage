@@ -1,5 +1,6 @@
 extends Node2D
 
+const ArtCatalog = preload("res://art_catalog.gd")
 const PixelType = preload("res://ui/pixel_type.gd")
 
 # Temporary story treatment; names and narration are not final canon.
@@ -23,6 +24,7 @@ const DIALOGUES = {
 	5: [["ムゥ", "飛ぶ場所は、自分たちで決めろ。"], ["三人", "やるっきゃない！"]]
 }
 
+var beat := 0
 var page := 0
 var age := 0.0
 var clock := 0.0
@@ -37,11 +39,8 @@ var frames := 0
 
 func _ready():
 	DisplayServer.window_set_title("曼珠沙華（MANJUSHAGE）")
-	pilot_dialogue_portraits = {
-		"コルミィ": pilot_texture_from_file("res://art/active/pilots/cormii_dialogue_pixel_v01.png"),
-		"ジヨーザ": pilot_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
-		"マフィオ": pilot_texture_from_file("res://art/active/pilots/mafio_dialogue_pixel_v01.png")
-	}
+	for i in range(ArtCatalog.PILOT_NAMES.size()):
+		pilot_dialogue_portraits[ArtCatalog.PILOT_NAMES[i]] = ArtCatalog.portrait(i)
 	# OPEN-VIS-001: a user-requested opening illustration. It is retained as a
 	# separately versioned source asset and only replaces page 01's backdrop;
 	# text, input, music and the later animated prologue pages remain live.
@@ -62,7 +61,7 @@ func _ready():
 		if arg == "--workshop-shot": test_shot=true;page=4;age=4.0
 		if arg == "--opening-shot": test_shot=true;opening_shot=true;page=0;age=4.0
 		# Capture the Cormii dialogue beat without changing the normal prologue.
-		if arg == "--pilot-story-shot": test_shot=true;page=2;age=5.0
+		if arg == "--pilot-story-shot": test_shot=true;page=2;beat=1;age=5.0
 	queue_redraw()
 
 func pilot_texture_from_file(path:String)->Texture2D:
@@ -106,6 +105,10 @@ func _unhandled_input(event):
 
 func advance():
 	if age < 2.5: age = 2.5; return
+	if DIALOGUES.has(page) and beat==0:
+		beat=1
+		return
+	beat=0
 	page += 1
 	age = 0.0
 	if page >= PAGES.size(): finish()
@@ -121,7 +124,6 @@ func _process(dt):
 	if finished: return
 	clock += dt
 	age += dt
-	if age > 8.5: advance()
 	queue_redraw()
 	frames += 1
 	if test_shot and frames == 5:
@@ -134,7 +136,7 @@ func _process(dt):
 		var texture = get_viewport().get_texture()
 		var image = texture.get_image() if texture != null else null
 		if image != null:
-			var preview_path="opening-preview.png" if opening_shot else ("pilot-story-preview.png" if page==2 and age>=4.25 else "story-preview.png")
+			var preview_path="opening-preview.png" if opening_shot else ("pilot-story-preview.png" if page==2 and beat==1 else "story-preview.png")
 			image.save_png("res://"+preview_path)
 		get_tree().quit()
 
@@ -156,17 +158,17 @@ func _draw():
 			draw_rect(Rect2(pos+Vector2(-3,-3),Vector2(6,3)),[Color("6cf1eb"),Color("ffad81"),Color("c8acff")][i])
 			draw_line(pos+Vector2(-19,1),pos+Vector2(-32-sin(clock*12)*4,1),Color("ffb474"),3)
 	if DIALOGUES.has(page): draw_story_dialogue()
-	draw_rect(Rect2(0,252,640,108),Color(.025,.04,.08,.94))
+	draw_rect(Rect2(0,252,640,108),Color("101326"))
 	draw_line(Vector2(28,253),Vector2(612,253),Color("637e9b"))
 	var opacity=clampf(age*1.5,0,1)
 	PixelType.draw(self,12,Vector2(30,34),PAGES[page][0],Color(.55,.76,.86,opacity))
-	PixelType.draw(self,20,Vector2(30,281),PAGES[page][1],Color(.94,.9,.75,opacity))
+	PixelType.draw(self,20,Vector2(24,276),PAGES[page][1],Color(.94,.9,.75,opacity))
 	var lines = PAGES[page][2].split("\n")
 	for i in range(lines.size()):
 		var text=lines[i].substr(0,int(age*22))
-		PixelType.draw(self,12,Vector2(30,307+i*21),text,Color("d8e5ee"))
-	PixelType.draw(self,10,Vector2(30,350),"Enter / A：次へ    Esc / Start：スキップ    M：音",Color("8ba4be"))
-	PixelType.draw(self,10,Vector2(574,350),str(page+1)+" / "+str(PAGES.size()),Color("8ba4be"))
+		PixelType.draw(self,20,Vector2(24,303+i*24),text,Color("d8e5ee"))
+	PixelType.draw(self,12,Vector2(24,353),"Enter / A：次へ    Esc / Start：スキップ    M：音",Color("8ba4be"))
+	PixelType.draw(self,12,Vector2(576,353),str(page+1)+" / "+str(PAGES.size()),Color("8ba4be"))
 
 func draw_opening_backdrop():
 	# Preserve the generated pixel clusters with nearest sampling and add only
@@ -221,7 +223,7 @@ func draw_legacy_backdrop():
 func draw_training():
 	# MOV-002: common tandem hull, no unapproved human appearance or gender assignment.
 	for i in range(3):
-		var pos=Vector2(floor(85+age*13+i*142),103+i*37)
+		var pos=Vector2(roundf(102+sin(clock*.45)*10+i*181),78+i*17)
 		var col=[Color("f4ac91"),Color("94c9ed"),Color("efdc9d")][i]
 		for y in range(-8,9):
 			var width=40-abs(y)*3
@@ -278,31 +280,15 @@ func draw_workshop():
 	PixelType.draw(self,12,Vector2(63,99),"ANALYSIS / 3 WORLDLINES",Color("87cde1"))
 
 func draw_story_dialogue():
-	var index=0 if age < 4.25 else 1
-	var entry=DIALOGUES[page][index]
-	var local_age=age if index==0 else age-4.25
-	var letters=maxi(0,int((local_age-.35)*23))
-	var dialogue=entry[1].substr(0,letters)
-	var reveal=clampf(local_age*2.0,0,1)
-	draw_story_pilot_portrait(str(entry[0]),reveal)
-	draw_rect(Rect2(62,209,518,37),Color(.025,.055,.115,.83*reveal))
-	draw_rect(Rect2(62,209,3,37),Color(.95,.48,.51,.87*reveal))
-	PixelType.draw(self,12,Vector2(77,224),entry[0],Color(.95,.68,.54,reveal))
-	PixelType.draw(self,12,Vector2(143,232),dialogue,Color(.95,.94,.87,reveal))
-	if int(clock*2)%2==0 and letters>=entry[1].length():
-		draw_rect(Rect2(555,232,7,2),Color(.91,.76,.54,reveal))
-
-# STORY-VIS-001 — show the same active pixel portraits during the relevant
-# dialogue beats without assigning a portrait to Mu or Kuu.
-func draw_story_pilot_portrait(speaker:String,reveal:float):
-	var portrait: Texture2D = pilot_dialogue_portraits.get(speaker)
-	if portrait == null: return
-	var panel=Rect2(468,49,139,144)
-	draw_rect(panel,Color(.025,.055,.115,.72*reveal))
-	draw_rect(panel,Color(.75,.83,1,.58*reveal),false,1)
-	var source_size=portrait.get_size()
-	var scale=minf(130.0/source_size.x,136.0/source_size.y)
-	var portrait_size=source_size*scale
-	var target=Rect2(panel.get_center()-portrait_size*.5,portrait_size)
-	draw_texture_rect(portrait,target,false,Color(1,1,1,reveal))
-
+	var entry=DIALOGUES[page][beat]
+	var dialogue: String = entry[1]
+	draw_rect(Rect2(16,160,608,86),Color("121626"))
+	draw_rect(Rect2(16,160,608,2),Color("746270"))
+	var face: Texture2D = pilot_dialogue_portraits.get(entry[0])
+	var left := 32
+	if face:
+		var extent := face.get_size() * minf(92.0 / face.get_width(), 80.0 / face.get_height())
+		draw_texture_rect(face, Rect2(Vector2(66,244) - Vector2(extent.x*.5,extent.y).round(),extent.round()),false)
+		left = 126
+	PixelType.draw(self,12,Vector2(left,184),entry[0],Color("f3c58f"))
+	PixelType.draw(self,20,Vector2(left,219),dialogue,Color("fff4de"))

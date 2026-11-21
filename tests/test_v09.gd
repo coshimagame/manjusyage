@@ -118,6 +118,13 @@ func run():
 	for shot in g.shots:
 		if shot.delay>0:delayed_shots+=1
 	assert(g.shots.size()==expected_shots and delayed_shots>0,"Staged Stage 1 volleys must create both immediate and delayed shots (expected=%d actual=%d delayed=%d)" % [expected_shots,g.shots.size(),delayed_shots])
+	var flyer=g.enemies[1]
+	flyer.cool=0
+	g.update_game(.01)
+	assert(flyer.retreating, "Small creatures leave the firing lane after their second salvo")
+	flyer.pos.x=695.9
+	g.update_game(.05)
+	assert(not g.enemies.has(flyer), "Departed creatures must free their slot")
 	var expected_shake=0.0 if g.visual.intensity>0 else 1.0
 	var expected_flash=0.0 if g.visual.flash_level>0 else .35
 	for key in [KEY_F10,KEY_F12]:

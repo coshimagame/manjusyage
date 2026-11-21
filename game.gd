@@ -1,5 +1,6 @@
 extends Node2D
 
+const ArtCatalog = preload("res://art_catalog.gd")
 const W = 640.0
 const H = 360.0
 const COLORS = [Color("67ecff"), Color("ff668e"), Color("ffce63")]
@@ -22,7 +23,7 @@ const STAGE1_ENEMY_PROFILES = {
 	"EN008":{"motion":"wasp","technique":"dive","shot_form":"needle","scale":0.84,"hp_bonus":0,"speed":96.0,"amplitude":26.0,"hit_radius":17.0,"fire_delay":2.20,"shot_offsets":[-0.18,0.0,0.18],"shot_speed":104.0,"shot_radius":2,"shot_turn":0.18,"volley_count":2,"volley_gap":0.11,"volley_twist":0.10},
 	"EN009":{"motion":"rotor","technique":"fan","shot_form":"ring","scale":0.98,"hp_bonus":1,"speed":61.0,"amplitude":21.0,"hit_radius":21.0,"fire_delay":2.90,"shot_offsets":[-0.48,-0.32,-0.16,0.0,0.16,0.32,0.48],"shot_speed":64.0,"shot_radius":3,"shot_turn":0.12,"volley_count":2,"volley_gap":0.16,"volley_twist":0.10},
 	"SB01":{"motion":"crab","technique":"dive","shot_form":"claw","scale":1.16,"hp_bonus":3,"speed":54.0,"amplitude":26.0,"hit_radius":29.0,"fire_delay":3.15,"shot_offsets":[-0.34,-0.12,0.12,0.34],"shot_speed":90.0,"shot_radius":5,"shot_turn":0.20,"volley_count":2,"volley_gap":0.16,"volley_twist":0.12},
-	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":34.0,"fire_delay":3.35,"shot_offsets":[-0.36,-0.18,0.0,0.18,0.36],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10,"volley_count":2,"volley_gap":0.18,"volley_twist":0.08,"body_segments":4,"body_spacing":28.0,"body_radius":15.0,"body_span":164.0}
+	"MB01":{"motion":"centipede","technique":"orbit","shot_form":"orb","scale":1.42,"hp_bonus":5,"speed":39.0,"amplitude":29.0,"hit_radius":19.0,"fire_delay":3.35,"shot_offsets":[-0.36,-0.18,0.0,0.18,0.36],"shot_speed":72.0,"shot_radius":5,"shot_turn":0.10,"volley_count":2,"volley_gap":0.18,"volley_twist":0.08,"body_segments":4,"body_spacing":28.0,"body_radius":15.0,"body_span":164.0}
 }
 const FONT = {
 "A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
@@ -144,11 +145,8 @@ func _ready():
 	chat_ui_atlas=image_texture_from_file("res://art/ui/chat_ui_atlas_20261106.png")
 	character_hub_ui=image_texture_from_file("res://art/ui/character_hub_ui_20261106.png")
 	character_system_ui=image_texture_from_file("res://art/ui/character_system_ui_20261106.png")
-	pilot_portraits=[
-		image_texture_from_file("res://art/active/pilots/cormii_dialogue_pixel_v01.png"),
-		image_texture_from_file("res://art/active/pilots/jiyoza_dialogue_pixel_v01.png"),
-		image_texture_from_file("res://art/active/pilots/mafio_dialogue_pixel_v01.png")
-	]
+	for i in range(ArtCatalog.PILOT_NAMES.size()):
+		pilot_portraits.append(ArtCatalog.portrait(i))
 	build_planet_texture()
 	for i in range(130):
 		stars.append(Vector3(randf()*W,randf()*H,randf_range(.3,1.6)))
@@ -820,12 +818,16 @@ func update_game(dt):
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
 		var motion=str(e.get("motion",e.get("technique","aimed")))
 		# Each organism has a readable, repeatable route before its shot telegraph.
-		if motion=="moth":
+		if e.get("retreating",false):
+			e.pos.x += (e.speed+64)*dt
+			e.pos.y += sin(e.phase+e.age)*22*dt
+		elif motion=="moth":
 			e.pos.x-=e.speed*dt
 			e.pos.y=e.base+sin(e.age*2.55+e.phase)*e.amplitude
 		elif motion=="bird":
-			e.pos.x-=e.speed*.94*dt
-			e.pos.y=e.base+sin(e.age*1.35+e.phase)*e.amplitude*1.25+sin(e.age*5.4+e.phase)*6
+			var swoop := maxf(0,sin(e.age*1.6+e.phase))
+			e.pos.x-=e.speed*(.65+.75*swoop)*dt
+			e.pos.y=e.base+e.amplitude*(1.6*swoop*swoop-.5)
 		elif motion=="fish":
 			e.pos.x-=e.speed*.66*dt+cos(e.age*1.1+e.phase)*7*dt
 			e.pos.y=e.base+sin(e.age*1.5+e.phase)*e.amplitude*.78
@@ -836,8 +838,9 @@ func update_game(dt):
 			e.pos.x-=e.speed*.55*dt
 			e.pos.y=e.base+sin(e.age*2.75+e.phase)*e.amplitude
 		elif motion=="jelly":
-			e.pos.x-=e.speed*.48*dt
-			e.pos.y=e.base+sin(e.age*1.7+e.phase)*e.amplitude+sin(e.age*5.2+e.phase)*5
+			var thrust := maxf(0,cos(e.age*3.0+e.phase))
+			e.pos.x-=e.speed*(.33+.81*thrust*thrust)*dt
+			e.pos.y=e.base+sin(e.age*1.5+e.phase)*e.amplitude
 		elif motion=="mushroom":
 			e.pos.x-=e.speed*.36*dt
 			e.pos.y=e.base+sin(e.age*1.05+e.phase)*e.amplitude*.55
@@ -868,9 +871,10 @@ func update_game(dt):
 			e.pos.y=e.base+sin(e.age*2.0+e.phase)*e.amplitude+sin(e.age*6.0+e.phase)*9
 		# This slice teaches bullets and routes, not surprise contact damage.
 		# Holding the living hull beyond the player lane preserves a clear rescue space.
-		if bio_route:e.pos.x=maxf(420,e.pos.x)
+		if bio_route and not e.get("retreating",false):
+			e.pos.x=maxf(e.get("hold_x",420.0),e.pos.x)
 		e.cool-=dt
-		if e.cool<=0 and e.pos.x<610:
+		if e.cool<=0 and e.pos.x<610 and not e.get("retreating",false):
 			e.cool=float(e.get("fire_delay",2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)))
 			var target=players[wave_id%count].pos
 			var angles=e.get("shot_offsets",[-.2,0,.2] if bio_route and motion=="fan" else ([0] if motion=="dive" else [-.11,.11]))
@@ -886,6 +890,12 @@ func update_game(dt):
 					elif motion=="weave":shot.turn=.46 if fired_angle<0 else -.46
 					elif motion=="orbit":shot.turn=.22 if fired_angle<0 else -.22
 					shots.append(shot)
+			if bio_route and slice_mode:
+				e.salvos=int(e.get("salvos",0))+1
+				if e.salvos >= (3 if motion in ["centipede","crab","turtle"] else 2):
+					e.retreating=true
+					e.cool=100
+
 		for p in players:
 			if p.down==0 and enemy_body_contains(e,p.pos,float(e.get("contact_radius",e.get("hit_radius",20.0)*.82))): hurt(p)
 		if e.hp<=0:
@@ -895,7 +905,7 @@ func update_game(dt):
 			if art_v09 and bio_route: visual.confirm(e.pos,combo)
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
 			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
-	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
+	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40 and not (e.get("retreating",false) and e.pos.x>696))
 	for shot in shots:
 		if float(shot.get("delay",0.0))>0:
 			shot.delay-=dt
@@ -929,6 +939,9 @@ func spawn_wave():
 	for j in range(3+count):
 		var technique=["fan","weave","dive","orbit"][(wave_id+j)%4] if bio_route else "aimed"
 		var lane=base+(j-(count+1)*.5)*18
+		if bio_route and slice_mode:
+			var slots: int = 3+count
+			lane=103.0+fposmod(j+wave_id,slots)*(172.0/(slots-1))
 		var art_id=art_cycle[(wave_id*2+j)%art_cycle.size()] if bio_route else ""
 		var hp=2+int(count>1)
 		var speed=55.0+wave_id%4*9
@@ -945,6 +958,9 @@ func spawn_wave():
 			art_id="SB01"; profile=STAGE1_ENEMY_PROFILES[art_id]; technique=str(profile["technique"]); hp+=int(profile["hp_bonus"]); speed=float(profile["speed"])
 		var amplitude=float(profile.get("amplitude",23.0+int(technique=="dive")*8))
 		enemies.append({"pos":Vector2(670+j*34,lane),"base":lane,"age":0.0,"phase":j*.65+wave_id*.27,"speed":speed,"amplitude":amplitude,"hp":hp,"cool":1.3+j*.27,"flash":0.0,"technique":technique,"motion":str(profile.get("motion",technique)),"art_id":art_id,"scale":float(profile.get("scale",1.0)),"hit_radius":float(profile.get("hit_radius",19.0)),"contact_radius":float(profile.get("hit_radius",19.0))*.82,"fire_delay":float(profile.get("fire_delay",2.5)),"shot_offsets":profile.get("shot_offsets",[]),"shot_speed":float(profile.get("shot_speed",88.0)),"shot_radius":int(profile.get("shot_radius",3)),"shot_turn":float(profile.get("shot_turn",0.0)),"shot_form":str(profile.get("shot_form","thorn")),"volley_count":int(profile.get("volley_count",1)),"volley_gap":float(profile.get("volley_gap",0.0)),"volley_twist":float(profile.get("volley_twist",0.0)),"body_segments":int(profile.get("body_segments",0)),"body_spacing":float(profile.get("body_spacing",0.0)),"body_radius":float(profile.get("body_radius",0.0)),"body_span":float(profile.get("body_span",0.0))})
+		if bio_route and slice_mode:
+			enemies[-1].hold_x=390+(j%3)*64
+
 
 func enemy_body_point(e,segment:int)->Vector2:
 	if segment<=0:return e.pos
@@ -1173,6 +1189,7 @@ func background():
 		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
 
 func _draw():
+	if mode=="intermission": return
 	if mode=="status":
 		draw_status_screen()
 		return

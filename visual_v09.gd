@@ -245,92 +245,72 @@ func enemy(g,e):
 	elif motion in ["turtle","mushroom","centipede"]:tilt+=sin(e.age*1.15+phase)*.07
 	elif motion in ["rotor","flower"]:tilt+=sin(e.age*2.0+phase)*.1
 	var pulse=1.0+sin(g.clock*(6.2 if motion=="jelly" else 4.0)+phase)*(.055 if motion in ["jelly","flower","mushroom"] else .025)
-	# MB01 is the long-body encounter: the supplied sprite is kept intact, while
-	# four armored tail sections make its full connected length readable before
-	# it crosses the player lane. The same body points drive hit/contact checks.
-	var body_segments=int(e.get("body_segments",0))
-	if body_segments>0:
-		var tail_radius=float(e.get("body_radius",12.0))
-		var previous=e.pos
-		for segment in range(1,body_segments+1):
-			var node=g.enemy_body_point(e,segment)
-			g.draw_line(previous,node,Color("201c40",.86),tail_radius*1.55)
-			g.draw_circle(node,tail_radius+2,Color("171329"))
-			g.draw_circle(node,tail_radius,Color("78649b"))
-			g.draw_circle(node+Vector2(-tail_radius*.25,-tail_radius*.18),tail_radius*.42,Color("c49aca"))
-			g.draw_circle(node,2.5,Color("ff7d98"))
-			previous=node
-	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,pulse))
-	if art_id!="":g.draw_texture_rect(tex,Rect2(-display_size*.5,display_size),false,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
-	else:g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
-	if opening>0:g.draw_arc(Vector2(-display_size.x*.31,0),4+opening*7,PI*.55,PI*1.45,12,Color("fff0b7"),1)
-	if motion in ["moth","flower","rotor"]:g.draw_arc(Vector2.ZERO,maxf(10,display_size.x*.27),0,TAU,12,Color("ffc9bb",.58),1)
-	elif motion in ["jelly","mushroom"]:g.draw_arc(Vector2(0,display_size.y*.18),maxf(9,display_size.x*.23),0,TAU,12,Color("b8d7dd",.58),1)
-	elif motion in ["turtle","centipede"]:g.draw_line(Vector2(-display_size.x*.42,0),Vector2(display_size.x*.42,0),Color("b8d7dd",.52),1)
+	var light := Color(1,.72,.69) if e.get("flash",0)>0 else Color.WHITE
+	if art_id=="MB01" and not g.vertical.active and e.get("body_segments",0)==4:
+		draw_armored_body(g,e,tex,light)
+	else:
+		g.draw_set_transform(e.pos.round(),tilt,Vector2(1,pulse))
+		g.draw_texture_rect(tex,Rect2(-display_size*.5,display_size),false,light)
+		if opening>.6:
+			g.draw_line(Vector2(-display_size.x*.40,-1),Vector2(-display_size.x*.32,-1),Color("fff1c8"),2)
 	g.draw_set_transform(Vector2.ZERO)
 	if e.hp<=3 and g.players.any(func(p):return p.character==2 and p.down==0 and p.pos.distance_to(e.pos)<85):
 		g.draw_arc(e.pos,27,PI*.65,PI*1.35,10,Color("d4b576"),1)
+
+# Project the continuous original shell onto the same joints used for collisions.
+func draw_armored_body(g,e,tex:Texture2D,light:Color):
+	var u := [0.0,.13,.34,.54,.74,.93,1.0]
+	var axis := [.62,.59,.45,.33,.23,.14,.12]
+	var spine: Array[Vector2] = [e.pos-Vector2(21,0),e.pos]
+	for joint in range(1,5):
+		spine.append(g.enemy_body_point(e,joint))
+	spine.append(spine[-1]+Vector2(12,-1))
+	var height := float(e.body_span)*tex.get_height()/tex.get_width()
+	for i in range(spine.size()-1):
+		var a := (spine[i]-Vector2(0,height*axis[i])).round()
+		var b := (spine[i+1]-Vector2(0,height*axis[i+1])).round()
+		var h := Vector2(0,roundf(height))
+		g.draw_polygon(PackedVector2Array([a,b,b+h,a+h]),PackedColorArray([light]),
+			PackedVector2Array([Vector2(u[i],0),Vector2(u[i+1],0),Vector2(u[i+1],1),Vector2(u[i],1)]),tex)
 
 func projectile(g,b,hostile=false):
 	var direction: float = b.get("vel",Vector2.RIGHT).angle()
 	g.draw_set_transform(b.pos.round(),direction)
 	if hostile:
-		# Enemy shots have a dark diamond hull, warm core and short ember. They
-		# therefore read differently from long friendly bolts even in dense fire.
-		var radius:=float(b.r)
-		var form=str(b.get("form","thorn"))
+		var radius := float(b.r)
+		var diameter := radius*2.0+2.0
+		var form := str(b.get("form","thorn"))
+		var dark := Color("231930")
+		var ink := Color("ff887b")
 		var sprite: Texture2D
 		match form:
 			"petal": sprite=bullet_petal_texture
 			"needle": sprite=bullet_needle_texture
 			"ring": sprite=bullet_flower_ring_texture
 			"orb": sprite=bullet_target_eye_texture
+			"bubble": ink=Color("87dcf6")
+			"drip": ink=Color("c1a5ff")
+			"spore": ink=Color("ffbd77")
 		if sprite:
-			# Correct the source art's baked angle. Keep the contact cue at b.pos.
-			var bounds := Vector2.ONE * (radius * 2.0 + 8.0)
+			g.draw_circle(Vector2.ZERO,radius+1,dark)
+			g.draw_circle(Vector2.ZERO,maxf(1,radius-1),Color("f5a9b3"))
+			var bounds := Vector2(diameter,diameter)
 			if form=="needle":
 				g.draw_set_transform(b.pos.round(),direction-2.65)
-				bounds=Vector2(17,12)
-			var size := fitted_texture_size(sprite,bounds)
-			g.draw_texture_rect(sprite,Rect2(-size*.5,size),false)
-			g.draw_rect(Rect2(-1,-1,2,2),Color("fff4da"))
-			g.draw_set_transform(Vector2.ZERO)
-			return
-		var dark=Color("171329")
-		var hot=Color("e36f71")
-		if form=="needle":
-			g.draw_line(Vector2(-radius-11,0),Vector2(radius+5,0),Color("6b354f",.75),3)
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,-radius),Vector2(radius+6,0),Vector2(-radius-1,radius)]),dark)
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,-1),Vector2(radius+3,0),Vector2(-radius+1,1)]),Color("f7b4b9"))
-		elif form in ["bubble","orb"]:
-			g.draw_circle(Vector2.ZERO,radius+3,dark)
-			g.draw_circle(Vector2.ZERO,radius+1,Color("72d9eb") if form=="bubble" else hot)
-			g.draw_circle(Vector2(-radius*.3,-radius*.35),maxf(1,radius*.34),Color("fff5d1"))
-		elif form=="spore":
-			g.draw_circle(Vector2.ZERO,radius+3,dark)
-			g.draw_circle(Vector2.ZERO,radius+1,Color("f0a76e"))
-			for petal in range(4):
-				var d=Vector2.from_angle(petal*TAU/4.0+PI*.25)
-				g.draw_circle(d*(radius+4),1.5,Color("ffd784"))
-		elif form=="ring":
-			g.draw_circle(Vector2.ZERO,radius+3,dark)
-			g.draw_arc(Vector2.ZERO,radius+1,0,TAU,12,Color("ff9ac2"),2)
-			g.draw_circle(Vector2.ZERO,1,Color("fff0bc"))
-		elif form=="claw":
-			g.draw_line(Vector2(-radius-7,-radius*.8),Vector2(radius+3,-radius*.25),dark,3)
-			g.draw_line(Vector2(-radius-7,radius*.8),Vector2(radius+3,radius*.25),dark,3)
-			g.draw_line(Vector2(-radius-6,-radius*.8),Vector2(radius+2,-radius*.25),Color("ff9d8a"),1)
-			g.draw_line(Vector2(-radius-6,radius*.8),Vector2(radius+2,radius*.25),Color("ff9d8a"),1)
+				bounds=Vector2(diameter+2,diameter)
+			var size := fitted_texture_size(sprite,bounds).round()
+			g.draw_texture_rect(sprite,Rect2((-size*.5).round(),size),false)
+		elif form in ["bubble","orb","ring","spore"]:
+			g.draw_circle(Vector2.ZERO,radius+1,dark)
+			g.draw_circle(Vector2.ZERO,radius,ink)
+			if form=="spore":
+				g.draw_line(Vector2(-radius*.6,0),Vector2(radius*.6,0),dark,1)
 		else:
-			g.draw_line(Vector2(-radius-8,0),Vector2(-radius,0),Color("6b354f",.7),3)
-			g.draw_line(Vector2(-radius-7,0),Vector2(-radius,0),Color("f06f72",.55),1)
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-1,0),Vector2(0,-radius-2),Vector2(radius+2,0),Vector2(0,radius+2)]),dark)
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius+1,0),Vector2(0,-radius),Vector2(radius,0),Vector2(0,radius)]),hot)
-			g.draw_circle(Vector2(1,0),maxf(1,radius-2),Color("fff0bc"))
-		if form=="petal" or form=="drip":
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius-2,0),Vector2(0,-radius-3),Vector2(radius+3,0),Vector2(0,radius+3)]),dark)
-			g.draw_colored_polygon(PackedVector2Array([Vector2(-radius,0),Vector2(0,-radius-1),Vector2(radius+1,0),Vector2(0,radius+1)]),Color("ff9aac") if form=="petal" else Color("b9a6ff"))
-			g.draw_circle(Vector2.ZERO,maxf(1,radius-2),Color("fff0bc"))
+			var tip := Vector2(radius+1,0)
+			var wing := Vector2(0,radius)
+			g.draw_colored_polygon(PackedVector2Array([-tip,-wing,tip,wing]),dark)
+			g.draw_colored_polygon(PackedVector2Array([-tip*.8,-wing*.7,tip*.8,wing*.7]),ink)
+		g.draw_rect(Rect2(-1,-1,2,2),Color("fff4da"))
 	else:
 		var col=g.COLORS[b.color]
 		var p=g.players[b.owner]

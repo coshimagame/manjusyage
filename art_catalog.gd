@@ -2,6 +2,25 @@ extends RefCounted
 # Optional PNG artwork. Keep each slot independent so art experiments never
 # break gameplay when a file is missing. Textures load at game startup.
 const ROOT = "res://art/active/"
+const PILOT_NAMES := ["コルミィ", "ジヨーザ", "マフィオ"]
+const PILOT_ORIGINALS := [
+	"res://art/originals/pilots/cormii_transparent_source_v01.png",
+	"res://art/originals/pilots/jiyoza_transparent_source_v01.png",
+	"res://art/originals/pilots/mafio_transparent_source_v01.png",
+]
+static var _portraits: Dictionary = {}
+
+# Downsample the chosen illustration once on the pixel grid, preserving its pose and alpha.
+static func portrait(index: int) -> Texture2D:
+	if not _portraits.has(index):
+		var original := load(PILOT_ORIGINALS[index]) as Texture2D
+		var pixels := original.get_image()
+		if pixels.is_compressed(): pixels.decompress()
+		var ratio := minf(160.0 / pixels.get_width(), 174.0 / pixels.get_height())
+		pixels.resize(roundi(pixels.get_width() * ratio), roundi(pixels.get_height() * ratio), Image.INTERPOLATE_LANCZOS)
+		_portraits[index] = ImageTexture.create_from_image(pixels)
+	return _portraits[index]
+
 const MAFIO_GOLD_BLACK := "res://art/active/ships/mafio_gold_black_v02.png"
 const MAFIO_GOLD_BLACK_REGION := Rect2(151,135,1472,615)
 const REFERENCE_SHIPS := [

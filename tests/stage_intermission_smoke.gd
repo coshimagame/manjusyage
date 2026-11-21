@@ -22,6 +22,9 @@ func _run() -> void:
 	assert(scene.index == 1)
 	await process_frame
 	assert(scene._portrait.visible and scene._portrait.texture == scene._pilot_portraits["コルミィ"], "A pilot line must show its matching portrait")
+	assert(scene.get_rect().size.x>=640 and scene.get_rect().size.y>=360)
+	assert(not scene._portrait.get_rect().intersects(scene._dialogue.get_rect()))
+	assert(scene._dialogue.text==lines[1].text and scene._dialogue.visible_characters<lines[1].text.length())
 	scene.toggle_log()
 	assert(scene.show_log and scene.history.size() == 1)
 	scene.advance()

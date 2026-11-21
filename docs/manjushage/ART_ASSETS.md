@@ -1,5 +1,11 @@
 # アート・音楽・参考画像の原本台帳
 
+## 2026-11-21　人物原本の表示とMB01の装甲
+
+- 人物はユーザー選定の `art/originals/pilots/*_transparent_source_v01.png`。原本のアルファと縦横比を保ち、Godotで160×174以内に縮小し、ドット単位で描画。v0.9のプロローグ、幕間、ステータスに採用。[人物と各機の採用画像](PILOT_SHIP_REFERENCE.md)・[原本の寸法とSHA-256](../../art/active/pilots/README.md)
+- MB01は提供原画 `MB01_h_draft.png` の連続した装甲をGodotのメッシュで曲げて描画。弾の輪郭、触手の先端とチャージはコード描画。既存原画を使った第1面の試遊演出。台詞本文と音楽は11月20日版を継承。
+- 実ゲーム画像は11月21日版 Windows PCK の640×360描画を加工せずに保存。[コルミィ](../screenshots/latest/intermission_cormii_20261121.png)・[ジヨーザ](../screenshots/latest/intermission_jiyoza_20261121.png)・[マフィオ](../screenshots/latest/intermission_mafio_20261121.png)・[敵と弾](../screenshots/latest/stage1_armored_wave_20261121.png)。敵の画像は確認用に編隊位置を揃えた戦闘場面。
+
 ## 2026-11-20　2面連続試遊 v0.9
 
 - **背景**　提供資料 `art/concept/eight_stage_retro_pixel_concepts_20261106.png` の第1・第2面の風景部分を使用。屈折、脈動、血管、反応する壁、水底の予告は `scripts/living_boundaries.gd` と `biological_stage.gd` の実行時描画。今回の2面の試遊に採用。

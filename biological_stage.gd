@@ -161,10 +161,16 @@ func draw_tendrils(g):
 		g.draw_polyline(points,Color("9f4966"),6)
 		g.draw_polyline(points,Color("e08187"),2)
 		var telegraph=clampf((tendril.age-.74)/.45,0.0,1.0) if not tendril.fired and recoil[0 if tendril.upper else 1]<=0 else 0.0
-		g.draw_circle(tip,9+telegraph*5,Color("6b2d52"))
-		g.draw_circle(tip+Vector2(-2,-2),5,Color("ffc091") if telegraph>.6 else Color("d2687b"))
+		var stem: Vector2=(tip-anchor).normalized()
+		var across:=stem.orthogonal()
+		for sign_x in [-1,1]:
+			var jaw := across * float(sign_x)
+			var base: Vector2=tip-stem*9
+			var point: Vector2=tip+stem*(5+telegraph*3)+jaw*(2+telegraph*4)
+			g.draw_colored_polygon(PackedVector2Array([base,base+jaw*5,point,tip]),Color("a45772"))
+			g.draw_line(base+jaw*4,point,Color("f0ab91"),1)
 		if telegraph>0:
-			g.draw_arc(tip,14+telegraph*9,0,TAU,18,Color("fff0c5",telegraph*.78),1)
+			g.draw_line(tip-stem*5,tip+stem*2,Color("ffdd9a",telegraph),2)
 
 func draw_boss(g):
 	var p=g.boss.pos
