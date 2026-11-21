@@ -8,18 +8,30 @@ var creatures=[]
 var blasts=[]
 var hits=[]
 var confirms=[]
+var pillars=[]
 var intensity=1.0
 var flash_level=.35
 
+func slot_or(key:String, fallback:String) -> Texture2D:
+	# Swappable-art convention: an art/active/<key>.png drop-in wins over the
+	# built-in file, so any of these textures can be replaced without code.
+	# PNGs are read as images (not import-cache resources), matching game.gd.
+	var flat="res://art/active/"+key+".png"
+	if FileAccess.file_exists(flat):
+		var image=Image.load_from_file(flat)
+		if image and not image.is_empty(): return ImageTexture.create_from_image(image)
+	var fallback_image=Image.load_from_file(fallback)
+	if fallback_image and not fallback_image.is_empty(): return ImageTexture.create_from_image(fallback_image)
+	return load(fallback) if ResourceLoader.exists(fallback) else null
+
 func setup():
-	cosmos=load("res://art/v09/cosmos.png")
-	atlas=load("res://art/v09/ship-atlas.png")
+	cosmos=slot_or("v09_cosmos","res://art/v09/cosmos.png")
+	atlas=slot_or("v09_ship_atlas","res://art/v09/ship-atlas.png")
 	# STG-CONCEPT-001 is a user-supplied eight-stage concept board. Only its
 	# Stage 1 environment strip is used here as a dim, non-colliding backdrop;
 	# the other seven rows remain concept material, not playable stage claims.
-	var concept_image=Image.load_from_file("res://art/concept/eight_stage_retro_pixel_concepts_20261106.png")
-	stage_concepts=ImageTexture.create_from_image(concept_image) if concept_image and not concept_image.is_empty() else null
-	for i in range(4):creatures.append(load("res://art/v09/enemy-"+str(i)+".png"))
+	stage_concepts=slot_or("stage_concept_board","res://art/concept/eight_stage_retro_pixel_concepts_20261106.png")
+	for i in range(4):creatures.append(slot_or("v09_enemy_"+str(i),"res://art/v09/enemy-"+str(i)+".png"))
 
 func update(dt):
 	for e in blasts:e.age+=dt
@@ -28,6 +40,12 @@ func update(dt):
 	hits=hits.filter(func(h):return h.age<.16)
 	for c in confirms:c.age+=dt
 	confirms=confirms.filter(func(c):return c.age<.62)
+	for pl in pillars:pl.age+=dt
+	pillars=pillars.filter(func(pl):return pl.age<.45)
+
+func pillar(pos,kind):
+	# V15: a short light pillar marks a pickup so collection reads at a glance.
+	if pillars.size()<12:pillars.append({"pos":pos,"kind":kind,"age":0.0})
 
 func hit(pos):
 	if hits.size()<45:hits.append({"pos":pos,"age":0.0})
@@ -136,11 +154,18 @@ func enemy(g,e):
 		for offset in offsets:
 			var lane=(target-e.pos).normalized().rotated(offset)
 			g.draw_line(e.pos+lane*8,e.pos+lane*lane_length,Color(telegraph_color,.13+opening*.48),1)
+		if technique=="dive" and opening>.46:
+			# P02: for the final 0.35s the needle line is shown as one long
+			# white aim line - the burst that follows is locked to it.
+			var aim=(target-e.pos).normalized()
+			g.draw_line(e.pos+aim*10,e.pos+aim*210,Color(1,1,1,.45+.3*sin(g.clock*22.0)),1)
 		if opening>.54:g.draw_arc(e.pos,10+opening*7,0,TAU,18,Color(telegraph_color,.35+opening*.4),1)
-	var tilt=PI/2 if g.vertical.active else sin(g.clock*4+e.pos.x)*.035
-	if technique=="dive":tilt+=sin(e.age*1.35+e.phase)*.16
-	elif technique=="orbit":tilt+=sin(e.age*2.0+e.phase)*.1
-	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,1+sin(g.clock*5+e.pos.x)*.035))
+	# Bank into the vertical movement like a flying creature leaning into its
+	# curve. The old position-coupled wobble (tilt + 5Hz squash pulse) made
+	# every enemy tremble constantly; banking is smooth and purposeful.
+	var bank=clampf((e.pos.y-e.get("prev_y",e.pos.y))*.22,-.35,.35)
+	var tilt=(PI/2 if g.vertical.active else 0.0)+bank
+	g.draw_set_transform(e.pos.round(),tilt,Vector2(1,1+sin(e.get("age",0.0)*1.3+e.get("phase",0.0))*.01))
 	g.draw_texture(tex,-tex.get_size()*.5,Color(1,.7,.65) if e.get("flash",0)>0 else Color.WHITE)
 	if opening>0:g.draw_arc(Vector2(-tex.get_width()*.31,0),4+opening*7,PI*.55,PI*1.45,12,Color("fff0b7"),1)
 	if technique=="weave":g.draw_arc(Vector2(3,0),12,-PI*.6,PI*.6,10,Color("e6b6a0"),1)
@@ -152,20 +177,48 @@ func enemy(g,e):
 func projectile(g,b,hostile=false):
 	g.draw_set_transform(b.pos.round(),b.get("vel",Vector2.RIGHT).angle())
 	if hostile:
-		g.draw_line(Vector2(-b.r-5,0),Vector2(-b.r,0),Color("ae4c55"),2)
-		g.draw_circle(Vector2.ZERO,b.r+1,Color("111026"))
-		g.draw_circle(Vector2.ZERO,b.r,Color("ffbd78"))
-		g.draw_circle(Vector2(1,0),maxf(1,b.r-2),Color("fff8d8"))
+		var kind=str(b.get("kind","petal"))
+		var tex: Texture2D = g.bullet_enemy_tex
+		if kind=="needle": tex=g.bullet_needle_tex
+		elif kind=="eye": tex=g.bullet_eye_tex
+		elif kind=="ring": tex=g.bullet_ring_tex
+		if tex != null:
+			if kind=="ring":
+				# Ring bullets carry the P05 pattern; draw them larger so the
+				# expanding wheel reads at a glance.
+				g.draw_texture_rect(tex, Rect2(-10, -10, 20, 20))
+			else:
+				g.draw_texture(tex, -tex.get_size() / 2)
+		elif kind=="needle":
+			g.draw_line(Vector2(-9,0),Vector2(7,0),Color("dfe9f2"),2)
+			g.draw_line(Vector2(-9,0),Vector2(7,0),Color("fff8d8"),1)
+		elif kind=="eye":
+			g.draw_circle(Vector2.ZERO,b.r+1,Color("111026"))
+			g.draw_circle(Vector2.ZERO,b.r,Color("c61e34"))
+			g.draw_circle(Vector2(1,0),2,Color("fff4ee"))
+		elif kind=="ring":
+			g.draw_arc(Vector2.ZERO,b.r+2,0,TAU,12,Color("e22a52"),2)
+			g.draw_circle(Vector2.ZERO,1.5,Color("ffd678"))
+		else:
+			g.draw_line(Vector2(-b.r-5,0),Vector2(-b.r,0),Color("ae4c55"),2)
+			g.draw_circle(Vector2.ZERO,b.r+1,Color("111026"))
+			g.draw_circle(Vector2.ZERO,b.r,Color("ffbd78"))
+			g.draw_circle(Vector2(1,0),maxf(1,b.r-2),Color("fff8d8"))
 	else:
 		var col=g.COLORS[b.color]
 		var p=g.players[b.owner]
 		if p.character==1:
 			g.draw_line(Vector2(-13,0),Vector2(6,0),Color(col,.35),5)
 			g.draw_line(Vector2(-10,0),Vector2(6,0),col,2)
+			g.draw_line(Vector2(-4,0),Vector2(5,0),Color("fff8d7"),1)
+		elif g.bullet_player_tex != null:
+			g.draw_texture(g.bullet_player_tex, -g.bullet_player_tex.get_size() / 2, col)
 		elif p.character==2 and p.learned!="none":
 			g.draw_arc(Vector2(-3,0),4,-PI*.7,PI*.7,8,col,2)
-		else:g.draw_colored_polygon(PackedVector2Array([Vector2(-12,0),Vector2(-2,-3),Vector2(7,0),Vector2(-2,3)]),Color(col,.7))
-		g.draw_line(Vector2(-4,0),Vector2(5,0),Color("fff8d7"),1)
+			g.draw_line(Vector2(-4,0),Vector2(5,0),Color("fff8d7"),1)
+		else:
+			g.draw_colored_polygon(PackedVector2Array([Vector2(-12,0),Vector2(-2,-3),Vector2(7,0),Vector2(-2,3)]),Color(col,.7))
+			g.draw_line(Vector2(-4,0),Vector2(5,0),Color("fff8d7"),1)
 	g.draw_set_transform(Vector2.ZERO)
 
 func boss(g):
@@ -176,15 +229,25 @@ func boss(g):
 	# safe gaps instead of adding another, misleading visual pattern.
 	if anticipation>.08:
 		var phase=1 if not g.bio_route or not g.bio.exposed() else (3 if g.boss.hp<g.boss.max*.5 else 2)
-		var fan=7 if phase==3 else 5
 		var muzzle=p+Vector2(-35,0)
 		var alpha=.10+anticipation*.42
-		for j in range(fan):
-			var angle=PI+(j-(fan-1)*.5)*.24+sin(g.boss.age)*.15
-			var lane=Vector2.from_angle(angle)
-			g.draw_line(muzzle+lane*8,muzzle+lane*(34+anticipation*58),Color(1,.58,.46,alpha),1)
-		if anticipation>.55:
-			g.draw_arc(muzzle,8+anticipation*8,0,TAU,20,Color(1,.82,.57,alpha),1)
+		if phase>=2 and (g.boss.volleys+1)%4==0:
+			# P05: the next volley is a ring expansion, not a fan - warn with a
+			# growing crimson circle instead of fan lanes.
+			g.draw_arc(p,20+anticipation*26,0,TAU,36,Color(1,.36,.44,alpha+.15),2)
+			g.draw_arc(p,12+anticipation*14,0,TAU,28,Color(1,.72,.6,alpha),1)
+		else:
+			# P01: fan lanes use the exact update_boss formula, fan_bonus incl.
+			var fan=(7 if phase==3 else 5)+(int(g.stage_def()["fan_bonus"]) if phase>=2 else 0)
+			for j in range(fan):
+				var angle=PI+(j-(fan-1)*.5)*.24+sin(g.boss.age)*.15
+				var lane=Vector2.from_angle(angle)
+				g.draw_line(muzzle+lane*8,muzzle+lane*(34+anticipation*58),Color(1,.58,.46,alpha),1)
+			if anticipation>.55:
+				g.draw_arc(muzzle,8+anticipation*8,0,TAU,20,Color(1,.82,.57,alpha),1)
+	if int(g.boss.get("rings",0))>0:
+		# A ring sequence is live: keep a pulsing halo on the boss.
+		g.draw_arc(p,30+sin(g.clock*9.0)*3,0,TAU,36,Color(1,.4,.48,.5),2)
 	for side in [-1,1]:
 		var pts=PackedVector2Array()
 		for j in range(12):pts.append(p+Vector2(55-j*9,side*(38+sin(j*.24+g.clock*1.8)*13+anticipation*j*1.3)))
@@ -215,10 +278,26 @@ func boss(g):
 		g.japanese("扇弾 接近",Vector2(557,84),9,Color("ffd29a"))
 
 func effects(g):
+	for pl in pillars:
+		# V15 pickup pillar: a coloured beam shoots up from the collection point.
+		var k = pl.age / .45
+		var col = Color(1, .45, .55) if pl.kind == 0 else Color(.45, .8, 1)
+		var hgt = 42.0 * (1 - k * .25)
+		for w in range(3):
+			var width = [11, 6, 3][w]
+			g.draw_rect(Rect2(pl.pos + Vector2(-width / 2.0, -hgt), Vector2(width, hgt)), Color(col, [.10, .22, .45][w] * (1 - k)))
+		g.draw_arc(pl.pos, 5 + k * 9, 0, TAU, 20, Color(col, .7 * (1 - k)), 1)
 	for h in hits:
-		for i in range(5):
-			var d=Vector2.from_angle(i*TAU/5)
-			g.draw_line(h.pos+d*(3+h.age*20),h.pos+d*(6+h.age*60),Color(1,.84,.64,1-h.age/.16),1)
+		if g.fx_spark_tex != null:
+			# V02 hit spark: a four-point star that pops and fades in 0.16s.
+			var k = h.age / .16
+			g.draw_set_transform(h.pos, h.age * 2.2, Vector2.ONE * (0.7 + k * 0.9))
+			g.draw_texture(g.fx_spark_tex, -g.fx_spark_tex.get_size() / 2, Color(1, 1, 1, 1 - k))
+			g.draw_set_transform(Vector2.ZERO)
+		else:
+			for i in range(5):
+				var d=Vector2.from_angle(i*TAU/5)
+				g.draw_line(h.pos+d*(3+h.age*20),h.pos+d*(6+h.age*60),Color(1,.84,.64,1-h.age/.16),1)
 	for e in blasts:
 		var t=e.age
 		var radius=[13,25,55][e.size]
@@ -231,9 +310,18 @@ func effects(g):
 			if age>0 and age<.45+e.size*.2:
 				var r=maxf(0,(1-age/(.45+e.size*.2))*(radius*.35)+sin(age*9)*3)
 				var center=e.pos+d*(radius*.55+age*13)
-				g.draw_circle(center,r,Color("77344a"))
-				g.draw_circle(center-Vector2(1,1),r*.65,Color("ec9566"))
-				if age<.15:g.draw_circle(center-Vector2(1,1),r*.35,Color("fff0b1"))
+				if g.fx_petal_tex != null:
+					# V01 sange: crimson petals scatter and spin instead of blobs.
+					# Petal size/alpha follow the petal's own age, not the old blob
+					# radius: tied to r they shrank to ~3px and vanished mid-burst.
+					var fade = clampf(1.3 - age / (.45 + e.size * .2), 0.0, 1.0)
+					g.draw_set_transform(center, i * 2.399 + age * 5.0, Vector2.ONE * clampf(1.9 - age * 1.1, 1.0, 1.9))
+					g.draw_texture(g.fx_petal_tex, -g.fx_petal_tex.get_size() / 2, Color(1, 1, 1, fade))
+					g.draw_set_transform(Vector2.ZERO)
+				else:
+					g.draw_circle(center,r,Color("77344a"))
+					g.draw_circle(center-Vector2(1,1),r*.65,Color("ec9566"))
+					if age<.15:g.draw_circle(center-Vector2(1,1),r*.35,Color("fff0b1"))
 		if t>.15:g.draw_arc(e.pos,radius+t*45,0,TAU,40,Color(.85,.45,.38,maxf(0,.5-t*.45)),1)
 	for c in confirms:
 		var t=c.age
@@ -248,6 +336,7 @@ func draw(g):
 	background(g)
 	if g.mode=="controls":g.draw_controls();return
 	if g.mode=="menu":g.draw_menu();return
+	if g.mode=="select":g.draw_select_screen();return
 	if g.gate>0:g.draw_gate()
 	for o in g.bio.organs:
 		g.draw_texture(creatures[3],o.pos-Vector2(27,27))
@@ -256,8 +345,12 @@ func draw(g):
 	for b in g.bullets:projectile(g,b)
 	for b in g.shots:projectile(g,b,true)
 	for item in g.pickups:
-		g.draw_arc(item.pos,7,0,TAU,12,g.COLORS[item.kind*2],1)
-		g.text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3))
+		var item_tex = g.item_hp_tex if item.kind==0 else g.item_energy_tex
+		if item_tex != null:
+			g.draw_texture(item_tex, item.pos - item_tex.get_size() / 2)
+		else:
+			g.draw_arc(item.pos,7,0,TAU,12,g.COLORS[item.kind*2],1)
+			g.text_at("+" if item.kind==0 else "E",item.pos-Vector2(2,3))
 	if not g.boss.is_empty():boss(g)
 	for i in range(g.players.size()):
 		var p=g.players[i]

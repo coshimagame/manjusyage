@@ -48,9 +48,9 @@ func update(g, dt):
 		if pilot.down==0 and (pilot.pos.y<ceiling(pilot.pos.x,g.travel,g.clock)+6 or pilot.pos.y>floor_y(pilot.pos.x,g.travel,g.clock)-6):
 			g.hurt(pilot)
 
-func begin_boss(count):
+func begin_boss(count, armor_bonus:=0):
 	organs.clear()
-	armor=[18+count*6,18+count*6]
+	armor=[18+count*6+armor_bonus,18+count*6+armor_bonus]
 
 func part_pos(g, index):
 	return g.boss.pos+Vector2(-27,-57 if index==0 else 57)

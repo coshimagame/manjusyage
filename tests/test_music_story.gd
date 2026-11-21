@@ -5,6 +5,7 @@ func _initialize(): run.call_deferred()
 func run():
 	var game=load("res://main.tscn").instantiate()
 	root.add_child(game)
+	game.slice_mode=false # Music/story expectations describe the full game, not the slice.
 	await process_frame
 	assert(game.music_name=="title")
 	assert(game.music.stream.get_length()>20)
