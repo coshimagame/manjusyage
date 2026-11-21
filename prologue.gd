@@ -25,6 +25,7 @@ var page := 0
 var age := 0.0
 var clock := 0.0
 var finished := false
+var story_paused := false
 var font: SystemFont
 var planet_tex: ImageTexture
 var music: AudioStreamPlayer
@@ -75,6 +76,7 @@ func _unhandled_input(event):
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE: finish()
 		elif event.keycode in [KEY_ENTER, KEY_SPACE, KEY_Z]: advance()
+		elif event.keycode == KEY_P: story_paused = not story_paused; queue_redraw()
 		elif event.keycode == KEY_M: music.stream_paused = not music.stream_paused
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_START: finish()
@@ -98,8 +100,8 @@ func finish():
 func _process(dt):
 	if finished: return
 	clock += dt
-	age += dt
-	if age > 8.5: advance()
+	if not story_paused: age += dt
+	if not story_paused and age > 8.5: advance()
 	queue_redraw()
 	frames += 1
 	if test_shot and frames == 5:
@@ -150,6 +152,9 @@ func _draw():
 			draw_rect(Rect2(pos+Vector2(-3,-3),Vector2(6,3)),[Color("6cf1eb"),Color("ffad81"),Color("c8acff")][i])
 			draw_line(pos+Vector2(-19,1),pos+Vector2(-32-sin(clock*12)*4,1),Color("ffb474"),3)
 	if DIALOGUES.has(page): draw_story_dialogue()
+	if story_paused:
+		draw_rect(Rect2(530, 8, 102, 24), Color(0.02, 0.04, 0.10, 0.88))
+		draw_string(font, Vector2(539, 26), "PAUSED / P", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e5f5ff"))
 	draw_rect(Rect2(0,252,640,108),Color(.025,.04,.08,.94))
 	draw_line(Vector2(28,253),Vector2(612,253),Color("637e9b"))
 	var opacity=clampf(age*1.5,0,1)
