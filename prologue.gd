@@ -21,12 +21,17 @@ const DIALOGUES = {
 	5: [["ムゥ", "飛ぶ場所は、自分たちで決めろ。"], ["三人", "やるっきゃない！"]]
 }
 
+const ArtCatalog = preload("res://art_catalog.gd")
+
 var page := 0
 var age := 0.0
 var clock := 0.0
 var finished := false
 var font: SystemFont
 var planet_tex: ImageTexture
+var cosmos_tex: Texture2D
+var page_images: Array = []
+var ship_texes: Array = []
 var music: AudioStreamPlayer
 var test_shot := false
 var frames := 0
@@ -36,9 +41,25 @@ func _ready():
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "sans-serif"])
 	cache_planet_texture()
+	# Layer the game's real art over the procedural scenery: the cosmos
+	# backdrop on every page and the actual player ships on the finale.
+	if ResourceLoader.exists("res://art/v09/cosmos.png"):
+		cosmos_tex = load("res://art/v09/cosmos.png")
+	# Swappable opening art (user request 2026-11-22): art/active/
+	# prologue_N.png replaces page N's procedural scenery when present.
+	# Pages without an image keep the drawn scenery, so new art can
+	# arrive one page at a time.
+	page_images.clear()
+	for i in range(8):
+		var p := "res://art/active/prologue_%d.png" % (i + 1)
+		page_images.append(load(p) if ResourceLoader.exists(p) else null)
+	for i in range(3):
+		ship_texes.append(ArtCatalog.reference_ship(i))
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	music.stream = load("res://audio/title.wav")
+	# Title/opening music: the user-approved v3 loop when present (the old
+	# title.wav file is kept untouched as the fallback).
+	music.stream = load("res://audio/title_loop_v3.wav") if ResourceLoader.exists("res://audio/title_loop_v3.wav") else load("res://audio/title.wav")
 	music.volume_db = -6
 	music.play()
 	music.finished.connect(_loop_music)
@@ -111,44 +132,56 @@ func _process(dt):
 func _draw():
 	if finished or font == null: return
 	# 16-bit-inspired palette ramps and multilayer pixel scenery, no external art.
-	for y in range(360):
-		var color = Color("090d24").lerp(Color("323354"), float(y)/360.0)
-		draw_line(Vector2(0,y),Vector2(640,y),color)
-	for layer in range(3):
-		for i in range(65):
-			var x = fposmod(i*137.0-layer*clock*4.0,640)
-			var y = fposmod(i*73.0+layer*39.0,260)
-			var glow = 0.4+0.3*sin(clock+i)
-			draw_rect(Rect2(x,y,1+int(layer==2),1),Color(.65,.8,1,glow))
-	# Cloud bands separated by palette and parallax.
-	for band in range(9):
-		for i in range(24):
-			var x = fposmod(i*31.0+band*19-clock*(2+band*.4),740)-50
-			var y = 90+band*9+sin(i*.9+band)*13
-			draw_rect(Rect2(x,y,34,3),Color(.24,.25+band*.008,.46,.20))
-	# Planet is now drawn as one cached texture instead of thousands of rects.
-	if planet_tex!=null: draw_texture(planet_tex,Vector2(357,51))
-	# Fracture through the horizon.
-	var crack = PackedVector2Array([Vector2(175,0),Vector2(210,55),Vector2(194,92),Vector2(239,132),Vector2(220,177),Vector2(265,226)])
-	draw_polyline(crack,Color(.52,.36,.9,.15),13)
-	draw_polyline(crack,Color(.65,.55,1,.7),3)
-	draw_polyline(crack,Color("e0d9ff"),1)
-	for layer in range(3):
-		var points = PackedVector2Array([Vector2(0,270)])
-		for i in range(34):
-			points.append(Vector2(i*20,220+layer*13-sin(i*.8+layer)*15-sin(i*1.9)*8))
-		points.append(Vector2(640,360)); points.append(Vector2(0,360))
-		draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
-	if page in [2,3]: draw_training()
-	if page in [4,5]: draw_workshop()
-	if page>=6:
-		for i in range(3):
-			var pos=Vector2(95+i*41+sin(clock)*4,130+i*21)
-			var hull=PackedVector2Array([pos+Vector2(-20,0),pos+Vector2(-11,-5),pos+Vector2(-6,-13),pos+Vector2(3,-4),pos+Vector2(21,0),pos+Vector2(2,5),pos+Vector2(-8,12)])
-			draw_colored_polygon(hull,Color("849db4"))
-			draw_line(pos+Vector2(-15,0),pos+Vector2(13,0),Color("e1e8d4"),2)
-			draw_rect(Rect2(pos+Vector2(-3,-3),Vector2(6,3)),[Color("6cf1eb"),Color("ffad81"),Color("c8acff")][i])
-			draw_line(pos+Vector2(-19,1),pos+Vector2(-32-sin(clock*12)*4,1),Color("ffb474"),3)
+	var custom: Texture2D = page_images[page] if page < page_images.size() else null
+	if custom:
+		draw_texture_rect(custom,Rect2(0,0,640,360),false)
+	else:
+		for y in range(360):
+			var color = Color("090d24").lerp(Color("323354"), float(y)/360.0)
+			draw_line(Vector2(0,y),Vector2(640,y),color)
+		if cosmos_tex: draw_texture_rect(cosmos_tex,Rect2(0,0,640,360),false,Color(1,1,1,.30))
+		for layer in range(3):
+			for i in range(65):
+				var x = fposmod(i*137.0-layer*clock*4.0,640)
+				var y = fposmod(i*73.0+layer*39.0,260)
+				var glow = 0.4+0.3*sin(clock+i)
+				draw_rect(Rect2(x,y,1+int(layer==2),1),Color(.65,.8,1,glow))
+		# Cloud bands separated by palette and parallax.
+		for band in range(9):
+			for i in range(24):
+				var x = fposmod(i*31.0+band*19-clock*(2+band*.4),740)-50
+				var y = 90+band*9+sin(i*.9+band)*13
+				draw_rect(Rect2(x,y,34,3),Color(.24,.25+band*.008,.46,.20))
+		# Planet is now drawn as one cached texture instead of thousands of rects.
+		if planet_tex!=null: draw_texture(planet_tex,Vector2(357,51))
+		# Fracture through the horizon.
+		var crack = PackedVector2Array([Vector2(175,0),Vector2(210,55),Vector2(194,92),Vector2(239,132),Vector2(220,177),Vector2(265,226)])
+		draw_polyline(crack,Color(.52,.36,.9,.15),13)
+		draw_polyline(crack,Color(.65,.55,1,.7),3)
+		draw_polyline(crack,Color("e0d9ff"),1)
+		for layer in range(3):
+			var points = PackedVector2Array([Vector2(0,270)])
+			for i in range(34):
+				points.append(Vector2(i*20,220+layer*13-sin(i*.8+layer)*15-sin(i*1.9)*8))
+			points.append(Vector2(640,360)); points.append(Vector2(0,360))
+			draw_colored_polygon(points,[Color("29334d"),Color("1b273f"),Color("101c31")][layer])
+		if page in [2,3]: draw_training()
+		if page in [4,5]: draw_workshop()
+		if page>=6:
+			for i in range(3):
+				var pos=Vector2(120+i*64+sin(clock)*4,118+i*34)
+				var stex: Texture2D = ship_texes[i] if i < ship_texes.size() else null
+				if stex:
+					# The real ships fly the finale, not grey placeholder polygons.
+					var sz=Vector2(72,72.0*stex.get_height()/stex.get_width())
+					draw_texture_rect(stex,Rect2(pos-sz*.5,sz),false)
+					draw_line(pos+Vector2(-38,1),pos+Vector2(-52-sin(clock*12)*5,1),Color("ffb474"),3)
+				else:
+					var hull=PackedVector2Array([pos+Vector2(-20,0),pos+Vector2(-11,-5),pos+Vector2(-6,-13),pos+Vector2(3,-4),pos+Vector2(21,0),pos+Vector2(2,5),pos+Vector2(-8,12)])
+					draw_colored_polygon(hull,Color("849db4"))
+					draw_line(pos+Vector2(-15,0),pos+Vector2(13,0),Color("e1e8d4"),2)
+					draw_rect(Rect2(pos+Vector2(-3,-3),Vector2(6,3)),[Color("6cf1eb"),Color("ffad81"),Color("c8acff")][i])
+					draw_line(pos+Vector2(-19,1),pos+Vector2(-32-sin(clock*12)*4,1),Color("ffb474"),3)
 	if DIALOGUES.has(page): draw_story_dialogue()
 	draw_rect(Rect2(0,252,640,108),Color(.025,.04,.08,.94))
 	draw_line(Vector2(28,253),Vector2(612,253),Color("637e9b"))

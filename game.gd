@@ -8,7 +8,7 @@ const DIM = Color("617797")
 const SHIP = ["...........11.............", "......11111221............", "..11112222222211..........", "..1333332222222211........", "1112222222444422221111....", "1222222244444422222222111.", "1112222222222222221111....", "..1333332222222211........", "..11112222222211..........", "......11111221............", "...........11............."]
 const FOE = ["..11........11..", ".1221......1221.", "1222211111122221", ".12223333332221.", "..123344443321..", "1112334444332111", ".12223333332221.", "1222211111122221", ".1221......1221.", "..11........11.."]
 const FONT = {
-"A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100"
+"A":"01110/10001/10001/11111/10001/10001/10001", "B":"11110/10001/10001/11110/10001/10001/11110", "C":"01111/10000/10000/10000/10000/10000/01111", "D":"11110/10001/10001/10001/10001/10001/11110", "E":"11111/10000/10000/11110/10000/10000/11111", "F":"11111/10000/10000/11110/10000/10000/10000", "G":"01111/10000/10000/10111/10001/10001/01111", "H":"10001/10001/10001/11111/10001/10001/10001", "I":"11111/00100/00100/00100/00100/00100/11111", "J":"00111/00010/00010/00010/10010/10010/01100", "K":"10001/10010/10100/11000/10100/10010/10001", "L":"10000/10000/10000/10000/10000/10000/11111", "M":"10001/11011/10101/10101/10001/10001/10001", "N":"10001/11001/11001/10101/10011/10011/10001", "O":"01110/10001/10001/10001/10001/10001/01110", "P":"11110/10001/10001/11110/10000/10000/10000", "Q":"01110/10001/10001/10001/10101/10010/01101", "R":"11110/10001/10001/11110/10100/10010/10001", "S":"01111/10000/10000/01110/00001/00001/11110", "T":"11111/00100/00100/00100/00100/00100/00100", "U":"10001/10001/10001/10001/10001/10001/01110", "V":"10001/10001/10001/10001/10001/01010/00100", "W":"10001/10001/10001/10101/10101/10101/01010", "X":"10001/10001/01010/00100/01010/10001/10001", "Y":"10001/10001/01010/00100/00100/00100/00100", "Z":"11111/00001/00010/00100/01000/10000/11111", "0":"01110/10001/10011/10101/11001/10001/01110", "1":"00100/01100/00100/00100/00100/00100/01110", "2":"01110/10001/00001/00010/00100/01000/11111", "3":"11110/00001/00001/01110/00001/00001/11110", "4":"00010/00110/01010/10010/11111/00010/00010", "5":"11111/10000/10000/11110/00001/00001/11110", "6":"01110/10000/10000/11110/10001/10001/01110", "7":"11111/00001/00010/00100/01000/01000/01000", "8":"01110/10001/10001/01110/10001/10001/01110", "9":"01110/10001/10001/01111/00001/00001/01110", ":":"00000/00100/00100/00000/00100/00100/00000", ".":"00000/00000/00000/00000/00000/00110/00110", "-":"00000/00000/00000/11111/00000/00000/00000", "+":"00000/00100/00100/11111/00100/00100/00000", "/":"00001/00010/00010/00100/01000/01000/10000", "<":"00010/00100/01000/10000/01000/00100/00010", ">":"01000/00100/00010/00001/00010/00100/01000", "!":"00100/00100/00100/00100/00100/00000/00100", "?":"01110/10001/00001/00010/00100/00000/00100", "%":"11001/11010/00010/00100/01000/01011/10011"
 }
 
 const Visual=preload("res://visual_v09.gd")
@@ -22,6 +22,7 @@ var planet_texture: ImageTexture
 var title_logo: Texture2D
 var title_logo_extended: Texture2D
 var launch_button: Texture2D
+var portrait_textures: Array = []
 # The UI atlas is a user-provided Chat asset.  It is intentionally loaded as a
 # single source image so later revisions can replace it without changing game
 # logic or the saved control/menu state.
@@ -41,6 +42,10 @@ var briefing_progress=BriefingProgress.new()
 const AmbientStageMusic=preload("res://ambient_stage_music.gd")
 var briefing_stage=1
 var briefing_slot=0
+var menu_choice=0
+var select_flash_t=0.0
+var stage_intro_t=0.0
+var intro_stage=1
 var briefing_chars=[0,1,2]
 var launch_chars=[]
 var status_slot=0
@@ -64,6 +69,7 @@ var bullet_player_tex: Texture2D
 var bullet_enemy_tex: Texture2D
 var item_hp_tex: Texture2D
 var item_energy_tex: Texture2D
+var item_omikuji_tex: Texture2D
 var fx_petal_tex: Texture2D
 var fx_spark_tex: Texture2D
 var bullet_needle_tex: Texture2D
@@ -71,13 +77,13 @@ var bullet_eye_tex: Texture2D
 var bullet_ring_tex: Texture2D
 
 func slot_texture(key: String) -> Texture2D:
-	# Same no-import-cache convention as the title art: organised slot path
-	# first, then the flat art/active/<key>.png drop-in path.
-	if ArtCatalog.ORGANIZED_PATHS.has(key) and FileAccess.file_exists(ArtCatalog.ORGANIZED_PATHS[key]):
+	# Organised slot path first, then the flat art/active/<key>.png drop-in.
+	# Existence is probed through the loader itself: in an exported build an
+	# imported file's raw path is not visible to FileAccess checks.
+	if ArtCatalog.ORGANIZED_PATHS.has(key):
 		var organised = image_texture_from_file(ArtCatalog.ORGANIZED_PATHS[key])
 		if organised != null: return organised
-	var flat = "res://art/active/" + key + ".png"
-	return image_texture_from_file(flat) if FileAccess.file_exists(flat) else null
+	return image_texture_from_file("res://art/active/" + key + ".png")
 var bio = BioStage.new()
 var bio_route = true
 const PILOT_NAMES = ["コルミィ", "ジヨーザ", "マフィオ"]
@@ -106,6 +112,10 @@ var combo_time = 0.0
 var high_scores = [0,0,0]
 var gate = 0
 var gates_done = 0
+var membrane: Dictionary = {}
+var membrane_done = false
+var subboss_mini_done = false
+var subboss_mid_done = false
 var gate_order = [1,0,2]
 var gate_step = 0
 var gate_lights = [0.0,0.0,0.0]
@@ -113,6 +123,11 @@ var gate_flash = 0.0
 var boss = {}
 var notice = ""
 var notice_time = 0.0
+# Kuu speaks under each pilot's HUD card (user note 2026-11-23):
+# event reactions - predation, fortunes, analysis - are hers to say.
+var kuu_lines=[{"text":"","t":0.0},{"text":"","t":0.0},{"text":"","t":0.0}]
+var intro_shown=false
+var title_card_in_game=true
 var shake = 0.0
 var music: AudioStreamPlayer
 var sounds = {}
@@ -152,6 +167,7 @@ func _ready():
 	# UI art follows the same swap convention: art/active/<key>.png wins.
 	title_logo_extended=ui_texture("title_logo_extended","res://art/ui/title_logo_extended_v01.png")
 	launch_button=ui_texture("launch_button","res://art/ui/launch_button_v01.png")
+	portrait_textures=[slot_texture("portrait_cormii"),slot_texture("portrait_jiyoza"),slot_texture("portrait_mafio")]
 	chat_ui_atlas=ui_texture("chat_ui_atlas","res://art/ui/chat_ui_atlas_20261106.png")
 	character_hub_ui=ui_texture("character_hub_ui","res://art/ui/character_hub_ui_20261106.png")
 	character_system_ui=ui_texture("character_system_ui","res://art/ui/character_system_ui_20261106.png")
@@ -159,6 +175,7 @@ func _ready():
 	bullet_enemy_tex=slot_texture("bullet_enemy")
 	item_hp_tex=slot_texture("item_hp")
 	item_energy_tex=slot_texture("item_energy")
+	item_omikuji_tex=slot_texture("item_omikuji")
 	fx_petal_tex=slot_texture("fx_petal")
 	fx_spark_tex=slot_texture("fx_spark")
 	bullet_needle_tex=slot_texture("bullet_needle")
@@ -245,14 +262,19 @@ func _ready():
 	queue_redraw()
 
 func image_texture_from_file(path:String)->Texture2D:
+	# Exported builds keep imported textures only in remapped form, so the
+	# engine resource loader must win; the raw image read remains as a
+	# fallback for not-yet-imported drop-ins during local iteration. (The
+	# image-only version silently lost every slot texture in exports.)
+	if ResourceLoader.exists(path, "Texture2D"):
+		var res = ResourceLoader.load(path, "Texture2D")
+		if res is Texture2D: return res
 	var image=Image.load_from_file(path)
 	return ImageTexture.create_from_image(image) if image and not image.is_empty() else null
 
 func ui_texture(key:String, fallback:String)->Texture2D:
-	var flat="res://art/active/"+key+".png"
-	if FileAccess.file_exists(flat):
-		var override=image_texture_from_file(flat)
-		if override!=null: return override
+	var override=image_texture_from_file("res://art/active/"+key+".png")
+	if override!=null: return override
 	return image_texture_from_file(fallback)
 
 func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
@@ -263,14 +285,21 @@ func draw_chat_ui_region(source:Rect2,target:Rect2,modulate:=Color.WHITE):
 # The crop is deliberately portrait-only: board dialogue, exact numbers, and
 # menu wording are not inferred as canon or copied into the live interface.
 func draw_fixed_pilot_visual(char_id:int,accent:Color):
-	if not character_system_ui: return
-	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+	# Official portraits (user-provided 2026-11-22) lead the panel; the
+	# ship remains the fallback when a portrait file is absent.
 	var panel=Rect2(438,55,180,183)
 	draw_rect(panel,Color("080d1c",.92))
-	draw_texture_rect_region(character_system_ui,Rect2(447,59,162,169),sources[char_id])
+	var portrait: Texture2D = portrait_textures[char_id] if char_id < portrait_textures.size() else null
+	if portrait:
+		var pw=float(portrait.get_width()); var ph=float(portrait.get_height())
+		draw_texture_rect_region(portrait,Rect2(447,60,162,146),Rect2(0,ph*0.02,pw,pw*0.9))
+	elif art_v09:
+		visual.ship(self,{"pos":Vector2(528,140),"color":char_id,"character":char_id,"experience":0},char_id,0,2.0)
+	else:
+		ship(Vector2(528,140),COLORS[char_id],3)
 	draw_rect(panel,Color(accent.r,accent.g,accent.b,.92),false,2)
 	draw_rect(Rect2(447,211,162,17),Color("101525",.82))
-	japanese("LIVE PROFILE / "+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
+	japanese(("パイロット / " if portrait_textures[char_id] else "搭乗機 / ")+PILOT_NAMES[char_id],Vector2(453,224),9,accent)
 
 func _repeat_music():
 	music.play()
@@ -326,7 +355,9 @@ func track(name):
 	if name=="wistful_demo" and not ResourceLoader.exists("res://audio/wistful_demo.wav"):
 		name="ruins" if mode=="play" else "title"
 		tell("NEW MUSIC NOT BUILT / USING ORIGINAL",5)
-	if art_v09 and bio_route and slice_mode:
+	if name=="title" and ResourceLoader.exists("res://audio/title_loop_v3.wav"):
+		name="title_loop_v3"
+	if art_v09 and bio_route:
 		if name in ["ruins","wistful_demo"]:name="red_echo_v09"
 		elif name=="sentinel":name="red_echo_boss_v09"
 	music_name=name
@@ -412,11 +443,18 @@ func capture_binding(event):
 		mode=calibration_return; calibration_step=-1
 
 func japanese(message,pos,size=13,color=WHITE):
+	# One pixel grid for every glyph (user note 2026-11-22): JP sizes snap
+	# to even values so they sit on the same grid as the 5x7 pixel font.
+	size=maxi(10,int(round(float(size)/2.0))*2)
 	draw_string(jp_font,pos,message,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
 
 func tell(message, duration = 3.0):
 	notice = message
 	notice_time = duration
+
+func kuu_say(slot, text, dur=3.5):
+	if slot>=0 and slot<kuu_lines.size():
+		kuu_lines[slot]={"text":text,"t":dur}
 
 func start_game(p_stage:=-1):
 	if p_stage>=1: current_stage=clampi(p_stage,1,8)
@@ -430,6 +468,7 @@ func start_game(p_stage:=-1):
 	players.clear(); bullets.clear(); shots.clear(); enemies.clear(); pickups.clear(); particles.clear()
 	travel = 0; elapsed = 0; wave_id = 0; wave_count = 0; pace_now = 1.0; wave_timer = 4.0 if slice_mode else 1.5; score = 0
 	reserves = count*3; combo = 1; combo_time = 0; gate = 0; gates_done = 0; boss = {}
+	membrane = {}; membrane_done = false; subboss_mini_done = false; subboss_mid_done = false
 	for i in range(count):
 		players.append({"pos":Vector2(100-i*23,110+i*65),"color":i,"hp":4,"cool":0.0,"inv":2.0,"down":0.0,"rescue":0.0,"charge":100.0,"burst":0.0})
 	for i in range(count): Abilities.initialize(players[i],launch_chars[i] if launch_chars.size()==count else (i+pilot_offset)%3)
@@ -437,7 +476,16 @@ func start_game(p_stage:=-1):
 	mode = "play"
 	show_help = false
 	track("ambient_stage" if new_music else "ruins")
-	tell("第%d境界：%s" % [current_stage, briefing_progress.stage_name(current_stage)] if bio_route else "旧試作：共鳴遺跡",4)
+	# The stage title is a centered fade card inside the stage
+	# (user note 2026-11-23); when the sortie intro already showed
+	# it, the in-stage card is skipped. No banner/footer copies.
+	title_card_in_game=not intro_shown
+	intro_shown=false
+	for i in range(count):
+		var p=players[i]
+		if p.character==0: kuu_say(i,"運気"+str(int(p.luck))+"・"+Abilities.luck_title(p)+"、いい流れ",4.0)
+		elif p.character==1: kuu_say(i,"解析は一機ずつ確実に",4.0)
+		else: kuu_say(i,"食べ過ぎに注意してね",4.0)
 
 func button_edge(device, button):
 	var key = str(device)+":"+str(button)
@@ -508,21 +556,25 @@ func _input(event):
 		if key == KEY_M:
 			muted = not muted
 			AudioServer.set_bus_mute(0,muted)
+		if mode == "intro":
+			finish_stage_intro()
+			return
 		if mode == "select":
+			if select_flash_t>0.0: return
 			if key in [KEY_LEFT,KEY_A]: cycle_character(-1)
 			if key in [KEY_RIGHT,KEY_D]: cycle_character(1)
 			if key in [KEY_UP,KEY_W]: briefing_slot = maxi(0,briefing_slot-1)
 			if key in [KEY_DOWN,KEY_S]: briefing_slot = mini(count-1,briefing_slot+1)
-			if key in [KEY_ENTER,KEY_SPACE]: launch_from_select()
+			if key in [KEY_1,KEY_2,KEY_3]: count=key-KEY_1+1; briefing_slot=mini(briefing_slot,count-1)
+			if key==KEY_MINUS: menu_stage=maxi(1,menu_stage-1)
+			if key==KEY_EQUAL: menu_stage=mini(briefing_progress.highest_unlocked,menu_stage+1)
+			if key in [KEY_ENTER,KEY_SPACE]: confirm_select()
 			if key == KEY_ESCAPE: mode = "menu"
 		elif mode == "menu":
-			if key in [KEY_LEFT,KEY_A]: count = maxi(1,count-1)
-			if key in [KEY_RIGHT,KEY_D]: count = mini(3,count+1)
-			if key in [KEY_1,KEY_2,KEY_3]: count = key-KEY_1+1
-			if key in [KEY_UP,KEY_W]: menu_stage = mini(briefing_progress.highest_unlocked,menu_stage+1)
-			if key in [KEY_DOWN,KEY_S]: menu_stage = maxi(1,menu_stage-1)
+			if key in [KEY_UP,KEY_W]: menu_choice = 0
+			if key in [KEY_DOWN,KEY_S]: menu_choice = 1
 			if key == KEY_H: show_help = not show_help
-			if key in [KEY_ENTER,KEY_SPACE]: open_select()
+			if key in [KEY_ENTER,KEY_SPACE]: confirm_menu_choice()
 		elif mode == "play":
 			if key in [KEY_ESCAPE,KEY_P]: mode = "pause"; notice = "FLIGHT PAUSED"
 			for i in range(count):
@@ -534,24 +586,27 @@ func _input(event):
 		else:
 			if key in [KEY_ENTER,KEY_SPACE]: start_game()
 			if key == KEY_ESCAPE: mode = "menu"; track("title")
+	if event is InputEventMouseMotion and mode == "menu":
+		var mp = get_global_mouse_position()
+		if Rect2(170,208,300,48).has_point(mp): menu_choice=0
+		elif Rect2(170,264,300,48).has_point(mp): menu_choice=1
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "intro":
+		finish_stage_intro()
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "menu":
 		var p = get_global_mouse_position()
-		if Rect2(220,236,200,32).has_point(p): open_select()
-		elif Rect2(185,307,270,20).has_point(p): open_calibration()
-		elif p.y > 200 and p.y < 232:
-			if p.x < 320: count=maxi(1,count-1)
-			else: count=mini(3,count+1)
+		if Rect2(170,208,300,48).has_point(p): menu_choice=0; confirm_menu_choice()
+		elif Rect2(170,264,300,48).has_point(p): menu_choice=1; confirm_menu_choice()
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and mode == "select":
 		var p = get_global_mouse_position()
-		if Rect2(220,304,200,34).has_point(p):
-			launch_from_select()
-			return
 		for i in range(count):
 			var x = 28+i*204
-			if Rect2(x,84,188,208).has_point(p):
+			if Rect2(x,84,188,222).has_point(p):
+				var was_selected = i == briefing_slot
 				briefing_slot = i
-				if Rect2(x,232,34,24).has_point(p): cycle_character(-1)
-				elif Rect2(x+154,232,34,24).has_point(p): cycle_character(1)
+				if Rect2(x,158,34,24).has_point(p): cycle_character(-1)
+				elif Rect2(x+154,158,34,24).has_point(p): cycle_character(1)
+				elif was_selected: confirm_select()
 				return
 
 func change_color(i):
@@ -570,6 +625,8 @@ func special_analysis(p):
 	if targets.is_empty() and target_shots.is_empty(): return
 	for e in targets: e.hp=0
 	shots=shots.filter(func(s): return not s.get("analysis_eligible",false))
+	if art_v09: visual.pillar(p.pos,1)
+	kuu_say(players.find(p),"解析完了。敵を消去",3.0)
 	p.analysis_charge=0
 	p.analysis_uses=int(p.get("analysis_uses",0))+1
 	sfx("burst")
@@ -589,6 +646,7 @@ func change_briefing_character():
 	cycle_character(1)
 
 func cycle_character(dir):
+	if select_flash_t>0.0: return
 	# Shared by briefing swaps and the character select screen: cycle the
 	# current slot's pilot, swapping with whoever holds the target pilot so
 	# two slots never share one character.
@@ -603,16 +661,128 @@ func open_select():
 	briefing_chars=[]
 	for i in range(3): briefing_chars.append((i+pilot_offset)%3)
 	briefing_slot=0
+	select_flash_t=0.0
 	mode="select"
 
 func launch_from_select():
 	launch_chars=briefing_chars.slice(0,count)
-	start_game(menu_stage)
+	begin_stage_intro(menu_stage)
+
+func confirm_select():
+	# Decision feedback (user direction 2026-11-22): the select screen
+	# has no launch button - confirming plays a sound and blinks the
+	# chosen card twice, then the stage intro takes over.
+	if mode!="select" or select_flash_t>0.0: return
+	select_flash_t=0.56
+	sfx("pickup")
+
+func confirm_menu_choice():
+	if menu_choice==0: open_select()
+	else: continue_game()
+
+func continue_game():
+	# Provisional continue (user wording: re-deploy, 2026-11-22): jump
+	# back in at the deepest unlocked boundary, default formation.
+	menu_stage=briefing_progress.highest_unlocked
+	open_select()
+	launch_from_select()
+
+const KANJI_FONT={
+	"赤":"0000000000000000/0000000110000000/0000000110000000/0011111111111000/0000000110000000/0000000110000000/0000000110000000/1111111111111110/0000011001100000/0011011001101100/0011011001100110/0110011001100110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"い":"0000000000000000/0000000000000000/0000000000000000/0110000000110000/0110000000110000/0110000000011000/0110000000011000/0110000000001100/0110000000001100/0110000000001100/0110000000000110/0110000110000110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"残":"0000000000000000/0000000001111000/1111111001101100/0011000001111100/0011000111100000/0011111001100000/0110011001111100/0110011111100000/0111110001100000/1101110000111110/0000110111110000/0001100000110110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"響":"0000000000000000/0001101111111111/1111001101111011/0110111111111110/0011101101111110/0110111111111011/1111111111011011/0001101111111110/1111001111111000/0111111111111110/0000011001100000/1111111111111111/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"追":"0000000000000000/0000000011000000/0110000110000000/0011001111111100/0001101100001100/0000001100001100/0000001111111100/0000001100000000/1111101111111110/0001101100000110/0001101100000110/0001101111111110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"憶":"0000000000000000/0011000001100000/0011011111111110/0011000110011000/0111100011110000/0111111111111111/0111110000000000/1111001111111100/1111001100001100/1111001111111100/0011001100001100/0011001111111100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"の":"0000000000000000/0000000000000000/0000000000000000/0000001111100000/0000110010011000/0001100010001100/0011000010000100/0010000100000010/0110000100000010/0100000100000010/0100001000000010/0100001000000010/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"海":"0000000000000000/0110000110000000/0011000110000000/0001100111111111/0000001100000000/0110011111111100/0011000110110110/0001100110110110/0000000110110110/0001111111111111/0001101101100110/0011001101100110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"（":"0000000000000000/0000000000000100/0000000000001000/0000000000010000/0000000000010000/0000000000100000/0000000000100000/0000000000100000/0000000000100000/0000000000100000/0000000000100000/0000000000100000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"仮":"0000000000000000/0001100000000000/0001101111111111/0001101100000000/0011001100000000/0011001100000000/0011001111111110/0111001110000110/0111001110000110/1111001111001100/0011001111001100/0011011001111000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"）":"0000000000000000/0010000000000000/0001000000000000/0000100000000000/0000100000000000/0000010000000000/0000010000000000/0000010000000000/0000010000000000/0000010000000000/0000010000000000/0000010000000000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"孤":"0000000000000000/0000000000001110/0111111111111100/0000011111101100/0000110111101100/0000110111101100/0001100111101100/0001100111101100/0001111111101100/1111100111101100/0001100111100110/0001101101111110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"独":"0000000000000000/1100110001100000/0110110001100000/0011110001100000/0001101111111110/0011101101100110/1111101101100110/0001101101100110/0001111101100110/0011111111111110/1110110001100000/0000110001101100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"な":"0000000000000000/0000001000000000/0000001000000000/0000011000000000/0111111110111100/0000110000000110/0000100000000000/0000100000100000/0001000000100000/0001000000100000/0010000000100000/0010001111100000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"庭":"0000000000000000/0000000011000000/0000000011000000/0011111111111111/0011000000000000/0011000000001100/0011111111111000/0011001100011000/0011011000011000/0011111111111111/0110000110011000/0110000110011000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"分":"0000000000000000/0000011001100000/0000110000110000/0000110000110000/0001100000011000/0011000000001100/0110000000000110/1100000000000011/0011111111111000/0000011000011000/0000011000011000/0000110000011000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"岐":"0000000000000000/0011000000110000/0011000000110000/0011000000110000/1111011111111111/1111011000110000/1111011000110000/1111011000110000/1111011111111110/1111011011000110/1111011011001100/1111011001101100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"す":"0000000000000000/0000000001000000/0000000001000000/0000000001000000/0111111111111110/0000000001000000/0000000001000000/0000011111000000/0000100011000000/0000100011000000/0000100011000000/0000011111000000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"る":"0000000000000000/0000000000000000/0000000000000000/0001111111110000/0000000001100000/0000000001000000/0000000110000000/0000001100000000/0000011111110000/0001100000011000/0011000000001100/0000111000000100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"空":"0000000000000000/0000000110000000/0000000110000000/0111111111111110/0110000000000110/0110011001100110/0000011001100000/0000110001100110/0111100000111110/0000000000000000/0011111111111100/0000000110000000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"忘":"0000000000000000/0000000110000000/0000000110000000/1111111111111110/0001100000000000/0001100000000000/0001100000000000/0001100000000000/0000111111111100/0000000000000000/0000000110000000/0011011011000110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"却":"0000000000000000/0000010000000000/0000010000111110/0000010000100110/0011111110100010/0000011000100010/0000010000100010/0000010000100010/0111111111100010/0000100000100010/0001000100100010/0001000100100010/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"要":"0000000000000000/1111111111111110/0000011001100000/0000011001100000/0111111111111100/0110011001100110/0110011001100110/0111111111111100/0000001100000000/0000001100000000/1111111111111110/0001100000011000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"塞":"0000000000000000/0000000110000000/0111111111111111/0110011001100011/0110011001100011/0011111111111110/0000011001100000/0000111111111100/0000011001100000/1111111111111111/0000110000110000/0011100110011100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"白":"0000000000000000/0000000100000000/0000000100000000/0000001000000000/0011111111111100/0011000000001100/0010000000000100/0010000000000100/0010000000000100/0011111111111100/0011000000001100/0010000000000100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"彼":"0000000000000000/0000110000110000/0001100000110000/0001101111111111/0011001100110011/0110111100110011/1101101100110000/0001101111111110/0011101111000110/1111101111000110/0001101101101100/0001101101101100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"岸":"0000000000000000/0000000110000000/0011000110000110/0011000110000110/0011111111111110/0000000000000000/0000000000000000/0111111111111111/0011000000000000/0011111111111100/0011000011000000/0011000011000000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"輪":"0000000000000000/0001100000110000/0001100001111000/1111111001111000/0001100011001100/0111111110000110/0111111111111111/0111111000000000/0111111000000000/0111111111111110/0111111111111110/0001100111111110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"廻":"0000000000000000/0000000000000000/0111111111111110/0000111100000110/0001101111110110/0001101111011110/0011001111011110/0111111111011110/0000111111111110/0110111100000110/0110111100000110/0011101111111110/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"終":"0000000000000000/0001100011000000/0001100011000000/1111011011111100/0110011110001100/0011111111011000/0001100011011000/0011011001110000/0110011011011000/1111111110001111/0001100001110000/0111111000011000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"点":"0000000000000000/0000001100000000/0000001100000000/0000001111111100/0000001100000000/0000001100000000/0011111111111100/0011000000001100/0011000000001100/0011000000001100/0011111111111100/0000000000000000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"曼":"0000000000000000/0001111111110000/0001100000110000/0001111111110000/0001100000110000/0001111111110000/0000000000000000/0111111111111100/0110011011001100/0111111111111100/0000000000000000/0011111111111000/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"珠":"0000000000000000/0000000000110000/0000000011110000/1111110011110000/0011000111111110/0011000110110000/0011001100110000/0011000000110000/1111110111111111/0011000001111000/0011000001111100/0011000011111100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"沙":"0000000000000000/0011000001100000/0001100001100000/0000110001100000/0110001101101100/0011001101100110/0001101101100110/0000011001100011/0000011001100000/0001100001100110/0001100111001100/0011000000001100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+	"華":"0000000000000000/0000110000110000/1111111111111110/0000110000110000/0000000000000000/0111111111111100/0001100110011000/0001100110011000/1111111111111110/0001100110011000/0001100110011000/0111111111111100/0000000000000000/0000000000000000/0000000000000000/0000000000000000",
+}
+
+# Stage names are drawn with generated 16x16 dot glyphs (DotGothic16,
+# OFL 1.1, rasterised to bitmaps) so the intro matches the pixel UI
+# instead of clashing with the smooth system font.
+func draw_pixel_kanji(text:String,pos:Vector2,scale:int,color:Color):
+	var cx=pos.x
+	for ch in text:
+		if KANJI_FONT.has(ch):
+			var rows=KANJI_FONT[ch].split("/")
+			for y in range(16):
+				for x in range(16):
+					if rows[y][x]=="1": draw_rect(Rect2(cx+x*scale,pos.y+y*scale,scale,scale),color)
+		cx+=17*scale
+
+func begin_stage_intro(p_stage:int):
+	# Stage intro (user request 2026-11-22): the stage name fades in over
+	# the stage's own background, then the sortie begins. Keys/clicks skip.
+	intro_stage=p_stage
+	current_stage=p_stage
+	travel=0.0
+	stage_intro_t=0.0
+	mode="intro"
+
+func finish_stage_intro():
+	intro_shown=true
+	start_game(intro_stage)
+
+func draw_stage_intro():
+	if art_v09 and bio_route:
+		visual.background(self)
+	else:
+		background()
+	var a=minf(clampf(stage_intro_t/0.7,0,1),clampf((2.8-stage_intro_t)/0.6,0,1))
+	draw_rect(Rect2(0,0,640,360),Color(0,0,0,.25*a))
+	var label="STAGE "+str(intro_stage)
+	text_at(label,Vector2(320-label.length()*9,96),Color(1,1,1,a),3)
+	var sname=briefing_progress.stage_name(intro_stage)
+	var name_w=sname.length()*17*3
+	draw_pixel_kanji(sname,Vector2(320-name_w/2,138),3,Color(1,1,1,a))
+	draw_line(Vector2(320-name_w/2-14,204),Vector2(320+name_w/2+14,204),Color(1,1,1,a*.7),1)
 
 func launch_from_briefing():
 	if not briefing_progress.can_launch(briefing_stage): return
 	launch_chars=briefing_chars.slice(0,count)
 	start_game(briefing_stage)
+
+func membrane_core() -> Vector2:
+	if membrane.is_empty(): return Vector2.ZERO
+	return Vector2(float(membrane.x), 180+sin(clock*.9)*36)
+
+func destroy_membrane():
+	var core=membrane_core()
+	membrane={}
+	explode(core,Color("ffdf86"),26)
+	score+=500
+	pickups.append({"pos":core+Vector2(-6,-10),"kind":0})
+	pickups.append({"pos":core+Vector2(-6,12),"kind":1})
+	sfx("break_medium_v09" if art_v09 else "burst")
+	tell("生体膜ゲート破壊 +500",2)
 
 func burst(i):
 	var p = players[i]
@@ -635,6 +805,11 @@ func burst(i):
 
 func _process(dt):
 	clock += dt
+	if mode=="select" and select_flash_t>0.0:
+		select_flash_t-=dt
+		if select_flash_t<=0.0:
+			select_flash_t=0.0
+			launch_from_select()
 	position=Vector2(sin(clock*71),cos(clock*83))*minf(2,shake)*visual.intensity if art_v09 and bio_route and mode=="play" else Vector2.ZERO
 	if mode!="pause":visual.update(dt)
 	for sound in sound_cooldowns:sound_cooldowns[sound]=maxf(0,sound_cooldowns[sound]-dt)
@@ -644,6 +819,11 @@ func _process(dt):
 	if mode=="controls":
 		if not calibration_ready and calibration_device>=0:
 			calibration_ready=not binding_down(calibration_device,calibration_previous)
+		queue_redraw()
+		return
+	if mode=="intro":
+		stage_intro_t+=dt
+		if stage_intro_t>=2.8: finish_stage_intro()
 		queue_redraw()
 		return
 	for device in Input.get_connected_joypads():
@@ -656,20 +836,20 @@ func _process(dt):
 		var up = pad_action_edge(device,"up",JOY_BUTTON_DPAD_UP)
 		var down = pad_action_edge(device,"down",JOY_BUTTON_DPAD_DOWN)
 		if mode == "menu":
-			if left: count=maxi(1,count-1)
-			if right: count=mini(3,count+1)
-			if up: menu_stage=mini(briefing_progress.highest_unlocked,menu_stage+1)
-			if down: menu_stage=maxi(1,menu_stage-1)
-			if x: pilot_offset=(pilot_offset+1)%3
+			if up: menu_choice=0
+			if down: menu_choice=1
 			if b: bio_route=not bio_route;slice_mode=bio_route
-			if start or a: open_select()
+			if start or a: confirm_menu_choice()
 		elif mode == "select":
 			if left: cycle_character(-1)
 			if right: cycle_character(1)
+			if pad_action_edge(device,"y_cycle",JOY_BUTTON_Y): count=count%3+1; briefing_slot=mini(briefing_slot,count-1)
+			if pad_action_edge(device,"stage_l",JOY_BUTTON_LEFT_SHOULDER): menu_stage=maxi(1,menu_stage-1)
+			if pad_action_edge(device,"stage_r",JOY_BUTTON_RIGHT_SHOULDER): menu_stage=mini(briefing_progress.highest_unlocked,menu_stage+1)
 			if up: briefing_slot=maxi(0,briefing_slot-1)
 			if down: briefing_slot=mini(count-1,briefing_slot+1)
 			if b: mode="menu"
-			elif start or a: launch_from_select()
+			elif start or a: confirm_select()
 		elif mode == "play":
 			if start: mode="pause"; notice="FLIGHT PAUSED"
 			var slot = pads.find(device)
@@ -729,10 +909,11 @@ func update_game(dt):
 		elif elapsed<55:travel=3700+(elapsed-46)*95
 		if elapsed>=55 and boss.is_empty():begin_boss()
 	if bio_route and mixed_scroll and bool(stage_def()["vertical"]) and not vertical.done and travel>=stage_length()*3100.0/4800.0 and gate==0 and boss.is_empty():
-		if not vertical.active: vertical.begin(self)
+		if not vertical.active: vertical.begin(self); membrane={}
 		vertical.update(self,dt)
 		return
 	notice_time = maxf(0,notice_time-dt)
+	for kl in kuu_lines: kl.t=maxf(0,kl.t-dt)
 	gate_flash = maxf(0,gate_flash-dt)
 	combo_time -= dt
 	if combo_time<0: combo=1
@@ -740,7 +921,9 @@ func update_game(dt):
 		# Scroll pace breathes per stage profile (slice demo keeps its fixed
 		# timeline). pace_now is exposed for future HUD/effect use.
 		pace_now = 1.0 if slice_mode else StageDefs.pace_at(current_stage, travel/stage_length())
-		travel+=dt*(28 if bio_route else 35)*pace_now
+		# A live membrane gate chokes the route: scroll drops to 30% while
+		# it is on screen, but never stops, so the run cannot soft-lock.
+		travel+=dt*(28 if bio_route else 35)*pace_now*(0.3 if not membrane.is_empty() else 1.0)
 	if bio_route: bio.update(self,dt)
 	for i in range(count):
 		var p=players[i]
@@ -784,17 +967,52 @@ func update_game(dt):
 		p.pos+=input[0]*155*dt
 		p.pos.x=clampf(p.pos.x,18,440 if gate>0 else 605)
 		p.pos.y=clampf(p.pos.y,48,320)
+		# Option drone (weapon growth, top tier): trails the ship and
+		# fires the base shot alongside it.
+		p.options=1 if bio_route and Abilities.level(p)>=3 else 0
+		if int(p.get("options",0))>0:
+			var want=p.pos+Vector2(-16,20)
+			p.option_pos=p.get("option_pos",want).lerp(want,minf(1.0,dt*7.0))
 		if input[1] and p.cool<=0:
 			p.cool=.13
-			var velocities=Abilities.velocities(p,Vector2.RIGHT,enemies) if bio_route else [Vector2(390,0)]
-			for velocity in velocities:
-				bullets.append({"pos":p.pos+Vector2(18,0),"color":p.color,"owner":i,"vel":velocity,"damage":Abilities.damage(p,elapsed) if bio_route else 1.0})
-			if art_v09 and bio_route:sfx(["pulse_v09","lance_v09","spore_v09"][p.character])
-			elif i==0:sfx("shot")
+			var growth=Abilities.level(p) if bio_route else 0
+			# Weapon growth made visible (user note 2026-11-23): twin
+			# shots first, then a signature weapon per pilot - Cormii's
+			# wave shot, Jiyoza's laser, Mafio's freezing ripple.
+			if bio_route and p.character==1 and growth>=2:
+				p.beam=.16; sfx("lance_v09")
+				if int(p.get("options",0))>0:
+					bullets.append({"pos":p.get("option_pos",p.pos)+Vector2(10,0),"color":p.color,"owner":i,"vel":Vector2(390,0),"damage":1.0,"kind":"std","age":0.0,"br":0.0,"freeze":0.0})
+			else:
+				var velocities=Abilities.velocities(p,Vector2.RIGHT,enemies) if bio_route else [Vector2(390,0)]
+				var kind="std"
+				if bio_route and p.character==0 and growth>=2: kind="wave"
+				if bio_route and p.character==2 and growth>=2 and p.learned=="none": kind="ripple"
+				var spawns=[Vector2(18,0)]
+				if growth>=1 and not (p.character==2 and p.learned!="none"): spawns=[Vector2(18,-5),Vector2(18,5)]
+				for velocity in velocities:
+					for off in spawns:
+						bullets.append({"pos":p.pos+off,"color":p.color,"owner":i,"vel":velocity,"damage":Abilities.damage(p,elapsed) if bio_route else 1.0,"kind":kind,"age":0.0,"br":4.0 if kind=="ripple" else 0.0,"freeze":0.9 if bio_route and p.character==2 and growth>=2 else 0.0})
+				if int(p.get("options",0))>0:
+					bullets.append({"pos":p.get("option_pos",p.pos)+Vector2(10,0),"color":p.color,"owner":i,"vel":Vector2(390,0),"damage":1.0,"kind":"std","age":0.0,"br":0.0,"freeze":0.0})
+				if art_v09 and bio_route:sfx(["pulse_v09","lance_v09","spore_v09"][p.character])
+				elif i==0:sfx("shot")
 	var alive=players.any(func(p): return p.down==0)
 	if not alive and reserves==0:
 		finish(false)
 		return
+	if bio_route and not membrane_done and membrane.is_empty() and gate==0 and boss.is_empty() and not vertical.active and travel>=stage_length()*1100.0/4800.0:
+		membrane={"x":660.0,"hp":26.0,"max":26.0,"flash":0.0}
+		membrane_done=true
+		tell("生体膜ゲート接近",2)
+	# Three-tier bosses (user decision 2026-11-22): a mini-boss at ~35%
+	# and a mid-boss at ~70% of the route; the stage boss stays the finale.
+	if bio_route and gate==0 and boss.is_empty() and not vertical.active:
+		var progress=travel/stage_length()
+		if not subboss_mini_done and (progress>=0.35 if not slice_mode else elapsed>=26.0):
+			spawn_subboss(1); subboss_mini_done=true
+		elif not subboss_mid_done and (progress>=0.70 if not slice_mode else elapsed>=50.0):
+			spawn_subboss(2); subboss_mid_done=true
 	if gate==0 and boss.is_empty():
 		if not slice_mode and travel>=stage_length()*1400.0/4800.0 and gates_done==0: begin_gate(1)
 		elif not slice_mode and travel>=stage_length()*3000.0/4800.0 and gates_done==1: begin_gate(2)
@@ -802,7 +1020,8 @@ func update_game(dt):
 		else:
 			wave_timer-=dt
 			if wave_timer<=0:
-				spawn_wave(); wave_count+=1
+				if not subboss_active():
+					spawn_wave(); wave_count+=1
 				# Encounter rhythm: breather, standard, rush - repeating, so a
 				# quiet moment lands right before each surge.
 				var rhythm=[1.35,1.0,0.7][wave_count%3] if not slice_mode else 1.0
@@ -812,7 +1031,10 @@ func update_game(dt):
 		if gate==2 and gate_lights.all(func(t): return t>0): open_gate()
 	if not boss.is_empty(): update_boss(dt)
 	for bullet in bullets:
+		bullet.age=float(bullet.get("age",0.0))+dt
 		bullet.pos+=dt*bullet.get("vel",Vector2(390,0))
+		if bullet.get("kind","")=="wave": bullet.pos.y+=sin(bullet.age*11.0)*150.0*dt
+		if bullet.get("kind","")=="ripple": bullet.br=minf(16.0,float(bullet.get("br",4.0))+dt*36.0)
 		if gate>0 and bullet.pos.x>472:
 			for i in range(3):
 				if absf(bullet.pos.y-(100+i*80))<17:
@@ -823,10 +1045,20 @@ func update_game(dt):
 					else: gate_flash=.12
 			bullet.pos.x=800
 			if gate==1 and gate_step>=3: open_gate()
+		if not membrane.is_empty():
+			var core=membrane_core()
+			if bullet.pos.distance_to(core)<20:
+				membrane.hp-=bullet.get("damage",1.0); membrane.flash=.08; visual.hit(bullet.pos); bullet.pos.x=800; sfx("hit")
+				if membrane.hp<=0: destroy_membrane()
+			elif absf(bullet.pos.x-float(membrane.x))<12 and bullet.pos.y>40 and bullet.pos.y<320:
+				# The membrane body swallows shots; only the core is weak.
+				visual.hit(bullet.pos); bullet.pos.x=800
 		for e in enemies:
-			if e.hp>0 and bullet.pos.distance_to(e.pos)<19:
+			if e.hp>0 and bullet.pos.distance_to(e.pos)<float(e.get("hit_r",19))+float(bullet.get("br",0.0)):
 				visual.hit(bullet.pos)
 				e.hp-=bullet.get("damage",1.0); e.flash=.08; bullet.pos.x=800; sfx("hit")
+				var fz=float(bullet.get("freeze",0.0))
+				if fz>0: e.frozen=maxf(float(e.get("frozen",0.0)),fz)
 			var owner=int(bullet.get("owner",-1))
 			if owner>=0 and owner<players.size() and players[owner].character==1:
 				players[owner].analysis_charge=mini(100,int(players[owner].get("analysis_charge",0))+3)
@@ -837,9 +1069,39 @@ func update_game(dt):
 				boss.hp-=bullet.get("damage",1.0); boss.flash=.07; sfx("hit")
 			bullet.pos.x=800
 	bullets=bullets.filter(func(b):return b.pos.x<700 and b.pos.y>30 and b.pos.y<340)
+	# Jiyoza's grown laser: sustained damage while the beam is lit.
+	for i in range(count):
+		var p=players[i]
+		if float(p.get("beam",0.0))>0:
+			p.beam=float(p.beam)-dt
+			p.beam_tick=float(p.get("beam_tick",0.0))-dt
+			if p.beam_tick<=0:
+				p.beam_tick=0.1
+				for e in enemies:
+					if e.hp>0 and e.pos.x>p.pos.x and absf(e.pos.y-p.pos.y)<16:
+						e.hp-=3; e.flash=.06; visual.hit(Vector2(e.pos.x-12,p.pos.y))
+						p.analysis_charge=mini(100,int(p.get("analysis_charge",0))+1)
+				if not boss.is_empty() and boss.pos.x>p.pos.x and absf(boss.pos.y-p.pos.y)<40 and p.color==boss.color and (not bio_route or bio.exposed()):
+					boss.hp-=3; boss.flash=.06; sfx("hit")
+	if not membrane.is_empty():
+		membrane.x-=dt*30
+		membrane.flash=maxf(0,float(membrane.get("flash",0))-dt)
+		if membrane.x<-50: membrane={}
 	for e in enemies:
 		e.age+=dt; e.flash=maxf(0,e.flash-dt)
+		if float(e.get("frozen",0.0))>0:
+			# Frozen solid by Mafio's grown ripple: no motion, no fire.
+			e.frozen=float(e.frozen)-dt
+			continue
 		e.prev_y=e.pos.y
+		if int(e.get("subboss",0))==2:
+			# Left alive, the mid-boss grows: bigger and denser fire.
+			e.growth_t=float(e.get("growth_t",0.0))+dt
+			if e.growth_t>=12.0 and int(e.get("growth",0))<3:
+				e.growth_t=0.0
+				e.growth=int(e.growth)+1
+				e.bscale=float(e.get("bscale",2.6))+.18
+				tell("中ボスが成長している…",2)
 		var motion=e.get("technique","aimed")
 		# Each organism has a readable, repeatable route before its shot telegraph.
 		# Routes favour one bold, smooth curve per technique: high-frequency
@@ -871,8 +1133,19 @@ func update_game(dt):
 		e.cool-=dt
 		if e.cool<=0 and e.pos.x<610:
 			e.cool=2.7 if motion=="orbit" else (2.3 if motion=="dive" else 2.5)
+			if int(e.get("subboss",0))>0: e.cool=1.8 if int(e.subboss)==1 else 2.1
 			var target=players[wave_id%count].pos
-			if motion=="dive":
+			if int(e.get("subboss",0))>0:
+				e.volleys=int(e.get("volleys",0))+1
+				if int(e.subboss)==2 and int(e.volleys)%4==0:
+					# Mid-boss signature: a 10-shot ring with real gaps.
+					for j in range(10):
+						var ang=e.age*1.3+j*TAU/10.0
+						shots.append({"pos":e.pos,"vel":Vector2.from_angle(ang)*52,"r":4,"kind":"ring"})
+				else:
+					for angle in [-.2,0,.2]:
+						shots.append({"pos":e.pos,"vel":(target-e.pos).normalized().rotated(angle)*92,"r":3})
+			elif motion=="dive":
 				# The aim was telegraphed for the last 0.35s (see visual_v09);
 				# lock it and loose a 3-needle line instead of a single shot.
 				e.aim_dir=(target-e.pos).normalized()
@@ -886,14 +1159,24 @@ func update_game(dt):
 					if motion=="orbit":shot.turn=.22 if angle<0 else -.22
 					shots.append(shot)
 		for p in players:
-			if p.down==0 and p.pos.distance_to(e.pos)<20: hurt(p)
+			if p.down==0 and p.pos.distance_to(e.pos)<float(e.get("hit_r",19))+2: hurt(p)
 		if e.hp<=0:
 			for p in players:
 				if p.down==0:p.experience+=1
 			explode(e.pos,COLORS[1],14)
 			if art_v09 and bio_route: visual.confirm(e.pos,combo)
 			score+=100*combo; combo=mini(8,combo+1); combo_time=3
+			if int(e.get("subboss",0))>0:
+				var tier=int(e.subboss)
+				score+=500 if tier==1 else 1500
+				explode(e.pos,COLORS[2],40 if tier==1 else 70)
+				pickups.append({"pos":e.pos,"kind":0})
+				pickups.append({"pos":e.pos+Vector2(0,16),"kind":1})
+				tell("小ボス撃破" if tier==1 else "中ボス撃破",3)
 			if randi()%4==0: pickups.append({"pos":e.pos,"kind":0 if randi()%4==0 else 1})
+			elif randi()%6==0 and players.any(func(p): return p.down==0 and p.character==0):
+				# C-065: Cormii's omikuji only enters the drop table while she flies.
+				pickups.append({"pos":e.pos+Vector2(0,14),"kind":2})
 	enemies=enemies.filter(func(e): return e.hp>0 and e.pos.x > -40)
 	for shot in shots:
 		shot.vel=shot.vel.rotated(shot.get("turn",0.0)*dt)
@@ -907,6 +1190,9 @@ func update_game(dt):
 		for p in players:
 			if p.down==0 and p.pos.distance_to(item.pos)<20:
 				if item.kind==0: p.hp=mini(4,p.hp+1)
+				elif item.kind==2 and p.character==0:
+					Abilities.draw_omikuji(p, randi_range(5,100))
+					kuu_say(players.find(p),"おみくじは"+Abilities.luck_title(p)+"、運気"+str(int(p.luck)),3.5)
 				else: p.charge=minf(100,p.charge+25)
 				score+=50; sfx("pickup")
 				if art_v09 and bio_route: visual.pillar(item.pos,item.kind) # V15 pickup pillar.
@@ -916,6 +1202,22 @@ func update_game(dt):
 		if slice_mode:
 			explode(boss.pos,COLORS[2],90);boss={};aftermath=.01;shots.clear();enemies.clear()
 		else:finish(true)
+
+func spawn_subboss(tier:int):
+	# Mini (tier 1) and mid (tier 2) bosses fly as regular enemies with a
+	# core-sized hitbox, so shots, bursts, XP and drops treat them
+	# consistently; only their fire, scale and rewards are boss-class.
+	var hp=0.0
+	if tier==1: hp=30.0+count*8 if slice_mode else 46.0+count*10+current_stage*4
+	else: hp=80.0+count*20 if slice_mode else 120.0+count*26+current_stage*10
+	enemies.append({"pos":Vector2(664,180),"base":180.0,"age":0.0,"phase":randf()*TAU,"speed":24.0 if tier==1 else 18.0,"amplitude":34.0,"hp":hp,"max_hp":hp,"cool":1.6,"flash":0.0,"technique":"fan","subboss":tier,"hit_r":30.0 if tier==1 else 40.0,"bscale":1.8 if tier==1 else 2.6,"volleys":0,"growth":0,"growth_t":0.0})
+	tell("小ボス接近" if tier==1 else "中ボス接近",3)
+	sfx("burst")
+
+func subboss_active() -> bool:
+	for e in enemies:
+		if int(e.get("subboss",0))>0 and e.hp>0: return true
+	return false
 
 func spawn_wave():
 	wave_id+=1
@@ -987,6 +1289,7 @@ func update_boss(dt):
 func hurt(p):
 	if p.inv>0: return
 	p.hp-=1; p.inv=1.7; shake=3; combo=1
+	if p.hp==1: kuu_say(players.find(p),"船体限界…無理しないで",3.5)
 	sfx("hit"); explode(p.pos,COLORS[p.color],10)
 	if p.hp<=0:
 		p.down=6; p.rescue=0
@@ -1141,6 +1444,9 @@ func background():
 		draw_rect(Rect2(x+30,top+12,3,23),Color("58b4bb"))
 
 func _draw():
+	if mode=="intro":
+		draw_stage_intro()
+		return
 	if mode=="status":
 		draw_status_screen()
 		return
@@ -1187,7 +1493,7 @@ func _draw():
 			draw_rect(Rect2(s.pos-Vector2.ONE*s.r,Vector2.ONE*s.r*2),Color("ff829c"))
 			draw_rect(Rect2(s.pos-Vector2.ONE,Vector2(2,2)),WHITE)
 	for item in pickups:
-		var item_tex = item_hp_tex if item.kind==0 else item_energy_tex
+		var item_tex = item_hp_tex if item.kind==0 else (item_omikuji_tex if item.kind==2 and item_omikuji_tex else item_energy_tex)
 		if item_tex != null:
 			draw_texture(item_tex, item.pos - item_tex.get_size() / 2)
 		else:
@@ -1237,36 +1543,50 @@ func _draw():
 # STATUS-001 — battle pauses behind this screen.  HP and energy retain the same
 # shape for all pilots; each page only explains the already-playable mechanism.
 func draw_select_screen():
-	# Character select (user-confirmed feature): one card per player slot,
-	# existing fixed portraits and ships only - no new character art.
+	# Character select (user-confirmed feature): one card per player slot.
+	# Official portraits were provided by the user on 2026-11-22; they are
+	# shown as-is (framing crop only, the art itself is never altered).
 	draw_rect(Rect2(0,0,W,H),Color("0a0f1e"))
 	japanese("キャラクター選択",Vector2(30,34),22,WHITE)
 	japanese("第%d境界：%s" % [menu_stage, briefing_progress.stage_name(menu_stage)],Vector2(30,60),12,DIM)
+	japanese("人数 %d（キー 1-3）" % count,Vector2(452,34),10,DIM)
+	japanese("ステージ変更（キー - / +）",Vector2(428,60),10,DIM)
 	var accents=[Color("ff668e"),Color("67ecff"),Color("ffce63")]
 	var system_names=["運気 / RISK & LUCK","解析 / ANALYSIS","捕食 / PREDATION"]
 	var system_descs=["おみくじで火力が変動","敵を読んで漸進成長","敵を食べて技を習得"]
-	var sources=[Rect2(10,62,245,326),Rect2(562,62,236,326),Rect2(1095,62,240,326)]
+	var system_hows=["おみくじ取得で運気を引き直し","解析100で固有キー：解析発動","固有キー：弱った敵を捕食"]
 	for i in range(count):
 		var char_id=int(briefing_chars[i])
 		var x=28+i*204
-		var card=Rect2(x,84,188,208)
+		var card=Rect2(x,84,188,222)
 		var selected=i==briefing_slot
 		draw_rect(card,Color("10182c"))
 		draw_rect(card,accents[char_id],false,3 if selected else 1)
 		text_at("P"+str(i+1),Vector2(x+12,96),accents[char_id],2)
 		japanese(PILOT_NAMES[char_id],Vector2(x+58,102),17,WHITE)
-		if character_system_ui:
-			draw_texture_rect_region(character_system_ui,Rect2(x+44,120,100,108),sources[char_id])
-		if art_v09 and bio_route:
-			visual.ship(self,{"pos":Vector2(x+94,246),"color":i,"character":char_id,"experience":0},i,0,1.0)
-		japanese("◀",Vector2(x+10,240),14,accents[char_id])
-		japanese("▶",Vector2(x+162,240),14,accents[char_id])
-		japanese(system_names[char_id],Vector2(x+12,272),11,accents[char_id])
-		japanese(system_descs[char_id],Vector2(x+12,288),10,WHITE)
-	draw_rect(Rect2(220,304,200,34),Color("0d3150"))
-	draw_rect(Rect2(220,304,200,34),COLORS[0],false,2)
-	japanese("出　撃",Vector2(292,328),16,WHITE)
-	centered("左右：キャラ変更　　上下：プレイヤー切替　　ENTER：出撃　　ESC：もどる",346,DIM)
+		var portrait: Texture2D = portrait_textures[char_id] if char_id < portrait_textures.size() else null
+		if portrait:
+			var box=Rect2(x+8,122,172,128)
+			draw_rect(box,Color("05070d"))
+			var pw=float(portrait.get_width()); var ph=float(portrait.get_height())
+			draw_texture_rect_region(portrait,box,Rect2(0,ph*0.03,pw,pw*0.744))
+			draw_rect(box,accents[char_id],false,1)
+		elif art_v09:
+			visual.ship(self,{"pos":Vector2(x+94,170),"color":char_id,"character":char_id,"experience":0},char_id,0,1.9)
+		else:
+			ship(Vector2(x+94,170),COLORS[char_id],3)
+		japanese("◀",Vector2(x+10,178),14,accents[char_id])
+		japanese("▶",Vector2(x+162,178),14,accents[char_id])
+		japanese(system_names[char_id],Vector2(x+12,262),11,accents[char_id])
+		japanese(system_descs[char_id],Vector2(x+12,277),10,WHITE)
+		japanese(system_hows[char_id],Vector2(x+12,291),9,Color("c8d4e2"))
+	if select_flash_t>0.0:
+		# Decision blink: the chosen card flashes twice before launch.
+		if int((0.56-select_flash_t)/0.14)%2==1:
+			var card=Rect2(28+briefing_slot*204,84,188,222)
+			draw_rect(card,Color(1,1,1,.5))
+			draw_rect(card,WHITE,false,3)
+	japanese("左右：変更　上下：プレイヤー　1-3：人数　-/+：ステージ　Enter：決定　Esc：もどる",Vector2(52,355),10,DIM)
 
 func draw_status_screen():
 	if players.is_empty(): return
@@ -1313,8 +1633,7 @@ func draw_cormii_status(p,accent):
 	japanese("RISK & LUCK / 運気盤",Vector2(29,78),20,Color("ffdbe5"))
 	var luck=int(p.get("luck",50))
 	var profile=Abilities.chance_profile(p,0.5)
-	text_at(str(luck),Vector2(38,112),accent,4)
-	japanese("%",Vector2(48+str(luck).length()*33,116),28,accent) # text_at's font has no % glyph; the JP font does.
+	text_at(str(luck)+"%",Vector2(38,112),accent,4)
 	japanese(Abilities.luck_title(p),Vector2(200,120),26,Color("ffe9be"))
 	draw_rect(Rect2(38,158,384,14),Color("3b2638"))
 	draw_rect(Rect2(38,158,384*clampf(luck/100.0,0,1),14),accent)
@@ -1327,8 +1646,7 @@ func draw_cormii_status(p,accent):
 		draw_rect(Rect2(112,y,238,13),Color("321a2b"))
 		draw_rect(Rect2(112,y,238*clampf(float(rows[i][1]),0,1),13),rows[i][2])
 		var pct_text=str(roundi(float(rows[i][1])*100))
-		text_at(pct_text,Vector2(362,y),WHITE,1)
-		japanese("%",Vector2(364+pct_text.length()*9,y+1),13,WHITE)
+		text_at(pct_text+"%",Vector2(362,y),WHITE,1)
 	japanese("おみくじ履歴",Vector2(38,296),12,DIM)
 	var history=p.get("fortune_history",[])
 	var hx=132
@@ -1398,8 +1716,7 @@ func draw_mafio_status(p,accent):
 		state="保持中："+status_technique_name(str(p.learned))
 	else:
 		state="空腹（弱った敵へ近づき、バーストで捕食）"
-	text_at(str(pct),Vector2(38,112),accent,4)
-	japanese("%",Vector2(48+str(pct).length()*33,116),28,accent) # text_at's font has no % glyph; the JP font does.
+	text_at(str(pct)+"%",Vector2(38,112),accent,4)
 	japanese("まんぷく" if pct>=100 else ("消化の進み" if digesting else "おなか"),Vector2(200,120),15,Color("ffe9be"))
 	draw_rect(Rect2(38,158,384,22),Color("352733"))
 	draw_rect(Rect2(38,158,384*clampf(pct/100.0,0,1),22),Color("ffce63"))
@@ -1443,25 +1760,63 @@ func draw_mafio_archive():
 	text_at("UP / DOWN : SELECT",Vector2(355,301),Color("a5aac0"))
 
 func draw_hud():
+	# Stage HUD (redesigned 2026-11-22): one framed panel per pilot with
+	# a portrait chip, hull pips, a segmented burst gauge and the
+	# character's own live stat - luck, analysis, digestion - readable
+	# at a glance instead of a 9px footnote.
 	draw_rect(Rect2(0,0,640,43),Color("080f22"))
 	draw_rect(Rect2(0,32,640,1),Color("2d4a62"))
+	var tech_jp={"fan":"拡散","weave":"蛇行","dive":"突撃","orbit":"周回","aimed":"狙撃"}
 	for i in range(count):
 		var p=players[i]
-		var x=12+i*138
-		text_at("P"+str(i+1),Vector2(x,8),COLORS[i])
-		japanese(PILOT_NAMES[p.character],Vector2(x,39),10,WHITE)
-		if bio_route: japanese(Abilities.label(p,elapsed),Vector2(x+48,39),9,COLORS[i])
-		for h in range(4): draw_rect(Rect2(x+22+h*10,8,7,5),COLORS[i] if h<p.hp else Color("26314b"))
-		text_at(["CYAN","ROSE","GOLD"][p.color],Vector2(x+70,8),COLORS[p.color])
-		draw_rect(Rect2(x,22,110,3),Color("26314b"))
-		draw_rect(Rect2(x,22,p.charge*1.1,3),COLORS[i])
-		if p.charge>=100: text_at("B",Vector2(x+115,19),WHITE)
-	text_at("SCORE",Vector2(460,7),DIM)
+		var x=8+i*150
+		var accent=COLORS[i]
+		draw_rect(Rect2(x,3,144,37),Color("0b1428",.94))
+		draw_rect(Rect2(x,3,144,37),accent,false,1)
+		draw_rect(Rect2(x,3,144,2),accent)
+		var portrait: Texture2D = portrait_textures[p.character] if p.character < portrait_textures.size() else null
+		if portrait:
+			var pw=float(portrait.get_width()); var ph=float(portrait.get_height())
+			draw_texture_rect_region(portrait,Rect2(x+3,8,26,26),Rect2(pw*0.28,ph*0.05,pw*0.58,pw*0.58))
+			draw_rect(Rect2(x+3,8,26,26),Color(1,1,1,.35),false,1)
+		text_at("P"+str(i+1),Vector2(x+34,6),accent)
+		japanese(PILOT_NAMES[p.character],Vector2(x+52,16),10,WHITE)
+		for h in range(4):
+			draw_rect(Rect2(x+116+h*7,7,6,5),accent if h<p.hp else Color("4a2432"))
+		draw_rect(Rect2(x+34,21,106,5),Color("26314b"))
+		draw_rect(Rect2(x+34,21,p.charge*1.06,5),WHITE if p.charge>=100 else accent)
+		for t in range(1,4): draw_rect(Rect2(x+34+t*26,21,1,5),Color("080f22"))
+		if bio_route:
+			if p.character==0:
+				japanese("運気",Vector2(x+34,37),10,DIM)
+				text_at(str(int(p.luck)),Vector2(x+60,30),WHITE)
+				var title=Abilities.luck_title(p)
+				japanese(title,Vector2(x+88,37),10,Color("ffce63") if title=="大吉" else (Color("ff668e") if title=="凶" else WHITE))
+			elif p.character==1:
+				var charge=int(p.get("analysis_charge",0))
+				japanese("解析",Vector2(x+34,37),10,DIM)
+				draw_rect(Rect2(x+60,31,42,5),Color("26314b"))
+				draw_rect(Rect2(x+60,31,charge*0.42,5),Color("67ecff"))
+				text_at(str(charge)+"%",Vector2(x+108,30),WHITE)
+			else:
+				if p.digest>0:
+					japanese("消化中",Vector2(x+34,37),10,Color("ffce63"))
+					var frac=1.0-p.digest/maxf(0.01,p.digest_total)
+					draw_rect(Rect2(x+88,31,42,5),Color("26314b"))
+					draw_rect(Rect2(x+88,31,frac*42,5),Color("ffce63"))
+				elif p.learned!="none":
+					japanese("習得："+str(tech_jp.get(p.learned,"")),Vector2(x+34,37),10,Color("ffce63"))
+				else:
+					japanese("捕食待ち",Vector2(x+34,37),10,DIM)
+		else:
+			japanese(Abilities.label(p,elapsed),Vector2(x+34,37),10,accent)
+	draw_rect(Rect2(460,3,172,37),Color("0b1428",.94))
+	draw_rect(Rect2(460,3,172,37),Color("35536d"),false,1)
+	text_at("SCORE",Vector2(468,7),DIM)
 	text_at("%07d"%score,Vector2(515,7),WHITE)
-	text_at("RESERVE "+str(reserves),Vector2(460,21),COLORS[2])
+	text_at("RESERVE "+str(reserves),Vector2(468,21),COLORS[2])
 	text_at("X"+str(combo),Vector2(585,21),COLORS[0])
 	draw_rect(Rect2(0,337,640,23),Color("080f22"))
-	japanese("第一境界：赤い残響（試作）" if bio_route else "旧試作：共鳴遺跡",Vector2(12,354),11,DIM)
 	text_at("M SOUND "+("OFF" if muted else "ON"),Vector2(265,345),DIM)
 	text_at("START PAUSE",Vector2(405,345),DIM)
 	draw_rect(Rect2(500,347,125,2),Color("28374e"))
@@ -1519,80 +1874,41 @@ func draw_boss():
 	draw_rect(Rect2(193,82,360*maxf(0,boss.hp)/boss.max,4),col)
 
 func draw_menu():
-	# Read top-to-bottom: mission -> ships -> launch. Keep the landing screen a title
-	# card, but give the actionable parameters the same visual weight as the art.
-	draw_rect(Rect2(12,10,616,42),Color("071122",.9))
-	draw_rect(Rect2(12,10,616,42),Color("527e9c"),false,1)
-	draw_rect(Rect2(18,16,4,30),COLORS[0])
-	japanese("MISSION  //  RED ECHO",Vector2(30,27),12,Color("d9e8ec"))
-	japanese("第%d境界・%s" % [menu_stage, briefing_progress.stage_name(menu_stage)],Vector2(30,44),10,COLORS[2])
-	draw_rect(Rect2(506,18,108,25),Color("10283e"))
-	draw_rect(Rect2(506,18,108,25),Color(COLORS[0],.7),false,1)
-	japanese("LOCAL  1 - 3P",Vector2(518,34),10,COLORS[0])
-	# Chat UI-013 supplies a longer, uncut floral rule around the title.  It is
-	# a presentation layer only: older builds retain the existing title assets.
-	if chat_ui_atlas:
-		draw_chat_ui_region(Rect2(48,0,1346,160),Rect2(16,51,608,72))
-	elif title_logo_extended:
-		draw_texture_rect(title_logo_extended,Rect2(50,42,540,180),false)
+	# User direction (2026-11-22): the title carries only the logo, two
+	# buttons (sortie / re-deploy) and the credit line. Pilot count and
+	# stage are chosen on the character select screen now.
+	if title_logo_extended:
+		draw_texture_rect(title_logo_extended,Rect2(20,0,600,200),false)
 	elif title_logo:
-		draw_texture_rect(title_logo,Rect2(121,57,396,90),false)
-		centered("M  A  N  J  U  S  H  A  G  E",147,COLORS[0],2)
+		draw_texture_rect(title_logo,Rect2(70,26,500,114),false)
+		centered("M  A  N  J  U  S  H  A  G  E",160,COLORS[0],3)
 	else:
 		japanese("曼珠沙華",Vector2(224,103),48,Color("203b59"))
 		japanese("曼珠沙華",Vector2(221,100),48,WHITE)
 		centered("MANJUSHAGE",116,COLORS[0],3)
-	# Compact parameter strip: it names every setting that can change on this screen.
-	draw_rect(Rect2(112,156,416,29),Color("08162b",.9))
-	draw_rect(Rect2(112,156,416,29),Color("527e9c"),false,1)
-	draw_line(Vector2(216,160),Vector2(216,181),Color("35536d"),1)
-	draw_line(Vector2(320,160),Vector2(320,181),Color("35536d"),1)
-	draw_line(Vector2(424,160),Vector2(424,181),Color("35536d"),1)
-	japanese("人数",Vector2(124,168),9,DIM)
-	japanese(str(count)+" PILOTS",Vector2(124,180),11,WHITE)
-	japanese("先導機",Vector2(228,168),9,DIM)
-	japanese(PILOT_NAMES[pilot_offset],Vector2(228,180),11,COLORS[2])
-	japanese("航路",Vector2(332,168),9,DIM)
-	japanese("赤い残響" if bio_route else "共鳴遺跡",Vector2(332,180),11,COLORS[0])
-	japanese("ステージ",Vector2(436,168),9,DIM)
-	japanese(str(menu_stage)+" / 8",Vector2(436,180),11,COLORS[2])
-	if art_v09 and bio_route:
-		for i in range(3):
-			visual.ship(self,{"pos":Vector2(240+i*80,202),"color":i,"character":i,"experience":0},i,0,1.15)
-	else:
-		ship(Vector2(319,202),COLORS[0],2)
-		ship(Vector2(240,201),COLORS[1])
-		ship(Vector2(397,201),COLORS[2])
-	draw_rect(Rect2(183,219,274,25),Color("08162b",.94))
-	draw_rect(Rect2(183,219,274,25),Color("35536d"),false,1)
-	japanese("◀",Vector2(198,237),13,COLORS[0])
-	japanese("▶",Vector2(438,237),13,COLORS[0])
-	centered(str(count)+" 名編成",238,WHITE,2)
-	# The launch control is deliberately the largest, brightest interactive surface.
-	if chat_ui_atlas:
-		# Crop the red selected button frame from the supplied four-state UI atlas.
-		# Mask its source label, then place the live action label over it so this
-		# remains an actual sortie control rather than a static mockup.
-		draw_chat_ui_region(Rect2(123,224,188,49),Rect2(190,250,260,44))
-		draw_rect(Rect2(202,258,236,27),Color("32152b",.88))
-		draw_rect(Rect2(202,258,236,27),Color("ffc4cf",.48),false,1)
-	elif launch_button:
-		draw_texture_rect(launch_button,Rect2(175,230,290,82),false)
-	else:
-		draw_rect(Rect2(194,251,252,44),Color(COLORS[0],.16))
-		draw_rect(Rect2(198,255,244,36),Color("0d3150"))
-		draw_rect(Rect2(198,255,244,36),COLORS[0],false,2)
-		draw_rect(Rect2(204,261,232,3),Color("f0fff6",.55))
-	japanese("出　撃",Vector2(289,281),19,WHITE)
-	japanese("A / ENTER",Vector2(373,281),10,COLORS[2])
-	centered("左右：人数選択　　F4 / X：先導機　　F8 / B：航路　　上下：ステージ",309,DIM)
-	centered("GAMEPADS "+str(Input.get_connected_joypads().size())+"  //  BGM "+("OFF" if muted else "ON"),323,COLORS[2])
-	japanese("F2：コントローラー設定",Vector2(22,341),10,COLORS[0])
-	japanese("H：遊び方",Vector2(282,341),10,WHITE)
-	japanese("最高 %07d"%high_scores[count-1],Vector2(510,341),10,COLORS[0])
-	japanese("曼珠沙華 0.9 / 生体宇宙 試作",Vector2(22,354),10,Color("3e536f"))
-	japanese("F6：音声テスト / F7：出力切替",Vector2(205,353),11,DIM)
-	japanese("F11：全画面",Vector2(540,345),10,Color("3e536f"))
+	var labels=["出撃","再展開"]
+	for i in range(2):
+		var rect=Rect2(170,208+i*56,300,48)
+		var selected=menu_choice==i
+		var pulse=.5+.5*sin(clock*3.2)
+		# Crafted pixel button: shadow, two-tone body, double frame,
+		# a lit left bar and a diamond marker on the selected one.
+		draw_rect(Rect2(rect.position+Vector2(4,5),rect.size),Color(0,0,0,.45))
+		draw_rect(rect,Color("8e1f2f") if selected else Color("12283f"))
+		draw_rect(Rect2(rect.position,Vector2(rect.size.x,rect.size.y*.52)),Color("c22b3d") if selected else Color("1b3a56"))
+		draw_rect(Rect2(rect.position+Vector2(0,rect.size.y-3),Vector2(rect.size.x,3)),Color(0,0,0,.35))
+		var frame=Color(1,1,1,.75+.25*pulse) if selected else Color("4a6a86")
+		draw_rect(rect,frame,false,2)
+		draw_rect(Rect2(rect.position+Vector2(3,3),rect.size-Vector2(6,6)),Color(0,0,0,.4),false,1)
+		draw_rect(Rect2(rect.position+Vector2(8,6),Vector2(4,rect.size.y-12)),COLORS[1] if selected else Color("35536d"))
+		if selected:
+			var c=rect.get_center()+Vector2(-rect.size.x/2+30,0)
+			var r=6.0+1.5*pulse
+			draw_colored_polygon(PackedVector2Array([c+Vector2(0,-r),c+Vector2(r,0),c+Vector2(0,r),c+Vector2(-r,0)]),Color(1,1,1,.9))
+			draw_colored_polygon(PackedVector2Array([c+Vector2(0,-r*.5),c+Vector2(r*.5,0),c+Vector2(0,r*.5),c+Vector2(-r*.5,0)]),COLORS[1])
+		japanese(labels[i],Vector2(321-labels[i].length()*12,235+i*56),24,WHITE if selected else Color("b9c9d6"))
+		japanese(labels[i],Vector2(320-labels[i].length()*12,234+i*56),24,WHITE if selected else Color("8fa6b8"))
+	japanese("© 2026 Mw-fActory",Vector2(268,350),10,Color("5b7a94"))
 	if show_help:
 		draw_rect(Rect2(45,42,550,270),Color("0c162c"))
 		draw_rect(Rect2(45,42,550,270),COLORS[0],false,1)
@@ -1600,7 +1916,10 @@ func draw_menu():
 		var lines=["GAMEPAD : STICK / D-PAD MOVE", "A / RT : SHOT   X : COLOR   B : BURST", "START : PAUSE   LEFT / RIGHT : PLAYER COUNT", "", "P1 : ARROWS    Z SHOT / X COLOR / C BURST", "P2 : W A S D   R SHOT / F COLOR / G BURST", "P3 : I J K L   U SHOT / O COLOR / N BURST", "", "MATCH THE RELAY COLOR AND SHOOT ITS CORE.", "APPROACH A DOWNED ALLY FOR 1.5S TO RESCUE.", "BURST CLEARS BULLETS. ENERGY REFILLS OVER TIME.", "1 HIT = 1 HULL. SOLO RESPAWNS USE RESERVES."]
 		for i in range(lines.size()): text_at(lines[i],Vector2(69,92+i*15),WHITE if i<7 else DIM)
 		centered("H : CLOSE / ENTER : LAUNCH",290,COLORS[2])
-		if bio_route: japanese("マフィオ：弱った輪付きの敵へ近づき、C / Bで捕食（40ゲージ）",Vector2(67,307),11,COLORS[2])
+		if bio_route:
+			japanese("コルミィ：おみくじ取得で運気を引き直し。高いほど大当たり火力が出やすい",Vector2(67,272),11,COLORS[2])
+			japanese("ジヨーザ：命中で解析が貯まる。100で固有キー：見た敵と敵弾を消す（2回まで）",Vector2(67,288),11,COLORS[2])
+			japanese("マフィオ：弱った敵へ近づき固有キーで捕食（40ゲージ）。その技を取り込む",Vector2(67,304),11,COLORS[2])
 	if notice_time>0: japanese(notice,Vector2(16,60),12,COLORS[2])
 
 func draw_controls():

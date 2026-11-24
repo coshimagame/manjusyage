@@ -85,7 +85,7 @@ static func digest(p,dt):
 static func eat(g,p) -> bool:
 	if p.digest>0 or p.charge<40: return false
 	for e in g.enemies:
-		if e.hp>0 and e.hp<=3 and p.pos.distance_to(e.pos)<85:
+		if e.hp>0 and e.hp<=3 and int(e.get("subboss",0))==0 and p.pos.distance_to(e.pos)<85:
 			p.charge-=40
 			p.pending_technique=e.get("technique","aimed")
 			# Current rules: the captured pattern is equipped immediately,
@@ -95,8 +95,13 @@ static func eat(g,p) -> bool:
 			p.digest=p.digest_total
 			if g.get("mafio_archive")!=null: g.mafio_archive.capture(e)
 			e.hp=0
-			g.explode(e.pos,Color("ffdf86"),18)
+			g.explode(e.pos,Color("ffdf86"),30)
 			g.sfx("consume_v09" if g.art_v09 else "pickup")
+			# Success must be unmistakable (user note 2026-11-22): a gold
+			# pillar rises on Mafio and a tell names the captured technique.
+			if g.art_v09: g.visual.pillar(p.pos,2)
+			var tech_names={"fan":"拡散","weave":"蛇行","dive":"突撃","orbit":"周回","aimed":"狙撃"}
+			g.kuu_say(g.players.find(p),"捕食成功：『" + str(tech_names.get(p.learned,"")) + "』習得",3.5)
 			return true
 	return false
 

@@ -30,7 +30,11 @@ func run():
 	g._input(key(KEY_RIGHT)) # Slot 1: Jiyoza -> Mafio.
 	assert(g.briefing_chars == [0, 2, 1])
 	g._input(key(KEY_ENTER))
-	assert(g.mode == "play", "Select Enter must launch")
+	assert(g.mode == "select" and g.select_flash_t > 0.0, "Confirm must start the decision blink first")
+	for i in range(14): g._process(0.05)
+	assert(g.mode == "intro", "After the blink, the stage intro must start")
+	g.finish_stage_intro()
+	assert(g.mode == "play", "Intro must hand over to play")
 	assert(g.players.size() == 2)
 	assert(int(g.players[0].character) == 0 and int(g.players[1].character) == 2)
 	# ESC from select returns to the menu.
