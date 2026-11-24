@@ -7,12 +7,15 @@ func run():
 	root.add_child(game)
 	game.slice_mode=false # Music/story expectations describe the full game, not the slice.
 	await process_frame
-	assert(game.music_name=="title")
+	# 2026-11-21 routing (user playtest: "the music is the original one"):
+	# title/opening uses the approved v3 loop, and the bio route's stage and
+	# boss tracks are the project's red_echo v09 pair by default.
+	assert(game.music_name=="title_loop_v3")
 	assert(game.music.stream.get_length()>20)
 	game.start_game()
-	assert(game.music_name=="ruins")
+	assert(game.music_name=="red_echo_v09")
 	game.begin_boss()
-	assert(game.music_name=="sentinel")
+	assert(game.music_name=="red_echo_boss_v09")
 	assert(game.boss.max==100)
 	game.update_boss(2.6)
 	assert(game.shots.size()==5)
